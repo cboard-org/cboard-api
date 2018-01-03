@@ -34,7 +34,7 @@ module.exports = function (locale) {
 
     nev.configure({
         verificationURL: 'http://localhost:4000/users/activate/${URL}',
-        URLLength: 48,
+        URLLength: 16,
 
         // mongo-stuff
         persistentUserModel: User,
