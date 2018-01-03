@@ -74,7 +74,6 @@ paths:
     x-swagger-pipe: swagger_raw
     
   /user:
-    # our controller name
     x-swagger-router-controller: user
     post:
       operationId: createUser
@@ -102,7 +101,6 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
   /user/{id}:
-    # our controller name
     x-swagger-router-controller: user
     get:
       description: get a specific user
@@ -146,13 +144,33 @@ paths:
             $ref: "#/definitions/ErrorResponse"
     delete:
       description: delete a user
-      # define the parameters
       parameters:
         - name: id
           description: User id
           type: string
           in: path
           required: true
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/activate/{url}:
+    x-swagger-router-controller: user
+    post:
+      operationId: activateUser
+      description: Create a new user
+      # define the type of response for Success "200" and Error
+      parameters:
+        - name: url
+          in: path
+          description: Random generated key for user activation
+          required: true
+          type: string
       responses:
         "200":
           description: Success
