@@ -13,11 +13,12 @@
   },
   "devDependencies": {
     "bcryptjs": "^2.3.0",
+    "email-verification": "^0.4.6",
+    "mongoose": "^4.4.6",
+    "rand-token": "^0.4.0",
     "should": "^7.1.0",
     "supertest": "^1.0.0",
-    "mongoose": "^4.4.6",
-    "email-verification": "^0.4.5",
-    "rand-token": "^0.4.0"
+    "nodemailer": "^4.4.1"
   },
   "scripts": {
     "start": "node app.js",
