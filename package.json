@@ -1,0 +1,26 @@
+{
+  "name": "cboard-api",
+  "version": "0.0.1",
+  "private": true,
+  "description": "New Swagger API Project",
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.12.3",
+    "swagger-express-mw": "^0.1.0"
+  },
+  "devDependencies": {
+    "bcryptjs": "^2.3.0",
+    "should": "^7.1.0",
+    "supertest": "^1.0.0",
+    "mongoose": "^4.4.6",
+    "email-verification": "^0.4.5",
+    "rand-token": "^0.4.0"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "swagger project test"
+  }
+}

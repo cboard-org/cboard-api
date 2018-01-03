@@ -1,1 +1,1 @@
-cboard-api
+# Skeleton project for Swagger
