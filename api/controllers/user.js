@@ -2,7 +2,7 @@ var User = require('../models/User');
 //var TempUser = require('../models/TempUser');
 var mailing = require('../mail');
 
-module.exports = {createUser: createUser};
+module.exports = {createUser: createUser, activateUser: activateUser};
 
 function createUser(req, res) {
     var user = new User(req.body);
@@ -32,7 +32,7 @@ function createUser(req, res) {
         if (newTempUser) {
 
             var URL = newTempUser[nev.options.URLFieldName];
-            nev.sendVerificationEmail(newTempUser.email, URL, function(err, info) {
+            nev.sendVerificationEmail(newTempUser.email, URL, function (err, info) {
                 if (err) {
                     return res.status(500).json({
                         message: 'ERROR: sending verification email FAILED'
@@ -51,4 +51,25 @@ function createUser(req, res) {
     });
     console.log(user);
 
+}
+function activateUser(req, res) {
+    console.log(req.params.URL);
+    var url = req.params.URL;
+    var nev = mailing('en');
+    nev.confirmTempUser(url, function (err, user) {
+        if (user) {
+            nev.sendConfirmationEmail(user.email, function (err, info) {
+                if (err) {
+                    return res.status(404).json({
+                        message: 'ERROR: sending confirmation email FAILED'});
+                }
+                res.status(200).json({
+                    success: 1,
+                    message: 'CONFIRMED!'});
+            });
+        } else {
+            return res.status(404).json({
+                message: 'ERROR: confirming temp user FAILED'});
+        }
+    });
 }
