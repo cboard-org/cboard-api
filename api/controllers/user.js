@@ -35,7 +35,7 @@ function createUser(req, res) {
             nev.sendVerificationEmail(newTempUser.email, URL, function (err, info) {
                 if (err) {
                     return res.status(500).json({
-                        message: 'ERROR: sending verification email FAILED'
+                        message: 'ERROR: sending verification email FAILED' + info
                     });
                 }
             });
@@ -53,23 +53,25 @@ function createUser(req, res) {
 
 }
 function activateUser(req, res) {
-    console.log(req.params.URL);
-    var url = req.params.URL;
     var nev = mailing('en');
-    nev.confirmTempUser(url, function (err, user) {
+    var url = req.swagger.params.url.value;
+    nev.confirmTempUser(url, function(err, user) {
         if (user) {
-            nev.sendConfirmationEmail(user.email, function (err, info) {
+            nev.sendConfirmationEmail(user.email, function(err, info) {
                 if (err) {
                     return res.status(404).json({
-                        message: 'ERROR: sending confirmation email FAILED'});
-                }
+                        message: 'ERROR: sending confirmation email FAILED' + info});
+                    }
+                
                 res.status(200).json({
                     success: 1,
-                    message: 'CONFIRMED!'});
+                    message: 'CONFIRMED!'
+                });
             });
         } else {
             return res.status(404).json({
-                message: 'ERROR: confirming temp user FAILED'});
-        }
+                message: 'ERROR: confirming temp user FAILED' + err});
+            }
+        
     });
 }

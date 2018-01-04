@@ -161,16 +161,17 @@ paths:
             $ref: "#/definitions/ErrorResponse"
   /user/activate/{url}:
     x-swagger-router-controller: user
-    get:
+    post:
       operationId: activateUser
       description: Create a new user
       # define the type of response for Success "200" and Error
       parameters:
-        - name: url
-          in: path
+        - in: path
+          name: url
           description: Random generated key for user activation
           required: true
           type: string
+          minimum: 1
       responses:
         "200":
           description: Success

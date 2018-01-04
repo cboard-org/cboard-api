@@ -77,6 +77,7 @@ module.exports = function (locale) {
     
     
     //using auto generated temp user model strategy
+    //if(typeof tempUserModel !== "undefined") {
     nev.generateTempUserModel(User, function (err, tempUserModel) {
         if (err) {
             console.log(err);
@@ -84,6 +85,7 @@ module.exports = function (locale) {
         }
         console.log('generated temp user model: ' + (typeof tempUserModel === 'function'));
     });
+    //}
 
     return nev;
 };
