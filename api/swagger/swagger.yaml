@@ -66,12 +66,13 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
     get:
-      description: Return data from users
+      operationId: listUser
+      description: Return users list
       responses:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GetUserResponse"
+            $ref: "#/definitions/GetUserListResponse"
         default:
           description: Error
           schema:
@@ -89,7 +90,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GetUserListResponse"
+            $ref: "#/definitions/GetUserResponse"
         default:
           description: Error
           schema:

@@ -2,7 +2,7 @@ var User = require('../models/User');
 var mailing = require('../mail');
 var nev = mailing('en');
 
-module.exports = {createUser: createUser, activateUser: activateUser};
+module.exports = {createUser: createUser, activateUser: activateUser, listUser: listUser};
 
 function createUser(req, res) {
     var user = new User(req.body);
@@ -66,3 +66,13 @@ function activateUser(req, res) {
         }
     });
 }
+function listUser(req, res) {
+    User.find(function(err, Users){
+      if(err) {
+        return res.status(500).json({
+          message: 'Error getting user list. ' + err
+        });
+      }
+      return res.status(200).json(Users);
+    });
+  }
