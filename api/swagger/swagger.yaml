@@ -80,12 +80,14 @@ paths:
   /user/{id}:
     x-swagger-router-controller: user
     get:
+      operationId: getUser
       description: get a specific user
       parameters:
         - name: id
           type: string
           in: path
           required: true
+          minimum: 1
       responses:
         "200":
           description: Success
@@ -120,6 +122,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
     delete:
+      operationId: removeUser
       description: delete a user
       parameters:
         - name: id
@@ -127,6 +130,7 @@ paths:
           type: string
           in: path
           required: true
+          minimum: 1
       responses:
         "200":
           description: Success

@@ -2,7 +2,13 @@ var User = require('../models/User');
 var mailing = require('../mail');
 var nev = mailing('en');
 
-module.exports = {createUser: createUser, activateUser: activateUser, listUser: listUser};
+module.exports = {
+    createUser: createUser, 
+    activateUser: activateUser, 
+    listUser: listUser, 
+    removeUser: removeUser,
+    getUser: getUser
+};
 
 function createUser(req, res) {
     var user = new User(req.body);
@@ -74,5 +80,35 @@ function listUser(req, res) {
         });
       }
       return res.status(200).json(Users);
+    });
+  }
+function removeUser(req, res) {
+    var id = req.swagger.params.id.value;
+    User.findByIdAndRemove(id, function(err, users){
+      if(err) {
+        return res.status(404).json({
+          message: 'User not found. User Id: ' + id
+        });
+      }
+      return res.status(200).json({
+          success: 1,
+          message: 'User Id: ' + id + ' was removed. ' + users
+      });
+    });
+  }
+function getUser(req, res) {
+    var id = req.swagger.params.id.value;
+    User.findOne({_id: id}, function(err, users){
+      if(err) {
+        return res.status(500).json({
+          message: 'Error getting user. ' + err
+        });
+      }
+      if(!users) {
+        return res.status(404).json({
+          message: 'User does not exist. User Id: ' + id
+        });
+      }
+      return res.status(200).json(users);
     });
   }
