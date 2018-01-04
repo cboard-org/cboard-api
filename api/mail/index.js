@@ -1,7 +1,6 @@
 var User = require('../models/User');
 var mongoose = require('mongoose');
 var nev = require('email-verification')(mongoose);
-//var TempUser = require('../models/TempUser');
 var bcrypt = require('bcryptjs');
 
 module.exports = function (locale) {
@@ -38,8 +37,6 @@ module.exports = function (locale) {
 
         // mongo-stuff
         persistentUserModel: User,
-        //tempUserModel: TempUser,
-        //tempUserCollection: 'tempusers',
         emailFieldName: 'email',
         passwordFieldName: 'password',
         URLFieldName: 'GENERATED_VERIFYING_URL',
@@ -74,10 +71,7 @@ module.exports = function (locale) {
         }
         console.log('configured: ' + (typeof options === 'object'));
     });
-    
-    
-    //using auto generated temp user model strategy
-    //if(typeof tempUserModel !== "undefined") {
+
     nev.generateTempUserModel(User, function (err, tempUserModel) {
         if (err) {
             console.log(err);
@@ -85,7 +79,6 @@ module.exports = function (locale) {
         }
         console.log('generated temp user model: ' + (typeof tempUserModel === 'function'));
     });
-    //}
 
     return nev;
 };
