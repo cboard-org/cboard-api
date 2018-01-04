@@ -186,16 +186,10 @@ definitions:
         description: returns 1 if successful
       message:
         type: string
-        description: a short comment 
+        description: a short comment
     required:
       - success
-      - description
-  HelloWorldResponse:
-    required:
       - message
-    properties:
-      message:
-        type: string
   ErrorResponse:
     required:
       - message
