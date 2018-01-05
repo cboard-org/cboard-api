@@ -3,11 +3,12 @@ var mailing = require('../mail');
 var nev = mailing('en');
 
 module.exports = {
-    createUser: createUser, 
-    activateUser: activateUser, 
-    listUser: listUser, 
+    createUser: createUser,
+    activateUser: activateUser,
+    listUser: listUser,
     removeUser: removeUser,
-    getUser: getUser
+    getUser: getUser,
+    updateUser: updateUser
 };
 
 function createUser(req, res) {
@@ -38,7 +39,7 @@ function createUser(req, res) {
             });
 
             res.status(200).json({
-                success: 1, 
+                success: 1,
                 message: 'An email has been sent to you. Please check it to verify your account.'
             });
 
@@ -73,42 +74,74 @@ function activateUser(req, res) {
     });
 }
 function listUser(req, res) {
-    User.find(function(err, Users){
-      if(err) {
-        return res.status(500).json({
-          message: 'Error getting user list. ' + err
-        });
-      }
-      return res.status(200).json(Users);
+    User.find(function (err, Users) {
+        if (err) {
+            return res.status(500).json({
+                message: 'Error getting user list. ' + err
+            });
+        }
+        return res.status(200).json(Users);
     });
-  }
+}
 function removeUser(req, res) {
     var id = req.swagger.params.id.value;
-    User.findByIdAndRemove(id, function(err, users){
-      if(err) {
-        return res.status(404).json({
-          message: 'User not found. User Id: ' + id
+    User.findByIdAndRemove(id, function (err, users) {
+        if (err) {
+            return res.status(404).json({
+                message: 'User not found. User Id: ' + id
+            });
+        }
+        return res.status(200).json({
+            success: 1,
+            message: 'User Id: ' + id + ' was removed. ' + users
         });
-      }
-      return res.status(200).json({
-          success: 1,
-          message: 'User Id: ' + id + ' was removed. ' + users
-      });
     });
-  }
+}
 function getUser(req, res) {
     var id = req.swagger.params.id.value;
-    User.findOne({_id: id}, function(err, users){
-      if(err) {
-        return res.status(500).json({
-          message: 'Error getting user. ' + err
-        });
-      }
-      if(!users) {
-        return res.status(404).json({
-          message: 'User does not exist. User Id: ' + id
-        });
-      }
-      return res.status(200).json(users);
+    User.findOne({_id: id}, function (err, users) {
+        if (err) {
+            return res.status(500).json({
+                message: 'Error getting user. ' + err
+            });
+        }
+        if (!users) {
+            return res.status(404).json({
+                message: 'User does not exist. User Id: ' + id
+            });
+        }
+        return res.status(200).json(users);
     });
-  }
+}
+function updateUser(req, res) {
+    var id = req.swagger.params.id.value;
+    User.findOne({_id: id}, function (err, users) {
+        if (err) {
+            return res.status(500).json({
+                message: 'Error updating user. ' + err
+            });
+        }
+        if (!users) {
+            return res.status(404).json({
+                message: 'Unable to find user. User Id: ' + id
+            });
+        }
+        users.name = req.body.name;
+        users.username = req.body.username;
+        users.email = req.body.email;
+        users.locale = req.body.locale;
+        users.save(function (err, users) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error saving user ' + err
+                });
+            }
+            if (!users) {
+                return res.status(404).json({
+                    message: 'Unable to find user. User id: ' + id
+                });
+            }
+        });
+        return res.status(200).json(users);
+    });
+}

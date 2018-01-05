@@ -98,6 +98,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
     put:
+      operationId: updateUser
       description: update a user
       # define the parameters
       parameters:
@@ -106,6 +107,7 @@ paths:
           type: string
           in: path
           required: true
+          mlinimum: 1
         - name: info
           description: User properties
           in: body
@@ -116,7 +118,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GeneralResponse"
+            $ref: "#/definitions/GetUserResponse"
         default:
           description: Error
           schema:
@@ -172,8 +174,6 @@ definitions:
         email:
           type: string
         username:
-          type: string
-        password:
           type: string
         locale:
           type: string
