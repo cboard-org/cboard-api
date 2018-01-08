@@ -91,10 +91,7 @@ function removeUser(req, res) {
                 message: 'User not found. User Id: ' + id
             });
         }
-        return res.status(200).json({
-            success: 1,
-            message: 'User Id: ' + id + ' was removed. ' + users
-        });
+        return res.status(200).json(users);
     });
 }
 function getUser(req, res) {
