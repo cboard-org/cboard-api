@@ -76,11 +76,11 @@ userSchema.path('username').validate(function (username) {
     return username.length;
 }, 'Username cannot be blank');
 
-//userSchema.path('password').validate(function (password) {
-//    if (this.skipValidation())
-//        return true;
-//    return password.length && this._password.length;
-//}, 'Password cannot be blank');
+userSchema.path('password').validate(function (password) {
+    if (this.skipValidation())
+        return true;
+    return password.length;
+}, 'Password cannot be blank');
 
 
 /**
