@@ -4,12 +4,19 @@
   "private": true,
   "description": "New Swagger API Project",
   "keywords": [],
-  "author": "",
+  "author": "Martin Bedouret",
+  "contributors": [
+    "Martin Bedouret <martinbedouret@gmail.com>"
+  ],
   "license": "",
   "main": "app.js",
   "dependencies": {
     "express": "^4.12.3",
-    "swagger-express-mw": "^0.1.0"
+    "swagger-express-mw": "^0.1.0",
+    "jsonwebtoken": "^7.3.0",
+    "swagger-tools": "^0.10.1",
+    "validator": "^7.0.0",
+    "yamljs": "^0.2.9"
   },
   "devDependencies": {
     "bcryptjs": "^2.3.0",

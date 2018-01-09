@@ -81,6 +81,11 @@ paths:
     get:
       operationId: listUser
       description: Return users list
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
       responses:
         "200":
           description: Success
@@ -159,7 +164,6 @@ paths:
     post:
       operationId: activateUser
       description: Create a new user
-      # define the type of response for Success "200" and Error
       parameters:
         - in: path
           name: url
@@ -167,6 +171,22 @@ paths:
           required: true
           type: string
           minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/login:
+    x-swagger-router-controller: user
+    post:
+      operationId: login
+      description: Authenticate user by email and password
+      parameters:
+        - $ref: '#/parameters/User'
       responses:
         "200":
           description: Success
