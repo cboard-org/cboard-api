@@ -67,6 +67,11 @@ paths:
     post:
       operationId: createUser
       description: Create a new user
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
       parameters:
         - $ref: '#/parameters/User'
       responses:
@@ -100,6 +105,11 @@ paths:
     get:
       operationId: getUser
       description: get a specific user
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
       parameters:
         - name: id
           type: string
@@ -118,6 +128,11 @@ paths:
     put:
       operationId: updateUser
       description: update a user
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
       parameters:
         - name: id
           description: User Id
@@ -143,6 +158,10 @@ paths:
     delete:
       operationId: removeUser
       description: delete a user
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
       parameters:
         - name: id
           description: User id
@@ -164,6 +183,11 @@ paths:
     post:
       operationId: activateUser
       description: Create a new user
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
       parameters:
         - in: path
           name: url
