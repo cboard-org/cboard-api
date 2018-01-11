@@ -66,7 +66,7 @@ paths:
     x-swagger-router-controller: user
     post:
       operationId: createUser
-      description: Create a new user
+      description: Create a new temporal user in database and send an email to validate the user.
       security:
         - Bearer: []
       x-security-scopes:
@@ -85,7 +85,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
     get:
       operationId: listUser
-      description: Return users list
+      description: Returns the full users list for the confirmed users.
       security:
         - Bearer: []
       x-security-scopes:
@@ -104,7 +104,7 @@ paths:
     x-swagger-router-controller: user
     get:
       operationId: getUser
-      description: get a specific user
+      description: Returns a specific user
       security:
         - Bearer: []
       x-security-scopes:
@@ -127,7 +127,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
     put:
       operationId: updateUser
-      description: update a user
+      description: Updates a specific user
       security:
         - Bearer: []
       x-security-scopes:
@@ -157,7 +157,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
     delete:
       operationId: removeUser
-      description: delete a user
+      description: Deletes a specific user
       security:
         - Bearer: []
       x-security-scopes:
@@ -182,7 +182,7 @@ paths:
     x-swagger-router-controller: user
     post:
       operationId: activateUser
-      description: Create a new user
+      description: Create a new user by copying it from temporal users and it removes the temporal user
       security:
         - Bearer: []
       x-security-scopes:
@@ -208,7 +208,7 @@ paths:
     x-swagger-router-controller: user
     post:
       operationId: loginUser
-      description: Authenticate user by email and password
+      description: Returns a valid token for a user, that can be used for api authentication.
       parameters:
         - name: role
           description: user role
