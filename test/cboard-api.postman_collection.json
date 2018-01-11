@@ -1,0 +1,131 @@
+{
+	"variables": [],
+	"info": {
+		"name": "cboard-api",
+		"_postman_id": "961723c3-9f0a-ae7e-5c44-3965e8853333",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:10010/user/",
+			"request": {
+				"url": "http://localhost:10010/user/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:10010/user/",
+			"request": {
+				"url": "http://localhost:10010/user",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"titin2\",\n    \"email\": \"martin@softwareadvice.com\",\n    \"username\": \"titin2\",\n    \"locale\": \"en\",\n    \"password\": \"12345\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:10010/user/activate/{url}",
+			"request": {
+				"url": "http://localhost:10010/user/activate/123456789",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:10010/user/{id}",
+			"request": {
+				"url": "http://localhost:10010/user/5a4e5a39a4531169bb20e8cf",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:10010/user/{id}",
+			"request": {
+				"url": "http://localhost:10010/user/5a4e8e4cba8e7e42fd214e14",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:10010/user/{id}",
+			"request": {
+				"url": "http://localhost:10010/user/5a5403033e36ec7a96f856f2",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"titin4\",\n    \"email\": \"qa_engineering@softwareadvice.com\",\n    \"username\": \"titin4\",\n    \"locale\": \"en\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

@@ -1,6 +1,7 @@
 var User = require('../models/User');
 var mailing = require('../mail');
 var nev = mailing('en');
+var auth = require("../helpers/auth");
 
 module.exports = {
     createUser: createUser,
@@ -8,7 +9,8 @@ module.exports = {
     listUser: listUser,
     removeUser: removeUser,
     getUser: getUser,
-    updateUser: updateUser
+    updateUser: updateUser,
+    loginUser: loginUser
 };
 
 function createUser(req, res) {
@@ -91,10 +93,7 @@ function removeUser(req, res) {
                 message: 'User not found. User Id: ' + id
             });
         }
-        return res.status(200).json({
-            success: 1,
-            message: 'User Id: ' + id + ' was removed. ' + users
-        });
+        return res.status(200).json(users);
     });
 }
 function getUser(req, res) {
@@ -144,4 +143,28 @@ function updateUser(req, res) {
         });
         return res.status(200).json(users);
     });
+}
+function loginUser(args, res) {
+    var role = args.swagger.params.role.value;
+    var username = args.body.username;
+    var password = args.body.password;
+    console.log(role + username + password);
+
+    if (role != "user" && role != "admin") {
+        return res.status(400).json({
+            message: 'Error: Role must be either "admin" or "user"'
+        });
+    }
+
+    if (username == "username" && password == "password" && role) {
+        var tokenString = auth.issueToken(username, role);
+        res.status(200).json({
+            token: tokenString,
+            message: "User successfully authenticated"
+        });
+    } else {
+        res.status(403).json({
+            message: "Error: Credentials incorrect"
+        });
+    }
 }
