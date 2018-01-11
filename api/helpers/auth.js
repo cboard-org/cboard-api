@@ -2,7 +2,7 @@
 
 var jwt = require("jsonwebtoken");
 var sharedSecret = "shh";
-var issuer = "my-awesome-website.com";
+var issuer = "cboard.io";
 
 //Here we setup the security checks for the endpoints
 //that need it (in our case, only /protected). This

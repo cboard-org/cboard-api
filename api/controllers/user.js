@@ -150,17 +150,17 @@ function loginUser(args, res) {
     var password = args.body.password;
     console.log(role + username + password);
 
-    if (role != "user" && role != "admin") {
+    if (role !== "user" && role !== "admin") {
         return res.status(400).json({
-            message: 'Error: Role must be either "admin" or "user"'
+            message: "Error: Role must be either admin or user"
         });
     }
 
-    if (username == "username" && password == "password" && role) {
+    if (username === "cboard_robot" && password === "youNIC4$" && role) {
         var tokenString = auth.issueToken(username, role);
         res.status(200).json({
             token: tokenString,
-            message: "User successfully authenticated"
+            message: "Token successfully generated"
         });
     } else {
         res.status(403).json({
