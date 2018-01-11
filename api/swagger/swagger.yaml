@@ -180,18 +180,28 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /user/login:
+  /user/login/{role}:
     x-swagger-router-controller: user
     post:
-      operationId: login
+      operationId: loginUser
       description: Authenticate user by email and password
       parameters:
-        - $ref: '#/parameters/User'
+        - name: role
+          description: user role
+          in: path
+          required: true
+          type: string
+        - name: info
+          description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/User"
       responses:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GeneralResponse"
+            $ref: "#/definitions/LoginResponse"
         default:
           description: Error
           schema:
@@ -263,4 +273,12 @@ definitions:
           type: string
         locale:
           type: string
-              
+  LoginResponse:
+      required:
+          - token
+          - message
+      properties:
+        token:
+            type: string
+        message:
+            type: string
