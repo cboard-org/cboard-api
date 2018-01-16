@@ -7,7 +7,7 @@
   "author": "Martin Bedouret",
   "contributors": [
     "Martin Bedouret <martinbedouret@gmail.com>"
-   ],
+  ],
   "license": "",
   "main": "app.js",
   "dependencies": {
@@ -17,16 +17,15 @@
     "swagger-tools": "^0.10.1",
     "validator": "^7.0.0",
     "yamljs": "^0.2.9",
-    "nodemailer": "^4.4.1"
+    "nodemailer": "^4.4.1",
+    "mongoose": "^4.4.6"
   },
   "devDependencies": {
     "bcryptjs": "^2.3.0",
     "email-verification": "^0.4.6",
-    "mongoose": "^4.4.6",
     "rand-token": "^0.4.0",
     "should": "^7.1.0",
-    "supertest": "^1.0.0",
-    "nodemailer": "^4.4.1"
+    "supertest": "^1.0.0"
   },
   "scripts": {
     "start": "node app.js",
