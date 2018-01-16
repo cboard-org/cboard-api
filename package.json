@@ -7,7 +7,7 @@
   "author": "Martin Bedouret",
   "contributors": [
     "Martin Bedouret <martinbedouret@gmail.com>"
-  ],
+   ],
   "license": "",
   "main": "app.js",
   "dependencies": {
@@ -16,7 +16,11 @@
     "jsonwebtoken": "^7.3.0",
     "swagger-tools": "^0.10.1",
     "validator": "^7.0.0",
-    "yamljs": "^0.2.9"
+    "yamljs": "^0.2.9",
+    "nodemailer": "*",
+  },
+  "engines": {
+    "node": "8.1.0" 
   },
   "devDependencies": {
     "bcryptjs": "^2.3.0",
