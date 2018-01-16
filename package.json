@@ -17,10 +17,7 @@
     "swagger-tools": "^0.10.1",
     "validator": "^7.0.0",
     "yamljs": "^0.2.9",
-    "nodemailer": "*",
-  },
-  "engines": {
-    "node": "8.1.0" 
+    "nodemailer": "^4.4.1"
   },
   "devDependencies": {
     "bcryptjs": "^2.3.0",
