@@ -1,6 +1,6 @@
 {
   "name": "cboard-api",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "New Swagger API Project",
   "keywords": [],
@@ -23,7 +23,8 @@
     "rand-token": "^0.4.0",
     "bcryptjs": "^2.3.0",
     "should": "^7.1.0",
-    "supertest": "^1.0.0"
+    "supertest": "^1.0.0",
+    "sendgrid": "^4.7.1"
   },
   "devDependencies": {},
   "scripts": {

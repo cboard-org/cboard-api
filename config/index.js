@@ -14,12 +14,12 @@ var nodemailer = require('nodemailer');
 var smtpTransport = nodemailer.createTransport({
     from: 'martinbedouret@gmail.com',
     options: {
-        host: 'smtp.gmail.com',
+        host: 'smtp.sendgrid.net',
         port: 465,
         secure: true,
         auth: {
-            user: 'martinbedouret@gmail.com',
-            pass: 'donttell'
+            user: 'apikey',
+            pass: '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'
         }
     }
     });
