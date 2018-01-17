@@ -20,15 +20,17 @@
     "nodemailer": "^4.4.1",
     "mongoose": "^4.4.6",
     "email-verification": "^0.4.6",
-    "rand-token": "^0.4.0"
-  },
-  "devDependencies": {
+    "rand-token": "^0.4.0",
     "bcryptjs": "^2.3.0",
     "should": "^7.1.0",
     "supertest": "^1.0.0"
   },
+  "devDependencies": {},
   "scripts": {
     "start": "node app.js",
     "test": "swagger project test"
+  },
+  "engines": {
+    "node": ">=6.0"
   }
 }
