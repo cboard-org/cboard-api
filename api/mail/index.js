@@ -44,6 +44,10 @@ module.exports = function (locale) {
 
         // emailing options
         transportOptions: {
+            from: 'martinbedouret@gmail.com',
+            host: 'smtp.sendgrid.net',
+            port: 465,
+            secure: true,
             service: 'Sendgrid',
             auth: {
                 user: 'apikey',
