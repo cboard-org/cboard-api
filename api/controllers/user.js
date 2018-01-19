@@ -40,7 +40,7 @@ function createUser(req, res) {
                 }
             });
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: 1,
                 message: 'An email has been sent to you. Please check it to verify your account.'
             });
@@ -63,7 +63,7 @@ function activateUser(req, res) {
                         message: 'ERROR: sending confirmation email FAILED ' + info
                     });
                 }
-                res.status(200).json({
+                return res.status(200).json({
                     success: 1,
                     message: 'CONFIRMED!'
                 });
@@ -144,27 +144,28 @@ function updateUser(req, res) {
         return res.status(200).json(users);
     });
 }
-function loginUser(args, res) {
-    var role = args.swagger.params.role.value;
-    var username = args.body.username;
-    var password = args.body.password;
-    console.log(role + username + password);
+function loginUser(req, res) {
+    var role = req.swagger.params.role.value;
+    var username = req.body.username;
+    var password = req.body.password;
 
     if (role !== "user" && role !== "admin") {
         return res.status(400).json({
             message: "Error: Role must be either admin or user"
         });
     }
-
-    if (username === "cboard_robot" && password === "youNIC4$" && role) {
+    User.authenticate(username, password, function (error, user) {
+      if (error || !user) {
+          return res.status(401).json({
+             message: "Wrong email or password."
+         });
+      } else {
+        req.session.userId = user._id;
         var tokenString = auth.issueToken(username, role);
-        res.status(200).json({
+        return res.status(200).json({
             token: tokenString,
             message: "Token successfully generated"
         });
-    } else {
-        res.status(403).json({
-            message: "Error: Credentials incorrect"
-        });
-    }
+      }
+    });
 }
