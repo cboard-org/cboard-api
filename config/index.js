@@ -10,19 +10,6 @@ const defaults = {
   jwtSecret: 'asdfgASDFG12345'
 };
 
-var nodemailer = require('nodemailer');
-var smtpTransport = nodemailer.createTransport({
-    from: 'martinbedouret@gmail.com',
-    options: {
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: 'martinbedouret@gmail.com',
-            pass: 'donttell'
-        }
-    }
-    });
 /**
  * Expose
  */

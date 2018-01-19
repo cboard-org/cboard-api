@@ -230,6 +230,33 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /user/logout:
+    x-swagger-router-controller: user
+    post:
+      operationId: logoutUser
+      description: Destroys user session and authentication token.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: info
+          description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LogoutResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
 # complex objects have schema definitions
 definitions:
   User:
@@ -304,5 +331,11 @@ definitions:
       properties:
         token:
             type: string
+        message:
+            type: string
+  LogoutResponse:
+      required:
+          - message
+      properties:
         message:
             type: string

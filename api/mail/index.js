@@ -44,10 +44,14 @@ module.exports = function (locale) {
 
         // emailing options
         transportOptions: {
-            service: 'Gmail',
+            from: 'martinbedouret@gmail.com',
+            host: 'smtp.sendgrid.net',
+            port: 465,
+            secure: true,
+            service: 'Sendgrid',
             auth: {
-                user: 'martinbedouret@gmail.com',
-                pass: 'pisco32065'
+                user: 'apikey',
+                pass: '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'
             }
         },
         verifyMailOptions: {

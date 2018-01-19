@@ -35,3 +35,6 @@ config/runtime.yaml
 
 # Netbeans project
 nbproject/
+
+# Env
+config/env/development.js

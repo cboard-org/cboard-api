@@ -1,7 +1,8 @@
 'use strict';
 
 var mongoose = require('mongoose');
-const crypto = require('crypto');
+var bcrypt = require('bcrypt');
+
 
 var Schema = mongoose.Schema;
 
@@ -14,14 +15,44 @@ const oAuthTypes = [
 ];
 
 const userSchema = new Schema({
-    name: {type: String, default: ''},
-    email: {type: String, default: ''},
-    username: {type: String, default: ''},
-    provider: {type: String, default: ''},
-    locale: {type: String, default: 'en'},
-    password: {type: String, default: ''},
-    authToken: {type: String, default: ''},
-    lastlogin: {type: Date, default: Date.now},
+    name: {
+        type: String, 
+        default: ''
+        },
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+        trim: true
+        },
+    username: {
+        type: String,
+        unique: true,
+        required: true,
+        trim: true,
+        default: ''
+    },
+    provider: {
+        type: String, 
+        default: ''
+        },
+    locale: {
+        type: String, 
+        default: 'en'
+        },
+    password: {
+        type: String,
+        required: true,
+        default: ''
+        },
+    authToken: {
+        type: String,
+        default: ''
+        },
+    lastlogin: {
+        type: Date, 
+        default: Date.now
+        },
     facebook: {
         id: String,
         token: String,
@@ -105,50 +136,6 @@ userSchema.pre('save', function (next) {
 userSchema.methods = {
 
     /**
-     * Authenticate - check if the passwords are the same
-     *
-     * @param {String} plainText
-     * @return {Boolean}
-     * @api public
-     */
-
-    authenticate: function (plainText) {
-        return this.encryptPassword(plainText) === this.hashed_password;
-    },
-
-    /**
-     * Make salt
-     *
-     * @return {String}
-     * @api public
-     */
-
-    makeSalt: function () {
-        return Math.round((new Date().valueOf() * Math.random())) + '';
-    },
-
-    /**
-     * Encrypt password
-     *
-     * @param {String} password
-     * @return {String}
-     * @api public
-     */
-
-    encryptPassword: function (password) {
-        if (!password)
-            return '';
-        try {
-            return crypto
-                    .createHmac('sha1', this.salt)
-                    .update(password)
-                    .digest('hex');
-        } catch (err) {
-            return '';
-        }
-    },
-
-    /**
      * Validation is not required if using OAuth
      */
 
@@ -176,8 +163,37 @@ userSchema.statics = {
         return this.findOne(options.criteria)
                 .select(options.select)
                 .exec(cb);
-    }
-};
+    },
+    
+    /**
+     * Authenticate input against database
+     *
+     * @param {String} username
+     * @param {String} password
+     * @param {Function} callback 
+     * @api private
+     */
+    
+    authenticate: function (username, password, callback) {
+        this.findOne({ username: username })
+            .exec(function (err, user) {
+                if (err) {
+                    return callback(err);
+                } else if (!user) {
+                    var err = new Error('User not found.');
+                    err.status = 401;
+                    return callback(err);
+                }
+                bcrypt.compare(password, user.password, function (err, result) {
+                    if (result === true) {
+                        return callback(null, user);
+                    } else {
+                        return callback();
+                    }
+                });
+            });
+        }
+    };
 
 var User = mongoose.model('User', userSchema);
 
