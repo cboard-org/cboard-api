@@ -10,7 +10,8 @@ module.exports = {
     removeUser: removeUser,
     getUser: getUser,
     updateUser: updateUser,
-    loginUser: loginUser
+    loginUser: loginUser,
+    logoutUser: logoutUser
 };
 
 function createUser(req, res) {
@@ -162,10 +163,60 @@ function loginUser(req, res) {
       } else {
         req.session.userId = user._id;
         var tokenString = auth.issueToken(username, role);
+        user.authToken = tokenString;
+        user.save(function (err, user) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error saving user ' + err
+                });
+            }
+            if (!user) {
+                return res.status(404).json({
+                    message: 'Unable to find user. User id: ' + user._id
+                });
+            }
+        });
         return res.status(200).json({
             token: tokenString,
             message: "Token successfully generated"
         });
       }
+    });
+}
+function logoutUser(req, res) {
+    var username = req.body.username;
+    var password = req.body.password;
+    User.authenticate(username, password, function (error, user) {
+        if (error || !user) {
+            return res.status(401).json({
+                message: "Wrong email or password."
+            });
+        }
+        if (req.session) {
+            // delete session object
+            req.session.destroy(function (err) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error removing session ' + err
+                    });
+                }
+            });
+        }
+        user.authToken = '';
+        user.save(function (err, user) {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Error saving user ' + err
+                });
+            }
+            if (!user) {
+                return res.status(404).json({
+                    message: 'Unable to find user. User id: ' + user._id
+                });
+            }
+        });
+        return res.status(200).json({
+            message: "User successfully logout"
+        });
     });
 }

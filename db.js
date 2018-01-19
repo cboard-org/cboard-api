@@ -12,3 +12,5 @@ process.on('SIGINT', () => mongoose.connection.close( () => {
   console.log('Finished App and disconnected from database');
   process.exit(0);
 }));
+
+module.exports = mongoose.connection;
