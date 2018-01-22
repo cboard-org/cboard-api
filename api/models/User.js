@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
+var constants = require('../constants');
 
 
 var Schema = mongoose.Schema;
@@ -38,7 +39,7 @@ const userSchema = new Schema({
         },
     locale: {
         type: String, 
-        default: 'en'
+        default: constants.DEFAULT_LANG
         },
     password: {
         type: String,
