@@ -32,7 +32,7 @@ module.exports = function (locale) {
     }
 
     nev.configure({
-        verificationURL: 'http://localhost:4000/users/activate/${URL}',
+        verificationURL: 'https://app.cboard.io/user_activate/${URL}',
         URLLength: 16,
 
         // mongo-stuff
@@ -44,14 +44,14 @@ module.exports = function (locale) {
 
         // emailing options
         transportOptions: {
-            from: 'martinbedouret@gmail.com',
+            from: 'cboard@cboard.io',
             host: 'smtp.sendgrid.net',
             port: 465,
             secure: true,
             service: 'Sendgrid',
             auth: {
                 user: 'apikey',
-                pass: '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'
+                pass: process.env.SENDGRID_API_KEY
             }
         },
         verifyMailOptions: {
