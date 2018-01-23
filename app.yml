@@ -1,7 +1,2 @@
-
-
 runtime: nodejs
 env: flex
-env_variables:
-  SENDGRID_API_KEY: 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
-  SENDGRID_SENDER: martinbedouret@gmail.com
