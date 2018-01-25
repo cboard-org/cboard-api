@@ -1,7 +1,7 @@
 "use strict";
 
 var User = require('../models/User');
-var config = require('../config');
+var config = require('../../config');
 var mongoose = require('mongoose');
 var nev = require('email-verification')(mongoose);
 var bcrypt = require('bcryptjs');
