@@ -1,19 +1,27 @@
-//require('babel-polyfill');
-const path = require('path');
 
+const path = require('path');
 const development = require('./env/development');
+const production = require('./env/production');
 
 const defaults = {
   host: process.env.HOST || 'mongodb',
-  port: process.env.PORT || 8100,
-  materialsDir: path.join( process.cwd(), 'materials' ),
-  jwtSecret: 'asdfgASDFG12345'
+  port: process.env.PORT || 8100
+};
+
+function getConfig() {
+    var config = null;
+    switch(process.env.NODE_ENV) {
+        case 'development':
+            return config = Object.assign({}, defaults, development);
+        case 'production':
+            return config  = Object.assign({}, defaults, production);
+        default:
+            return config = Object.assign({}, defaults, development);
+    }
 };
 
 /**
  * Expose
  */
 
-module.exports = {
-  development: Object.assign({}, defaults, development)
-}[process.env.NODE_ENV || 'development'];
+module.exports = getConfig();

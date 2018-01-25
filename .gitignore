@@ -37,4 +37,4 @@ config/runtime.yaml
 nbproject/
 
 # Env
-config/env/development.js
+config/env/production.js
