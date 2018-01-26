@@ -2,9 +2,9 @@
 
 module.exports = {
     env: 'production',
-    databaseUrl: process.env.MONGO_URL || 'mongodb://localhost/cboard-api',
+    databaseUrl: process.env.MONGO_URL || 'mongodb://martinbedouret:Kapsch32065@ds253587.mlab.com:53587/cboard',
     jwt: {
-        secret: process.env.JWT_SECRET || 'secret key for testing'
+        secret: process.env.JWT_SECRET
     },
     emailTransport: {
         from: 'cboard@cboard.io',
