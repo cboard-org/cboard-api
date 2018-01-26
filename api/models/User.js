@@ -31,6 +31,10 @@ const userSchema = new Schema({
         trim: true,
         default: ''
     },
+    birthdate: { 
+        type: Date,
+        default: ''
+    },
     provider: {
         type: String,
         default: ''

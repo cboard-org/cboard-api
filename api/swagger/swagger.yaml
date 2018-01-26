@@ -39,24 +39,8 @@ parameters:
     description: User data for creating a new local user 
     required: true
     schema:
-      type: object
-      required:
-      - name
-      - email
-      - username
-      - password
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-        username:
-          type: string
-        password:
-          type: string
-        locale:
-          type: string
-          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+      $ref: "#/definitions/User" 
+
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -249,22 +233,27 @@ paths:
 # complex objects have schema definitions
 definitions:
   User:
-    type: object
-    properties:
+      type: object
+      required:
+      - name
+      - email
+      - username
+      - password
+      properties:
         name:
           type: string
         email:
           type: string
         username:
           type: string
+        password:
+          type: string
+        birthdate:
+            type: string
+            format: date-time
         locale:
           type: string
-          enum: ["da", "nl", "en", "fi", "fr", "de", "hu", "it", "nb", "pt", "ro", "ru", "es", "sv", "tr", "ara", "prs", "pes", "urd", "zhs", "zht", "none"]
-    required:
-        - name
-        - email
-        - username
-        - locale
+          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
   GeneralResponse:
     type: object
     properties:
