@@ -14,14 +14,21 @@
   "devDependencies": {
     "bcryptjs": "^2.3.0",
     "email-verification": "^0.4.6",
+    "husky": "^0.14.3",
+    "lint-staged": "^6.1.0",
     "mongoose": "^4.4.6",
+    "nodemailer": "^4.4.1",
+    "prettier": "1.10.2",
     "rand-token": "^0.4.0",
     "should": "^7.1.0",
-    "supertest": "^1.0.0",
-    "nodemailer": "^4.4.1"
+    "supertest": "^1.0.0"
+  },
+  "lint-staged": {
+    "*.{js,json,css}": ["prettier --write", "git add"]
   },
   "scripts": {
     "start": "node app.js",
-    "test": "swagger project test"
+    "test": "swagger project test",
+    "precommit": "lint-staged"
   }
 }
