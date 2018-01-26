@@ -9,8 +9,8 @@ mongoose.connection.on('error', (err) => console.log('Database connection error:
 mongoose.connection.on('disconnected', () => console.log('Disconnected from database'));
 
 process.on('SIGINT', () => mongoose.connection.close(() => {
-        console.log('Finished App and disconnected from database');
-        process.exit(0);
-    }));
+    console.log('Finished App and disconnected from database');
+    process.exit(0);
+}));
 
 module.exports = mongoose.connection;
