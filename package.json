@@ -5,33 +5,39 @@
   "description": "New Swagger API Project",
   "keywords": [],
   "author": "Martin Bedouret",
-  "contributors": [
-    "Martin Bedouret <martinbedouret@gmail.com>"
-  ],
+  "contributors": ["Martin Bedouret <martinbedouret@gmail.com>"],
   "license": "",
   "main": "app.js",
   "dependencies": {
-    "express": "^4.12.3",
-    "swagger-express-mw": "^0.1.0",
-    "jsonwebtoken": "^7.3.0",
-    "swagger-tools": "^0.10.1",
-    "validator": "^7.0.0",
-    "yamljs": "^0.2.9",
-    "connect-mongo": "^1.3.2",
-    "express-session": "^1.15.2",
-    "mongoose": "^4.4.6",
-    "email-verification": "^0.4.6",
-    "rand-token": "^0.4.0",
+    "bcrypt": "^1.0.2",
     "bcryptjs": "^2.3.0",
+    "connect-mongo": "^1.3.2",
+    "email-verification": "^0.4.6",
+    "express": "^4.12.3",
+    "express-session": "^1.15.2",
+    "jsonwebtoken": "^7.3.0",
+    "mongoose": "^4.4.6",
+    "rand-token": "^0.4.0",
+    "sendgrid": "^4.7.1",
     "should": "^7.1.0",
     "supertest": "^1.0.0",
-    "sendgrid": "^4.7.1",
-    "bcrypt": "^1.0.2"
+    "swagger-express-mw": "^0.1.0",
+    "swagger-tools": "^0.10.1",
+    "validator": "^7.0.0",
+    "yamljs": "^0.2.9"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "husky": "^0.14.3",
+    "lint-staged": "^6.1.0",
+    "prettier": "1.10.2"
+  },
   "scripts": {
     "start": "node app.js",
-    "test": "swagger project test"
+    "test": "swagger project test",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,json,css}": ["prettier --write", "git add"]
   },
   "engines": {
     "node": ">=6.0"
