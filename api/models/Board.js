@@ -12,6 +12,11 @@ const boardSchema = new Schema({
     required: true,
     trim: true
   },
+  cellSize: {
+    type: String,
+    trim: true,
+    default: constants.DEFAULT_CELL_SIZE
+  },
   locale: {
     type: String,
     default: constants.DEFAULT_LANG
