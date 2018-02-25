@@ -18,6 +18,12 @@ This video from Real Look Autism will help you understand how communication boar
 
 ## Quick start
 
+### Pre-requisites
+Before to install the Cboard API, be sure you are **locally** running successfully following tools:
+* Node.js > 7.0.0 (download [here](https://nodejs.org/en/download/)
+* MongoDB > 3.0.0 (download [here](https://docs.mongodb.com/manual/installation/)
+* Swagger for node 2.0 (download and install using npm [here](https://github.com/swagger-api/swagger-node)
+
 ### Install
 Clone repository and install npm dependencies:
 ```bash
@@ -36,13 +42,32 @@ $ swagger project start
 That should start a server process listening on port 10010.
 
 ### See API Paths
-By using swagger edit appication:
+By using swagger edit application:
 ```bash
 $ swagger project edit
 ```
 That should open a browser window and show API swagger editor like below:
 <img src='https://i.imgur.com/pt0eJVQ.png' width='600' alt='Cboard API Swagger'>
 
+### Mailing system configuration
+When a new user is created using the API, some verification emails are sent and hence, a emailing system must be configured.d
+To use a specific SMPT server, you must edit locally following file:
+**config/env/development.js**
+And look for following config block:
+```javascript
+    emailTransport: {
+        from: 'cboard@cboard.io',
+        host: 'smtp.sendgrid.net',
+        port: 465,
+        secure: true,
+        service: 'Sendgrid',
+        auth: {
+            user: 'apikey',
+            pass: process.env.SENDGRID_API_KEY
+        }
+    }
+```
+Replace above values with your SMTP server details you own.
 
 ## License
 
