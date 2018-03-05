@@ -1,15 +1,15 @@
-"use strict";
+'use strict';
 
-var app = require("express")();
-var swaggerTools = require("swagger-tools");
-var YAML = require("yamljs");
-var auth = require("./api/helpers/auth");
-var swaggerConfig = YAML.load("./api/swagger/swagger.yaml");
-var db = require("./db");
-var session = require("express-session");
-var MongoStore = require("connect-mongo")(session);
+var app = require('express')();
+var swaggerTools = require('swagger-tools');
+var YAML = require('yamljs');
+var auth = require('./api/helpers/auth');
+var swaggerConfig = YAML.load('./api/swagger/swagger.yaml');
+var db = require('./db');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 
-const config = require("./config");
+const config = require('./config');
 
 module.exports = app; // for testing
 
@@ -30,7 +30,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
   //use sessions for tracking logins
   app.use(
     session({
-      secret: "work hard",
+      secret: 'work hard',
       resave: true,
       saveUninitialized: false,
       store: new MongoStore({
@@ -40,7 +40,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
   );
 
   var routerConfig = {
-    controllers: "./api/controllers",
+    controllers: './api/controllers',
     useStubs: false
   };
 
@@ -50,6 +50,6 @@ swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
 
   var port = process.env.PORT || 10010;
   app.listen(port, function() {
-    console.log("Started server on port " + port);
+    console.log('Started server on port ' + port);
   });
 });
