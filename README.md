@@ -1,57 +1,66 @@
 # Cboard API - REST API for CBoard application
 
-[Cboard](https://app.cboard.io/) is an augmentative and alternative communication (AAC) web application, allowing users with speech and language impairments (autism, cerebral palsy) to communicate by symbols and text-to-speech.
+[Cboard](https://app.cboard.io/) is an augmentative and alternative communication (AAC) web application, allowing users with speech and language impairments (autism, cerebral palsy) to communicate by symbols and text-to-speech. This repo supports the CBoard front-end, providing backend functionality and persistence.
 
-<img src='https://i.imgur.com/eeH9cUM.jpg' width='794' alt='Cboard screenshot'>
-
-The app uses the browser's Speech Synthesis API to generate speech when a symbol is clicked, there are 3400 symbols to choose from when creating a board. Cboard is available in 33 languages (support varies by platform - Android, iOS, Windows).
-
-**We're using Discord to collaborate, join us at: https://discord.gg/TEH8uxh**
-
-## How does it work?
-
-This video from Real Look Autism will help you understand how communication boards are being used.
-
-**Disclaimer:** the app in the video is not Cboard.
-
-<a href="https://www.youtube.com/watch?v=oIGrxzPMVtw"><img src="https://img.youtube.com/vi/oIGrxzPMVtw/0.jpg" alt="Real Look Autism Episode 8" width="480" height="360"></a>
-
+Learn more about the [Cboard project](https://github.com/cboard-org/cboard).
 ## Quick start
 
 ### Pre-requisites
-Before to install the Cboard API, be sure you are **locally** running successfully following tools:
-* Node.js > 7.0.0 (download [here](https://nodejs.org/en/download/)
-* MongoDB > 3.0.0 (download [here](https://docs.mongodb.com/manual/installation/)
-* Swagger for node 2.0 (download and install using npm [here](https://github.com/swagger-api/swagger-node)
+Before installing and running the Cboard API, be sure you have **locally** installed the following tools:
+* Node.js > 7.0.0 (download [here](https://nodejs.org/en/download/))
+* MongoDB > 3.0.0 (download [here](https://docs.mongodb.com/manual/installation/))
+* Swagger
+
+Install Swagger globally using npm: 
+
+`npm install -g swagger`
+
+If needed, check out the Swagger docs [here](https://github.com/swagger-api/swagger-node/blob/master/docs/install.md).
+
+Use the following commands to check that you have them successfully installed, and/or to double-check your versions:
+* `node -v`
+* `mongo --version`
+* `swagger --version`
 
 ### Install
-Clone repository and install npm dependencies:
+Clone the repository and install npm dependencies:
 ```bash
 $ git clone https://github.com/cboard-org/cboard-api.git
 $ cd cboard-api
 $ npm install
 ```
+### Start the database
 
-### Run the API Server
-Using swagger for nodejs. You need to install swagger for node locally first, Install it using npm. For complete instructions, see the [install](./docs/install.md) page.
+Start MongoDB. ([See MongoDB docs, if needed](https://docs.mongodb.com/manual/tutorial/manage-mongodb-processes/)).
 
 ```bash
-$ npm install -g swagger
+$ mongod
+```
+
+### Run the API Server
+
+In a separate terminal tab/window, run the Swagger project server.
+
+```bash
 $ swagger project start
 ```
-That should start a server process listening on port 10010.
+
+This will start a server process listening on port 10010. You will now be able to make calls to the API.
+
+(If you are having trouble, make sure you have successfully installed the pre-requisites -- see "Pre-requisites" section above.)
 
 ### See API Paths
-By using swagger edit application:
+
+Swagger provides an interactive, browser-based editor. To visualize available API endpoints, start the editor:
+
 ```bash
 $ swagger project edit
 ```
-That should open a browser window and show API swagger editor like below:
+That should open a browser window and show API swagger editor (as shown below):
 <img src='https://i.imgur.com/pt0eJVQ.png' width='600' alt='Cboard API Swagger'>
 
 ### Mailing system configuration
-When a new user is created using the API, some verification emails are sent and hence, a emailing system must be configured.d
-To use a specific SMPT server, you must edit locally following file:
+When a new user is created using the API, some verification emails are generated. To use a specific SMPT server, locally edit the following file to use values for an SMTP server you own:
 **config/env/development.js**
 And look for following config block:
 ```javascript
@@ -67,7 +76,6 @@ And look for following config block:
         }
     }
 ```
-Replace above values with your SMTP server details you own.
 
 ## License
 
