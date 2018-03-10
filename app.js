@@ -1,8 +1,7 @@
 "use strict";
 
 var cors = require("cors");
-
-var app = require("express")(cors);
+var app = require("express")();
 var swaggerTools = require("swagger-tools");
 var YAML = require("yamljs");
 var auth = require("./api/helpers/auth");
@@ -45,6 +44,8 @@ swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
   app.use(middleware.swaggerRouter(routerConfig));
 
   app.use(middleware.swaggerUi());
+
+  app.use(cors());
 
   var port = process.env.PORT || 10010;
   app.listen(port, function() {
