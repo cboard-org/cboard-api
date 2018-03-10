@@ -16,6 +16,7 @@ module.exports = app; // for testing
 
 swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
   //Serves the Swagger UI on /docs
+  app.use(cors());
   app.use(middleware.swaggerMetadata()); // needs to go BEFORE swaggerSecurity
   app.use(
     middleware.swaggerSecurity({
@@ -44,8 +45,6 @@ swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
   app.use(middleware.swaggerRouter(routerConfig));
 
   app.use(middleware.swaggerUi());
-
-  app.use(cors());
 
   var port = process.env.PORT || 10010;
   app.listen(port, function() {
