@@ -24,7 +24,8 @@
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "^0.10.1",
     "validator": "^7.0.0",
-    "yamljs": "^0.2.9"
+    "yamljs": "^0.2.9",
+    "ms": "^2.1.1"
   },
   "devDependencies": {
     "husky": "^0.14.3",
