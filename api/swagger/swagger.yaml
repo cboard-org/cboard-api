@@ -219,7 +219,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/UserLogin"
       responses:
         "200":
           description: Success
@@ -257,10 +257,10 @@ definitions:
   UserLogin:
       type: object
       required:
-      - username
+      - email
       - password
       properties:
-        username:
+        email:
           type: string
         password:
           type: string
