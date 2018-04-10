@@ -28,11 +28,14 @@
     "ms": "^2.1.1"
   },
   "devDependencies": {
+    "dotenv": "^5.0.1",
     "husky": "^0.14.3",
     "lint-staged": "^6.1.0",
+    "nodemon": "^1.17.2",
     "prettier": "1.10.2"
   },
   "scripts": {
+    "dev": "nodemon app.js",
     "start": "node app.js",
     "test": "swagger project test",
     "precommit": "lint-staged"
