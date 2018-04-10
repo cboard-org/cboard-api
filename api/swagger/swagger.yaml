@@ -56,7 +56,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GeneralResponse"
+            $ref: "#/definitions/TempUserResponse"
         default:
           description: Error
           schema:
@@ -275,6 +275,22 @@ definitions:
         description: a short comment
     required:
       - success
+      - message
+  TempUserResponse:
+    type: object
+    properties:
+      success:
+        type: number
+        description: returns 1 if successful
+      url:
+        type: string
+        description: generated verifying url
+      message:
+        type: string
+        description: a short comment
+    required:
+      - success
+      - url
       - message
   ErrorResponse:
     required:

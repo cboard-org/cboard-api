@@ -40,6 +40,37 @@
     },
     {
       "name": "http://localhost:10010/user/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "3b1eade7-1b9e-498d-ad78-3c6f7b37706b",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Body matches string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"An email has been sent to you. Please check it to verify your account\");",
+              "});",
+              "pm.globals.set(\"url\",pm.response.json().url);",
+              "console.log(pm.globals.get(\"url\"));"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "8df35307-b429-4f47-b14e-8056ed92b096",
+            "type": "text/javascript",
+            "exec": [
+              "email_key = Math.random().toString(36).substring(7);",
+              "",
+              "pm.globals.set(\"email\", email_key + \"@cboard.io\");",
+              "",
+              "pm.globals.set(\"username\", email_key );",
+              ""
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -51,7 +82,7 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n    \"name\": \"martin1\",\n    \"email\": \"martinbedouret@gmail.com\",\n    \"username\": \"titin1\",\n    \"password\": \"123456\",\n    \"birthdate\": \"12/10/1995\"\n}"
+            "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"username\": \"{{username}}\",\n    \"password\": \"123456\",\n    \"birthdate\": \"12/10/1995\"\n}"
         },
         "url": {
           "raw": "http://localhost:10010/user",
@@ -66,6 +97,28 @@
     },
     {
       "name": "http://localhost:10010/user/activate/{url}",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "3d4cf118-a5a0-449d-bbae-0beac9ad3db7",
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "id": "a7b61f09-d8b7-4a21-b822-77bdaa4c910d",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Body matches string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"CONFIRMED!\");",
+              "});"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -79,11 +132,11 @@
           "raw": ""
         },
         "url": {
-          "raw": "http://localhost:10010/user/activate/PcLcTX0hqgKdtAY5",
+          "raw": "http://localhost:10010/user/activate/{{url}}",
           "protocol": "http",
           "host": ["localhost"],
           "port": "10010",
-          "path": ["user", "activate", "PcLcTX0hqgKdtAY5"]
+          "path": ["user", "activate", "{{url}}"]
         },
         "description": null
       },
@@ -178,6 +231,24 @@
     },
     {
       "name": "http://localhost:10010/user/login/{role}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "318fecf2-bd0d-4811-9d4e-6804bd63376c",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Body matches string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"Token successfully generated\");",
+              "});",
+              "",
+              "",
+              "pm.globals.set(\"token\",pm.response.json().token);",
+              "console.log(pm.globals.get(\"token\"));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -189,7 +260,7 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n    \"email\": \"martinbedouret@gmail.com\",\n    \"password\": \"123456\"\n}"
+            "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
         },
         "url": {
           "raw": "http://localhost:10010/user/login/admin",
@@ -204,6 +275,20 @@
     },
     {
       "name": "http://localhost:10010/user/logout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "b26f5cc7-7e58-4116-96d7-8d5d780539ef",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Body matches string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"User successfully logout\");",
+              "});"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -213,14 +298,13 @@
           },
           {
             "key": "Authorization",
-            "value":
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0aXRpbjEwIiwiaXNzIjoiY2JvYXJkLmlvIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNTE2Mzk1NzMyfQ.6TlQv33mfUAQg0gMUyPdUOxleCi72cgBm-gDTpscAV4"
+            "value": "Bearer {{token}}"
           }
         ],
         "body": {
           "mode": "raw",
           "raw":
-            "{\n\n    \"email\": \"martinbedouret@gmail.com\",\n    \"password\": \"123456\"\n}"
+            "{\n\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
         },
         "url": {
           "raw": "http://localhost:10010/user/logout",
