@@ -38,6 +38,7 @@ nbproject/
 
 # Env
 config/env/production.js
+.env
 
 # Visual studio project
 .vscode/
