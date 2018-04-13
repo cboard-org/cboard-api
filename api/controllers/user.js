@@ -69,6 +69,7 @@ function activateUser(req, res) {
         }
         return res.status(200).json({
           success: 1,
+          userid: user._id,
           message: 'CONFIRMED!'
         });
       });
@@ -118,34 +119,33 @@ function getUser(req, res) {
 }
 function updateUser(req, res) {
   var id = req.swagger.params.id.value;
-  User.findOne({ _id: id }, function(err, users) {
+  User.findOne({ _id: id }, function(err, user) {
     if (err) {
       return res.status(500).json({
         message: 'Error updating user. ' + err
       });
     }
-    if (!users) {
+    if (!user) {
       return res.status(404).json({
         message: 'Unable to find user. User Id: ' + id
       });
     }
-    users.name = req.body.name;
-    users.username = req.body.username;
-    users.email = req.body.email;
-    users.locale = req.body.locale;
-    users.save(function(err, users) {
+    for (var key in req.body) {
+      user[key] = req.body[key];
+    }
+    user.save(function(err, user) {
       if (err) {
         return res.status(500).json({
           message: 'Error saving user ' + err
         });
       }
-      if (!users) {
+      if (!user) {
         return res.status(404).json({
           message: 'Unable to find user. User id: ' + id
         });
       }
     });
-    return res.status(200).json(users);
+    return res.status(200).json(user);
   });
 }
 function loginUser(req, res) {

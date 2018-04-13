@@ -18,13 +18,6 @@ const userSchema = new Schema({
     required: true,
     trim: true
   },
-  username: {
-    type: String,
-    unique: true,
-    required: true,
-    trim: true,
-    default: ''
-  },
   birthdate: {
     type: Date,
     default: Date.now
@@ -94,11 +87,6 @@ userSchema.path('email').validate(function(email, fn) {
   } else fn(true);
 }, 'Email already exists');
 
-userSchema.path('username').validate(function(username) {
-  if (this.skipValidation()) return true;
-  return username.length;
-}, 'Username cannot be blank');
-
 userSchema.path('password').validate(function(password) {
   if (this.skipValidation()) return true;
   return password.length;
@@ -146,7 +134,7 @@ userSchema.statics = {
    */
 
   load: function(options, cb) {
-    options.select = options.select || 'name username';
+    options.select = options.select || 'name email';
     return this.findOne(options.criteria)
       .select(options.select)
       .exec(cb);
