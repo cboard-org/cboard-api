@@ -179,10 +179,7 @@ function loginUser(req, res) {
           });
         }
       });
-      return res.status(200).json({
-        token: tokenString,
-        message: 'Token successfully generated'
-      });
+      return res.status(200).json(user);
     }
   });
 }
