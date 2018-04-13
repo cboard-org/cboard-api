@@ -69,6 +69,7 @@ function activateUser(req, res) {
         }
         return res.status(200).json({
           success: 1,
+          userid: user._id,
           message: 'CONFIRMED!'
         });
       });
@@ -130,7 +131,6 @@ function updateUser(req, res) {
       });
     }
     users.name = req.body.name;
-    users.username = req.body.username;
     users.email = req.body.email;
     users.locale = req.body.locale;
     users.save(function(err, users) {

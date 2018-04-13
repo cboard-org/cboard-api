@@ -172,7 +172,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GeneralResponse"
+            $ref: "#/definitions/UserActivatedResponse"
         default:
           description: Error
           schema:
@@ -237,14 +237,11 @@ definitions:
       required:
       - name
       - email
-      - username
       - password
       properties:
         name:
           type: string
         email:
-          type: string
-        username:
           type: string
         password:
           type: string
@@ -270,6 +267,21 @@ definitions:
       success:
         type: number
         description: returns 1 if successful
+      message:
+        type: string
+        description: a short comment
+    required:
+      - success
+      - message
+  UserActivatedResponse:
+    type: object
+    properties:
+      success:
+        type: number
+        description: returns 1 if successful
+      userid:
+        type: string
+        description: the id for the activated user
       message:
         type: string
         description: a short comment
@@ -309,22 +321,17 @@ definitions:
               type: string
             email:
               type: string
-            username:
-              type: string
             password:
               type: string
   GetUserResponse:
     required:
         - name
         - email
-        - username
         - locale
     properties:
         name:
           type: string
         email:
-          type: string
-        username:
           type: string
         locale:
           type: string
