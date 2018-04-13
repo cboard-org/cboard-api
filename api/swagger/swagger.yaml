@@ -198,7 +198,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/LoginResponse"
+            $ref: "#/definitions/GetUserResponse"
         default:
           description: Error
           schema:
@@ -335,15 +335,6 @@ definitions:
           type: string
         locale:
           type: string
-  LoginResponse:
-      required:
-          - token
-          - message
-      properties:
-        token:
-            type: string
-        message:
-            type: string
   LogoutResponse:
       required:
           - message
