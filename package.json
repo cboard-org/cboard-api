@@ -25,10 +25,10 @@
     "swagger-tools": "^0.10.1",
     "validator": "^7.0.0",
     "yamljs": "^0.2.9",
+    "dotenv": "^5.0.1",
     "ms": "^2.1.1"
   },
   "devDependencies": {
-    "dotenv": "^5.0.1",
     "husky": "^0.14.3",
     "lint-staged": "^6.1.0",
     "nodemon": "^1.17.2",
