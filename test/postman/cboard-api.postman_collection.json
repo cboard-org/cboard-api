@@ -1,26 +1,26 @@
 {
   "info": {
-    "name": "cboard-api (local)",
-    "_postman_id": "88e9dbda-8d18-4363-ac8e-7e006403a983",
-    "description": "",
+    "name": "cboard-api",
+    "_postman_id": "47e58b72-0a7b-48ea-bb8b-4d47f29306ca",
+    "description": "contains tests for all cboard-api calls",
     "schema":
       "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "http://localhost:10010/user/",
+      "name": "/user/",
       "event": [
         {
           "listen": "test",
           "script": {
-            "id": "3b1eade7-1b9e-498d-ad78-3c6f7b37706b",
+            "id": "af69944d-45fb-402e-9dae-f6e6e8cfb3a2",
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Body matches string\", function () {",
+              "pm.test(\"Body match+es string\", function () {",
               "    pm.expect(pm.response.text()).to.include(\"An email has been sent to you. Please check it to verify your account\");",
               "});",
-              "pm.globals.set(\"url\",pm.response.json().url);",
-              "console.log(pm.globals.get(\"url\"));"
+              "pm.globals.set(\"activation_url\",pm.response.json().url);",
+              "console.log(pm.globals.get(\"activation_url\"));"
             ]
           }
         },
@@ -54,10 +54,8 @@
             "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
         },
         "url": {
-          "raw": "http://localhost:10010/user",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
+          "raw": "{{url}}/user",
+          "host": ["{{url}}"],
           "path": ["user"]
         },
         "description": null
@@ -65,7 +63,7 @@
       "response": []
     },
     {
-      "name": "http://localhost:10010/user/activate/{url}",
+      "name": "/user/activate/{activation_url}",
       "event": [
         {
           "listen": "prerequest",
@@ -104,32 +102,31 @@
           "raw": ""
         },
         "url": {
-          "raw": "http://localhost:10010/user/activate/{{url}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
-          "path": ["user", "activate", "{{url}}"]
+          "raw": "{{url}}/user/activate/{{activation_url}}",
+          "host": ["{{url}}"],
+          "path": ["user", "activate", "{{activation_url}}"]
         },
         "description": null
       },
       "response": []
     },
     {
-      "name": "http://localhost:10010/user/login/{role}",
+      "name": "/user/login/{role}",
       "event": [
         {
           "listen": "test",
           "script": {
-            "id": "318fecf2-bd0d-4811-9d4e-6804bd63376c",
+            "id": "11abaa21-b246-46bc-b4f8-08a21e856580",
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Body matches string\", function () {",
-              "    pm.expect(pm.response.text()).to.include(\"Token successfully generated\");",
-              "});",
               "",
               "",
-              "pm.globals.set(\"token\",pm.response.json().token);",
-              "console.log(pm.globals.get(\"token\"));"
+              "pm.globals.set(\"token\",pm.response.json().authToken);",
+              "console.log(pm.globals.get(\"token\"));",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
             ]
           }
         }
@@ -148,10 +145,8 @@
             "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
         },
         "url": {
-          "raw": "http://localhost:10010/user/login/admin",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
+          "raw": "{{url}}/user/login/admin",
+          "host": ["{{url}}"],
           "path": ["user", "login", "admin"]
         },
         "description": null
@@ -159,7 +154,7 @@
       "response": []
     },
     {
-      "name": "http://localhost:10010/user/",
+      "name": "/user/",
       "event": [
         {
           "listen": "test",
@@ -192,10 +187,8 @@
             "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
         },
         "url": {
-          "raw": "http://localhost:10010/user/",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
+          "raw": "{{url}}/user/",
+          "host": ["{{url}}"],
           "path": ["user", ""]
         },
         "description": null
@@ -203,7 +196,7 @@
       "response": []
     },
     {
-      "name": "http://localhost:10010/user/{id}",
+      "name": "/user/{id}",
       "event": [
         {
           "listen": "test",
@@ -236,10 +229,8 @@
             "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
         },
         "url": {
-          "raw": "http://localhost:10010/user/{{userid}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
+          "raw": "{{url}}/user/{{userid}}",
+          "host": ["{{url}}"],
           "path": ["user", "{{userid}}"]
         },
         "description": null
@@ -247,7 +238,7 @@
       "response": []
     },
     {
-      "name": "http://localhost:10010/user/{id}",
+      "name": "/user/{id}",
       "event": [
         {
           "listen": "test",
@@ -279,10 +270,8 @@
           "raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
         },
         "url": {
-          "raw": "http://localhost:10010/user/{{userid}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
+          "raw": "{{url}}/user/{{userid}}",
+          "host": ["{{url}}"],
           "path": ["user", "{{userid}}"]
         },
         "description": null
@@ -290,7 +279,7 @@
       "response": []
     },
     {
-      "name": "http://localhost:10010/user/logout",
+      "name": "/user/logout",
       "event": [
         {
           "listen": "test",
@@ -323,10 +312,8 @@
             "{\n\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
         },
         "url": {
-          "raw": "http://localhost:10010/user/logout",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
+          "raw": "{{url}}/user/logout",
+          "host": ["{{url}}"],
           "path": ["user", "logout"]
         },
         "description": null
@@ -334,7 +321,7 @@
       "response": []
     },
     {
-      "name": "http://localhost:10010/user/{id}",
+      "name": "/user/{id}",
       "event": [
         {
           "listen": "test",
@@ -366,10 +353,8 @@
           "raw": ""
         },
         "url": {
-          "raw": "http://localhost:10010/user/{{userid}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "10010",
+          "raw": "{{url}}/user/{{userid}}",
+          "host": ["{{url}}"],
           "path": ["user", "{{userid}}"]
         },
         "description": null
