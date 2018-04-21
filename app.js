@@ -14,8 +14,6 @@ var MongoStore = require('connect-mongo')(session);
 
 const config = require('./config');
 
-module.exports = app; // for testing
-
 swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
   //Serves the Swagger UI on /docs
   app.use(cors());
@@ -53,3 +51,5 @@ swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
     console.log('Started server on port ' + port);
   });
 });
+
+module.exports = app; // for testing
