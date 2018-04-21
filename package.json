@@ -41,6 +41,7 @@
     "dev": "nodemon app.js",
     "start": "node app.js",
     "test": "swagger project test",
+    "mocha": "mocha test/test.js",
     "precommit": "lint-staged"
   },
   "lint-staged": {
