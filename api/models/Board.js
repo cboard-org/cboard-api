@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-var mongoose = require("mongoose");
-var bcrypt = require("bcryptjs");
-var constants = require("../constants");
+var mongoose = require('mongoose');
+var bcrypt = require('bcryptjs');
+var constants = require('../constants');
 var Schema = mongoose.Schema;
 
 const boardSchema = new Schema({
@@ -11,6 +11,17 @@ const boardSchema = new Schema({
     unique: true,
     required: true,
     trim: true
+  },
+  user: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true
+  },
+  content: {
+    type: String,
+    unique: false,
+    required: true
   },
   cellSize: {
     type: String,
@@ -29,59 +40,48 @@ const validatePresenceOf = value => value && value.length;
  * Validations
  */
 
-// the below 5 validations only apply if you are signing up traditionally
+// the below validations only apply if you are signing up traditionally
 
-userSchema.path("name").validate(function(name) {
+boardSchema.path('name').validate(function(name) {
   if (this.skipValidation()) return true;
   return name.length;
-}, "Name cannot be blank");
+}, 'Name cannot be blank');
 
-userSchema.path("email").validate(function(email) {
+boardSchema.path('user').validate(function(user) {
   if (this.skipValidation()) return true;
-  return email.length;
-}, "Email cannot be blank");
+  return user.length;
+}, 'User cannot be blank');
 
-userSchema.path("email").validate(function(email, fn) {
-  const User = mongoose.model("User");
+boardSchema.path('content').validate(function(content) {
+  if (this.skipValidation()) return true;
+  return content.length;
+}, 'Content cannot be blank');
+
+boardSchema.path('name').validate(function(name, fn) {
+  const Board = mongoose.model('Board');
   if (this.skipValidation()) fn(true);
-
-  // Check only when it is a new user or when email field is modified
-  if (this.isNew || this.isModified("email")) {
-    User.find({ email: email }).exec(function(err, users) {
-      fn(!err && users.length === 0);
+  // Check only when it is a new board or when name field is modified
+  if (this.isNew || this.isModified('name')) {
+    Board.find({ name: name }).exec(function(err, boards) {
+      fn(!err && boards.length === 0);
     });
   } else fn(true);
-}, "Email already exists");
-
-userSchema.path("username").validate(function(username) {
-  if (this.skipValidation()) return true;
-  return username.length;
-}, "Username cannot be blank");
-
-userSchema.path("password").validate(function(password) {
-  if (this.skipValidation()) return true;
-  return password.length;
-}, "Password cannot be blank");
+}, 'Board name already exists');
 
 /**
  * Pre-save hook
  */
 
-userSchema.pre("save", function(next) {
+boardSchema.pre('save', function(next) {
   if (!this.isNew) return next();
-
-  if (!validatePresenceOf(this.password) && !this.skipValidation()) {
-    next(new Error("Invalid password"));
-  } else {
-    next();
-  }
+  next();
 });
 
 /**
  * Methods
  */
 
-userSchema.methods = {
+boardSchema.methods = {
   /**
    * Validation is not required if using OAuth
    */
@@ -95,7 +95,7 @@ userSchema.methods = {
  * Statics
  */
 
-userSchema.statics = {
+boardSchema.statics = {
   /**
    * Load
    *
@@ -105,7 +105,7 @@ userSchema.statics = {
    */
 
   load: function(options, cb) {
-    options.select = options.select || "name username";
+    options.select = options.select || 'name user';
     return this.findOne(options.criteria)
       .select(options.select)
       .exec(cb);
@@ -125,7 +125,7 @@ userSchema.statics = {
       if (err) {
         return callback(err);
       } else if (!user) {
-        var err = new Error("User not found.");
+        var err = new Error('User not found.');
         err.status = 401;
         return callback(err);
       }
@@ -140,6 +140,6 @@ userSchema.statics = {
   }
 };
 
-var User = mongoose.model("User", userSchema);
+var Board = mongoose.model('Board', boardSchema);
 
-module.exports = User;
+module.exports = Board;
