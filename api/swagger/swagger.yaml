@@ -49,14 +49,14 @@ paths:
     x-swagger-router-controller: user
     post:
       operationId: createUser
-      description: Create a new temporal user in database and send an email to validate the user.
+      description: Create a new temporary user in database and send an email to validate the user.
       parameters:
         - $ref: '#/parameters/User'
       responses:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GeneralResponse"
+            $ref: "#/definitions/TempUserResponse"
         default:
           description: Error
           schema:
@@ -160,7 +160,7 @@ paths:
     x-swagger-router-controller: user
     post:
       operationId: activateUser
-      description: Create a new user by copying it from temporal users and it removes the temporal user
+      description: Create a new user by copying it from temporary users and it removes the temporary user
       parameters:
         - in: path
           name: url
@@ -172,7 +172,7 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GeneralResponse"
+            $ref: "#/definitions/UserActivatedResponse"
         default:
           description: Error
           schema:
@@ -193,12 +193,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/UserLogin"
       responses:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/LoginResponse"
+            $ref: "#/definitions/GetUserResponse"
         default:
           description: Error
           schema:
@@ -219,7 +219,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/UserLogin"
       responses:
         "200":
           description: Success
@@ -237,14 +237,11 @@ definitions:
       required:
       - name
       - email
-      - username
       - password
       properties:
         name:
           type: string
         email:
-          type: string
-        username:
           type: string
         password:
           type: string
@@ -254,6 +251,16 @@ definitions:
         locale:
           type: string
           enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+  UserLogin:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
   GeneralResponse:
     type: object
     properties:
@@ -265,6 +272,37 @@ definitions:
         description: a short comment
     required:
       - success
+      - message
+  UserActivatedResponse:
+    type: object
+    properties:
+      success:
+        type: number
+        description: returns 1 if successful
+      userid:
+        type: string
+        description: the id for the activated user
+      message:
+        type: string
+        description: a short comment
+    required:
+      - success
+      - message
+  TempUserResponse:
+    type: object
+    properties:
+      success:
+        type: number
+        description: returns 1 if successful
+      url:
+        type: string
+        description: generated verifying url
+      message:
+        type: string
+        description: a short comment
+    required:
+      - success
+      - url
       - message
   ErrorResponse:
     required:
@@ -283,34 +321,20 @@ definitions:
               type: string
             email:
               type: string
-            username:
-              type: string
             password:
               type: string
   GetUserResponse:
     required:
         - name
         - email
-        - username
         - locale
     properties:
         name:
           type: string
         email:
           type: string
-        username:
-          type: string
         locale:
           type: string
-  LoginResponse:
-      required:
-          - token
-          - message
-      properties:
-        token:
-            type: string
-        message:
-            type: string
   LogoutResponse:
       required:
           - message

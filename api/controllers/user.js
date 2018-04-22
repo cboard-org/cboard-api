@@ -1,7 +1,7 @@
-var User = require("../models/User");
-var mailing = require("../mail");
-var nev = mailing("en");
-var auth = require("../helpers/auth");
+var User = require('../models/User');
+var mailing = require('../mail');
+var nev = mailing('en');
+var auth = require('../helpers/auth');
 
 module.exports = {
   createUser: createUser,
@@ -27,7 +27,7 @@ function createUser(req, res) {
     if (existingPersistentUser) {
       return res.status(409).json({
         message:
-          "You have already signed up and confirmed your account. Did you forget your password?"
+          'You have already signed up and confirmed your account. Did you forget your password?'
       });
     }
     // new user created
@@ -36,22 +36,23 @@ function createUser(req, res) {
       nev.sendVerificationEmail(newTempUser.email, URL, function(err, info) {
         if (err) {
           return res.status(500).json({
-            message: "ERROR: sending verification email FAILED " + info
+            message: 'ERROR: sending verification email FAILED ' + info
           });
         }
       });
 
       return res.status(200).json({
         success: 1,
+        url: URL,
         message:
-          "An email has been sent to you. Please check it to verify your account."
+          'An email has been sent to you. Please check it to verify your account.'
       });
 
       // user already exists in temporary collection!
     } else {
       return res.status(409).json({
         message:
-          "You have already signed up. Please check your email to verify your account."
+          'You have already signed up. Please check your email to verify your account.'
       });
     }
   });
@@ -63,17 +64,18 @@ function activateUser(req, res) {
       nev.sendConfirmationEmail(user.email, function(err, info) {
         if (err) {
           return res.status(404).json({
-            message: "ERROR: sending confirmation email FAILED " + info
+            message: 'ERROR: sending confirmation email FAILED ' + info
           });
         }
         return res.status(200).json({
           success: 1,
-          message: "CONFIRMED!"
+          userid: user._id,
+          message: 'CONFIRMED!'
         });
       });
     } else {
       return res.status(404).json({
-        message: "ERROR: confirming temp user FAILED " + err
+        message: 'ERROR: confirming temp user FAILED ' + err
       });
     }
   });
@@ -82,7 +84,7 @@ function listUser(req, res) {
   User.find(function(err, Users) {
     if (err) {
       return res.status(500).json({
-        message: "Error getting user list. " + err
+        message: 'Error getting user list. ' + err
       });
     }
     return res.status(200).json(Users);
@@ -93,7 +95,7 @@ function removeUser(req, res) {
   User.findByIdAndRemove(id, function(err, users) {
     if (err) {
       return res.status(404).json({
-        message: "User not found. User Id: " + id
+        message: 'User not found. User Id: ' + id
       });
     }
     return res.status(200).json(users);
@@ -104,12 +106,12 @@ function getUser(req, res) {
   User.findOne({ _id: id }, function(err, users) {
     if (err) {
       return res.status(500).json({
-        message: "Error getting user. " + err
+        message: 'Error getting user. ' + err
       });
     }
     if (!users) {
       return res.status(404).json({
-        message: "User does not exist. User Id: " + id
+        message: 'User does not exist. User Id: ' + id
       });
     }
     return res.status(200).json(users);
@@ -117,81 +119,77 @@ function getUser(req, res) {
 }
 function updateUser(req, res) {
   var id = req.swagger.params.id.value;
-  User.findOne({ _id: id }, function(err, users) {
+  User.findOne({ _id: id }, function(err, user) {
     if (err) {
       return res.status(500).json({
-        message: "Error updating user. " + err
+        message: 'Error updating user. ' + err
       });
     }
-    if (!users) {
+    if (!user) {
       return res.status(404).json({
-        message: "Unable to find user. User Id: " + id
+        message: 'Unable to find user. User Id: ' + id
       });
     }
-    users.name = req.body.name;
-    users.username = req.body.username;
-    users.email = req.body.email;
-    users.locale = req.body.locale;
-    users.save(function(err, users) {
+    for (var key in req.body) {
+      user[key] = req.body[key];
+    }
+    user.save(function(err, user) {
       if (err) {
         return res.status(500).json({
-          message: "Error saving user " + err
+          message: 'Error saving user ' + err
         });
       }
-      if (!users) {
+      if (!user) {
         return res.status(404).json({
-          message: "Unable to find user. User id: " + id
+          message: 'Unable to find user. User id: ' + id
         });
       }
     });
-    return res.status(200).json(users);
+    return res.status(200).json(user);
   });
 }
 function loginUser(req, res) {
   var role = req.swagger.params.role.value;
-  var username = req.body.username;
+  var email = req.body.email;
   var password = req.body.password;
 
-  if (role !== "user" && role !== "admin") {
+  if (role !== 'user' && role !== 'admin') {
     return res.status(400).json({
-      message: "Error: Role must be either admin or user"
+      message: 'Error: Role must be either admin or user'
     });
   }
-  User.authenticate(username, password, function(error, user) {
+  User.authenticate(email, password, function(error, user) {
     if (error || !user) {
       return res.status(401).json({
-        message: "Wrong email or password."
+        message: 'Wrong email or password.'
       });
     } else {
       req.session.userId = user._id;
-      var tokenString = auth.issueToken(username, role);
+      var tokenString = auth.issueToken(email, role);
       user.authToken = tokenString;
       user.save(function(err, user) {
         if (err) {
           return res.status(500).json({
-            message: "Error saving user " + err
+            message: 'Error saving user ' + err
           });
         }
         if (!user) {
           return res.status(404).json({
-            message: "Unable to find user. User id: " + user._id
+            message: 'Unable to find user. User id: ' + user._id
           });
         }
       });
-      return res.status(200).json({
-        token: tokenString,
-        message: "Token successfully generated"
-      });
+      return res.status(200).json(user);
     }
   });
 }
 function logoutUser(req, res) {
-  var username = req.body.username;
+  var email = req.body.email;
   var password = req.body.password;
-  User.authenticate(username, password, function(error, user) {
+  User.authenticate(email, password, function(error, user) {
     if (error || !user) {
       return res.status(401).json({
-        message: "Wrong email or password."
+        message: 'Wrong email or password.'
       });
     }
     if (req.session) {
@@ -199,26 +197,26 @@ function logoutUser(req, res) {
       req.session.destroy(function(err) {
         if (err) {
           return res.status(500).json({
-            message: "Error removing session " + err
+            message: 'Error removing session ' + err
           });
         }
       });
     }
-    user.authToken = "";
+    user.authToken = '';
     user.save(function(err, user) {
       if (err) {
         return res.status(500).json({
-          message: "Error saving user " + err
+          message: 'Error saving user ' + err
         });
       }
       if (!user) {
         return res.status(404).json({
-          message: "Unable to find user. User id: " + user._id
+          message: 'Unable to find user. User id: ' + user._id
         });
       }
     });
     return res.status(200).json({
-      message: "User successfully logout"
+      message: 'User successfully logout'
     });
   });
 }

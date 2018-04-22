@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-var jwt = require("jsonwebtoken");
-var sharedSecret = "shh";
-var issuer = "cboard.io";
+var jwt = require('jsonwebtoken');
+var sharedSecret = 'shh';
+var issuer = 'cboard.io';
 
 //Here we setup the security checks for the endpoints
 //that need it (in our case, only /protected). This
@@ -10,16 +10,16 @@ var issuer = "cboard.io";
 //endpoint is received
 exports.verifyToken = function(req, authOrSecDef, token, callback) {
   //these are the scopes/roles defined for the current endpoint
-  var currentScopes = req.swagger.operation["x-security-scopes"];
+  var currentScopes = req.swagger.operation['x-security-scopes'];
 
   function sendError() {
-    return req.res.status(403).json({ message: "Error: Access Denied" });
+    return req.res.status(403).json({ message: 'Error: Access Denied' });
   }
 
   //validate the 'Authorization' header. it should have the following format:
   //'Bearer tokenString'
-  if (token && token.indexOf("Bearer ") == 0) {
-    var tokenString = token.split(" ")[1];
+  if (token && token.indexOf('Bearer ') == 0) {
+    var tokenString = token.split(' ')[1];
 
     jwt.verify(tokenString, sharedSecret, function(
       verificationError,
@@ -62,10 +62,10 @@ exports.verifyToken = function(req, authOrSecDef, token, callback) {
   }
 };
 
-exports.issueToken = function(username, role) {
+exports.issueToken = function(email, role) {
   var token = jwt.sign(
     {
-      sub: username,
+      sub: email,
       iss: issuer,
       role: role
     },

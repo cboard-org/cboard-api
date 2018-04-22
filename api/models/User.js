@@ -1,16 +1,16 @@
-"use strict";
+'use strict';
 
-var mongoose = require("mongoose");
-var bcrypt = require("bcryptjs");
-var constants = require("../constants");
+var mongoose = require('mongoose');
+var bcrypt = require('bcryptjs');
+var constants = require('../constants');
 var Schema = mongoose.Schema;
 
-const oAuthTypes = ["github", "twitter", "facebook", "google", "linkedin"];
+const oAuthTypes = ['github', 'twitter', 'facebook', 'google', 'linkedin'];
 
 const userSchema = new Schema({
   name: {
     type: String,
-    default: ""
+    default: ''
   },
   email: {
     type: String,
@@ -18,20 +18,13 @@ const userSchema = new Schema({
     required: true,
     trim: true
   },
-  username: {
-    type: String,
-    unique: true,
-    required: true,
-    trim: true,
-    default: ""
-  },
   birthdate: {
     type: Date,
-    default: ""
+    default: Date.now
   },
   provider: {
     type: String,
-    default: ""
+    default: ''
   },
   locale: {
     type: String,
@@ -40,11 +33,11 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true,
-    default: ""
+    default: ''
   },
   authToken: {
     type: String,
-    default: ""
+    default: ''
   },
   lastlogin: {
     type: Date,
@@ -72,47 +65,42 @@ const validatePresenceOf = value => value && value.length;
 
 // the below 5 validations only apply if you are signing up traditionally
 
-userSchema.path("name").validate(function(name) {
+userSchema.path('name').validate(function(name) {
   if (this.skipValidation()) return true;
   return name.length;
-}, "Name cannot be blank");
+}, 'Name cannot be blank');
 
-userSchema.path("email").validate(function(email) {
+userSchema.path('email').validate(function(email) {
   if (this.skipValidation()) return true;
   return email.length;
-}, "Email cannot be blank");
+}, 'Email cannot be blank');
 
-userSchema.path("email").validate(function(email, fn) {
-  const User = mongoose.model("User");
+userSchema.path('email').validate(function(email, fn) {
+  const User = mongoose.model('User');
   if (this.skipValidation()) fn(true);
 
   // Check only when it is a new user or when email field is modified
-  if (this.isNew || this.isModified("email")) {
+  if (this.isNew || this.isModified('email')) {
     User.find({ email: email }).exec(function(err, users) {
       fn(!err && users.length === 0);
     });
   } else fn(true);
-}, "Email already exists");
+}, 'Email already exists');
 
-userSchema.path("username").validate(function(username) {
-  if (this.skipValidation()) return true;
-  return username.length;
-}, "Username cannot be blank");
-
-userSchema.path("password").validate(function(password) {
+userSchema.path('password').validate(function(password) {
   if (this.skipValidation()) return true;
   return password.length;
-}, "Password cannot be blank");
+}, 'Password cannot be blank');
 
 /**
  * Pre-save hook
  */
 
-userSchema.pre("save", function(next) {
+userSchema.pre('save', function(next) {
   if (!this.isNew) return next();
 
   if (!validatePresenceOf(this.password) && !this.skipValidation()) {
-    next(new Error("Invalid password"));
+    next(new Error('Invalid password'));
   } else {
     next();
   }
@@ -146,7 +134,7 @@ userSchema.statics = {
    */
 
   load: function(options, cb) {
-    options.select = options.select || "name username";
+    options.select = options.select || 'name email';
     return this.findOne(options.criteria)
       .select(options.select)
       .exec(cb);
@@ -155,18 +143,18 @@ userSchema.statics = {
   /**
    * Authenticate input against database
    *
-   * @param {String} username
+   * @param {String} email
    * @param {String} password
    * @param {Function} callback
    * @api private
    */
 
-  authenticate: function(username, password, callback) {
-    this.findOne({ username: username }).exec(function(err, user) {
+  authenticate: function(email, password, callback) {
+    this.findOne({ email: email }).exec(function(err, user) {
       if (err) {
         return callback(err);
       } else if (!user) {
-        var err = new Error("User not found.");
+        var err = new Error('User not found.');
         err.status = 401;
         return callback(err);
       }
@@ -181,6 +169,6 @@ userSchema.statics = {
   }
 };
 
-var User = mongoose.model("User", userSchema);
+var User = mongoose.model('User', userSchema);
 
 module.exports = User;
