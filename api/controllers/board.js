@@ -12,7 +12,7 @@ function createBoard(req, res) {
   var board = new Board(req.body);
   board.save(function(err, board) {
     if (err) {
-      return res.status(500).json({
+      return res.status(409).json({
         message: 'Error saving board',
         error: err
       });

@@ -14,7 +14,7 @@ const boardSchema = new Schema({
   },
   user: {
     type: String,
-    unique: true,
+    unique: false,
     required: true,
     trim: true
   },
