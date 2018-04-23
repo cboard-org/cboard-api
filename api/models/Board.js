@@ -87,7 +87,7 @@ boardSchema.methods = {
    */
 
   skipValidation: function() {
-    return ~oAuthTypes.indexOf(this.provider);
+    return null;
   }
 };
 
@@ -109,34 +109,6 @@ boardSchema.statics = {
     return this.findOne(options.criteria)
       .select(options.select)
       .exec(cb);
-  },
-
-  /**
-   * Authenticate input against database
-   *
-   * @param {String} username
-   * @param {String} password
-   * @param {Function} callback
-   * @api private
-   */
-
-  authenticate: function(username, password, callback) {
-    this.findOne({ username: username }).exec(function(err, user) {
-      if (err) {
-        return callback(err);
-      } else if (!user) {
-        var err = new Error('User not found.');
-        err.status = 401;
-        return callback(err);
-      }
-      bcrypt.compare(password, user.password, function(err, result) {
-        if (result === true) {
-          return callback(null, user);
-        } else {
-          return callback();
-        }
-      });
-    });
   }
 };
 
