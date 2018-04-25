@@ -12,7 +12,7 @@ const boardSchema = new Schema({
     required: true,
     trim: true
   },
-  user: {
+  email: {
     type: String,
     unique: false,
     required: true,
@@ -47,10 +47,10 @@ boardSchema.path('name').validate(function(name) {
   return name.length;
 }, 'Name cannot be blank');
 
-boardSchema.path('user').validate(function(user) {
+boardSchema.path('email').validate(function(email) {
   if (this.skipValidation()) return true;
-  return user.length;
-}, 'User cannot be blank');
+  return email.length;
+}, 'User email cannot be blank');
 
 boardSchema.path('content').validate(function(content) {
   if (this.skipValidation()) return true;
@@ -67,6 +67,17 @@ boardSchema.path('name').validate(function(name, fn) {
     });
   } else fn(true);
 }, 'Board name already exists');
+
+boardSchema.path('email').validate(function(email, fn) {
+  const User = mongoose.model('User');
+  if (this.skipValidation()) fn(true);
+  // Check only when it is a new user or when email field is modified
+  if (this.isNew || this.isModified('email')) {
+    User.find({ email: email }).exec(function(err, users) {
+      fn(!err && users.length > 0);
+    });
+  } else fn(true);
+}, 'User Email does not exist in database');
 
 /**
  * Pre-save hook
@@ -105,7 +116,7 @@ boardSchema.statics = {
    */
 
   load: function(options, cb) {
-    options.select = options.select || 'name user';
+    options.select = options.select || 'name email';
     return this.findOne(options.criteria)
       .select(options.select)
       .exec(cb);

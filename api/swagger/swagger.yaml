@@ -379,12 +379,12 @@ definitions:
       type: object
       required:
       - name
-      - user
+      - email
       - content
       properties:
         name:
           type: string
-        user:
+        email:
           type: string
         content:
           type: string
@@ -484,12 +484,15 @@ definitions:
   GetBoardResponse:
     required:
         - name
-        - user
+        - email
+        - boardid
         - content
     properties:
         name:
           type: string
-        user:
+        email:
+          type: string
+        boardid:
           type: string
         content:
           type: string
@@ -499,6 +502,9 @@ definitions:
       success:
         type: number
         description: returns 1 if successful
+      boardid:
+        type: string
+        description: self-generated id for the board
       content:
         type: string
         description: generated board contents
@@ -507,6 +513,7 @@ definitions:
         description: a short comment
     required:
       - success
+      - boardid
       - content
       - message
   GetBoardListResponse:
@@ -518,7 +525,7 @@ definitions:
         properties:
             name:
               type: string
-            user:
+            email:
               type: string
             content:
               type: string
