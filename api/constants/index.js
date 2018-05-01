@@ -1,6 +1,6 @@
-
-
 const DEFAULT_LANG = 'en-US';
+const DEFAULT_CELL_SIZE = 'medium';
+const DEFAULT_FORMAT = 'obf';
 const APP_LANGS = [
   'ar-SA',
   'bn-BD',
@@ -44,7 +44,8 @@ const APP_LANGS = [
  * Expose
  */
 
-module.exports = { 
-    DEFAULT_LANG: DEFAULT_LANG,
-    APP_LANGS: APP_LANGS
- };
+module.exports = {
+  DEFAULT_LANG: DEFAULT_LANG,
+  DEFAULT_CELL_SIZE: DEFAULT_CELL_SIZE,
+  APP_LANGS: APP_LANGS
+};

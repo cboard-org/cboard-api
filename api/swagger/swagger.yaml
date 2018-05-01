@@ -40,7 +40,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/User" 
-
+  Board:
+    name: board
+    in: body
+    description: Board data for creating a new custom board 
+    required: true
+    schema:
+      $ref: "#/definitions/Board" 
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -230,6 +236,149 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+
+  /board:
+    x-swagger-router-controller: board
+    post:
+      operationId: createBoard
+      description: Create a new board in database and send an email to notify the user.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Board'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/BoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: listBoard
+      description: Returns the full boards list.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board/{id}:
+    x-swagger-router-controller: board
+    get:
+      operationId: getBoard
+      description: Returns a specific board
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      operationId: updateBoard
+      description: Updates a specific board
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          description: Board Id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+        - name: info
+          description: Board properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Board"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      operationId: removeBoard
+      description: Deletes a specific board
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: id
+          description: Board id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board/byemail/{email}:
+    x-swagger-router-controller: board
+    get:
+      operationId: getBoardsEmail
+      description: Returns boards for a specific user email
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: email
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            
 # complex objects have schema definitions
 definitions:
   User:
@@ -248,6 +397,24 @@ definitions:
         birthdate:
             type: string
             format: date-time
+        locale:
+          type: string
+          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+  Board:
+      type: object
+      required:
+      - name
+      - email
+      - content
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        content:
+          type: object
+        format:
+          type: string
         locale:
           type: string
           enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
@@ -298,7 +465,7 @@ definitions:
         type: string
         description: generated verifying url
       message:
-        type: string
+        type: string 
         description: a short comment
     required:
       - success
@@ -341,3 +508,51 @@ definitions:
       properties:
         message:
             type: string
+  GetBoardResponse:
+    required:
+        - name
+        - email
+        - boardid
+        - content
+    properties:
+        name:
+          type: string
+        email:
+          type: string
+        boardid:
+          type: string
+        content:
+          type: object
+  BoardResponse:
+    type: object
+    properties:
+      success:
+        type: number
+        description: returns 1 if successful
+      boardid:
+        type: string
+        description: self-generated id for the board
+      content:
+        type: object
+        description: generated board contents
+      message:
+        type: string 
+        description: a short comment
+    required:
+      - success
+      - boardid
+      - content
+      - message
+  GetBoardListResponse:
+    required:
+      - keywords
+    properties:
+      keywords:
+        type: object
+        properties:
+            name:
+              type: string
+            email:
+              type: string
+            content:
+              type: object

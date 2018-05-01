@@ -75,7 +75,8 @@ function activateUser(req, res) {
       });
     } else {
       return res.status(404).json({
-        message: 'ERROR: confirming temp user FAILED ' + err
+        message: 'ERROR: confirming temp user FAILED ',
+        error: err
       });
     }
   });
@@ -84,7 +85,8 @@ function listUser(req, res) {
   User.find(function(err, Users) {
     if (err) {
       return res.status(500).json({
-        message: 'Error getting user list. ' + err
+        message: 'Error getting user list. ',
+        error: err
       });
     }
     return res.status(200).json(Users);
@@ -106,7 +108,8 @@ function getUser(req, res) {
   User.findOne({ _id: id }, function(err, users) {
     if (err) {
       return res.status(500).json({
-        message: 'Error getting user. ' + err
+        message: 'Error getting user. ',
+        error: err
       });
     }
     if (!users) {
@@ -122,7 +125,8 @@ function updateUser(req, res) {
   User.findOne({ _id: id }, function(err, user) {
     if (err) {
       return res.status(500).json({
-        message: 'Error updating user. ' + err
+        message: 'Error updating user. ',
+        error: err
       });
     }
     if (!user) {
@@ -136,7 +140,8 @@ function updateUser(req, res) {
     user.save(function(err, user) {
       if (err) {
         return res.status(500).json({
-          message: 'Error saving user ' + err
+          message: 'Error saving user. ',
+          error: err
         });
       }
       if (!user) {
@@ -170,7 +175,8 @@ function loginUser(req, res) {
       user.save(function(err, user) {
         if (err) {
           return res.status(500).json({
-            message: 'Error saving user ' + err
+            message: 'Error saving user ',
+            error: err
           });
         }
         if (!user) {
@@ -197,7 +203,8 @@ function logoutUser(req, res) {
       req.session.destroy(function(err) {
         if (err) {
           return res.status(500).json({
-            message: 'Error removing session ' + err
+            message: 'Error removing session .',
+            error: err
           });
         }
       });
@@ -206,7 +213,8 @@ function logoutUser(req, res) {
     user.save(function(err, user) {
       if (err) {
         return res.status(500).json({
-          message: 'Error saving user ' + err
+          message: 'Error saving user. ',
+          error: err
         });
       }
       if (!user) {
