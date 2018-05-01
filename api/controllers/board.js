@@ -5,7 +5,8 @@ module.exports = {
   listBoard: listBoard,
   removeBoard: removeBoard,
   getBoard: getBoard,
-  updateBoard: updateBoard
+  updateBoard: updateBoard,
+  getBoardsEmail: getBoardsEmail
 };
 
 function createBoard(req, res) {
@@ -27,6 +28,18 @@ function createBoard(req, res) {
 }
 function listBoard(req, res) {
   Board.find(function(err, boards) {
+    if (err) {
+      return res.status(500).json({
+        message: 'Error getting boards list.',
+        error: err
+      });
+    }
+    return res.status(200).json(boards);
+  });
+}
+function getBoardsEmail(req, res) {
+  var email = req.swagger.params.email.value;
+  Board.find({ email: email }, function(err, boards) {
     if (err) {
       return res.status(500).json({
         message: 'Error getting boards list.',

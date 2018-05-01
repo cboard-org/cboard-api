@@ -260,7 +260,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
     get:
       operationId: listBoard
-      description: Returns the full boards list for the current user.
+      description: Returns the full boards list.
       security:
         - Bearer: []
       x-security-scopes:
@@ -353,7 +353,32 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
+  /board/byemail/{email}:
+    x-swagger-router-controller: board
+    get:
+      operationId: getBoardsEmail
+      description: Returns boards for a specific user email
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: email
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+            
 # complex objects have schema definitions
 definitions:
   User:
@@ -388,6 +413,8 @@ definitions:
           type: string
         content:
           type: object
+        format:
+          type: string
         locale:
           type: string
           enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']

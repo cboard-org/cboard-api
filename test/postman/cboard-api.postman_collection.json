@@ -324,7 +324,7 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"id\": \"simple\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"id\": \"simple\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
         },
         "url": {
           "raw": "{{url}}/board/",
@@ -463,6 +463,48 @@
           "raw": "{{url}}/board/{{boardid}}",
           "host": ["{{url}}"],
           "path": ["board", "{{boardid}}"]
+        },
+        "description": null
+      },
+      "response": []
+    },
+    {
+      "name": "/board/byemail/{email}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "e3034a60-7774-4342-822f-7c4611c6694e",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/byemail/{{email}}",
+          "host": ["{{url}}"],
+          "path": ["board", "byemail", "{{email}}"]
         },
         "description": null
       },
