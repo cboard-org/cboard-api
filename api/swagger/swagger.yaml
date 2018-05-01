@@ -387,7 +387,7 @@ definitions:
         email:
           type: string
         content:
-          type: string
+          type: object
         locale:
           type: string
           enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
@@ -495,7 +495,7 @@ definitions:
         boardid:
           type: string
         content:
-          type: string
+          type: object
   BoardResponse:
     type: object
     properties:
@@ -506,7 +506,7 @@ definitions:
         type: string
         description: self-generated id for the board
       content:
-        type: string
+        type: object
         description: generated board contents
       message:
         type: string 
@@ -528,4 +528,4 @@ definitions:
             email:
               type: string
             content:
-              type: string
+              type: object

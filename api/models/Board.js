@@ -19,7 +19,7 @@ const boardSchema = new Schema({
     trim: true
   },
   content: {
-    type: String,
+    type: Object,
     unique: false,
     required: true
   },
@@ -31,6 +31,10 @@ const boardSchema = new Schema({
   locale: {
     type: String,
     default: constants.DEFAULT_LANG
+  },
+  format: {
+    type: String,
+    default: constants.DEFAULT_FORMAT
   }
 });
 
@@ -54,7 +58,7 @@ boardSchema.path('email').validate(function(email) {
 
 boardSchema.path('content').validate(function(content) {
   if (this.skipValidation()) return true;
-  return content.length;
+  return Object.keys(content).length;
 }, 'Content cannot be blank');
 
 boardSchema.path('name').validate(function(name, fn) {
