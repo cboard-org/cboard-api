@@ -279,6 +279,279 @@
       "response": []
     },
     {
+      "name": "/board/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Body matches string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"Board saved successfully\");",
+              "});",
+              "pm.globals.set(\"boardid\",pm.response.json().boardid);",
+              "console.log(pm.globals.get(\"boardid\"));"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "7fea3c84-699b-42c4-86a8-b014fba76009",
+            "type": "text/javascript",
+            "exec": [
+              "board_key = Math.random().toString(36).substring(7);",
+              "pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
+              "",
+              "pm.environment.unset(\"variable_key\");"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"id\": \"simple\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/",
+          "host": ["{{url}}"],
+          "path": ["board", ""]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/board/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "de06fe90-74c9-44d6-8c11-ddc1f08c60d5",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "05073d7b-085d-4be3-8aee-321e6e5551ae",
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"content\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/",
+          "host": ["{{url}}"],
+          "path": ["board", ""]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/board/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "86020fc2-9539-4ef1-9f64-b571b5b1a0be",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/{{boardid}}",
+          "host": ["{{url}}"],
+          "path": ["board", "{{boardid}}"]
+        },
+        "description": null
+      },
+      "response": []
+    },
+    {
+      "name": "/board/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "e3034a60-7774-4342-822f-7c4611c6694e",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/{{boardid}}",
+          "host": ["{{url}}"],
+          "path": ["board", "{{boardid}}"]
+        },
+        "description": null
+      },
+      "response": []
+    },
+    {
+      "name": "/board/byemail/{email}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "e3034a60-7774-4342-822f-7c4611c6694e",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/byemail/{{email}}",
+          "host": ["{{url}}"],
+          "path": ["board", "byemail", "{{email}}"]
+        },
+        "description": null
+      },
+      "response": []
+    },
+    {
+      "name": "/board/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "513da3fe-5b11-4bc0-8cba-9fd073c883f3",
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/board/{{boardid}}",
+          "host": ["{{url}}"],
+          "path": ["board", "{{boardid}}"]
+        },
+        "description": null
+      },
+      "response": []
+    },
+    {
       "name": "/user/logout",
       "event": [
         {

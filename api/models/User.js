@@ -63,7 +63,7 @@ const validatePresenceOf = value => value && value.length;
  * Validations
  */
 
-// the below 5 validations only apply if you are signing up traditionally
+// the below validations only apply if you are signing up traditionally
 
 userSchema.path('name').validate(function(name) {
   if (this.skipValidation()) return true;
@@ -78,7 +78,6 @@ userSchema.path('email').validate(function(email) {
 userSchema.path('email').validate(function(email, fn) {
   const User = mongoose.model('User');
   if (this.skipValidation()) fn(true);
-
   // Check only when it is a new user or when email field is modified
   if (this.isNew || this.isModified('email')) {
     User.find({ email: email }).exec(function(err, users) {
