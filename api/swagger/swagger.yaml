@@ -5,7 +5,7 @@ info:
   title: CBoard API
   termsOfService: "http://cboard.io"
 # during dev, should point to your local machine
-host: localhost:10010
+# host: localhost:10010
 # basePath prefixes all resource paths 
 basePath: /
 # 

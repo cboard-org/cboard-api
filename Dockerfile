@@ -8,4 +8,4 @@ RUN npm install --silent
 RUN npm install -g swagger
 
 EXPOSE 80 10010
-CMD [ "swagger", "project", "start"]
+CMD [ "npm", "start"]
