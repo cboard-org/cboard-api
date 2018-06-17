@@ -38,7 +38,6 @@ module.exports = function(locale) {
         (text =
           'Thanks for signup to Cboard!. Please confirm your account by clicking the following link: ${URL}');
   }
-
   nev.configure(
     {
       verificationURL: 'https://app.cboard.io/activate/${URL}',
