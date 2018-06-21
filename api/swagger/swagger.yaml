@@ -47,6 +47,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/Board" 
+  Translate:
+    name: translate
+    in: body
+    description: Translate data 
+    required: true
+    schema:
+      $ref: "#/definitions/Translate" 
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -236,6 +243,22 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /translate:
+    x-swagger-router-controller: translate
+    post:
+      operationId: translate
+      description: Translates an array of labels.
+      parameters:
+        - $ref: '#/parameters/Translate'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/TranslateResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /board:
     x-swagger-router-controller: board
@@ -400,6 +423,21 @@ definitions:
         locale:
           type: string
           enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+  Translate:
+      type: object
+      required:
+      - labels
+      - from
+      - to
+      properties:
+        labels:
+          type: array
+          items:
+            type: string
+        from:
+          type: string
+        to:
+          type: string
   Board:
       type: object
       required:
@@ -543,6 +581,8 @@ definitions:
       - boardid
       - content
       - message
+  TranslateResponse:
+    type: object
   GetBoardListResponse:
     required:
       - keywords
