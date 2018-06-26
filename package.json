@@ -5,7 +5,9 @@
   "description": "New Swagger API Project",
   "keywords": [],
   "author": "Martin Bedouret",
-  "contributors": ["Martin Bedouret <martinbedouret@gmail.com>"],
+  "contributors": [
+    "Martin Bedouret <martinbedouret@gmail.com>"
+  ],
   "license": "",
   "main": "app.js",
   "dependencies": {
@@ -20,13 +22,14 @@
     "rand-token": "^0.4.0",
     "sendgrid": "^4.7.1",
     "should": "^7.1.0",
-    "supertest": "^1.0.0",
+    "supertest": "^2.0.0",
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "^0.10.1",
     "validator": "^7.0.0",
     "yamljs": "^0.2.9",
     "dotenv": "^5.0.1",
-    "ms": "^2.1.1"
+    "ms": "^2.1.1",
+    "snyk": "^1.85.0"
   },
   "devDependencies": {
     "husky": "^0.14.3",
@@ -38,12 +41,18 @@
     "dev": "nodemon app.js",
     "start": "node app.js",
     "test": "swagger project test",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "lint-staged": {
-    "*.{js,json,css}": ["prettier --write", "git add"]
+    "*.{js,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "engines": {
     "node": ">=6.0"
-  }
+  },
+  "snyk": true
 }
