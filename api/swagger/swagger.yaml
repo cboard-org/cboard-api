@@ -249,7 +249,27 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /me:
+    x-swagger-router-controller: user
+    get:
+      operationId: getMe
+      description: Returns logged user data
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
+            
   /translate:
     x-swagger-router-controller: translate
     post:

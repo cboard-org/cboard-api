@@ -301,7 +301,7 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"id\": \"simple\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"author\": \"Tincho\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
         },
         "url": {
           "raw": "{{url}}/board/",
@@ -632,7 +632,7 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n\t\"name\": \"{{communicator_name}}\",\n\t\"email\": \"{{email}}\",\n\t\"author\": \"Author of {{communicator_name}}\",\n\t\"description\": \"Some description\",\n\t\"boards\": [\n\t\t\"board-test-1\",\n\t\t\"board-test-2\"\n\t],\n\t\"rootBoard\": \"board-test-2\"\n}"
+            "{\n\t\"name\": \"{{communicator_name}}\",\n\t\"email\": \"{{email}}\",\n\t\"author\": \"Author of {{communicator_name}}\",\n\t\"description\": \"Some description\",\n\t\"boards\": [\n\t\t\"5b3d14beef8bbc78feb7f3c0\",\n\t\t\"eeeee\"\n\t],\n\t\"rootBoard\": \"eeeee\"\n}"
         },
         "url": {
           "raw": "{{url}}/communicator/",
@@ -796,7 +796,7 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n    \"name\": \"communicator-test-update\",\n    \"boards\": [\n\t\t\"board-test-2\"\n\t]\n}"
+            "{\n    \"name\": \"communicator-test-update\",\n    \"rootBoard\": \"eeeee\"\n}"
         },
         "url": {
           "raw": "{{url}}/communicator/{{communicatorid}}",
@@ -842,6 +842,47 @@
           "raw": "{{url}}/communicator/{{communicatorid}}",
           "host": ["{{url}}"],
           "path": ["communicator", "{{communicatorid}}"]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/me/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"content\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/me/",
+          "host": ["{{url}}"],
+          "path": ["me", ""]
         },
         "description": ""
       },

@@ -11,7 +11,8 @@ module.exports = {
   getUser: getUser,
   updateUser: updateUser,
   loginUser: loginUser,
-  logoutUser: logoutUser
+  logoutUser: logoutUser,
+  getMe: getMe
 };
 
 function createUser(req, res) {
@@ -57,6 +58,7 @@ function createUser(req, res) {
     }
   });
 }
+
 function activateUser(req, res) {
   var url = req.swagger.params.url.value;
   nev.confirmTempUser(url, function(err, user) {
@@ -81,6 +83,7 @@ function activateUser(req, res) {
     }
   });
 }
+
 function listUser(req, res) {
   User.find()
     .populate('communicators')
@@ -128,6 +131,7 @@ function getUser(req, res) {
       return res.status(200).json(users);
     });
 }
+
 function updateUser(req, res) {
   var id = req.swagger.params.id.value;
   User.findById(id)
@@ -164,6 +168,7 @@ function updateUser(req, res) {
       return res.status(200).json(user);
     });
 }
+
 function loginUser(req, res) {
   var role = req.swagger.params.role.value;
   var email = req.body.email;
@@ -200,6 +205,7 @@ function loginUser(req, res) {
     }
   });
 }
+
 function logoutUser(req, res) {
   var email = req.body.email;
   var password = req.body.password;
@@ -238,4 +244,30 @@ function logoutUser(req, res) {
       message: 'User successfully logout'
     });
   });
+}
+
+function getMe(req, res) {
+  const authorizationHeader = req.headers.authorization || null;
+  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+    return res.status(400).json({
+      message: 'Need to provide a Bearer Authorization token'
+    });
+  }
+
+  const token = authorizationHeader.split(' ')[1];
+  const tokenData = auth.getTokenData(token);
+
+  User.findOne({ email: tokenData.sub })
+    .populate('communicators')
+    .populate('boards')
+    .exec(function(err, user) {
+      if (err || !user) {
+        return res.status(500).json({
+          message: 'Error getting user.',
+          error: err
+        });
+      }
+
+      return res.status(200).json(user);
+    });
 }

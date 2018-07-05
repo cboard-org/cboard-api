@@ -1,13 +1,20 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var bcrypt = require('bcryptjs');
-var constants = require('../constants');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const constants = require('../constants');
+const Schema = mongoose.Schema;
+
 const BOARD_SCHEMA_DEFINITION = {
   name: {
     type: String,
     unique: true,
+    required: true,
+    trim: true
+  },
+  author: {
+    type: String,
+    unique: false,
     required: true,
     trim: true
   },
@@ -16,6 +23,10 @@ const BOARD_SCHEMA_DEFINITION = {
     unique: false,
     required: true,
     trim: true
+  },
+  isPublic: {
+    type: Boolean,
+    default: false
   },
   content: {
     type: Object,
@@ -142,6 +153,6 @@ boardSchema.statics = {
   }
 };
 
-var Board = mongoose.model('Board', boardSchema);
+const Board = mongoose.model('Board', boardSchema);
 
 module.exports = Board;
