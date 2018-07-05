@@ -91,7 +91,6 @@ function updateCommunicator(req, res) {
     }
 
     if (!communicator) {
-      console.log(id, communicator);
       return res.status(404).json({
         message: `Unable to find communicator. Communicator ID: ${id}`
       });
