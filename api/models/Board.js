@@ -4,8 +4,7 @@ var mongoose = require('mongoose');
 var bcrypt = require('bcryptjs');
 var constants = require('../constants');
 var Schema = mongoose.Schema;
-
-const boardSchema = new Schema({
+const BOARD_SCHEMA_DEFINITION = {
   name: {
     type: String,
     unique: true,
@@ -36,7 +35,23 @@ const boardSchema = new Schema({
     type: String,
     default: constants.DEFAULT_FORMAT
   }
-});
+};
+
+const BOARD_SCHEMA_OPTIONS = {
+  toObject: {
+    virtuals: true
+  },
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    transform: function(doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+    }
+  }
+};
+
+const boardSchema = new Schema(BOARD_SCHEMA_DEFINITION, BOARD_SCHEMA_OPTIONS);
 
 const validatePresenceOf = value => value && value.length;
 

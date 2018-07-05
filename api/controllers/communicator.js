@@ -1,4 +1,4 @@
-var Communicator = require('../models/Communicator');
+const Communicator = require('../models/Communicator');
 
 module.exports = {
   createCommunicator: createCommunicator,
@@ -10,7 +10,7 @@ module.exports = {
 };
 
 function createCommunicator(req, res) {
-  var communicator = new Communicator(req.body);
+  const communicator = new Communicator(req.body);
   communicator.save(function(err, communicator) {
     if (err) {
       return res.status(409).json({
@@ -48,7 +48,7 @@ function listCommunicators(req, res) {
 }
 
 function getCommunicatorsEmail(req, res) {
-  var email = req.swagger.params.email.value;
+  const email = req.swagger.params.email.value;
   Communicator.find({ email: email }, function(err, communicators) {
     if (err) {
       return res.status(500).json({
@@ -61,7 +61,7 @@ function getCommunicatorsEmail(req, res) {
 }
 
 function getCommunicator(req, res) {
-  var id = req.swagger.params.id.value;
+  const id = req.swagger.params.id.value;
   Communicator.findById(id, function(err, communicator) {
     if (err) {
       return res.status(500).json({

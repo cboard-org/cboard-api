@@ -82,16 +82,20 @@ function activateUser(req, res) {
   });
 }
 function listUser(req, res) {
-  User.find(function(err, Users) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting user list. ',
-        error: err
-      });
-    }
-    return res.status(200).json(Users);
-  });
+  User.find()
+    .populate('communicators')
+    .populate('boards')
+    .exec(function(err, Users) {
+      if (err) {
+        return res.status(500).json({
+          message: 'Error getting user list. ',
+          error: err
+        });
+      }
+      return res.status(200).json(Users);
+    });
 }
+
 function removeUser(req, res) {
   var id = req.swagger.params.id.value;
   User.findByIdAndRemove(id, function(err, users) {
@@ -103,55 +107,62 @@ function removeUser(req, res) {
     return res.status(200).json(users);
   });
 }
+
 function getUser(req, res) {
   var id = req.swagger.params.id.value;
-  User.findOne({ _id: id }, function(err, users) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting user. ',
-        error: err
-      });
-    }
-    if (!users) {
-      return res.status(404).json({
-        message: 'User does not exist. User Id: ' + id
-      });
-    }
-    return res.status(200).json(users);
-  });
+  User.findById(id)
+    .populate('communicators')
+    .populate('boards')
+    .exec(function(err, users) {
+      if (err) {
+        return res.status(500).json({
+          message: 'Error getting user. ',
+          error: err
+        });
+      }
+      if (!users) {
+        return res.status(404).json({
+          message: 'User does not exist. User Id: ' + id
+        });
+      }
+      return res.status(200).json(users);
+    });
 }
 function updateUser(req, res) {
   var id = req.swagger.params.id.value;
-  User.findOne({ _id: id }, function(err, user) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error updating user. ',
-        error: err
-      });
-    }
-    if (!user) {
-      return res.status(404).json({
-        message: 'Unable to find user. User Id: ' + id
-      });
-    }
-    for (var key in req.body) {
-      user[key] = req.body[key];
-    }
-    user.save(function(err, user) {
+  User.findById(id)
+    .populate('communicators')
+    .populate('boards')
+    .exec(function(err, user) {
       if (err) {
         return res.status(500).json({
-          message: 'Error saving user. ',
+          message: 'Error updating user. ',
           error: err
         });
       }
       if (!user) {
         return res.status(404).json({
-          message: 'Unable to find user. User id: ' + id
+          message: 'Unable to find user. User Id: ' + id
         });
       }
+      for (var key in req.body) {
+        user[key] = req.body[key];
+      }
+      user.save(function(err, user) {
+        if (err) {
+          return res.status(500).json({
+            message: 'Error saving user. ',
+            error: err
+          });
+        }
+        if (!user) {
+          return res.status(404).json({
+            message: 'Unable to find user. User id: ' + id
+          });
+        }
+      });
+      return res.status(200).json(user);
     });
-    return res.status(200).json(user);
-  });
 }
 function loginUser(req, res) {
   var role = req.swagger.params.role.value;

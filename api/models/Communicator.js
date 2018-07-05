@@ -1,11 +1,11 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var bcrypt = require('bcryptjs');
-var constants = require('../constants');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const constants = require('../constants');
+const Schema = mongoose.Schema;
 
-const communicatorSchema = new Schema({
+const COMMUNICATOR_SCHEMA_DEFINITION = {
   name: {
     type: String,
     unique: true,
@@ -37,7 +37,26 @@ const communicatorSchema = new Schema({
     trim: true
   },
   boards: [{ type: String }]
-});
+};
+
+const COMMUNICATOR_SCHEMA_OPTIONS = {
+  toObject: {
+    virtuals: true
+  },
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    transform: function(doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+    }
+  }
+};
+
+const communicatorSchema = new Schema(
+  COMMUNICATOR_SCHEMA_DEFINITION,
+  COMMUNICATOR_SCHEMA_OPTIONS
+);
 
 const validatePresenceOf = value => value && value.length;
 
@@ -127,6 +146,6 @@ communicatorSchema.methods = {
  */
 communicatorSchema.statics = {};
 
-var Communicator = mongoose.model('Communicator', communicatorSchema);
+const Communicator = mongoose.model('Communicator', communicatorSchema);
 
 module.exports = Communicator;
