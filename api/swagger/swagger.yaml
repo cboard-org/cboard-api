@@ -576,24 +576,27 @@ paths:
 # complex objects have schema definitions
 definitions:
   User:
-      type: object
-      required:
+    type: object
+    required:
+      - id
       - name
       - email
       - password
-      properties:
-        name:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      birthdate:
           type: string
-        email:
-          type: string
-        password:
-          type: string
-        birthdate:
-            type: string
-            format: date-time
-        locale:
-          type: string
-          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+          format: date-time
+      locale:
+        type: string
+        enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
   Translate:
       type: object
       required:
@@ -610,46 +613,52 @@ definitions:
         to:
           type: string
   Communicator:
-      type: object
-      required:
+    type: object
+    required:
+      - id
       - name
       - email
       - author
       - rootBoard
       - boards
-      properties:
-        name:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      author:
+        type: string
+      description:
+        type: string
+      rootBoard:
+        type: string
+      boards:
+        type: array
+        items:
           type: string
-        email:
-          type: string
-        author:
-          type: string
-        description:
-          type: string
-        rootBoard:
-          type: string
-        boards:
-          type: array
-          items:
-            type: string
   Board:
-      type: object
-      required:
+    type: object
+    required:
+      - id
       - name
       - email
       - content
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-        content:
-          type: object
-        format:
-          type: string
-        locale:
-          type: string
-          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      content:
+        type: object
+      format:
+        type: string
+      locale:
+        type: string
+        enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
   UserLogin:
       type: object
       required:
@@ -711,17 +720,27 @@ definitions:
         type: string
   GetUserListResponse:
     required:
-      - keywords
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
     properties:
-      keywords:
-        type: object
-        properties:
-            name:
-              type: string
-            email:
-              type: string
-            password:
-              type: string
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/User"
   GetUserResponse:
     required:
         - name
@@ -777,51 +796,52 @@ definitions:
       - message
   GetCommunicatorResponse:
     required:
-        - id
-        - name
-        - email
-        - author
-        - rootBoard
-        - boards
+      - id
+      - name
+      - email
+      - author
+      - rootBoard
+      - boards
     properties:
-        id:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      author:
+        type: string
+      description:
+        type: string
+      rootBoard:
+        type: string
+      boards:
+        type: array
+        items:
           type: string
-        name:
-          type: string
-        email:
-          type: string
-        author:
-          type: string
-        description:
-          type: string
-        rootBoard:
-          type: string
-        boards:
-          type: array
-          items:
-            type: string
-  
   GetCommunicatorsListResponse:
     required:
-      - keywords
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
     properties:
-      keywords:
-        type: object
-        properties:
-            name:
-              type: string
-            description:
-              type: string
-            email:
-              type: string
-            author:
-              type: string
-            rootBoard:
-              type: string
-            boards:
-              type: array
-              items:
-                type: string
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Communicator"
   BoardResponse:
     type: object
     properties:
@@ -846,14 +866,24 @@ definitions:
     type: object
   GetBoardListResponse:
     required:
-      - keywords
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
     properties:
-      keywords:
-        type: object
-        properties:
-            name:
-              type: string
-            email:
-              type: string
-            content:
-              type: object
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Board"

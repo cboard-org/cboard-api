@@ -1,7 +1,8 @@
-var User = require('../models/User');
-var mailing = require('../mail');
-var nev = mailing('en');
-var auth = require('../helpers/auth');
+const { paginatedResponse } = require('../helpers/response');
+const User = require('../models/User');
+const mailing = require('../mail');
+const nev = mailing('en');
+const auth = require('../helpers/auth');
 
 module.exports = {
   createUser: createUser,
@@ -16,7 +17,7 @@ module.exports = {
 };
 
 function createUser(req, res) {
-  var user = new User(req.body);
+  const user = new User(req.body);
 
   nev.createTempUser(user, function(err, existingPersistentUser, newTempUser) {
     if (err) {
@@ -33,7 +34,7 @@ function createUser(req, res) {
     }
     // new user created
     if (newTempUser) {
-      var URL = newTempUser[nev.options.URLFieldName];
+      const URL = newTempUser[nev.options.URLFieldName];
       nev.sendVerificationEmail(newTempUser.email, URL, function(err, info) {
         if (err) {
           return res.status(500).json({
@@ -60,7 +61,7 @@ function createUser(req, res) {
 }
 
 function activateUser(req, res) {
-  var url = req.swagger.params.url.value;
+  const url = req.swagger.params.url.value;
   nev.confirmTempUser(url, function(err, user) {
     if (user) {
       nev.sendConfirmationEmail(user.email, function(err, info) {
@@ -84,23 +85,28 @@ function activateUser(req, res) {
   });
 }
 
-function listUser(req, res) {
-  User.find()
-    .populate('communicators')
-    .populate('boards')
-    .exec(function(err, Users) {
-      if (err) {
-        return res.status(500).json({
-          message: 'Error getting user list. ',
-          error: err
-        });
-      }
-      return res.status(200).json(Users);
-    });
+async function listUser(req, res) {
+  const { page, limit, offset, sort } = req.query;
+  const paginationConfig = {
+    page: !isNaN(page) ? parseInt(page, 10) : 1,
+    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
+    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
+    sort: sort && sort.length ? sort : '-_id'
+  };
+
+  const response = await paginatedResponse(
+    User,
+    {
+      populate: ['communicators', 'boards']
+    },
+    paginationConfig
+  );
+
+  return res.status(200).json(response);
 }
 
 function removeUser(req, res) {
-  var id = req.swagger.params.id.value;
+  const id = req.swagger.params.id.value;
   User.findByIdAndRemove(id, function(err, users) {
     if (err) {
       return res.status(404).json({
@@ -112,7 +118,7 @@ function removeUser(req, res) {
 }
 
 function getUser(req, res) {
-  var id = req.swagger.params.id.value;
+  const id = req.swagger.params.id.value;
   User.findById(id)
     .populate('communicators')
     .populate('boards')
@@ -133,7 +139,7 @@ function getUser(req, res) {
 }
 
 function updateUser(req, res) {
-  var id = req.swagger.params.id.value;
+  const id = req.swagger.params.id.value;
   User.findById(id)
     .populate('communicators')
     .populate('boards')
@@ -149,7 +155,7 @@ function updateUser(req, res) {
           message: 'Unable to find user. User Id: ' + id
         });
       }
-      for (var key in req.body) {
+      for (let key in req.body) {
         user[key] = req.body[key];
       }
       user.save(function(err, user) {
@@ -170,9 +176,9 @@ function updateUser(req, res) {
 }
 
 function loginUser(req, res) {
-  var role = req.swagger.params.role.value;
-  var email = req.body.email;
-  var password = req.body.password;
+  const role = req.swagger.params.role.value;
+  const email = req.body.email;
+  const password = req.body.password;
 
   if (role !== 'user' && role !== 'admin') {
     return res.status(400).json({
@@ -186,7 +192,7 @@ function loginUser(req, res) {
       });
     } else {
       req.session.userId = user._id;
-      var tokenString = auth.issueToken(email, role);
+      const tokenString = auth.issueToken(email, role);
       user.authToken = tokenString;
       user.save(function(err, user) {
         if (err) {
@@ -207,8 +213,8 @@ function loginUser(req, res) {
 }
 
 function logoutUser(req, res) {
-  var email = req.body.email;
-  var password = req.body.password;
+  const email = req.body.email;
+  const password = req.body.password;
   User.authenticate(email, password, function(error, user) {
     if (error || !user) {
       return res.status(401).json({

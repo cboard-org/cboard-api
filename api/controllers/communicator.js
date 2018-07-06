@@ -1,3 +1,4 @@
+const { paginatedResponse } = require('../helpers/response');
 const Communicator = require('../models/Communicator');
 
 module.exports = {
@@ -35,29 +36,36 @@ function createCommunicator(req, res) {
   });
 }
 
-function listCommunicators(req, res) {
-  Communicator.find(function(err, communicators) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting communicators list.',
-        error: err
-      });
-    }
-    return res.status(200).json(communicators);
-  });
+async function listCommunicators(req, res) {
+  const { page, limit, offset, sort } = req.query;
+  const paginationConfig = {
+    page: !isNaN(page) ? parseInt(page, 10) : 1,
+    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
+    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
+    sort: sort && sort.length ? sort : '-_id'
+  };
+
+  const response = await paginatedResponse(Communicator, {}, paginationConfig);
+  return res.status(200).json(response);
 }
 
-function getCommunicatorsEmail(req, res) {
+async function getCommunicatorsEmail(req, res) {
   const email = req.swagger.params.email.value;
-  Communicator.find({ email: email }, function(err, communicators) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting communicators list.',
-        error: err
-      });
-    }
-    return res.status(200).json(communicators);
-  });
+
+  const { page, limit, offset, sort } = req.query;
+  const paginationConfig = {
+    page: !isNaN(page) ? parseInt(page, 10) : 1,
+    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
+    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
+    sort: sort && sort.length ? sort : '-_id'
+  };
+
+  const response = await paginatedResponse(
+    Communicator,
+    { query: { email } },
+    paginationConfig
+  );
+  return res.status(200).json(response);
 }
 
 function getCommunicator(req, res) {
