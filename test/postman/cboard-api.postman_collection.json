@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "cboard-api",
-    "_postman_id": "47e58b72-0a7b-48ea-bb8b-4d47f29306ca",
+    "_postman_id": "a1154e65-1b99-1514-0834-0b57a3772474",
     "description": "contains tests for all cboard-api calls",
     "schema":
       "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -13,7 +13,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "af69944d-45fb-402e-9dae-f6e6e8cfb3a2",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Body match+es string\", function () {",
@@ -27,7 +26,6 @@
         {
           "listen": "prerequest",
           "script": {
-            "id": "8df35307-b429-4f47-b14e-8056ed92b096",
             "type": "text/javascript",
             "exec": [
               "email_key = Math.random().toString(36).substring(7);",
@@ -57,8 +55,7 @@
           "raw": "{{url}}/user",
           "host": ["{{url}}"],
           "path": ["user"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -66,17 +63,8 @@
       "name": "/user/activate/{activation_url}",
       "event": [
         {
-          "listen": "prerequest",
-          "script": {
-            "id": "3d4cf118-a5a0-449d-bbae-0beac9ad3db7",
-            "type": "text/javascript",
-            "exec": [""]
-          }
-        },
-        {
           "listen": "test",
           "script": {
-            "id": "7ddf9877-e1f7-45d3-8fd0-47ed6a4f8f8b",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Body matches string\", function () {",
@@ -105,8 +93,7 @@
           "raw": "{{url}}/user/activate/{{activation_url}}",
           "host": ["{{url}}"],
           "path": ["user", "activate", "{{activation_url}}"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -116,7 +103,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "11abaa21-b246-46bc-b4f8-08a21e856580",
             "type": "text/javascript",
             "exec": [
               "",
@@ -148,8 +134,7 @@
           "raw": "{{url}}/user/login/admin",
           "host": ["{{url}}"],
           "path": ["user", "login", "admin"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -159,7 +144,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "8a65cc47-7cab-47c1-9b01-19c5f3577972",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -190,8 +174,7 @@
           "raw": "{{url}}/user/",
           "host": ["{{url}}"],
           "path": ["user", ""]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -201,7 +184,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "e3034a60-7774-4342-822f-7c4611c6694e",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -232,8 +214,7 @@
           "raw": "{{url}}/user/{{userid}}",
           "host": ["{{url}}"],
           "path": ["user", "{{userid}}"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -243,7 +224,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "86020fc2-9539-4ef1-9f64-b571b5b1a0be",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -273,8 +253,7 @@
           "raw": "{{url}}/user/{{userid}}",
           "host": ["{{url}}"],
           "path": ["user", "{{userid}}"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -284,7 +263,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Body matches string\", function () {",
@@ -298,7 +276,6 @@
         {
           "listen": "prerequest",
           "script": {
-            "id": "7fea3c84-699b-42c4-86a8-b014fba76009",
             "type": "text/javascript",
             "exec": [
               "board_key = Math.random().toString(36).substring(7);",
@@ -324,14 +301,13 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"id\": \"simple\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"author\": \"Tincho\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
         },
         "url": {
           "raw": "{{url}}/board/",
           "host": ["{{url}}"],
           "path": ["board", ""]
-        },
-        "description": ""
+        }
       },
       "response": []
     },
@@ -341,21 +317,12 @@
         {
           "listen": "test",
           "script": {
-            "id": "de06fe90-74c9-44d6-8c11-ddc1f08c60d5",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});"
             ]
-          }
-        },
-        {
-          "listen": "prerequest",
-          "script": {
-            "id": "05073d7b-085d-4be3-8aee-321e6e5551ae",
-            "type": "text/javascript",
-            "exec": [""]
           }
         }
       ],
@@ -380,8 +347,7 @@
           "raw": "{{url}}/board/",
           "host": ["{{url}}"],
           "path": ["board", ""]
-        },
-        "description": ""
+        }
       },
       "response": []
     },
@@ -391,7 +357,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "86020fc2-9539-4ef1-9f64-b571b5b1a0be",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -421,8 +386,7 @@
           "raw": "{{url}}/board/{{boardid}}",
           "host": ["{{url}}"],
           "path": ["board", "{{boardid}}"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -432,7 +396,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "e3034a60-7774-4342-822f-7c4611c6694e",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -463,8 +426,7 @@
           "raw": "{{url}}/board/{{boardid}}",
           "host": ["{{url}}"],
           "path": ["board", "{{boardid}}"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -474,7 +436,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "e3034a60-7774-4342-822f-7c4611c6694e",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -505,8 +466,7 @@
           "raw": "{{url}}/board/byemail/{{email}}",
           "host": ["{{url}}"],
           "path": ["board", "byemail", "{{email}}"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -516,7 +476,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "513da3fe-5b11-4bc0-8cba-9fd073c883f3",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -546,8 +505,7 @@
           "raw": "{{url}}/board/{{boardid}}",
           "host": ["{{url}}"],
           "path": ["board", "{{boardid}}"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -557,7 +515,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "b26f5cc7-7e58-4116-96d7-8d5d780539ef",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Body matches string\", function () {",
@@ -588,8 +545,7 @@
           "raw": "{{url}}/user/logout",
           "host": ["{{url}}"],
           "path": ["user", "logout"]
-        },
-        "description": null
+        }
       },
       "response": []
     },
@@ -599,7 +555,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "513da3fe-5b11-4bc0-8cba-9fd073c883f3",
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status code is 200\", function () {",
@@ -629,8 +584,307 @@
           "raw": "{{url}}/user/{{userid}}",
           "host": ["{{url}}"],
           "path": ["user", "{{userid}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Body matches string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"Communicator saved successfully\");",
+              "});",
+              "pm.globals.set(\"communicatorid\",pm.response.json().id);",
+              "console.log(pm.globals.get(\"communicatorid\"));"
+            ]
+          }
         },
-        "description": null
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "board_key = Math.random().toString(36).substring(7);",
+              "pm.globals.set(\"communicator_name\", \"test_communicator_\" + board_key);",
+              "",
+              "pm.environment.unset(\"variable_key\");"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n\t\"name\": \"{{communicator_name}}\",\n\t\"email\": \"{{email}}\",\n\t\"author\": \"Author of {{communicator_name}}\",\n\t\"description\": \"Some description\",\n\t\"boards\": [\n\t\t\"5b3d14beef8bbc78feb7f3c0\",\n\t\t\"eeeee\"\n\t],\n\t\"rootBoard\": \"eeeee\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/communicator/",
+          "host": ["{{url}}"],
+          "path": ["communicator", ""]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"content\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/communicator/",
+          "host": ["{{url}}"],
+          "path": ["communicator", ""]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/byemail/{email}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/communicator/byemail/{{email}}",
+          "host": ["{{url}}"],
+          "path": ["communicator", "byemail", "{{email}}"]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n\t\"title\": \"martin 1prod\",\n\t\"price\": \"500\",\n\t\"instock\": \"true\",\n\t\"photo\": \"null\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/communicator/{{communicatorid}}",
+          "host": ["{{url}}"],
+          "path": ["communicator", "{{communicatorid}}"]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n    \"name\": \"communicator-test-update\",\n    \"rootBoard\": \"eeeee\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/communicator/{{communicatorid}}",
+          "host": ["{{url}}"],
+          "path": ["communicator", "{{communicatorid}}"]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/communicator/{{communicatorid}}",
+          "host": ["{{url}}"],
+          "path": ["communicator", "{{communicatorid}}"]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/me/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw":
+            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"content\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/me/",
+          "host": ["{{url}}"],
+          "path": ["me", ""]
+        },
+        "description": ""
       },
       "response": []
     }

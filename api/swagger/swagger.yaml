@@ -40,6 +40,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/User" 
+  Communicator:
+    name: communicator
+    in: body
+    description: Communicator data for creating a new custom communicator 
+    required: true
+    schema:
+      $ref: "#/definitions/Communicator" 
   Board:
     name: board
     in: body
@@ -242,7 +249,27 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /me:
+    x-swagger-router-controller: user
+    get:
+      operationId: getMe
+      description: Returns logged user data
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
+            
   /translate:
     x-swagger-router-controller: translate
     post:
@@ -259,6 +286,150 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+
+
+  /communicator:
+    x-swagger-router-controller: communicator
+    post:
+      operationId: createCommunicator
+      description: Creates a new communicator in database and send an email to notify the user.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Communicator'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/CommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: listCommunicators
+      description: Returns the full communicators list.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /communicator/{id}:
+    x-swagger-router-controller: communicator
+    get:
+      operationId: getCommunicator
+      description: Returns a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      operationId: updateCommunicator
+      description: Updates a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          description: Communicator Id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+        - name: info
+          description: Communicator properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Communicator"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      operationId: removeCommunicator
+      description: Deletes a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: id
+          description: Communicator id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /communicator/byemail/{email}:
+    x-swagger-router-controller: communicator
+    get:
+      operationId: getCommunicatorsEmail
+      description: Returns communicators for a specific user email
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: email
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
 
   /board:
     x-swagger-router-controller: board
@@ -405,24 +576,27 @@ paths:
 # complex objects have schema definitions
 definitions:
   User:
-      type: object
-      required:
+    type: object
+    required:
+      - id
       - name
       - email
       - password
-      properties:
-        name:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      birthdate:
           type: string
-        email:
-          type: string
-        password:
-          type: string
-        birthdate:
-            type: string
-            format: date-time
-        locale:
-          type: string
-          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+          format: date-time
+      locale:
+        type: string
+        enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
   Translate:
       type: object
       required:
@@ -438,24 +612,53 @@ definitions:
           type: string
         to:
           type: string
+  Communicator:
+    type: object
+    required:
+      - id
+      - name
+      - email
+      - author
+      - rootBoard
+      - boards
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      author:
+        type: string
+      description:
+        type: string
+      rootBoard:
+        type: string
+      boards:
+        type: array
+        items:
+          type: string
   Board:
-      type: object
-      required:
+    type: object
+    required:
+      - id
       - name
       - email
       - content
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-        content:
-          type: object
-        format:
-          type: string
-        locale:
-          type: string
-          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      content:
+        type: object
+      format:
+        type: string
+      locale:
+        type: string
+        enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
   UserLogin:
       type: object
       required:
@@ -517,17 +720,27 @@ definitions:
         type: string
   GetUserListResponse:
     required:
-      - keywords
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
     properties:
-      keywords:
-        type: object
-        properties:
-            name:
-              type: string
-            email:
-              type: string
-            password:
-              type: string
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/User"
   GetUserResponse:
     required:
         - name
@@ -561,6 +774,74 @@ definitions:
           type: string
         content:
           type: object
+  CommunicatorResponse:
+    type: object
+    properties:
+      success:
+        type: number
+        description: returns 1 if successful
+      id:
+        type: string
+        description: self-generated id for the communicator
+      communicator:
+        type: object
+        description: generated communicator data
+      message:
+        type: string
+        description: a short comment
+    required:
+      - success
+      - id
+      - communicator
+      - message
+  GetCommunicatorResponse:
+    required:
+      - id
+      - name
+      - email
+      - author
+      - rootBoard
+      - boards
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      author:
+        type: string
+      description:
+        type: string
+      rootBoard:
+        type: string
+      boards:
+        type: array
+        items:
+          type: string
+  GetCommunicatorsListResponse:
+    required:
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
+    properties:
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Communicator"
   BoardResponse:
     type: object
     properties:
@@ -585,14 +866,24 @@ definitions:
     type: object
   GetBoardListResponse:
     required:
-      - keywords
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
     properties:
-      keywords:
-        type: object
-        properties:
-            name:
-              type: string
-            email:
-              type: string
-            content:
-              type: object
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Board"

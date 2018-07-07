@@ -4,6 +4,16 @@ var jwt = require('jsonwebtoken');
 var sharedSecret = 'shh';
 var issuer = 'cboard.io';
 
+exports.getTokenData = function(token) {
+  let data = null;
+
+  try {
+    data = jwt.verify(token, sharedSecret);
+  } catch (err) {}
+
+  return data;
+};
+
 //Here we setup the security checks for the endpoints
 //that need it (in our case, only /protected). This
 //function will be called every time a request to a protected
