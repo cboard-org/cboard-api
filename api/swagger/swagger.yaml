@@ -33,6 +33,12 @@ consumes:
 produces:
   - application/json
 parameters:
+  Media:
+    name: file
+    in: formData
+    type: file
+    description: The files to upload.
+    required: true
   User:
     name: user
     in: body
@@ -268,8 +274,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
-            
+  
   /translate:
     x-swagger-router-controller: translate
     post:
@@ -286,7 +291,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
 
   /communicator:
     x-swagger-router-controller: communicator
@@ -430,6 +434,29 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /media:
+    x-swagger-router-controller: media
+    post:
+      operationId: uploadMedia
+      description: Uploads media files and returns a set of urls.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Media'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/MediaResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /board:
     x-swagger-router-controller: board
@@ -718,6 +745,13 @@ definitions:
     properties:
       message:
         type: string
+  MediaResponse:
+    required:
+      - url
+    properties:
+      url:
+        type: string
+
   GetUserListResponse:
     required:
       - total
