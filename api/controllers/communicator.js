@@ -1,4 +1,5 @@
 const { paginatedResponse } = require('../helpers/response');
+const { getORQuery } = require('../helpers/query');
 const Communicator = require('../models/Communicator');
 
 module.exports = {
@@ -37,34 +38,31 @@ function createCommunicator(req, res) {
 }
 
 async function listCommunicators(req, res) {
-  const { page, limit, offset, sort } = req.query;
-  const paginationConfig = {
-    page: !isNaN(page) ? parseInt(page, 10) : 1,
-    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
-    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
-    sort: sort && sort.length ? sort : '-_id'
-  };
+  const { search = '' } = req.query;
 
-  const response = await paginatedResponse(Communicator, {}, paginationConfig);
+  const searchFields = ['name', 'author', 'description', 'email'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
+
+  const response = await paginatedResponse(Communicator, { query }, req.query);
+
   return res.status(200).json(response);
 }
 
 async function getCommunicatorsEmail(req, res) {
   const email = req.swagger.params.email.value;
+  const { search = '' } = req.query;
 
-  const { page, limit, offset, sort } = req.query;
-  const paginationConfig = {
-    page: !isNaN(page) ? parseInt(page, 10) : 1,
-    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
-    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
-    sort: sort && sort.length ? sort : '-_id'
-  };
+  const searchFields = ['name', 'author', 'description'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
 
   const response = await paginatedResponse(
     Communicator,
-    { query: { email } },
-    paginationConfig
+    { query: { ...query, email } },
+    req.query
   );
+
   return res.status(200).json(response);
 }
 

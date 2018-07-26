@@ -1,4 +1,5 @@
 const { paginatedResponse } = require('../helpers/response');
+const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 
 module.exports = {
@@ -29,34 +30,29 @@ function createBoard(req, res) {
 }
 
 async function listBoard(req, res) {
-  const { page, limit, offset, sort } = req.query;
-  const paginationConfig = {
-    page: !isNaN(page) ? parseInt(page, 10) : 1,
-    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
-    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
-    sort: sort && sort.length ? sort : '-_id'
-  };
+  const { search = '' } = req.query;
+  const searchFields = ['name', 'author', 'email'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
 
-  const response = await paginatedResponse(Board, {}, paginationConfig);
+  const response = await paginatedResponse(Board, { query }, req.query);
+
   return res.status(200).json(response);
 }
 
 async function getBoardsEmail(req, res) {
+  const { search = '' } = req.query;
   const email = req.swagger.params.email.value;
-
-  const { page, limit, offset, sort } = req.query;
-  const paginationConfig = {
-    page: !isNaN(page) ? parseInt(page, 10) : 1,
-    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
-    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
-    sort: sort && sort.length ? sort : '-_id'
-  };
+  const searchFields = ['name', 'author'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
 
   const response = await paginatedResponse(
     Board,
-    { query: { email } },
-    paginationConfig
+    { query: { ...query, email } },
+    req.query
   );
+
   return res.status(200).json(response);
 }
 
