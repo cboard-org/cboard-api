@@ -185,6 +185,7 @@ function loginUser(req, res) {
       message: 'Error: Role must be either admin or user'
     });
   }
+
   User.authenticate(email, password, function(error, user) {
     if (error || !user) {
       return res.status(401).json({
@@ -207,7 +208,8 @@ function loginUser(req, res) {
           });
         }
       });
-      return res.status(200).json(user);
+
+      return res.status(200).json(user.toJSON());
     }
   });
 }

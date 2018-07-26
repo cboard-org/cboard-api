@@ -70,6 +70,7 @@ const USER_SCHEMA_OPTIONS = {
       delete ret._id;
       delete ret.password;
       delete ret.authToken;
+      ret.authToken = doc.authToken;
     }
   }
 };
