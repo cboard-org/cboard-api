@@ -529,11 +529,6 @@ paths:
     get:
       operationId: listBoard
       description: Returns the full boards list.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
       parameters:
         - $ref: "#/parameters/PageParameter"
         - $ref: "#/parameters/LimitParameter"
@@ -554,11 +549,6 @@ paths:
     get:
       operationId: getBoard
       description: Returns a specific board
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
       parameters:
         - name: id
           type: string
