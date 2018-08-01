@@ -24,7 +24,7 @@
     "sendgrid": "^4.7.1",
     "should": "^7.1.0",
     "snyk": "^1.88.0",
-    "supertest": "^2.0.0",
+    "supertest": "^3.0.0",
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "^0.10.1",
     "translate-api": "^0.3.12",
