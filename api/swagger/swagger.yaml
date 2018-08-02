@@ -33,6 +33,36 @@ consumes:
 produces:
   - application/json
 parameters:
+  PageParameter:
+    in: query
+    name: page
+    type: integer
+    default: 1
+    description: Page
+  LimitParameter:
+    in: query
+    name: limit
+    type: integer
+    default: 0
+    description: The numbers of items to return
+  OffsetParameter:
+    in: query
+    name: offset
+    type: integer
+    default: 0
+    description: The number of items to skip before starting to collect the result set
+  SortParameter:
+    in: query
+    name: sort
+    type: string
+    default: "-_id"
+    description: Sort by
+  SearchParameter:
+    in: query
+    name: search
+    type: string
+    default: ""
+    description: Search by
   Media:
     name: file
     in: formData
@@ -95,6 +125,12 @@ paths:
       x-security-scopes:
         - admin
         - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
       responses:
         "200":
           description: Success
@@ -321,6 +357,12 @@ paths:
       x-security-scopes:
         - admin
         - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
       responses:
         "200":
           description: Success
@@ -419,6 +461,11 @@ paths:
         - admin
         - user
       parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
         - name: email
           type: string
           in: path
@@ -482,11 +529,12 @@ paths:
     get:
       operationId: listBoard
       description: Returns the full boards list.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
       responses:
         "200":
           description: Success
@@ -501,11 +549,6 @@ paths:
     get:
       operationId: getBoard
       description: Returns a specific board
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
       parameters:
         - name: id
           type: string
@@ -585,6 +628,11 @@ paths:
         - admin
         - user
       parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
         - name: email
           type: string
           in: path
@@ -751,7 +799,6 @@ definitions:
     properties:
       url:
         type: string
-
   GetUserListResponse:
     required:
       - total
@@ -770,6 +817,8 @@ definitions:
       offset:
         type: integer
       sort:
+        type: string
+      search:
         type: string
       data:
         type: array
@@ -872,6 +921,8 @@ definitions:
         type: integer
       sort:
         type: string
+      search:
+        type: string
       data:
         type: array
         items:
@@ -916,6 +967,8 @@ definitions:
       offset:
         type: integer
       sort:
+        type: string
+      search:
         type: string
       data:
         type: array

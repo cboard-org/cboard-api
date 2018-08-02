@@ -1,4 +1,5 @@
 const { paginatedResponse } = require('../helpers/response');
+const { getORQuery } = require('../helpers/query');
 const User = require('../models/User');
 const mailing = require('../mail');
 const nev = mailing('en');
@@ -86,20 +87,18 @@ function activateUser(req, res) {
 }
 
 async function listUser(req, res) {
-  const { page, limit, offset, sort } = req.query;
-  const paginationConfig = {
-    page: !isNaN(page) ? parseInt(page, 10) : 1,
-    limit: !isNaN(limit) ? parseInt(limit, 10) : 10,
-    offset: !isNaN(offset) ? parseInt(offset, 10) : 0,
-    sort: sort && sort.length ? sort : '-_id'
-  };
+  const { search = '' } = req.query;
+  const searchFields = ['name', 'author', 'email'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
 
   const response = await paginatedResponse(
     User,
     {
+      query,
       populate: ['communicators', 'boards']
     },
-    paginationConfig
+    req.query
   );
 
   return res.status(200).json(response);

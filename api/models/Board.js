@@ -42,6 +42,11 @@ const BOARD_SCHEMA_DEFINITION = {
     type: String,
     default: constants.DEFAULT_LANG
   },
+  caption: {
+    type: String,
+    unique: false,
+    trim: true
+  },
   format: {
     type: String,
     default: constants.DEFAULT_FORMAT
