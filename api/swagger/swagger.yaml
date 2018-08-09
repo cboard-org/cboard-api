@@ -5,7 +5,7 @@ info:
   title: CBoard API
   termsOfService: "http://cboard.io"
 # during dev, should point to your local machine
-host: localhost:10010
+# host: localhost:10010
 # basePath prefixes all resource paths 
 basePath: /
 # 
@@ -33,6 +33,42 @@ consumes:
 produces:
   - application/json
 parameters:
+  PageParameter:
+    in: query
+    name: page
+    type: integer
+    default: 1
+    description: Page
+  LimitParameter:
+    in: query
+    name: limit
+    type: integer
+    default: 0
+    description: The numbers of items to return
+  OffsetParameter:
+    in: query
+    name: offset
+    type: integer
+    default: 0
+    description: The number of items to skip before starting to collect the result set
+  SortParameter:
+    in: query
+    name: sort
+    type: string
+    default: "-_id"
+    description: Sort by
+  SearchParameter:
+    in: query
+    name: search
+    type: string
+    default: ""
+    description: Search by
+  Media:
+    name: file
+    in: formData
+    type: file
+    description: The files to upload.
+    required: true
   User:
     name: user
     in: body
@@ -40,6 +76,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/User" 
+  Communicator:
+    name: communicator
+    in: body
+    description: Communicator data for creating a new custom communicator 
+    required: true
+    schema:
+      $ref: "#/definitions/Communicator" 
   Board:
     name: board
     in: body
@@ -47,6 +90,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/Board" 
+  Translate:
+    name: translate
+    in: body
+    description: Translate data 
+    required: true
+    schema:
+      $ref: "#/definitions/Translate" 
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -75,6 +125,12 @@ paths:
       x-security-scopes:
         - admin
         - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
       responses:
         "200":
           description: Success
@@ -235,7 +291,219 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /me:
+    x-swagger-router-controller: user
+    get:
+      operationId: getMe
+      description: Returns logged user data
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  
+  /translate:
+    x-swagger-router-controller: translate
+    post:
+      operationId: translate
+      description: Translates an array of labels.
+      parameters:
+        - $ref: '#/parameters/Translate'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/TranslateResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
+  /communicator:
+    x-swagger-router-controller: communicator
+    post:
+      operationId: createCommunicator
+      description: Creates a new communicator in database and send an email to notify the user.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Communicator'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/CommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: listCommunicators
+      description: Returns the full communicators list.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /communicator/{id}:
+    x-swagger-router-controller: communicator
+    get:
+      operationId: getCommunicator
+      description: Returns a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      operationId: updateCommunicator
+      description: Updates a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          description: Communicator Id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+        - name: info
+          description: Communicator properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Communicator"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      operationId: removeCommunicator
+      description: Deletes a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: id
+          description: Communicator id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /communicator/byemail/{email}:
+    x-swagger-router-controller: communicator
+    get:
+      operationId: getCommunicatorsEmail
+      description: Returns communicators for a specific user email
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+        - name: email
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /media:
+    x-swagger-router-controller: media
+    post:
+      operationId: uploadMedia
+      description: Uploads media files and returns a set of urls.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Media'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/MediaResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /board:
     x-swagger-router-controller: board
@@ -261,11 +529,12 @@ paths:
     get:
       operationId: listBoard
       description: Returns the full boards list.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
       responses:
         "200":
           description: Success
@@ -280,11 +549,6 @@ paths:
     get:
       operationId: getBoard
       description: Returns a specific board
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
       parameters:
         - name: id
           type: string
@@ -364,6 +628,11 @@ paths:
         - admin
         - user
       parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
         - name: email
           type: string
           in: path
@@ -382,42 +651,96 @@ paths:
 # complex objects have schema definitions
 definitions:
   User:
-      type: object
-      required:
+    type: object
+    required:
+      - id
       - name
       - email
       - password
-      properties:
-        name:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      birthdate:
           type: string
-        email:
-          type: string
-        password:
-          type: string
-        birthdate:
-            type: string
-            format: date-time
-        locale:
-          type: string
-          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
-  Board:
+          format: date-time
+      locale:
+        type: string
+        enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+  Translate:
       type: object
       required:
+      - labels
+      - from
+      - to
+      properties:
+        labels:
+          type: array
+          items:
+            type: string
+        from:
+          type: string
+        to:
+          type: string
+  Communicator:
+    type: object
+    required:
+      - id
       - name
       - email
-      - content
-      properties:
-        name:
+      - author
+      - rootBoard
+      - boards
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      author:
+        type: string
+      description:
+        type: string
+      rootBoard:
+        type: string
+      boards:
+        type: array
+        items:
           type: string
-        email:
-          type: string
-        content:
+  Board:
+    type: object
+    required:
+      - id
+      - name
+      - author
+      - email
+      - tiles
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      author:
+        type: string
+      email:
+        type: string
+      tiles:
+        type: array
+        items:
           type: object
-        format:
-          type: string
-        locale:
-          type: string
-          enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+      caption:
+        type: string
+      isPublic:
+        type: boolean
+      locale:
+        type: string
+        enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
   UserLogin:
       type: object
       required:
@@ -477,19 +800,37 @@ definitions:
     properties:
       message:
         type: string
+  MediaResponse:
+    required:
+      - url
+    properties:
+      url:
+        type: string
   GetUserListResponse:
     required:
-      - keywords
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
     properties:
-      keywords:
-        type: object
-        properties:
-            name:
-              type: string
-            email:
-              type: string
-            password:
-              type: string
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      search:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/User"
   GetUserResponse:
     required:
         - name
@@ -503,56 +844,175 @@ definitions:
         locale:
           type: string
   LogoutResponse:
-      required:
-          - message
-      properties:
-        message:
-            type: string
-  GetBoardResponse:
     required:
-        - name
-        - email
-        - boardid
-        - content
+      - message
     properties:
-        name:
-          type: string
-        email:
-          type: string
-        boardid:
-          type: string
-        content:
+      message:
+        type: string
+  GetBoardResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Self-generated id for the board
+      name:
+        type: string
+        description: Board name
+      author:
+        type: string
+        description: Author of the board
+      email:
+        type: string
+        description: Email of the author
+      tiles:
+        type: array
+        items:
           type: object
-  BoardResponse:
+        description: Generated board tiles
+      caption:
+        type: string
+        description: Picture of the board
+      isPublic:
+        type: boolean
+        description: Board is public or not
+      locale:
+        type: string
+        description: Locale for the board
+    required:
+      - id
+      - name
+      - author
+      - email
+      - tiles
+  CommunicatorResponse:
     type: object
     properties:
       success:
         type: number
         description: returns 1 if successful
-      boardid:
+      id:
         type: string
-        description: self-generated id for the board
-      content:
+        description: self-generated id for the communicator
+      communicator:
         type: object
-        description: generated board contents
+        description: generated communicator data
       message:
-        type: string 
+        type: string
         description: a short comment
     required:
       - success
-      - boardid
-      - content
+      - id
+      - communicator
       - message
+  GetCommunicatorResponse:
+    required:
+      - id
+      - name
+      - email
+      - author
+      - rootBoard
+      - boards
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      email:
+        type: string
+      author:
+        type: string
+      description:
+        type: string
+      rootBoard:
+        type: string
+      boards:
+        type: array
+        items:
+          type: string
+  GetCommunicatorsListResponse:
+    required:
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
+    properties:
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      search:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Communicator"
+  BoardResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Self-generated id for the board
+      name:
+        type: string
+        description: Board name
+      author:
+        type: string
+        description: Author of the board
+      email:
+        type: string
+        description: Email of the author
+      tiles:
+        type: array
+        items:
+          type: object
+        description: Generated board tiles
+      isPublic:
+        type: boolean
+        description: Board is public or not
+      caption:
+        type: string
+        description: Picture of the board
+      locale:
+        type: string
+        description: Locale for the board
+    required:
+      - id
+      - name
+      - author
+      - email
+      - tiles
+  TranslateResponse:
+    type: object
   GetBoardListResponse:
     required:
-      - keywords
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
     properties:
-      keywords:
-        type: object
-        properties:
-            name:
-              type: string
-            email:
-              type: string
-            content:
-              type: object
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      search:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Board"

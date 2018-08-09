@@ -1,4 +1,6 @@
-var Board = require('../models/Board');
+const { paginatedResponse } = require('../helpers/response');
+const { getORQuery } = require('../helpers/query');
+const Board = require('../models/Board');
 
 module.exports = {
   createBoard: createBoard,
@@ -10,7 +12,7 @@ module.exports = {
 };
 
 function createBoard(req, res) {
-  var board = new Board(req.body);
+  const board = new Board(req.body);
   board.save(function(err, board) {
     if (err) {
       return res.status(409).json({
@@ -18,39 +20,39 @@ function createBoard(req, res) {
         error: err
       });
     }
-    return res.status(200).json({
-      success: 1,
-      boardid: board._id,
-      content: board.content,
-      message: 'Board saved successfully'
-    });
+    return res.status(200).json(board.toJSON());
   });
 }
-function listBoard(req, res) {
-  Board.find(function(err, boards) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting boards list.',
-        error: err
-      });
-    }
-    return res.status(200).json(boards);
-  });
+
+async function listBoard(req, res) {
+  const { search = '' } = req.query;
+  const searchFields = ['name', 'author', 'email'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
+
+  const response = await paginatedResponse(Board, { query }, req.query);
+
+  return res.status(200).json(response);
 }
-function getBoardsEmail(req, res) {
-  var email = req.swagger.params.email.value;
-  Board.find({ email: email }, function(err, boards) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting boards list.',
-        error: err
-      });
-    }
-    return res.status(200).json(boards);
-  });
+
+async function getBoardsEmail(req, res) {
+  const { search = '' } = req.query;
+  const email = req.swagger.params.email.value;
+  const searchFields = ['name', 'author'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
+
+  const response = await paginatedResponse(
+    Board,
+    { query: { ...query, email } },
+    req.query
+  );
+
+  return res.status(200).json(response);
 }
+
 function removeBoard(req, res) {
-  var id = req.swagger.params.id.value;
+  const id = req.swagger.params.id.value;
   Board.findByIdAndRemove(id, function(err, boards) {
     if (err) {
       return res.status(404).json({
@@ -61,8 +63,9 @@ function removeBoard(req, res) {
     return res.status(200).json(boards);
   });
 }
+
 function getBoard(req, res) {
-  var id = req.swagger.params.id.value;
+  const id = req.swagger.params.id.value;
   Board.findOne({ _id: id }, function(err, boards) {
     if (err) {
       return res.status(500).json({
@@ -75,11 +78,12 @@ function getBoard(req, res) {
         message: 'Board does not exist. Board Id: ' + id
       });
     }
-    return res.status(200).json(boards);
+    return res.status(200).json(boards.toJSON());
   });
 }
+
 function updateBoard(req, res) {
-  var id = req.swagger.params.id.value;
+  const id = req.swagger.params.id.value;
   Board.findOne({ _id: id }, function(err, board) {
     if (err) {
       return res.status(500).json({
@@ -92,7 +96,7 @@ function updateBoard(req, res) {
         message: 'Unable to find board. board Id: ' + id
       });
     }
-    for (var key in req.body) {
+    for (let key in req.body) {
       board[key] = req.body[key];
     }
     board.save(function(err, board) {
@@ -108,6 +112,6 @@ function updateBoard(req, res) {
         });
       }
     });
-    return res.status(200).json(board);
+    return res.status(200).json(board.toJSON());
   });
 }

@@ -1,13 +1,14 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var bcrypt = require('bcryptjs');
-var constants = require('../constants');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const constants = require('../constants');
+const Schema = mongoose.Schema;
+const Communicator = require('./Communicator');
 
 const oAuthTypes = ['github', 'twitter', 'facebook', 'google', 'linkedin'];
 
-const userSchema = new Schema({
+const USER_SCHEMA_DEFINITION = {
   name: {
     type: String,
     default: ''
@@ -55,6 +56,37 @@ const userSchema = new Schema({
     email: String,
     name: String
   }
+};
+
+const USER_SCHEMA_OPTIONS = {
+  toObject: {
+    virtuals: true
+  },
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    transform: function(doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.password;
+      delete ret.authToken;
+      ret.authToken = doc.authToken;
+    }
+  }
+};
+
+const userSchema = new Schema(USER_SCHEMA_DEFINITION, USER_SCHEMA_OPTIONS);
+
+userSchema.virtual('communicators', {
+  ref: 'Communicator',
+  localField: 'email',
+  foreignField: 'email'
+});
+
+userSchema.virtual('boards', {
+  ref: 'Board',
+  localField: 'email',
+  foreignField: 'email'
 });
 
 const validatePresenceOf = value => value && value.length;
@@ -136,6 +168,8 @@ userSchema.statics = {
     options.select = options.select || 'name email';
     return this.findOne(options.criteria)
       .select(options.select)
+      .populate('communicators')
+      .populate('boards')
       .exec(cb);
   },
 
@@ -149,25 +183,28 @@ userSchema.statics = {
    */
 
   authenticate: function(email, password, callback) {
-    this.findOne({ email: email }).exec(function(err, user) {
-      if (err) {
-        return callback(err);
-      } else if (!user) {
-        var err = new Error('User not found.');
-        err.status = 401;
-        return callback(err);
-      }
-      bcrypt.compare(password, user.password, function(err, result) {
-        if (result === true) {
-          return callback(null, user);
-        } else {
-          return callback();
+    this.findOne({ email: email })
+      .populate('communicators')
+      .populate('boards')
+      .exec(function(err, user) {
+        if (err) {
+          return callback(err);
+        } else if (!user) {
+          const err = new Error('User not found.');
+          err.status = 401;
+          return callback(err);
         }
+        bcrypt.compare(password, user.password, function(err, result) {
+          if (result === true) {
+            return callback(null, user);
+          } else {
+            return callback();
+          }
+        });
       });
-    });
   }
 };
 
-var User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

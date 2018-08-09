@@ -9,6 +9,7 @@
   "license": "",
   "main": "app.js",
   "dependencies": {
+    "azure-storage": "^2.10.0",
     "bcryptjs": "^2.3.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
@@ -25,9 +26,12 @@
     "rand-token": "^0.4.0",
     "sendgrid": "^4.7.1",
     "should": "^7.1.0",
-    "supertest": "^1.0.0",
+    "snyk": "^1.88.0",
+    "supertest": "^3.0.0",
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "^0.10.1",
+    "translate-api": "^0.3.12",
+    "uuid": "^3.3.2",
     "validator": "^7.0.0",
     "yamljs": "^0.2.9"
   },
@@ -41,13 +45,15 @@
     "dev": "nodemon app.js",
     "start": "node app.js",
     "test": "swagger project test",
-    "mocha": "mocha test/test.js",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "lint-staged": {
     "*.{js,json,css}": ["prettier --write", "git add"]
   },
   "engines": {
     "node": ">=6.0"
-  }
+  },
+  "snyk": true
 }

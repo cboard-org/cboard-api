@@ -1,14 +1,20 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var bcrypt = require('bcryptjs');
-var constants = require('../constants');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const constants = require('../constants');
+const Schema = mongoose.Schema;
 
-const boardSchema = new Schema({
+const BOARD_SCHEMA_DEFINITION = {
   name: {
     type: String,
-    unique: true,
+    unique: false,
+    required: true,
+    trim: true
+  },
+  author: {
+    type: String,
+    unique: false,
     required: true,
     trim: true
   },
@@ -18,25 +24,56 @@ const boardSchema = new Schema({
     required: true,
     trim: true
   },
-  content: {
-    type: Object,
-    unique: false,
-    required: true
+  isPublic: {
+    type: Boolean,
+    default: false
   },
-  cellSize: {
+  caption: {
     type: String,
-    trim: true,
-    default: constants.DEFAULT_CELL_SIZE
+    unique: false,
+    trim: true
   },
   locale: {
     type: String,
     default: constants.DEFAULT_LANG
   },
-  format: {
-    type: String,
-    default: constants.DEFAULT_FORMAT
+  tiles: {
+    type: Array,
+    default: [],
+    required: true
   }
-});
+  // tiles: [{ Object }],
+  // content: {
+  //   type: Object,
+  //   unique: false,
+  //   required: true
+  // },
+  // cellSize: {
+  //   type: String,
+  //   trim: true,
+  //   default: constants.DEFAULT_CELL_SIZE
+  // },
+  // format: {
+  //   type: String,
+  //   default: constants.DEFAULT_FORMAT
+  // }
+};
+
+const BOARD_SCHEMA_OPTIONS = {
+  toObject: {
+    virtuals: true
+  },
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    transform: function(doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+    }
+  }
+};
+
+const boardSchema = new Schema(BOARD_SCHEMA_DEFINITION, BOARD_SCHEMA_OPTIONS);
 
 const validatePresenceOf = value => value && value.length;
 
@@ -56,10 +93,15 @@ boardSchema.path('email').validate(function(email) {
   return email.length;
 }, 'User email cannot be blank');
 
-boardSchema.path('content').validate(function(content) {
+// boardSchema.path('content').validate(function(content) {
+//   if (this.skipValidation()) return true;
+//   return Object.keys(content).length;
+// }, 'Content cannot be blank');
+
+boardSchema.path('tiles').validate(function(tiles) {
   if (this.skipValidation()) return true;
-  return Object.keys(content).length;
-}, 'Content cannot be blank');
+  return tiles && tiles.length;
+}, 'Tiles cannot be empty');
 
 boardSchema.path('name').validate(function(name, fn) {
   const Board = mongoose.model('Board');
@@ -127,6 +169,6 @@ boardSchema.statics = {
   }
 };
 
-var Board = mongoose.model('Board', boardSchema);
+const Board = mongoose.model('Board', boardSchema);
 
 module.exports = Board;

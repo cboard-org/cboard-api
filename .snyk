@@ -1,0 +1,27 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.12.0
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:mime:20170907':
+    - swagger-express-mw > swagger-node-runner > swagger-tools > superagent > mime:
+        patched: '2018-06-26T08:58:22.300Z'
+  'npm:lodash:20180130':
+    - swagger-express-mw > swagger-node-runner > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > machine > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > machine > rttc > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > machine > switchback > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > machinepack-urls > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > machinepack-urls > machine > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
+    - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > machinepack-urls > machine > rttc > lodash:
+        patched: '2018-07-03T08:57:30.735Z'
