@@ -718,19 +718,26 @@ definitions:
     required:
       - id
       - name
+      - author
       - email
-      - content
+      - tiles
     properties:
       id:
         type: string
       name:
         type: string
+      author:
+        type: string
       email:
         type: string
-      content:
-        type: object
-      format:
+      tiles:
+        type: array
+        items:
+          type: object
+      caption:
         type: string
+      isPublic:
+        type: boolean
       locale:
         type: string
         enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
@@ -837,26 +844,46 @@ definitions:
         locale:
           type: string
   LogoutResponse:
-      required:
-          - message
-      properties:
-        message:
-            type: string
-  GetBoardResponse:
     required:
-        - name
-        - email
-        - boardid
-        - content
+      - message
     properties:
-        name:
-          type: string
-        email:
-          type: string
-        boardid:
-          type: string
-        content:
+      message:
+        type: string
+  GetBoardResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Self-generated id for the board
+      name:
+        type: string
+        description: Board name
+      author:
+        type: string
+        description: Author of the board
+      email:
+        type: string
+        description: Email of the author
+      tiles:
+        type: array
+        items:
           type: object
+        description: Generated board tiles
+      caption:
+        type: string
+        description: Picture of the board
+      isPublic:
+        type: boolean
+        description: Board is public or not
+      locale:
+        type: string
+        description: Locale for the board
+    required:
+      - id
+      - name
+      - author
+      - email
+      - tiles
   CommunicatorResponse:
     type: object
     properties:
@@ -930,23 +957,38 @@ definitions:
   BoardResponse:
     type: object
     properties:
-      success:
-        type: number
-        description: returns 1 if successful
-      boardid:
+      id:
         type: string
-        description: self-generated id for the board
-      content:
-        type: object
-        description: generated board contents
-      message:
-        type: string 
-        description: a short comment
+        description: Self-generated id for the board
+      name:
+        type: string
+        description: Board name
+      author:
+        type: string
+        description: Author of the board
+      email:
+        type: string
+        description: Email of the author
+      tiles:
+        type: array
+        items:
+          type: object
+        description: Generated board tiles
+      isPublic:
+        type: boolean
+        description: Board is public or not
+      caption:
+        type: string
+        description: Picture of the board
+      locale:
+        type: string
+        description: Locale for the board
     required:
-      - success
-      - boardid
-      - content
-      - message
+      - id
+      - name
+      - author
+      - email
+      - tiles
   TranslateResponse:
     type: object
   GetBoardListResponse:

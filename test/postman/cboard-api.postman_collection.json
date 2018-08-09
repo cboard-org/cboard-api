@@ -112,6 +112,7 @@
               "",
               "pm.test(\"Status code is 200\", function () {",
               "    pm.response.to.have.status(200);",
+              "    pm.response.json().authToken && pm.response.json().authToken.length;",
               "});"
             ]
           }
@@ -268,7 +269,7 @@
               "pm.test(\"Body matches string\", function () {",
               "    pm.expect(pm.response.text()).to.include(\"Board saved successfully\");",
               "});",
-              "pm.globals.set(\"boardid\",pm.response.json().boardid);",
+              "pm.globals.set(\"boardid\",pm.response.json().id);",
               "console.log(pm.globals.get(\"boardid\"));"
             ]
           }
@@ -301,7 +302,7 @@
         "body": {
           "mode": "raw",
           "raw":
-            "{\n    \"name\": \"{{board_name}}\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"author\": \"Tincho\",\n    \"content\": {\n  \"format\": \"open-board-0.1\",\n  \"locale\": \"en\",\n  \"name\": \"Simple Board\",\n  \"description_html\": \"This is a very basic .obf file, it contains no images or sounds, and assumes default styling.\",\n  \"grid\": {\n    \"rows\": 2,\n    \"columns\": 2,\n    \"order\": [\n      [1, 2],\n      [null, null]\n    ]\n  },\n  \"buttons\": [\n    {\n      \"id\": 1,\n      \"label\": \"happy\"\n    },\n    {\n      \"id\": 2,\n      \"label\": \"sad\"\n    }\n  ],\n  \"images\": [],\n  \"sounds\": []\n}\n}"
+            "{\n\t\"name\": \"{{board_name}}\",\n\t\"author\": \"{{username}}\",\n\t\"email\": \"{{email}}\",\n\t\"isPublic\": true,\n\t\"tiles\": [{\n\t\t\t\"labelKey\": \"cboard.symbol.iWant\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985694_a90dd657f96d_symbols_mulberry_want_%2C_to.svg\",\n\t\t\t\"id\": \"ryGoMC96mcYW\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodSweetsAndDesserts.iceCream\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985692_a90dd657f96d_symbols_mulberry_ice_cream.svg\",\n\t\t\t\"id\": \"HkXizC5T79Yb\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodSweetsAndDesserts.chocolate\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985698_a90dd657f96d_symbols_mulberry_chocolate.svg\",\n\t\t\t\"id\": \"rJEif0cTm5KZ\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodMealsAndSnacks.crisps\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985694_a90dd657f96d_symbols_mulberry_crisps.svg\",\n\t\t\t\"id\": \"BkSjfR5a7qt-\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodSweetsAndDesserts.marshmallows\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985690_a90dd657f96d_symbols_mulberry_marshmallows.svg\",\n\t\t\t\"id\": \"B1IjfA9TQctW\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodBreadsAndBaking.biscuits\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985695_a90dd657f96d_symbols_mulberry_biscuits.svg\",\n\t\t\t\"id\": \"HyPjzRqTXqYZ\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodSweetsAndDesserts.jellyBeans\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985690_a90dd657f96d_symbols_mulberry_jelly_beans.svg\",\n\t\t\t\"id\": \"By_jGRcaQcY-\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodNuts.candyCane\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985694_a90dd657f96d_symbols_mulberry_candy_cane.svg\",\n\t\t\t\"id\": \"rkFoG0c6XqFb\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodNuts.nuts\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985690_a90dd657f96d_symbols_mulberry_nuts.svg\",\n\t\t\t\"id\": \"r19oGC9Tm5YZ\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodBreadsAndBaking.cakeSlice\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985694_a90dd657f96d_symbols_mulberry_cake_slice_2.svg\",\n\t\t\t\"id\": \"HyssM0qTm5FW\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodBreadsAndBaking.chocolateChipBiscuit\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985698_a90dd657f96d_symbols_mulberry_chocolate_chip_biscuit.svg\",\n\t\t\t\"id\": \"B1noG05aX5tb\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodDairy.yogurt\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985696_a90dd657f96d_symbols_mulberry_yogurt.svg\",\n\t\t\t\"id\": \"Hk6jGRcaQcY-\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodSweetsAndDesserts.iceLolly\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985702_a90dd657f96d_symbols_mulberry_ice_lolly.svg\",\n\t\t\t\"id\": \"BJCof0qpm9tb\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodBreadsAndBaking.pretzel\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985700_a90dd657f96d_symbols_mulberry_pretzel.svg\",\n\t\t\t\"id\": \"HkJhG0c6Q5t-\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t},\n\t\t{\n\t\t\t\"labelKey\": \"symbol.foodNuts.peanut\",\n\t\t\t\"image\": \"https://cboardgroupdiag483.blob.core.windows.net/cblob/1532985694_a90dd657f96d_symbols_mulberry_peanut.svg\",\n\t\t\t\"id\": \"H1enMCqpQ5F-\",\n\t\t\t\"backgroundColor\": \"rgb(255, 241, 118)\"\n\t\t}\n\t]\n}"
         },
         "url": {
           "raw": "{{url}}/board/",
@@ -883,6 +884,47 @@
           "raw": "{{url}}/me/",
           "host": ["{{url}}"],
           "path": ["me", ""]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "/media",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "description": "",
+              "type": "file",
+              "src": "dybala.jpg"
+            },
+            {
+              "key": "file",
+              "value": "",
+              "description": "",
+              "type": "file",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{url}}/media",
+          "host": ["{{url}}"],
+          "path": ["media"]
         },
         "description": ""
       },

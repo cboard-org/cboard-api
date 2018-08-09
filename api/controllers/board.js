@@ -20,12 +20,7 @@ function createBoard(req, res) {
         error: err
       });
     }
-    return res.status(200).json({
-      success: 1,
-      boardid: board._id,
-      content: board.content,
-      message: 'Board saved successfully'
-    });
+    return res.status(200).json(board.toJSON());
   });
 }
 
@@ -83,7 +78,7 @@ function getBoard(req, res) {
         message: 'Board does not exist. Board Id: ' + id
       });
     }
-    return res.status(200).json(boards);
+    return res.status(200).json(boards.toJSON());
   });
 }
 
@@ -117,6 +112,6 @@ function updateBoard(req, res) {
         });
       }
     });
-    return res.status(200).json(board);
+    return res.status(200).json(board.toJSON());
   });
 }
