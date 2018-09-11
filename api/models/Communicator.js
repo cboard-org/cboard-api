@@ -8,7 +8,7 @@ const Schema = mongoose.Schema;
 const COMMUNICATOR_SCHEMA_DEFINITION = {
   name: {
     type: String,
-    unique: true,
+    unique: false,
     required: true,
     trim: true
   },
@@ -95,17 +95,6 @@ communicatorSchema.path('rootBoard').validate(function(rootBoard, fn) {
   if (this.skipValidation()) fn(true);
   fn(this.boards.indexOf(rootBoard) >= 0);
 }, 'Communicator rootBoard should be exists in boards field');
-
-communicatorSchema.path('name').validate(function(name, fn) {
-  const Communicator = mongoose.model('Communicator');
-  if (this.skipValidation()) fn(true);
-  // Check only when it is a new Communicator or when name field is modified
-  if (this.isNew || this.isModified('name')) {
-    Communicator.find({ name: name }).exec(function(err, communicators) {
-      fn(!err && communicators.length === 0);
-    });
-  } else fn(true);
-}, 'Communicator name already exists');
 
 communicatorSchema.path('email').validate(function(email, fn) {
   const User = mongoose.model('User');
