@@ -28,35 +28,29 @@ const BOARD_SCHEMA_DEFINITION = {
     type: Boolean,
     default: false
   },
-  caption: {
-    type: String,
+  tiles: {
+    type: Array,
     unique: false,
-    trim: true
+    required: true
+  },
+  cellSize: {
+    type: String,
+    trim: true,
+    default: constants.DEFAULT_CELL_SIZE
   },
   locale: {
     type: String,
     default: constants.DEFAULT_LANG
   },
-  tiles: {
-    type: Array,
-    default: [],
-    required: true
+  caption: {
+    type: String,
+    unique: false,
+    trim: true
+  },
+  format: {
+    type: String,
+    default: constants.DEFAULT_FORMAT
   }
-  // tiles: [{ Object }],
-  // content: {
-  //   type: Object,
-  //   unique: false,
-  //   required: true
-  // },
-  // cellSize: {
-  //   type: String,
-  //   trim: true,
-  //   default: constants.DEFAULT_CELL_SIZE
-  // },
-  // format: {
-  //   type: String,
-  //   default: constants.DEFAULT_FORMAT
-  // }
 };
 
 const BOARD_SCHEMA_OPTIONS = {
@@ -93,26 +87,10 @@ boardSchema.path('email').validate(function(email) {
   return email.length;
 }, 'User email cannot be blank');
 
-// boardSchema.path('content').validate(function(content) {
-//   if (this.skipValidation()) return true;
-//   return Object.keys(content).length;
-// }, 'Content cannot be blank');
-
 boardSchema.path('tiles').validate(function(tiles) {
   if (this.skipValidation()) return true;
   return tiles && tiles.length;
 }, 'Tiles cannot be empty');
-
-boardSchema.path('name').validate(function(name, fn) {
-  const Board = mongoose.model('Board');
-  if (this.skipValidation()) fn(true);
-  // Check only when it is a new board or when name field is modified
-  if (this.isNew || this.isModified('name')) {
-    Board.find({ name: name }).exec(function(err, boards) {
-      fn(!err && boards.length === 0);
-    });
-  } else fn(true);
-}, 'Board name already exists');
 
 boardSchema.path('email').validate(function(email, fn) {
   const User = mongoose.model('User');
