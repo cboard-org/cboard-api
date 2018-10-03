@@ -175,106 +175,52 @@ function updateUser(req, res) {
 }
 
 function loginUser(req, res) {
-  const role = req.swagger.params.role.value;
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password } = req.body;
 
-  if (role !== 'user' && role !== 'admin') {
-    return res.status(400).json({
-      message: 'Error: Role must be either admin or user'
-    });
-  }
-
-  User.authenticate(email, password, function(error, user) {
+  User.authenticate(email, password, (error, user) => {
     if (error || !user) {
       return res.status(401).json({
         message: 'Wrong email or password.'
       });
     } else {
-      req.session.userId = user._id;
-      const tokenString = auth.issueToken(email, role);
-      user.authToken = tokenString;
-      user.save(function(err, user) {
-        if (err) {
-          return res.status(500).json({
-            message: 'Error saving user ',
-            error: err
-          });
-        }
-        if (!user) {
-          return res.status(404).json({
-            message: 'Unable to find user. User id: ' + user._id
-          });
-        }
+      const userId = user._id;
+      req.session.userId = userId;
+
+      const tokenString = auth.issueToken({
+        id: userId,
+        email
       });
 
-      return res.status(200).json(user.toJSON());
+      const response = { ...user.toJSON(), authToken: tokenString };
+      return res.status(200).json(response);
     }
   });
 }
 
 function logoutUser(req, res) {
-  const email = req.body.email;
-  const password = req.body.password;
-  User.authenticate(email, password, function(error, user) {
-    if (error || !user) {
-      return res.status(401).json({
-        message: 'Wrong email or password.'
-      });
-    }
-    if (req.session) {
-      // delete session object
-      req.session.destroy(function(err) {
-        if (err) {
-          return res.status(500).json({
-            message: 'Error removing session .',
-            error: err
-          });
-        }
-      });
-    }
-    user.authToken = '';
-    user.save(function(err, user) {
+  if (req.session) {
+    // delete session object
+    req.session.destroy(err => {
       if (err) {
         return res.status(500).json({
-          message: 'Error saving user. ',
+          message: 'Error removing session .',
           error: err
         });
       }
-      if (!user) {
-        return res.status(404).json({
-          message: 'Unable to find user. User id: ' + user._id
-        });
-      }
-    });
-    return res.status(200).json({
-      message: 'User successfully logout'
-    });
-  });
-}
-
-function getMe(req, res) {
-  const authorizationHeader = req.headers.authorization || null;
-  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-    return res.status(400).json({
-      message: 'Need to provide a Bearer Authorization token'
     });
   }
 
-  const token = authorizationHeader.split(' ')[1];
-  const tokenData = auth.getTokenData(token);
+  return res.status(200).json({
+    message: 'User successfully logout'
+  });
+}
 
-  User.findOne({ email: tokenData.sub })
-    .populate('communicators')
-    .populate('boards')
-    .exec(function(err, user) {
-      if (err || !user) {
-        return res.status(500).json({
-          message: 'Error getting user.',
-          error: err
-        });
-      }
+async function getMe(req, res) {
+  if (!req.user) {
+    return res
+      .status(400)
+      .json({ message: 'Are you logged in? Is bearer token present?' });
+  }
 
-      return res.status(200).json(user);
-    });
+  return res.status(200).json(req.user);
 }

@@ -1,10 +1,13 @@
 'use strict';
 
+const constants = require('../constants');
+
 module.exports = {
   env: 'development',
   databaseUrl: process.env.MONGO_URL || 'mongodb://localhost/cboard-api',
   jwt: {
-    secret: process.env.JWT_SECRET
+    secret: process.env.JWT_SECRET,
+    issuer: process.env.JWT_ISSUER || constants.JWT_DEFAULT_ISSUER
   },
   emailTransport: {
     service: 'Gmail',

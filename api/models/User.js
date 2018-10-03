@@ -19,6 +19,12 @@ const USER_SCHEMA_DEFINITION = {
     required: true,
     trim: true
   },
+  role: {
+    type: String,
+    default: 'user',
+    required: true,
+    trim: true
+  },
   birthdate: {
     type: Date,
     default: Date.now
@@ -34,10 +40,6 @@ const USER_SCHEMA_DEFINITION = {
   password: {
     type: String,
     required: true,
-    default: ''
-  },
-  authToken: {
-    type: String,
     default: ''
   },
   lastlogin: {
@@ -69,8 +71,9 @@ const USER_SCHEMA_OPTIONS = {
       ret.id = ret._id;
       delete ret._id;
       delete ret.password;
-      delete ret.authToken;
-      ret.authToken = doc.authToken;
+      if (ret.authToken) {
+        delete ret.authToken;
+      }
     }
   }
 };
@@ -181,7 +184,6 @@ userSchema.statics = {
    * @param {Function} callback
    * @api private
    */
-
   authenticate: function(email, password, callback) {
     this.findOne({ email: email })
       .populate('communicators')
@@ -202,6 +204,30 @@ userSchema.statics = {
           }
         });
       });
+  },
+
+  updateUser: async function(user) {
+    let success = false;
+
+    try {
+      await user.save().exec();
+      success = true;
+    } catch (e) {}
+
+    return success;
+  },
+
+  getById: async function(id) {
+    let user = null;
+
+    try {
+      user = await this.findById(id)
+        .populate('communicators')
+        .populate('boards')
+        .exec();
+    } catch (e) {}
+
+    return user ? user.toJSON() : null;
   }
 };
 
