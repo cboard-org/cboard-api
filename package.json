@@ -18,7 +18,7 @@
     "express": "^4.12.3",
     "express-session": "^1.15.2",
     "jsonwebtoken": "^7.3.0",
-    "mongoose": "^4.4.6",
+    "mongoose": "^5.3.1",
     "ms": "^2.1.1",
     "rand-token": "^0.4.0",
     "sendgrid": "^4.7.1",
