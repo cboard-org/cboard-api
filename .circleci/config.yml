@@ -37,18 +37,10 @@ jobs:
           fingerprints:
             - "70:3a:28:02:d9:74:fd:be:c8:79:f6:2e:9b:f7:21:04"
       - run: |
-          ssh -t $SSH_USERNAME@$SSH_SERVER "docker run --rm \
+          ssh -t $SSH_USERNAME@$SSH_SERVER 'bash -ic "docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             cboard/cboard-bootstrap \
             pull && \
-            docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            cboard/cboard-bootstrap \
-            stop cboard-api && \
-            docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            cboard/cboard-bootstrap \
-            kill cboard-api && \
             docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -e URL \
@@ -62,7 +54,7 @@ jobs:
             -e SENDGRID_API_KEY \
             -e JWT_SECRET \
             cboard/cboard-bootstrap \
-            up -d --no-deps cboard-api && exit"
+            up -d --no-deps cboard-api" && exit'
 
   
 workflows:
