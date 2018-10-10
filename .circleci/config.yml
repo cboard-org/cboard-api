@@ -43,6 +43,14 @@ jobs:
             pull && \
             docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
+            cboard/cboard-bootstrap \
+            stop cboard-api && \
+            docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            cboard/cboard-bootstrap \
+            kill cboard-api && \
+            docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
             -e URL \
             -e SUBDOMAINS \
             -e VALIDATION \
