@@ -91,20 +91,29 @@ communicatorSchema.path('rootBoard').validate(function(rootBoard) {
   return rootBoard.length;
 }, 'RootBoard cannot be blank');
 
-communicatorSchema.path('rootBoard').validate(function(rootBoard, fn) {
-  if (this.skipValidation()) fn(true);
-  fn(this.boards.indexOf(rootBoard) >= 0);
+communicatorSchema.path('rootBoard').validate(function(rootBoard) {
+  if (this.skipValidation()) {
+    return true;
+  }
+
+  return this.boards.indexOf(rootBoard) >= 0;
 }, 'Communicator rootBoard should be exists in boards field');
 
-communicatorSchema.path('email').validate(function(email, fn) {
+communicatorSchema.path('email').validate(async function(email) {
   const User = mongoose.model('User');
-  if (this.skipValidation()) fn(true);
+  if (this.skipValidation()) {
+    return true;
+  }
+
   // Check only when it is a new user or when email field is modified
   if (this.isNew || this.isModified('email')) {
-    User.find({ email: email }).exec(function(err, users) {
-      fn(!err && users.length > 0);
-    });
-  } else fn(true);
+    const users = await User.find({ email }).exec();
+    if (users.length < 1) {
+      return false;
+    }
+  }
+
+  return true;
 }, 'User Email does not exist in database');
 
 /**

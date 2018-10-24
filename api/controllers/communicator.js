@@ -86,56 +86,55 @@ function getCommunicator(req, res) {
   });
 }
 
-function updateCommunicator(req, res) {
+async function updateCommunicator(req, res) {
   const id = req.swagger.params.id.value;
-  Communicator.findById(id, function(err, communicator) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error updating communicator.',
-        error: err
-      });
-    }
-
+  let communicator = null;
+  try {
+    communicator = await Communicator.findById(id).exec();
     if (!communicator) {
       return res.status(404).json({
         message: `Unable to find communicator. Communicator ID: ${id}`
       });
     }
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error updating communicator.',
+      error: err
+    });
+  }
 
-    // Validate rootBoard is present in boards field
-    const rootBoard = req.body.rootBoard || communicator.rootBoard;
-    const boards = req.body.boards || communicator.boards;
+  // Validate rootBoard is present in boards field
+  const rootBoard = req.body.rootBoard || communicator.rootBoard;
+  const boards = req.body.boards || communicator.boards;
 
-    if (boards.indexOf(rootBoard) < 0) {
-      return res.status(400).json({
-        message: `RootBoard '${rootBoard}' does not exist in boards: ${boards.join(
-          ', '
-        )}`,
-        error: err
+  if (boards.indexOf(rootBoard) < 0) {
+    return res.status(400).json({
+      message: `RootBoard '${rootBoard}' does not exist in boards: ${boards.join(
+        ', '
+      )}`,
+      error: err
+    });
+  }
+
+  for (let key in req.body) {
+    communicator[key] = req.body[key];
+  }
+
+  try {
+    const dbCommunicator = await communicator.save();
+    if (!dbCommunicator) {
+      return res.status(404).json({
+        message: `Unable to update communicator. Communicator Id: ${id}`
       });
     }
 
-    for (let key in req.body) {
-      communicator[key] = req.body[key];
-    }
-
-    communicator.save(function(err, communicator) {
-      if (err) {
-        return res.status(500).json({
-          message: 'Error saving communicator.',
-          error: err
-        });
-      }
-
-      if (!communicator) {
-        return res.status(404).json({
-          message: `Unable to find communicator. Communicator Id: ${id}`
-        });
-      }
+    return res.status(200).json(dbCommunicator);
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error saving communicator.',
+      error: err
     });
-
-    return res.status(200).json(communicator);
-  });
+  }
 }
 
 function removeCommunicator(req, res) {
