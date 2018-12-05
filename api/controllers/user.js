@@ -15,7 +15,14 @@ module.exports = {
   updateUser: updateUser,
   loginUser: loginUser,
   logoutUser: logoutUser,
-  getMe: getMe
+  getMe: getMe,
+  facebookLogin: facebookLogin,
+  googleLogin: googleLogin
+};
+
+const USER_MODEL_ID_TYPE = {
+  facebook: 'facebook.id',
+  google: 'google.id'
 };
 
 async function getSettings(user) {
@@ -71,6 +78,70 @@ function createUser(req, res) {
       });
     }
   });
+}
+
+// Login from Facebook or Google
+async function passportLogin(type, accessToken, refreshToken, profile, done) {
+  try {
+    const propertyId = USER_MODEL_ID_TYPE[type];
+    let user = await User.findOne({ [propertyId]: profile.id })
+      .populate('communicators')
+      .populate('boards')
+      .exec();
+
+    if (!user) {
+      user = await createOrUpdateUser(accessToken, profile, type);
+    }
+
+    const { _id: userId, email } = user;
+    const tokenString = auth.issueToken({
+      id: userId,
+      email
+    });
+
+    const settings = await getSettings(user);
+
+    const response = {
+      ...user.toJSON(),
+      settings,
+      authToken: tokenString
+    };
+
+    done(null, response);
+  } catch (err) {
+    console.error('Passport Login error', err);
+    return done(err);
+  }
+}
+
+async function facebookLogin(accessToken, refreshToken, profile, done) {
+  return passportLogin('facebook', accessToken, refreshToken, profile, done);
+}
+
+async function googleLogin(accessToken, refreshToken, profile, done) {
+  return passportLogin('google', accessToken, refreshToken, profile, done);
+}
+
+async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
+  const fnMap = {
+    facebook: {
+      create: 'createUserFromFacebook',
+      update: 'updateUserFromFacebook'
+    },
+    google: {
+      create: 'createUserFromGoogle',
+      update: 'updateUserFromGoogle'
+    }
+  };
+
+  const mergedProfile = { ...profile, accessToken };
+  const emails = profile.emails.map(email => email.value);
+  const existingUser = await User.findOne({ email: { $in: emails } }).exec();
+
+  const userModelFn = existingUser ? fnMap[type].update : fnMap[type].create;
+  const user = await User[userModelFn](mergedProfile, existingUser);
+
+  return user;
 }
 
 function activateUser(req, res) {
