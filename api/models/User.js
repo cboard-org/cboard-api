@@ -39,24 +39,33 @@ const USER_SCHEMA_DEFINITION = {
   },
   password: {
     type: String,
-    required: true,
     default: ''
   },
   lastlogin: {
     type: Date,
     default: Date.now
   },
-  facebook: {
-    id: String,
-    token: String,
-    email: String,
-    name: String
-  },
   google: {
     id: String,
     token: String,
+    displayName: String,
+    name: String,
+    lastname: String,
+    gender: String,
     email: String,
-    name: String
+    emails: [{ type: String }],
+    photos: [{ type: String }]
+  },
+  facebook: {
+    id: String,
+    token: String,
+    gender: String,
+    displayName: String,
+    name: String,
+    lastname: String,
+    email: String,
+    emails: [{ type: String }],
+    photos: [{ type: String }]
   }
 };
 
@@ -129,21 +138,41 @@ userSchema.path('email').validate(async function(email) {
 
 userSchema.path('password').validate(function(password) {
   if (this.skipValidation()) return true;
+
+  const { facebook, google } = this;
+  if (facebook.token || google.token) return true;
+
   return password.length;
 }, 'Password cannot be blank');
 
 /**
  * Pre-save hook
  */
-
 userSchema.pre('save', function(next) {
   if (!this.isNew) return next();
 
-  if (!validatePresenceOf(this.password) && !this.skipValidation()) {
+  const { facebook, google, password } = this;
+  const isValidUser =
+    validatePresenceOf(password) || facebook.token || google.token;
+
+  if (!isValidUser && !this.skipValidation()) {
     next(new Error('Invalid password'));
   } else {
     next();
   }
+});
+
+/**
+ * Post-save hook
+ */
+userSchema.post('save', function(doc, next) {
+  doc
+    .populate('communicators')
+    .populate('boards')
+    .execPopulate()
+    .then(function() {
+      next();
+    });
 });
 
 /**
@@ -234,8 +263,75 @@ userSchema.statics = {
     } catch (e) {}
 
     return user ? user.toJSON() : null;
+  },
+
+  // Creates an user from a Facebook Profile (+ accessToken)
+  // Returns a promise
+  createUserFromFacebook: async function(profile) {
+    const user = getUserFromProfile(profile, 'facebook', User);
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
+  // Creates an user from a Google Profile (+ accessToken)
+  // Returns a promise
+  createUserFromGoogle: async function(profile) {
+    const user = getUserFromProfile(profile, 'google', User);
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
+  // Updates an user from a Facebook Profile (+ accessToken)
+  // Returns a promise
+  updateUserFromFacebook: async function(profile, existingUser) {
+    const user = updateUserFromProfile(profile, existingUser, 'facebook');
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
+  // Updates an user from a Google Profile (+ accessToken)
+  // Returns a promise
+  updateUserFromGoogle: async function(profile, existingUser) {
+    const user = updateUserFromProfile(profile, existingUser, 'google');
+    const dbUser = await user.save();
+    return dbUser;
   }
 };
+
+function getUserType(profile) {
+  const photos = profile.photos || [];
+
+  const user = {
+    id: profile.id,
+    token: profile.accessToken,
+    gender: profile.gender,
+    displayName: profile.displayName,
+    name: profile.name.givenName,
+    lastname: profile.name.familyName,
+    email: profile.emails[0].value,
+    emails: profile.emails.map(email => email.value),
+    photos: photos.map(photo => photo.value)
+  };
+
+  return user;
+}
+
+function getUserFromProfile(profile, type = 'facebook', Model = User) {
+  const user = new Model();
+
+  const userType = getUserType(profile);
+  user[type] = userType;
+  user.name = userType.displayName || userType.name;
+  user.email = userType.email;
+  return user;
+}
+
+function updateUserFromProfile(profile, existingUser, type = 'facebook') {
+  const userType = getUserType(profile);
+  existingUser[type] = userType;
+
+  return existingUser;
+}
 
 const User = mongoose.model('User', userSchema);
 

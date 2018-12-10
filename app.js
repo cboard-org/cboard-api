@@ -3,21 +3,25 @@
 require('dotenv').config();
 
 const cors = require('cors');
-const app = require('express')();
+const express = require('express');
 const swaggerTools = require('swagger-tools');
 const YAML = require('yamljs');
+const https = require('https');
+const pem = require('pem');
 const auth = require('./api/helpers/auth');
 const swaggerConfig = YAML.load('./api/swagger/swagger.yaml');
 const db = require('./db');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const User = require('./api/models/User');
+const Facebook = require('./api/passport/facebook');
+const Google = require('./api/passport/google');
 
 const config = require('./config');
 
-module.exports = app; // for testing
+const app = express();
 
-swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
+swaggerTools.initializeMiddleware(swaggerConfig, async function(middleware) {
   //Serves the Swagger UI on /docs
   app.use(cors());
   app.use(middleware.swaggerMetadata()); // needs to go BEFORE swaggerSecurity
@@ -80,8 +84,43 @@ swaggerTools.initializeMiddleware(swaggerConfig, function(middleware) {
 
   app.use(middleware.swaggerUi());
 
+  Facebook.configureFacebookStrategy(app);
+  Google.configureGoogleStrategy(app);
+  startServer(app);
+});
+
+async function startServer(app) {
+  let server = app;
+
+  const HTTPS = process.env.DEV_ENV_WITH_HTTPS
+    ? parseInt(process.env.DEV_ENV_WITH_HTTPS, 10)
+    : false;
+  if (HTTPS) {
+    console.log('*** Dev Server = HTTPS Enabled ***');
+    try {
+      server = await new Promise((resolve, reject) => {
+        pem.createCertificate({ days: 365, selfSigned: true }, function(
+          err,
+          keys
+        ) {
+          if (err) {
+            reject(err);
+          }
+          server = https.createServer(
+            { key: keys.serviceKey, cert: keys.certificate },
+            server
+          );
+          resolve(server);
+        });
+      });
+    } catch (e) {
+      console.error('Could not create HTTPS Server:', e);
+    }
+    console.log('******* HTTPS ********');
+  }
+
   const port = process.env.PORT || 10010;
-  app.listen(port, function() {
+  server.listen(port, function() {
     console.log('Started server on port ' + port);
   });
-});
+}
