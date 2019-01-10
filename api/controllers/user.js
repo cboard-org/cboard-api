@@ -1,6 +1,7 @@
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const User = require('../models/User');
+const Settings = require('../models/Settings');
 const mailing = require('../mail');
 const nev = mailing('en');
 const auth = require('../helpers/auth');
@@ -14,8 +15,26 @@ module.exports = {
   updateUser: updateUser,
   loginUser: loginUser,
   logoutUser: logoutUser,
-  getMe: getMe
+  getMe: getMe,
+  facebookLogin: facebookLogin,
+  googleLogin: googleLogin
 };
+
+const USER_MODEL_ID_TYPE = {
+  facebook: 'facebook.id',
+  google: 'google.id'
+};
+
+async function getSettings(user) {
+  let settings = null;
+
+  try {
+    settings = await Settings.getOrCreate({ id: user.id || user._id });
+    delete settings.user;
+  } catch (e) {}
+
+  return settings;
+}
 
 function createUser(req, res) {
   const user = new User(req.body);
@@ -59,6 +78,70 @@ function createUser(req, res) {
       });
     }
   });
+}
+
+// Login from Facebook or Google
+async function passportLogin(type, accessToken, refreshToken, profile, done) {
+  try {
+    const propertyId = USER_MODEL_ID_TYPE[type];
+    let user = await User.findOne({ [propertyId]: profile.id })
+      .populate('communicators')
+      .populate('boards')
+      .exec();
+
+    if (!user) {
+      user = await createOrUpdateUser(accessToken, profile, type);
+    }
+
+    const { _id: userId, email } = user;
+    const tokenString = auth.issueToken({
+      id: userId,
+      email
+    });
+
+    const settings = await getSettings(user);
+
+    const response = {
+      ...user.toJSON(),
+      settings,
+      authToken: tokenString
+    };
+
+    done(null, response);
+  } catch (err) {
+    console.error('Passport Login error', err);
+    return done(err);
+  }
+}
+
+async function facebookLogin(accessToken, refreshToken, profile, done) {
+  return passportLogin('facebook', accessToken, refreshToken, profile, done);
+}
+
+async function googleLogin(accessToken, refreshToken, profile, done) {
+  return passportLogin('google', accessToken, refreshToken, profile, done);
+}
+
+async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
+  const fnMap = {
+    facebook: {
+      create: 'createUserFromFacebook',
+      update: 'updateUserFromFacebook'
+    },
+    google: {
+      create: 'createUserFromGoogle',
+      update: 'updateUserFromGoogle'
+    }
+  };
+
+  const mergedProfile = { ...profile, accessToken };
+  const emails = profile.emails.map(email => email.value);
+  const existingUser = await User.findOne({ email: { $in: emails } }).exec();
+
+  const userModelFn = existingUser ? fnMap[type].update : fnMap[type].create;
+  const user = await User[userModelFn](mergedProfile, existingUser);
+
+  return user;
 }
 
 function activateUser(req, res) {
@@ -116,25 +199,34 @@ function removeUser(req, res) {
   });
 }
 
-function getUser(req, res) {
+async function getUser(req, res) {
   const id = req.swagger.params.id.value;
-  User.findById(id)
-    .populate('communicators')
-    .populate('boards')
-    .exec(function(err, users) {
-      if (err) {
-        return res.status(500).json({
-          message: 'Error getting user. ',
-          error: err
-        });
-      }
-      if (!users) {
-        return res.status(404).json({
-          message: 'User does not exist. User Id: ' + id
-        });
-      }
-      return res.status(200).json(users);
+
+  try {
+    const user = await User.findById(id)
+      .populate('communicators')
+      .populate('boards')
+      .exec();
+
+    if (!user) {
+      return res.status(404).json({
+        message: `User does not exist. User Id: ${id}`
+      });
+    }
+
+    const settings = await getSettings(user);
+    const response = {
+      ...user.toJSON(),
+      settings
+    };
+
+    return res.status(200).json(response);
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting user.',
+      error: err
     });
+  }
 }
 
 function updateUser(req, res) {
@@ -175,106 +267,62 @@ function updateUser(req, res) {
 }
 
 function loginUser(req, res) {
-  const role = req.swagger.params.role.value;
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password } = req.body;
 
-  if (role !== 'user' && role !== 'admin') {
-    return res.status(400).json({
-      message: 'Error: Role must be either admin or user'
-    });
-  }
-
-  User.authenticate(email, password, function(error, user) {
+  User.authenticate(email, password, async (error, user) => {
     if (error || !user) {
       return res.status(401).json({
         message: 'Wrong email or password.'
       });
     } else {
-      req.session.userId = user._id;
-      const tokenString = auth.issueToken(email, role);
-      user.authToken = tokenString;
-      user.save(function(err, user) {
-        if (err) {
-          return res.status(500).json({
-            message: 'Error saving user ',
-            error: err
-          });
-        }
-        if (!user) {
-          return res.status(404).json({
-            message: 'Unable to find user. User id: ' + user._id
-          });
-        }
+      const userId = user._id;
+      req.session.userId = userId;
+
+      const tokenString = auth.issueToken({
+        id: userId,
+        email
       });
 
-      return res.status(200).json(user.toJSON());
+      const settings = await getSettings(user);
+
+      const response = {
+        ...user.toJSON(),
+        settings,
+        authToken: tokenString
+      };
+
+      return res.status(200).json(response);
     }
   });
 }
 
 function logoutUser(req, res) {
-  const email = req.body.email;
-  const password = req.body.password;
-  User.authenticate(email, password, function(error, user) {
-    if (error || !user) {
-      return res.status(401).json({
-        message: 'Wrong email or password.'
-      });
-    }
-    if (req.session) {
-      // delete session object
-      req.session.destroy(function(err) {
-        if (err) {
-          return res.status(500).json({
-            message: 'Error removing session .',
-            error: err
-          });
-        }
-      });
-    }
-    user.authToken = '';
-    user.save(function(err, user) {
+  if (req.session) {
+    // delete session object
+    req.session.destroy(err => {
       if (err) {
         return res.status(500).json({
-          message: 'Error saving user. ',
+          message: 'Error removing session .',
           error: err
         });
       }
-      if (!user) {
-        return res.status(404).json({
-          message: 'Unable to find user. User id: ' + user._id
-        });
-      }
-    });
-    return res.status(200).json({
-      message: 'User successfully logout'
-    });
-  });
-}
-
-function getMe(req, res) {
-  const authorizationHeader = req.headers.authorization || null;
-  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-    return res.status(400).json({
-      message: 'Need to provide a Bearer Authorization token'
     });
   }
 
-  const token = authorizationHeader.split(' ')[1];
-  const tokenData = auth.getTokenData(token);
+  return res.status(200).json({
+    message: 'User successfully logout'
+  });
+}
 
-  User.findOne({ email: tokenData.sub })
-    .populate('communicators')
-    .populate('boards')
-    .exec(function(err, user) {
-      if (err || !user) {
-        return res.status(500).json({
-          message: 'Error getting user.',
-          error: err
-        });
-      }
+async function getMe(req, res) {
+  if (!req.user) {
+    return res
+      .status(400)
+      .json({ message: 'Are you logged in? Is bearer token present?' });
+  }
 
-      return res.status(200).json(user);
-    });
+  const settings = await getSettings(req.user);
+  const response = { ...req.user, settings };
+
+  return res.status(200).json(response);
 }

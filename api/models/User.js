@@ -19,6 +19,12 @@ const USER_SCHEMA_DEFINITION = {
     required: true,
     trim: true
   },
+  role: {
+    type: String,
+    default: 'user',
+    required: true,
+    trim: true
+  },
   birthdate: {
     type: Date,
     default: Date.now
@@ -33,28 +39,33 @@ const USER_SCHEMA_DEFINITION = {
   },
   password: {
     type: String,
-    required: true,
-    default: ''
-  },
-  authToken: {
-    type: String,
     default: ''
   },
   lastlogin: {
     type: Date,
     default: Date.now
   },
-  facebook: {
-    id: String,
-    token: String,
-    email: String,
-    name: String
-  },
   google: {
     id: String,
     token: String,
+    displayName: String,
+    name: String,
+    lastname: String,
+    gender: String,
     email: String,
-    name: String
+    emails: [{ type: String }],
+    photos: [{ type: String }]
+  },
+  facebook: {
+    id: String,
+    token: String,
+    gender: String,
+    displayName: String,
+    name: String,
+    lastname: String,
+    email: String,
+    emails: [{ type: String }],
+    photos: [{ type: String }]
   }
 };
 
@@ -69,8 +80,9 @@ const USER_SCHEMA_OPTIONS = {
       ret.id = ret._id;
       delete ret._id;
       delete ret.password;
-      delete ret.authToken;
-      ret.authToken = doc.authToken;
+      if (ret.authToken) {
+        delete ret.authToken;
+      }
     }
   }
 };
@@ -107,34 +119,60 @@ userSchema.path('email').validate(function(email) {
   return email.length;
 }, 'Email cannot be blank');
 
-userSchema.path('email').validate(function(email, fn) {
+userSchema.path('email').validate(async function(email) {
   const User = mongoose.model('User');
-  if (this.skipValidation()) fn(true);
+  if (this.skipValidation()) {
+    return true;
+  }
+
   // Check only when it is a new user or when email field is modified
   if (this.isNew || this.isModified('email')) {
-    User.find({ email: email }).exec(function(err, users) {
-      fn(!err && users.length === 0);
-    });
-  } else fn(true);
+    const users = await User.find({ email }).exec();
+    if (users.length > 0) {
+      return false;
+    }
+  }
+
+  return true;
 }, 'Email already exists');
 
 userSchema.path('password').validate(function(password) {
   if (this.skipValidation()) return true;
+
+  const { facebook, google } = this;
+  if (facebook.token || google.token) return true;
+
   return password.length;
 }, 'Password cannot be blank');
 
 /**
  * Pre-save hook
  */
-
 userSchema.pre('save', function(next) {
   if (!this.isNew) return next();
 
-  if (!validatePresenceOf(this.password) && !this.skipValidation()) {
+  const { facebook, google, password } = this;
+  const isValidUser =
+    validatePresenceOf(password) || facebook.token || google.token;
+
+  if (!isValidUser && !this.skipValidation()) {
     next(new Error('Invalid password'));
   } else {
     next();
   }
+});
+
+/**
+ * Post-save hook
+ */
+userSchema.post('save', function(doc, next) {
+  doc
+    .populate('communicators')
+    .populate('boards')
+    .execPopulate()
+    .then(function() {
+      next();
+    });
 });
 
 /**
@@ -181,7 +219,6 @@ userSchema.statics = {
    * @param {Function} callback
    * @api private
    */
-
   authenticate: function(email, password, callback) {
     this.findOne({ email: email })
       .populate('communicators')
@@ -202,8 +239,99 @@ userSchema.statics = {
           }
         });
       });
+  },
+
+  updateUser: async function(user) {
+    let success = false;
+
+    try {
+      await user.save().exec();
+      success = true;
+    } catch (e) {}
+
+    return success;
+  },
+
+  getById: async function(id) {
+    let user = null;
+
+    try {
+      user = await this.findById(id)
+        .populate('communicators')
+        .populate('boards')
+        .exec();
+    } catch (e) {}
+
+    return user ? user.toJSON() : null;
+  },
+
+  // Creates an user from a Facebook Profile (+ accessToken)
+  // Returns a promise
+  createUserFromFacebook: async function(profile) {
+    const user = getUserFromProfile(profile, 'facebook', User);
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
+  // Creates an user from a Google Profile (+ accessToken)
+  // Returns a promise
+  createUserFromGoogle: async function(profile) {
+    const user = getUserFromProfile(profile, 'google', User);
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
+  // Updates an user from a Facebook Profile (+ accessToken)
+  // Returns a promise
+  updateUserFromFacebook: async function(profile, existingUser) {
+    const user = updateUserFromProfile(profile, existingUser, 'facebook');
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
+  // Updates an user from a Google Profile (+ accessToken)
+  // Returns a promise
+  updateUserFromGoogle: async function(profile, existingUser) {
+    const user = updateUserFromProfile(profile, existingUser, 'google');
+    const dbUser = await user.save();
+    return dbUser;
   }
 };
+
+function getUserType(profile) {
+  const photos = profile.photos || [];
+
+  const user = {
+    id: profile.id,
+    token: profile.accessToken,
+    gender: profile.gender,
+    displayName: profile.displayName,
+    name: profile.name.givenName,
+    lastname: profile.name.familyName,
+    email: profile.emails[0].value,
+    emails: profile.emails.map(email => email.value),
+    photos: photos.map(photo => photo.value)
+  };
+
+  return user;
+}
+
+function getUserFromProfile(profile, type = 'facebook', Model = User) {
+  const user = new Model();
+
+  const userType = getUserType(profile);
+  user[type] = userType;
+  user.name = userType.displayName || userType.name;
+  user.email = userType.email;
+  return user;
+}
+
+function updateUserFromProfile(profile, existingUser, type = 'facebook') {
+  const userType = getUserType(profile);
+  existingUser[type] = userType;
+
+  return existingUser;
+}
 
 const User = mongoose.model('User', userSchema);
 

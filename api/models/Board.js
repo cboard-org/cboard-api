@@ -1,7 +1,6 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const constants = require('../constants');
 const Schema = mongoose.Schema;
 
@@ -92,15 +91,21 @@ boardSchema.path('tiles').validate(function(tiles) {
   return tiles && tiles.length;
 }, 'Tiles cannot be empty');
 
-boardSchema.path('email').validate(function(email, fn) {
+boardSchema.path('email').validate(async function(email) {
   const User = mongoose.model('User');
-  if (this.skipValidation()) fn(true);
+  if (this.skipValidation()) {
+    return true;
+  }
+
   // Check only when it is a new user or when email field is modified
   if (this.isNew || this.isModified('email')) {
-    User.find({ email: email }).exec(function(err, users) {
-      fn(!err && users.length > 0);
-    });
-  } else fn(true);
+    const users = await User.find({ email }).exec();
+    if (users.length < 1) {
+      return false;
+    }
+  }
+
+  return true;
 }, 'User Email does not exist in database');
 
 /**

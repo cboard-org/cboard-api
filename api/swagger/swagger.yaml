@@ -79,10 +79,17 @@ parameters:
   Communicator:
     name: communicator
     in: body
-    description: Communicator data for creating a new custom communicator 
+    description: Communicator data for creating a new custom communicator
     required: true
     schema:
       $ref: "#/definitions/Communicator" 
+  Settings:
+    name: settings
+    in: body
+    description: Settings data for creating a new custom settings
+    required: true
+    schema:
+      $ref: "#/definitions/Settings" 
   Board:
     name: board
     in: body
@@ -136,6 +143,74 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/GetUserListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/activate/{url}:
+    x-swagger-router-controller: user
+    post:
+      operationId: activateUser
+      description: Create a new user by copying it from temporary users and it removes the temporary user
+      parameters:
+        - in: path
+          name: url
+          description: Random generated key for user activation
+          required: true
+          type: string
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/UserActivatedResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/login:
+    x-swagger-router-controller: user
+    post:
+      operationId: loginUser
+      description: Returns a valid token for a user, that can be used for api authentication.
+      parameters:
+        - name: info
+          description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserLogin"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/logout:
+    x-swagger-router-controller: user
+    post:
+      operationId: logoutUser
+      description: Destroys user session and authentication token.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: info
+          description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserLogin"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LogoutResponse"
         default:
           description: Error
           schema:
@@ -218,79 +293,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /user/activate/{url}:
-    x-swagger-router-controller: user
-    post:
-      operationId: activateUser
-      description: Create a new user by copying it from temporary users and it removes the temporary user
-      parameters:
-        - in: path
-          name: url
-          description: Random generated key for user activation
-          required: true
-          type: string
-          minimum: 1
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/UserActivatedResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /user/login/{role}:
-    x-swagger-router-controller: user
-    post:
-      operationId: loginUser
-      description: Returns a valid token for a user, that can be used for api authentication.
-      parameters:
-        - name: role
-          description: user role
-          in: path
-          required: true
-          type: string
-        - name: info
-          description: User properties
-          in: body
-          required: true
-          schema:
-            $ref: "#/definitions/UserLogin"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetUserResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /user/logout:
-    x-swagger-router-controller: user
-    post:
-      operationId: logoutUser
-      description: Destroys user session and authentication token.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - name: info
-          description: User properties
-          in: body
-          required: true
-          schema:
-            $ref: "#/definitions/UserLogin"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/LogoutResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
   /me:
     x-swagger-router-controller: user
     get:
@@ -323,6 +325,45 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/TranslateResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /settings:
+    x-swagger-router-controller: settings
+    post:
+      operationId: updateSettings
+      description: Creates or updates a user's settings object in database.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Settings'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SettingsResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: getSettings
+      description: Returns settings for current user
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SettingsResponse"
         default:
           description: Error
           schema:
@@ -687,6 +728,26 @@ definitions:
           type: string
         to:
           type: string
+  Settings:
+    type: object
+    required:
+      - id
+      - user
+    properties:
+      id:
+        type: string
+      language:
+        type: object
+      speech:
+        type: object
+      display:
+        type: object
+      scanning:
+        type: object
+      navigation:
+        type: object
+      user:
+        type: string
   Communicator:
     type: object
     required:
@@ -884,6 +945,33 @@ definitions:
       - author
       - email
       - tiles
+  SettingsResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Self-generated id for the board
+      language:
+        type: object
+        description: Settings for Language
+      speech:
+        type: object
+        description: Settings for Speech
+      display:
+        type: object
+        description: Settings for Display
+      scanning:
+        type: object
+        description: Settings for Scanning
+      navigation:
+        type: object
+        description: Settings for Navigation
+      user:
+        type: string
+        description: User's id
+    required:
+      - id
+      - user
   CommunicatorResponse:
     type: object
     properties:
