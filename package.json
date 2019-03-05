@@ -30,7 +30,7 @@
     "rand-token": "^0.4.0",
     "sendgrid": "^4.10.0",
     "should": "^7.1.0",
-    "snyk": "^1.116.4",
+    "snyk": "^1.124.1",
     "supertest": "^3.0.0",
     "swagger-express-mw": "^0.7.0",
     "swagger-tools": "^0.10.1",
