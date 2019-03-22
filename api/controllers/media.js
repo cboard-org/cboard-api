@@ -1,6 +1,8 @@
 const uuidv1 = require('uuid/v1');
 const azure = require('azure-storage');
-const blobService = azure.createBlobService();
+const blobService = azure.createBlobService(
+  'DefaultEndpointsProtocol=https;AccountName=cboardgroupdiag483;AccountKey=vLQDLppDf6FvnODQ6hxS65rRw6mTtpYtmucxEqQ9ZvT4WfsV1F8ybVkw8JYHpm6zp8zPNMk9SMy4RBdEugnr6w==;EndpointSuffix=core.windows.net'
+);
 
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
