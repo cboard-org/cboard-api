@@ -18,12 +18,10 @@ const LAGUAGES_SCHEMA_DEFINITION = {
   },
   skin: {
     type: String,
-    required: true,
     trim: true
   },
   hair: {
     type: String,
-    required: true,
     trim: true
   }
 };
