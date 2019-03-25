@@ -33,7 +33,7 @@ consumes:
 produces:
   - application/json
 parameters:
-  LaguageParameter:
+  LanguageParameter:
     in: query
     name: lang
     type: string
@@ -114,13 +114,13 @@ paths:
   /swagger:
     x-swagger-pipe: swagger_raw
     
-  /laguages:
-    x-swagger-router-controller: laguages
+  /languages:
+    x-swagger-router-controller: languages
     get:
-      operationId: listLaguages
-      description: Returns the full Laguages list.
+      operationId: listLanguage
+      description: Returns the full Language list.
       parameters:
-        - $ref: "#/parameters/LaguageParameter"
+        - $ref: "#/parameters/LanguageParameter"
       responses:
         "200":
           description: Success

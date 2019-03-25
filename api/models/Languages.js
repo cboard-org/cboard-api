@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const constants = require('../constants');
 const Schema = mongoose.Schema;
 
-const LAGUAGES_SCHEMA_DEFINITION = {
+const LANGUAGES_SCHEMA_DEFINITION = {
   locale: {
     type: String,
     unique: true,
@@ -26,8 +26,8 @@ const LAGUAGES_SCHEMA_DEFINITION = {
   }
 };
 
-const laguagesSchema = new Schema(LAGUAGES_SCHEMA_DEFINITION);
+const languagesSchema = new Schema(LANGUAGES_SCHEMA_DEFINITION);
 
-const Laguages = mongoose.model('Laguages', laguagesSchema);
+const Language = mongoose.model('Language', languagesSchema);
 
-module.exports = Laguages;
+module.exports = Language;

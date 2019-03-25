@@ -1,16 +1,16 @@
-const LaguagesModel = require('../api/models/Laguages');
-const laguages = require('./laguages.json');
+const LanguagesModel = require('../api/models/Languages');
+const languages = require('./laguages.json');
 
 module.exports = async () => {
-  const laguagesDefaultData = await LaguagesModel.find();
-  if (laguagesDefaultData.length === 0) {
-    console.log(`>>> Creating (${laguages.length}) laguages seed <<<`);
+  const languagesDefaultData = await LanguagesModel.find();
+  if (languagesDefaultData.length === 0) {
+    console.log(`>>> Creating (${languages.length}) languages seed <<<`);
     await Promise.all(
-      laguages.map(laguage => {
-        const newLaguage = new LaguagesModel(laguage);
-        return newLaguage.save();
+      languages.map(laguage => {
+        const newLanguage = new LanguagesModel(laguage);
+        return newLanguage.save();
       })
     );
-    console.log(`>>> (${laguages.length}) laguages seed created <<<`);
+    console.log(`>>> (${languages.length}) languages seed created <<<`);
   }
 };
