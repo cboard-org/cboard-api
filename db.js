@@ -2,11 +2,13 @@
 
 var mongoose = require('mongoose');
 var config = require('./config');
+const seeds = require('./seeds');
 
 mongoose.connect(config.databaseUrl, { useNewUrlParser: true });
-mongoose.connection.on('connected', () =>
-  console.log('Connected to ' + config.env + ' database ')
-);
+mongoose.connection.on('connected', () => {
+  console.log('Connected to ' + config.env + ' database ');
+  seeds();
+});
 mongoose.connection.on('error', err =>
   console.log('Database connection error: ' + err)
 );
