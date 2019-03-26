@@ -38,7 +38,7 @@ parameters:
     name: lang
     type: string
     default: ""
-    description: Laguage option
+    description: Language option in format xx-XX (e.g. en-US)
   PageParameter:
     in: query
     name: page
