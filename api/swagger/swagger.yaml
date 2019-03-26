@@ -124,6 +124,12 @@ paths:
       responses:
         "200":
           description: Success
+          schema:
+            $ref: "#/definitions/GetLanguageListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /user:
     x-swagger-router-controller: user
     post:
@@ -707,6 +713,46 @@ paths:
             
 # complex objects have schema definitions
 definitions:
+  GetLanguageListResponse:
+    required:
+      - total
+      - page
+      - limit
+      - offset
+      - sort
+      - data
+    properties:
+      total:
+        type: integer
+      page:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
+      sort:
+        type: string
+      search:
+        type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Language"
+  Language:
+    type: object
+    required:
+      - displayName
+      - locale
+    properties:
+      locale:
+        type: string
+        enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
+      displayName:
+        type: string
+      skin:
+        type: string
+      hair:
+        type: string
   User:
     type: object
     required:
