@@ -130,6 +130,26 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /languages/{lang}:
+    x-swagger-router-controller: languages
+    get:
+      operationId: getLanguage
+      description: Returns a specific language
+      parameters:
+        - name: lang
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetLanguageResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /user:
     x-swagger-router-controller: user
     post:
@@ -713,6 +733,19 @@ paths:
             
 # complex objects have schema definitions
 definitions:
+  GetLanguageResponse:
+    required:
+        - locale
+        - displayName
+    properties:
+        locale:
+          type: string
+        displayName:
+          type: string
+        skin:
+          type: string
+        hair:
+          type: string
   GetLanguageListResponse:
     required:
       - total
