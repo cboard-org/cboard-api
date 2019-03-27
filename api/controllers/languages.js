@@ -16,6 +16,20 @@ const listLanguage = async (req, res) => {
   );
   return res.status(200).json(laguages);
 };
+
+const getLanguage = async (req, res) => {
+  const lang = req.swagger.params.lang.value;
+  const cond = { locale: { $regex: lang, $options: 'i' } };
+  const language = await LanguagesModel.findOne(cond);
+  if (!language) {
+    return res.status(404).json({
+      message: `Language does not exist. Language: ${lang}`
+    });
+  }
+  return res.status(200).json(language);
+};
+
 module.exports = {
-  listLanguage
+  listLanguage,
+  getLanguage
 };
