@@ -1,3 +1,5 @@
+var ObjectId = require('mongoose').Types.ObjectId;
+
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
@@ -65,7 +67,13 @@ function removeBoard(req, res) {
 }
 
 function getBoard(req, res) {
-  const id = req.swagger.params.id.value;
+    const id = req.swagger.params.id.value;
+    //  Validate id
+    if (!ObjectId.isValid(id)) {
+        return res.status(404).json({
+            message: 'Invalid ID for a Board. Board Id: ' + id
+        });
+    }
   Board.findOne({ _id: id }, function(err, boards) {
     if (err) {
       return res.status(500).json({
