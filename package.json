@@ -5,7 +5,9 @@
   "description": "New Swagger API Project",
   "keywords": [],
   "author": "Martin Bedouret",
-  "contributors": ["Martin Bedouret <martinbedouret@gmail.com>"],
+  "contributors": [
+    "Martin Bedouret <martinbedouret@gmail.com>"
+  ],
   "license": "",
   "main": "app.js",
   "dependencies": {
@@ -54,7 +56,10 @@
     "prepare": "npm run snyk-protect"
   },
   "lint-staged": {
-    "*.{js,json,css}": ["prettier --write", "git add"]
+    "*.{js,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "engines": {
     "node": ">=6.0"
