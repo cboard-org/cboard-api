@@ -1,0 +1,242 @@
+[
+  {
+    "locale": "ar-SA",
+    "displayName": "Arabic, Saudi Arabia",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "be-BY",
+    "displayName": "Belarusian (Belarus)",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "bn-BD",
+    "displayName": "Bangla (Bangladesh)",
+    "skin": "black",
+    "hair": "black"
+  },
+  {
+    "locale": "cs-CZ",
+    "displayName": "Czech (Czechia)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "da-DK",
+    "displayName": "Danish (Denmark)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "de-DE",
+    "displayName": "Deutsch(Deutschland)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "el-GR",
+    "displayName": "Greek (Greece)",
+    "skin": "white",
+    "hair": "brown"
+  },
+  {
+    "locale": "en-US",
+    "displayName": "English",
+    "skin": "white",
+    "hair": "brown"
+  },
+  {
+    "locale": "en-GB",
+    "displayName": "English",
+    "skin": "white",
+    "hair": "brown"
+  },
+  {
+    "locale": "es-ES",
+    "displayName": "Spanish (Spain)",
+    "skin": "white",
+    "hair": "brown"
+  },
+  {
+    "locale": "fi-FI",
+    "displayName": "Finnish (Finland)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "fr-FR",
+    "displayName": "French (France)",
+    "skin": "white",
+    "hair": "brown"
+  },
+  {
+    "locale": "he-IL",
+    "displayName": "Hebrew (Israel)",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "hi-IN",
+    "displayName": "Hindi (India)",
+    "skin": "black",
+    "hair": "black"
+  },
+  {
+    "locale": "hr-HR",
+    "displayName": "Croatian (Croatia)",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "hu-HU",
+    "displayName": "Hungarian (Hungary)",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "id-ID",
+    "displayName": "Indonesian (Indonesia)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "it-IT",
+    "displayName": "Italian (Italy)",
+    "skin": "white",
+    "hair": "brown"
+  },
+  {
+    "locale": "ja-JP",
+    "displayName": "Japanese (Japan)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "km-KH",
+    "displayName": "Khmer (Cambodia)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "ko-KR",
+    "displayName": "Korean (South Korea)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "ne-NP",
+    "displayName": "Nepali (Nepal)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "nl-NL",
+    "displayName": "Dutch (Netherlands)",
+    "skin": "white",
+    "hair": "red"
+  },
+  {
+    "locale": "no-NO",
+    "displayName": "Norwegian (Norway)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "pl-PL",
+    "displayName": "Polish (Poland)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "pt-BR",
+    "displayName": "Portuguese (Brazil)",
+    "skin": "mulatto",
+    "hair": "black"
+  },
+  {
+    "locale": "pt-PT",
+    "displayName": "Portuguese (Portugal)",
+    "skin": "mulatto",
+    "hair": "brown"
+  },
+  {
+    "locale": "ro-RO",
+    "displayName": "Romanian (Romania)",
+    "skin": "white",
+    "hair": "brown"
+  },
+  {
+    "locale": "ru-MD",
+    "displayName": "Russian (Moldova)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "ru-RU",
+    "displayName": "Russian (Russia)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "si-LK",
+    "displayName": "Sinhala (Sri Lanka)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "sk-SK",
+    "displayName": "Slovak (Slovakia)",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "sr-SP",
+    "displayName": "Serbian (Cyrillic)",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "sv-SE",
+    "displayName": "Swedish (Sweden)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "th-TH",
+    "displayName": "Thai (Thailand)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "tr-TR",
+    "displayName": "Turkish (Turkey)",
+    "skin": "white",
+    "hair": "black"
+  },
+  {
+    "locale": "uk-UA",
+    "displayName": "Ukrainian (Ukraine)",
+    "skin": "white",
+    "hair": "blonde"
+  },
+  {
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Vietnam)",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "zh-CN",
+    "displayName": "Chinese Traditional.",
+    "skin": "assian",
+    "hair": "black"
+  },
+  {
+    "locale": "zu-ZA",
+    "displayName": "Zulu(South Africa)",
+    "skin": "black",
+    "hair": "black"
+  }
+]
