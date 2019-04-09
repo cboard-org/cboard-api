@@ -5,7 +5,9 @@
   "description": "New Swagger API Project",
   "keywords": [],
   "author": "Martin Bedouret",
-  "contributors": ["Martin Bedouret <martinbedouret@gmail.com>"],
+  "contributors": [
+    "Martin Bedouret <martinbedouret@gmail.com>"
+  ],
   "license": "",
   "main": "app.js",
   "dependencies": {
@@ -32,7 +34,7 @@
     "supertest": "^3.0.0",
     "swagger-express-mw": "^0.7.0",
     "swagger-tools": "^0.10.1",
-    "translate-api": "^0.3.12",
+    "translate-api": "^0.3.18",
     "uuid": "^3.3.2",
     "validator": "^7.0.0",
     "yamljs": "^0.2.9"
@@ -52,7 +54,10 @@
     "prepare": "npm run snyk-protect"
   },
   "lint-staged": {
-    "*.{js,json,css}": ["prettier --write", "git add"]
+    "*.{js,json,css}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "engines": {
     "node": ">=6.0"
