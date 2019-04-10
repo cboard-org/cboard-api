@@ -23,7 +23,11 @@ const LANGUAGES_SCHEMA_DEFINITION = {
   hair: {
     type: String,
     trim: true
-  }
+    },
+  arabic: {
+    type: Boolean,
+    default: false
+    }
 };
 
 const languagesSchema = new Schema(LANGUAGES_SCHEMA_DEFINITION);

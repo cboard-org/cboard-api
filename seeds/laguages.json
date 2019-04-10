@@ -3,240 +3,280 @@
     "locale": "ar-SA",
     "displayName": "Arabic, Saudi Arabia",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic":  "true"
   },
   {
     "locale": "be-BY",
     "displayName": "Belarusian (Belarus)",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "bn-BD",
     "displayName": "Bangla (Bangladesh)",
     "skin": "black",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "cs-CZ",
     "displayName": "Czech (Czechia)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "da-DK",
     "displayName": "Danish (Denmark)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "de-DE",
     "displayName": "Deutsch(Deutschland)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "el-GR",
     "displayName": "Greek (Greece)",
     "skin": "white",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "en-US",
     "displayName": "English",
     "skin": "white",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "en-GB",
     "displayName": "English",
     "skin": "white",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "es-ES",
     "displayName": "Spanish (Spain)",
     "skin": "white",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "fi-FI",
     "displayName": "Finnish (Finland)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "fr-FR",
     "displayName": "French (France)",
     "skin": "white",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "he-IL",
     "displayName": "Hebrew (Israel)",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "hi-IN",
     "displayName": "Hindi (India)",
     "skin": "black",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "hr-HR",
     "displayName": "Croatian (Croatia)",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "hu-HU",
     "displayName": "Hungarian (Hungary)",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "id-ID",
     "displayName": "Indonesian (Indonesia)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "it-IT",
     "displayName": "Italian (Italy)",
     "skin": "white",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "ja-JP",
     "displayName": "Japanese (Japan)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "km-KH",
     "displayName": "Khmer (Cambodia)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "ko-KR",
     "displayName": "Korean (South Korea)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "ne-NP",
     "displayName": "Nepali (Nepal)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "nl-NL",
     "displayName": "Dutch (Netherlands)",
     "skin": "white",
-    "hair": "red"
+    "hair": "red",
+    "arabic": "false"
   },
   {
     "locale": "no-NO",
     "displayName": "Norwegian (Norway)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "pl-PL",
     "displayName": "Polish (Poland)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "pt-BR",
     "displayName": "Portuguese (Brazil)",
     "skin": "mulatto",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "pt-PT",
     "displayName": "Portuguese (Portugal)",
     "skin": "mulatto",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "ro-RO",
     "displayName": "Romanian (Romania)",
     "skin": "white",
-    "hair": "brown"
+    "hair": "brown",
+    "arabic": "false"
   },
   {
     "locale": "ru-MD",
     "displayName": "Russian (Moldova)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "ru-RU",
     "displayName": "Russian (Russia)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "si-LK",
     "displayName": "Sinhala (Sri Lanka)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "sk-SK",
     "displayName": "Slovak (Slovakia)",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "sr-SP",
     "displayName": "Serbian (Cyrillic)",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "sv-SE",
     "displayName": "Swedish (Sweden)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "th-TH",
     "displayName": "Thai (Thailand)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "tr-TR",
     "displayName": "Turkish (Turkey)",
     "skin": "white",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "uk-UA",
     "displayName": "Ukrainian (Ukraine)",
     "skin": "white",
-    "hair": "blonde"
+    "hair": "blonde",
+    "arabic": "false"
   },
   {
     "locale": "vi-VN",
     "displayName": "Vietnamese (Vietnam)",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "zh-CN",
     "displayName": "Chinese Traditional.",
     "skin": "assian",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   },
   {
     "locale": "zu-ZA",
     "displayName": "Zulu(South Africa)",
     "skin": "black",
-    "hair": "black"
+    "hair": "black",
+    "arabic": "false"
   }
 ]
