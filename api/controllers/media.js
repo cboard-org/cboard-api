@@ -1,6 +1,6 @@
 const uuidv1 = require('uuid/v1');
 const azure = require('azure-storage');
-const blobService = azure.createBlobService();
+const blobService = azure.createBlobService(process.env.AZURE_STORAGE_CONNECTION_STRING);
 
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
