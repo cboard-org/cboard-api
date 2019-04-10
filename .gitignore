@@ -42,3 +42,4 @@ config/env/production.js
 
 # Visual studio project
 .vscode/
+*.njsproj
