@@ -65,7 +65,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function(middleware) {
   //use sessions for tracking logins
   app.use(
     session({
-      secret: 'work hard',
+      secret: process.env.SESSION_SECRET,
       resave: true,
       saveUninitialized: false,
       store: new MongoStore({
