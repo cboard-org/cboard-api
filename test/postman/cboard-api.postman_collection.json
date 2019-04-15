@@ -312,9 +312,13 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check languages\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(240);",
+							"    pm.expect(Object.keys(jsonData.data).length).to.eql(10);",
+							"});",
+							"pm.test(\"Check total\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.total).to.eql(40);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -361,9 +365,13 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check language\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(6);",
+							"    pm.expect(jsonData.locale).to.eql(\"en-US\");",
+							"    pm.expect(jsonData.displayName).to.eql(\"English\");",
+							"    pm.expect(jsonData.skin).to.eql(\"white\");",
+							"    pm.expect(jsonData.hair).to.eql(\"brown\");",
+							"    pm.expect(jsonData.arabic).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -387,19 +395,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{url}}/languages/?lang=en-US",
+					"raw": "{{url}}/languages/en-US",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"languages",
-						""
-					],
-					"query": [
-						{
-							"key": "lang",
-							"value": "en-US"
-						}
+						"en-US"
 					]
 				}
 			},
@@ -416,9 +418,13 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check language\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(6);",
+							"    pm.expect(jsonData.locale).to.eql(\"es-ES\");",
+							"    pm.expect(jsonData.displayName).to.eql(\"Spanish (Spain)\");",
+							"    pm.expect(jsonData.skin).to.eql(\"white\");",
+							"    pm.expect(jsonData.hair).to.eql(\"brown\");",
+							"    pm.expect(jsonData.arabic).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -442,19 +448,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{url}}/languages/?lang=es-Es",
+					"raw": "{{url}}/languages/es-Es",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"languages",
-						""
-					],
-					"query": [
-						{
-							"key": "lang",
-							"value": "es-Es"
-						}
+						"es-Es"
 					]
 				}
 			},
@@ -471,9 +471,13 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check language\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(6);",
+							"    pm.expect(jsonData.locale).to.eql(\"cs-CZ\");",
+							"    pm.expect(jsonData.displayName).to.eql(\"Czech (Czechia)\");",
+							"    pm.expect(jsonData.skin).to.eql(\"white\");",
+							"    pm.expect(jsonData.hair).to.eql(\"blonde\");",
+							"    pm.expect(jsonData.arabic).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -497,19 +501,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{url}}/languages/?lang=cs-CZ",
+					"raw": "{{url}}/languages/cs-CZ",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"languages",
-						""
-					],
-					"query": [
-						{
-							"key": "lang",
-							"value": "cs-CZ"
-						}
+						"cs-CZ"
 					]
 				}
 			},
@@ -562,6 +560,67 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"tiles\": [\n    \t{}\n    \t],\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/board/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"board",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/board/ Empty",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.globals.set(\"boardid\",pm.response.json().id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
+						"exec": [
+							"board_key = Math.random().toString(36).substring(7);",
+							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
+							"",
+							"pm.environment.unset(\"variable_key\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/board/",
@@ -768,63 +827,23 @@
 			"response": []
 		},
 		{
-			"name": "/board/{id}",
+			"name": "/user/logout/",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
-						"id": "513da3fe-5b11-4bc0-8cba-9fd073c883f3",
-						"type": "text/javascript",
+						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
+							"",
+							"",
+							"pm.globals.set(\"token\",pm.response.json().authToken);",
+							"console.log(pm.globals.get(\"token\"));",
+							"",
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/board/{{boardid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"{{boardid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/logout",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "b26f5cc7-7e58-4116-96d7-8d5d780539ef",
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"User successfully logout\");",
-							"});"
-						]
+						],
+						"type": "text/javascript"
 					}
 				}
 			],
@@ -837,66 +856,23 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer {{token}}"
+						"value": "Bearer {{token}}",
+						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
 				},
 				"url": {
-					"raw": "{{url}}/user/logout",
+					"raw": "{{url}}/user/logout/",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"user",
-						"logout"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/{id}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "513da3fe-5b11-4bc0-8cba-9fd073c883f3",
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/user/{{userid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"{{userid}}"
+						"logout",
+						""
 					]
 				}
 			},

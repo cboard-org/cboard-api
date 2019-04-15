@@ -29,8 +29,7 @@ const BOARD_SCHEMA_DEFINITION = {
   },
   tiles: {
     type: Array,
-    unique: false,
-    required: true
+    unique: false
   },
   cellSize: {
     type: String,
@@ -85,11 +84,6 @@ boardSchema.path('email').validate(function(email) {
   if (this.skipValidation()) return true;
   return email.length;
 }, 'User email cannot be blank');
-
-boardSchema.path('tiles').validate(function(tiles) {
-  if (this.skipValidation()) return true;
-  return tiles && tiles.length;
-}, 'Tiles cannot be empty');
 
 boardSchema.path('email').validate(async function(email) {
   const User = mongoose.model('User');
