@@ -312,9 +312,13 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check languages\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(240);",
+							"    pm.expect(Object.keys(jsonData.data).length).to.eql(10);",
+							"});",
+							"pm.test(\"Check total\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.total).to.eql(40);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -361,9 +365,13 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check language\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(6);",
+							"    pm.expect(jsonData.locale).to.eql(\"en-US\");",
+							"    pm.expect(jsonData.displayName).to.eql(\"English\");",
+							"    pm.expect(jsonData.skin).to.eql(\"white\");",
+							"    pm.expect(jsonData.hair).to.eql(\"brown\");",
+							"    pm.expect(jsonData.arabic).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -387,19 +395,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{url}}/languages/?lang=en-US",
+					"raw": "{{url}}/languages/en-US",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"languages",
-						""
-					],
-					"query": [
-						{
-							"key": "lang",
-							"value": "en-US"
-						}
+						"en-US"
 					]
 				}
 			},
@@ -416,9 +418,13 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check language\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(6);",
+							"    pm.expect(jsonData.locale).to.eql(\"es-ES\");",
+							"    pm.expect(jsonData.displayName).to.eql(\"Spanish (Spain)\");",
+							"    pm.expect(jsonData.skin).to.eql(\"white\");",
+							"    pm.expect(jsonData.hair).to.eql(\"brown\");",
+							"    pm.expect(jsonData.arabic).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -442,19 +448,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{url}}/languages/?lang=es-Es",
+					"raw": "{{url}}/languages/es-Es",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"languages",
-						""
-					],
-					"query": [
-						{
-							"key": "lang",
-							"value": "es-Es"
-						}
+						"es-Es"
 					]
 				}
 			},
@@ -471,9 +471,13 @@
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"Your test name\", function () {",
+							"pm.test(\"Check language\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData).length).to.eql(6);",
+							"    pm.expect(jsonData.locale).to.eql(\"cs-CZ\");",
+							"    pm.expect(jsonData.displayName).to.eql(\"Czech (Czechia)\");",
+							"    pm.expect(jsonData.skin).to.eql(\"white\");",
+							"    pm.expect(jsonData.hair).to.eql(\"blonde\");",
+							"    pm.expect(jsonData.arabic).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -497,19 +501,13 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{url}}/languages/?lang=cs-CZ",
+					"raw": "{{url}}/languages/cs-CZ",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"languages",
-						""
-					],
-					"query": [
-						{
-							"key": "lang",
-							"value": "cs-CZ"
-						}
+						"cs-CZ"
 					]
 				}
 			},
