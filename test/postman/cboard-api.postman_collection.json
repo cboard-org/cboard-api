@@ -577,6 +577,67 @@
 			"response": []
 		},
 		{
+			"name": "/board/ Empty",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.globals.set(\"boardid\",pm.response.json().id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
+						"exec": [
+							"board_key = Math.random().toString(36).substring(7);",
+							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
+							"",
+							"pm.environment.unset(\"variable_key\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/board/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"board",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/board/",
 			"event": [
 				{
