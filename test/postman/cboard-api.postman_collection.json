@@ -827,63 +827,23 @@
 			"response": []
 		},
 		{
-			"name": "/board/{id}",
+			"name": "/user/logout/",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
-						"id": "513da3fe-5b11-4bc0-8cba-9fd073c883f3",
-						"type": "text/javascript",
+						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
+							"",
+							"",
+							"pm.globals.set(\"token\",pm.response.json().authToken);",
+							"console.log(pm.globals.get(\"token\"));",
+							"",
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/board/{{boardid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"{{boardid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/logout",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "b26f5cc7-7e58-4116-96d7-8d5d780539ef",
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"User successfully logout\");",
-							"});"
-						]
+						],
+						"type": "text/javascript"
 					}
 				}
 			],
@@ -896,66 +856,23 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer {{token}}"
+						"value": "Bearer {{token}}",
+						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
 				},
 				"url": {
-					"raw": "{{url}}/user/logout",
+					"raw": "{{url}}/user/logout/",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"user",
-						"logout"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/{id}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "513da3fe-5b11-4bc0-8cba-9fd073c883f3",
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/user/{{userid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"{{userid}}"
+						"logout",
+						""
 					]
 				}
 			},
