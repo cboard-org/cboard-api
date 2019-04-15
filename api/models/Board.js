@@ -29,8 +29,7 @@ const BOARD_SCHEMA_DEFINITION = {
   },
   tiles: {
     type: Array,
-    unique: false,
-    required: true
+    unique: false
   },
   cellSize: {
     type: String,
