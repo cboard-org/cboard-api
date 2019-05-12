@@ -678,12 +678,13 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
     delete:
-      operationId: removeBoard
+      operationId: deleteBoard
       description: Deletes a specific board
       security:
         - Bearer: []
       x-security-scopes:
         - admin
+        - user
       parameters:
         - name: id
           description: Board id

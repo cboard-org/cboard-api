@@ -5,12 +5,12 @@ const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 
 module.exports = {
-  createBoard: createBoard,
-  listBoard: listBoard,
-  removeBoard: removeBoard,
-  getBoard: getBoard,
-  updateBoard: updateBoard,
-  getBoardsEmail: getBoardsEmail
+    createBoard: createBoard,
+    listBoard: listBoard,
+    deleteBoard: deleteBoard,
+    getBoard: getBoard,
+    updateBoard: updateBoard,
+    getBoardsEmail: getBoardsEmail
 };
 
 function createBoard(req, res) {
@@ -53,9 +53,9 @@ async function getBoardsEmail(req, res) {
   return res.status(200).json(response);
 }
 
-function removeBoard(req, res) {
-  const id = req.swagger.params.id.value;
-  Board.findByIdAndRemove(id, function(err, boards) {
+async function deleteBoard(req, res) {
+    const id = req.swagger.params.id.value;
+    Board.findByIdAndDelete(id, function(err, boards) {
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
