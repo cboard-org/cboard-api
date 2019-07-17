@@ -40,6 +40,8 @@ nbproject/
 config/env/production.js
 .env
 
-# Visual studio project
-.vscode/
+# visual studio
 *.njsproj
+*.njsproj.*
+*.sln
+/.vs

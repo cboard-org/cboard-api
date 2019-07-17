@@ -1,3 +1,4 @@
+const moment = require('moment');
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const User = require('../models/User');
@@ -288,6 +289,7 @@ function loginUser(req, res) {
       const response = {
         ...user.toJSON(),
         settings,
+        birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
         authToken: tokenString
       };
 
