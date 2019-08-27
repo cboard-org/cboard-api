@@ -4,10 +4,10 @@ const config = require('../../config');
 const UserController = require('../controllers/user');
 
 const FBStrategy = {
-  clientID: config.facebook.APP_ID,
-  clientSecret: config.facebook.APP_SECRET,
-  callbackURL: config.facebook.CALLBACK_URL,
-  profileFields: config.facebook.PROFILE_FIELDS
+  clientID: process.env.FACEBOOK_APP_ID,
+  clientSecret: process.env.FACEBOOK_APP_SECRET,
+  callbackURL: process.env.FACEBOOK_CALLBACK_URL,
+  profileFields: ['id', 'emails', 'name', 'displayName', 'gender', 'picture']
 };
 
 passport.use(new FacebookStrategy(FBStrategy, UserController.facebookLogin));
