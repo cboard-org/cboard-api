@@ -214,10 +214,31 @@ paths:
     x-swagger-router-controller: user
     post:
       operationId: loginUser
-      description: Returns a valid token for a user, that can be used for api authentication.
+      description: Returns a valid token for a user that can be used for api authentication.
       parameters:
         - name: info
           description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserLogin"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/forgot:
+    x-swagger-router-controller: user
+    post:
+      operationId: forgotPassword
+      description: Clear token for a user that can be used for api authentication.
+      parameters:
+        - name: email
+          description: User email
           in: body
           required: true
           schema:
