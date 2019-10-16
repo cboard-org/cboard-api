@@ -22,7 +22,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "2.24.0",
-    "mongoose": "^5.5.7",
+    "mongoose": "^5.7.5",
     "ms": "^2.1.1",
     "passport": "^0.4.0",
     "passport-facebook": "^3.0.0",
