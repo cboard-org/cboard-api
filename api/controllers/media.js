@@ -33,7 +33,7 @@ async function uploadAnalytics(req, res) {
     await createContainerIfNotExists(BLOB_CONTAINER_NAME);
     const file = await createBlockBlobFromText(BLOB_CONTAINER_NAME, {
       ...req.files.file[0],
-      originalname: user.email
+      originalname: req.user.email
     });
     url = blobService.getUrl(file.container, file.name);
   } catch (e) {}
