@@ -3,18 +3,17 @@ const { createBlockBlobFromText } = require('../helpers/blob');
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
 module.exports = {
-  uploadMedia
+  uploadAnalytics
 };
 
-async function uploadMedia(req, res) {
+async function uploadAnalytics(req, res) {
   let url = null;
 
   try {
-    const uploadedFile = req.files.file[0];
     const file = await createBlockBlobFromText(
       BLOB_CONTAINER_NAME,
-      uploadedFile.originalname,
-      uploadedFile
+      req.user.email,
+      req.files.file[0]
     );
     url = blobService.getUrl(file.container, file.name);
   } catch (e) {}

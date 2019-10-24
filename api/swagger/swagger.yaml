@@ -588,29 +588,29 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-    /analytics:
-      x-swagger-router-controller: media
-      post:
-        operationId: uploadAnalytics
-        description: Uploads offline analytics
-        security:
-          - Bearer: []
-        x-security-scopes:
-          - admin
-          - user
-        consumes:
-          - multipart/form-data
-        parameters:
-          - $ref: '#/parameters/Media'
-        responses:
-          "200":
-            description: Success
-            schema:
-              $ref: "#/definitions/MediaResponse"
-          default:
-            description: Error
-            schema:
-              $ref: "#/definitions/ErrorResponse"
+  /analytics:
+    x-swagger-router-controller: analytics
+    post:
+      operationId: uploadAnalytics
+      description: Uploads offline analytics
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Media'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/MediaResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /board:
     x-swagger-router-controller: board
