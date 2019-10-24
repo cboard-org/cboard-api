@@ -239,12 +239,12 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/UserLogin"
+            $ref: "#/definitions/UserForgot"
       responses:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GetUserResponse"
+            $ref: "#/definitions/GeneralResponse"
         default:
           description: Error
           schema:
@@ -919,6 +919,13 @@ definitions:
         email:
           type: string
         password:
+          type: string
+  UserForgot:
+      type: object
+      required:
+      - email
+      properties:
+        email:
           type: string
   GeneralResponse:
     type: object

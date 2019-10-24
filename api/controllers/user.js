@@ -2,6 +2,7 @@ const moment = require('moment');
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const User = require('../models/User');
+const ResetPassword = require('../models/ResetPassword');
 const Settings = require('../models/Settings');
 const mailing = require('../mail');
 const nev = mailing('en');
@@ -18,7 +19,8 @@ module.exports = {
   logoutUser: logoutUser,
   getMe: getMe,
   facebookLogin: facebookLogin,
-  googleLogin: googleLogin
+  googleLogin: googleLogin,
+  forgotPassword: forgotPassword
 };
 
 const USER_MODEL_ID_TYPE = {
@@ -327,4 +329,28 @@ async function getMe(req, res) {
   const response = { ...req.user, settings };
 
   return res.status(200).json(response);
+}
+
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email: { $in: emails } }).exec();
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'No user found with that email address.'
+      });
+    }
+    const response = {
+      success: 1,
+      message: 'Successfully.'
+    };
+    return res.status(200).json(response);
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting user.',
+      error: err
+    });
+  }
 }
