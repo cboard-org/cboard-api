@@ -1,4 +1,7 @@
 const moment = require('moment');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const User = require('../models/User');
