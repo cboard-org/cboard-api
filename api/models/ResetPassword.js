@@ -5,28 +5,17 @@ const constants = require('../constants');
 const Schema = mongoose.Schema;
 
 const RESETPASSWORD_SCHEMA_DEFINITION = {
-  locale: {
+  userId: {
     type: String,
     unique: true,
     required: true,
     trim: true
   },
-  displayName: {
-    type: String,
-    required: true,
-    trim: true
+  resetPasswordToken: {
+    type: String
   },
-  skin: {
-    type: String,
-    trim: true
-  },
-  hair: {
-    type: String,
-    trim: true
-  },
-  arabic: {
-    type: Boolean,
-    default: false
+  resetPasswordExpires: {
+    type: Date
   }
 };
 
