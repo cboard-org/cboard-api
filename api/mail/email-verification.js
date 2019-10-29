@@ -111,7 +111,17 @@ module.exports = function(mongoose) {
         options[key] = optionsToConfigure[key];
       }
     }
+    console.log(options.transportOptions);
     transporter = nodemailer.createTransport(options.transportOptions);
+
+    // verify connection configuration
+    transporter.verify(function(error, success) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email Server is ready to take our messages');
+      }
+    });
 
     var err;
 
