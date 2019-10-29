@@ -3,7 +3,7 @@
 var User = require('../models/User');
 var config = require('../../config');
 var mongoose = require('mongoose');
-var nev = require('email-verification')(mongoose);
+var nev = require('./email-verification')(mongoose);
 var bcrypt = require('bcryptjs');
 
 module.exports = function(locale) {
@@ -16,6 +16,7 @@ module.exports = function(locale) {
   };
 
   var subject, html, text;
+
   switch (locale) {
     case 'en':
       subject = 'Cboard - Please confirm account';
@@ -38,6 +39,7 @@ module.exports = function(locale) {
         (text =
           'Thanks for signup to Cboard!. Please confirm your account by clicking the following link: ${URL}');
   }
+
   nev.configure(
     {
       verificationURL: 'https://app.cboard.io/activate/${URL}',
