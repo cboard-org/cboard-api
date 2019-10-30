@@ -9,14 +9,17 @@ module.exports = {
 async function uploadAnalytics(req, res) {
   let url = null;
 
+  console.log(req.files);
   try {
-    const file = await createBlockBlobFromText(
+    const [file, urlResult] = await createBlockBlobFromText(
       BLOB_CONTAINER_NAME,
-      req.user.email,
+      req.user.email + '.analytics',
       req.files.file[0]
     );
-    url = blobService.getUrl(file.container, file.name);
-  } catch (e) {}
+    url = urlResult;
+  } catch (e) {
+    console.error(e);
+  }
 
   res.status(url ? 200 : 500).json({ url });
 }
