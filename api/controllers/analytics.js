@@ -1,6 +1,7 @@
 const { createBlockBlobFromText } = require('../helpers/blob');
 
-const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
+const BLOB_CONTAINER_NAME =
+  process.env.ANALYTICS_BLOB_CONTAINER_NAME || 'analytics';
 
 module.exports = {
   uploadAnalytics
