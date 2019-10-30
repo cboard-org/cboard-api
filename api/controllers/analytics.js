@@ -9,7 +9,6 @@ module.exports = {
 async function uploadAnalytics(req, res) {
   let url = null;
 
-  console.log(req.files);
   try {
     const [file, urlResult] = await createBlockBlobFromText(
       BLOB_CONTAINER_NAME,
