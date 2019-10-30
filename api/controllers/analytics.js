@@ -12,8 +12,9 @@ async function uploadAnalytics(req, res) {
   try {
     const [file, urlResult] = await createBlockBlobFromText(
       BLOB_CONTAINER_NAME,
-      req.user.email + '.analytics',
-      req.files.file[0]
+      req.user.email,
+      req.files.file[0],
+      'analytics'
     );
     url = urlResult;
   } catch (e) {

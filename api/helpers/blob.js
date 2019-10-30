@@ -21,7 +21,12 @@ function createContainerIfNotExists(shareName) {
 }
 
 // Returns [file:BlobResult, fileUrl:string]
-async function createBlockBlobFromText(containerName, fileName, file) {
+async function createBlockBlobFromText(
+  containerName,
+  fileName,
+  file,
+  prefix = ''
+) {
   await createContainerIfNotExists(containerName);
 
   const { buffer, mimetype } = file;
@@ -37,7 +42,9 @@ async function createBlockBlobFromText(containerName, fileName, file) {
   const uuidSuffix = uuidv1()
     .split('-')
     .pop();
-  const finalName = `${ts}_${uuidSuffix}_${fileName.toLowerCase().trim()}`;
+  const finalName = `${prefix}_${ts}_${uuidSuffix}_${fileName
+    .toLowerCase()
+    .trim()}`;
 
   return new Promise((resolve, reject) => {
     blobService.createBlockBlobFromText(
