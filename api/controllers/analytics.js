@@ -18,9 +18,10 @@ async function uploadAnalytics(req, res) {
       'analytics'
     );
     url = urlResult;
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    return res.status(500).json({
+      message: 'ERROR: Unable to upload analytics file . ' + err.message
+    });
   }
-
-  res.status(url ? 200 : 500).json({ url });
+  return res.status(200).json({ url });
 }

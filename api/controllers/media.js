@@ -17,9 +17,10 @@ async function uploadMedia(req, res) {
       uploadedFile
     );
     url = fileUrl;
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    return res.status(500).json({
+      message: 'ERROR: Unable to upload media file . ' + err.message
+    });
   }
-
-  res.status(url ? 200 : 500).json({ url });
+  return res.status(200).json({ url });
 }
