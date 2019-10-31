@@ -345,6 +345,19 @@ async function forgotPassword(req, res) {
         message: 'No user found with that email address.'
       });
     }
+    ResetPassword.findOne({
+      where: { userId: user.id, status: 0 }
+    }).then(function(resetPassword) {
+      if (resetPassword)
+        resetPassword.destroy({
+          where: {
+            id: resetPassword.id
+          }
+        });
+      //creating the token to be sent to the forgot password form (react)
+      token = crypto.randomBytes(32).toString('hex');
+    });
+
     const response = {
       success: 1,
       message: 'Successfully.'
