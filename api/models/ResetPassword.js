@@ -21,6 +21,6 @@ const RESETPASSWORD_SCHEMA_DEFINITION = {
 
 const resetPasswordSchema = new Schema(RESETPASSWORD_SCHEMA_DEFINITION);
 
-const ResetPassword = mongoose.model('Language', resetPasswordSchema);
+const ResetPassword = mongoose.model('ResetPassword', resetPasswordSchema);
 
 module.exports = ResetPassword;
