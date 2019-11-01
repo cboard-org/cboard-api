@@ -44,7 +44,8 @@ module.exports = function(mongoose) {
 
   // default options
   var options = {
-    verificationURL: 'http://example.com/email-verification/${URL}',
+    verificationURL: 'https://app.cboard.io/activate/${URL}',
+    resetPasswordURL: 'https://app.cboard.io/reset/${URL}',
     URLLength: 48,
 
     // mongo-stuff
@@ -65,7 +66,7 @@ module.exports = function(mongoose) {
       }
     },
     verifyMailOptions: {
-      from: 'Do Not Reply <user@gmail.com>',
+      from: 'Do Not Reply <cboard@cboard.io>',
       subject: 'Confirm your account',
       html:
         '<p>Please verify your account by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
@@ -82,12 +83,33 @@ module.exports = function(mongoose) {
     },
     shouldSendConfirmation: true,
     confirmMailOptions: {
-      from: 'Do Not Reply <user@gmail.com>',
+      from: 'Do Not Reply<cboard@cboard.io>',
       subject: 'Successfully verified!',
       html: '<p>Your account has been successfully verified.</p>',
       text: 'Your account has been successfully verified.'
     },
     confirmSendMailCallback: function(err, info) {
+      if (err) {
+        throw err;
+      } else {
+        console.log(info.response);
+      }
+    },
+    resetPasswordEmailOptions: {
+      from: 'Do Not Reply <user@gmail.com>',
+      subject: 'Cboard - Password reset',
+      html:
+        '<p>A request was submitted to reset the password of your Cboard account. </p> \
+        <p>This request will expire in 24 hours. Please set a new password as soon as possible.</p> \
+        <p>Please reset your account by clicking<a href = "${URL}">this link</a>. </p> \
+        <p>If you are unable to do so, copy and paste the following link into your browser:</p><p>${URL}</p>',
+      text:
+        'A request was submitted to reset the password of your Cboard account. \
+        This request will expire in 24 hours. Please set a new password as soon as possible. \
+        Please reset your account by clicking ${URL} \
+        If you are unable to do so, copy and paste the following link into your browser: ${URL}'
+    },
+    verifySendMailCallback: function(err, info) {
       if (err) {
         throw err;
       } else {
@@ -111,7 +133,9 @@ module.exports = function(mongoose) {
         options[key] = optionsToConfigure[key];
       }
     }
-    console.log(options.transportOptions);
+    console.log(
+      options.transportOptions.service + ' is configured as email transport.'
+    );
     transporter = nodemailer.createTransport(options.transportOptions);
 
     // verify connection configuration
@@ -484,6 +508,33 @@ module.exports = function(mongoose) {
     });
   };
 
+  /**
+   * Send an email to the user requesting confirmation.
+   *
+   * @func sendResetPasswordEmail
+   * @param {string} email - the user's email address.
+   * @param {function} callback - the callback to pass to Nodemailer's transporter
+   */
+  var sendResetPasswordEmail = function(email, url, callback) {
+    var r = /\$\{URL\}/g;
+
+    // inject newly-created URL into the email's body and FIRE
+    // stringify --> parse is used to deep copy
+    var URL = options.resetPasswordURL.replace(r, url),
+      mailOptions = JSON.parse(
+        JSON.stringify(options.resetPasswordMailOptions)
+      );
+
+    mailOptions.to = email;
+    mailOptions.html = mailOptions.html.replace(r, URL);
+    mailOptions.text = mailOptions.text.replace(r, URL);
+
+    if (!callback) {
+      callback = options.resetPasswordSendMailCallback;
+    }
+    transporter.sendMail(mailOptions, callback);
+  };
+
   return {
     options: options,
     configure: configure,
@@ -492,6 +543,7 @@ module.exports = function(mongoose) {
     confirmTempUser: confirmTempUser,
     resendVerificationEmail: resendVerificationEmail,
     sendConfirmationEmail: sendConfirmationEmail,
-    sendVerificationEmail: sendVerificationEmail
+    sendVerificationEmail: sendVerificationEmail,
+    sendResetPasswordEmail: sendResetPasswordEmail
   };
 };

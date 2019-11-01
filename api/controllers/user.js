@@ -356,16 +356,40 @@ async function forgotPassword(req, res) {
         });
       //creating the token to be sent to the forgot password form (react)
       token = crypto.randomBytes(32).toString('hex');
+      //hashing the password to store in the db node.js
+      bcrypt.hash(token, null, null, function(err, hash) {
+        ResetPassword.create({
+          userId: user.id,
+          resetPasswordToken: hash,
+          resetPasswordExpires: moment.utc().add(86400, 'seconds')
+        }).then(function(item) {
+          if (!item) {
+            return throwFailed(
+              res,
+              'Oops problem in creating new password record'
+            );
+          }
+          //sending mail to the user where he can reset password.
+          //User id and the token generated are sent as params in a link
+          nev.sendResetPasswordEmail(user.email, token, function(err, info) {
+            if (err) {
+              return res.status(500).json({
+                message: 'ERROR: sending verification email FAILED ' + info
+              });
+            } else {
+              const response = {
+                success: 1,
+                message: 'Check your mail to reset your password.'
+              };
+              return res.status(200).json(response);
+            }
+          });
+        });
+      });
     });
-
-    const response = {
-      success: 1,
-      message: 'Successfully.'
-    };
-    return res.status(200).json(response);
   } catch (err) {
     return res.status(500).json({
-      message: 'Error getting user.',
+      message: 'Error resetting user password.',
       error: err
     });
   }
