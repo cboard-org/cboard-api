@@ -249,6 +249,27 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /user/store-password:
+    x-swagger-router-controller: user
+    post:
+      operationId: storePassword
+      description: Allows to store a new password using a verification url.
+      parameters:
+        - name: info
+          description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserStorePassword"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /user/logout:
     x-swagger-router-controller: user
     post:
@@ -601,7 +622,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
   /analytics:
     x-swagger-router-controller: analytics
     post:
@@ -625,7 +645,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
   /board:
     x-swagger-router-controller: board
     post:
@@ -951,6 +970,19 @@ definitions:
       - email
       properties:
         email:
+          type: string
+  UserStorePassword:
+      type: object
+      required:
+      - userid
+      - token
+      - password
+      properties:
+        userid:
+          type: string
+        token:
+          type: string
+        password:
           type: string
   GeneralResponse:
     type: object
