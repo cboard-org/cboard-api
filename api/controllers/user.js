@@ -336,58 +336,63 @@ async function getMe(req, res) {
 
 async function forgotPassword(req, res) {
   const { email } = req.body;
-  console.log(email);
   try {
     const user = await User.findOne({ email: { $in: email } }).exec();
-
-    console.log(user);
     if (!user) {
       return res.status(404).json({
-        message: 'No user found with that email address.'
+        message: 'No user found with that email address. Check your input.'
       });
     }
-    ResetPassword.findOne({
-      where: { userId: user.id, status: 0 }
-    }).then(function(resetPassword) {
-      if (resetPassword)
-        resetPassword.destroy({
-          where: {
-            id: resetPassword.id
+    const resetPassword = await ResetPassword.findOne({
+      userId: user.id,
+      status: false
+    }).exec();
+    if (resetPassword) {
+      //remove entry if exist
+      await ResetPassword.deleteOne({ _id: resetPassword.id }, function(err) {
+        if (err) {
+          return res.status(500).json({
+            message: 'ERROR: delete reset password FAILED ',
+            error: err.message
+          });
+        }
+      }).exec();
+    }
+    //creating the token to be sent to the forgot password form
+    token = crypto.randomBytes(32).toString('hex');
+    //hashing the password to store in the db node.js
+    bcrypt.genSalt(8, function(err, salt) {
+      bcrypt.hash(token, salt, function(err, hash) {
+        const item = new ResetPassword({
+          userId: user.id,
+          resetPasswordToken: hash,
+          resetPasswordExpires: moment.utc().add(86400, 'seconds'),
+          status: false
+        });
+        item.save(function(err, rstPassword) {
+          if (err) {
+            return res.status(500).json({
+              message: 'ERROR: create reset password FAILED ',
+              error: err.message
+            });
           }
         });
-      //creating the token to be sent to the forgot password form (react)
-      token = crypto.randomBytes(32).toString('hex');
-      //hashing the password to store in the db node.js
-      bcrypt.genSalt(8, function(err, salt) {
-        bcrypt.hash(token, salt, function(err, hash) {
-          ResetPassword.create({
-            userId: user.id,
-            resetPasswordToken: hash,
-            resetPasswordExpires: moment.utc().add(86400, 'seconds')
-          }).then(function(item) {
-            if (!item) {
-              return throwFailed(
-                res,
-                'Oops problem in creating new password record'
-              );
-            }
-            //sending mail to the user where he can reset password.
-            //User id and the token generated are sent as params in a link
-            nev.sendResetPasswordEmail(user.email, token, function(err, info) {
-              if (err) {
-                return res.status(500).json({
-                  message:
-                    'ERROR: sending reset your password email FAILED ' + info
-                });
-              } else {
-                const response = {
-                  success: 1,
-                  message: 'Check your mail to reset your password.'
-                };
-                return res.status(200).json(response);
-              }
+        //sending mail to the user where he can reset password.
+        //User id and the token generated are sent as params in a link
+        nev.sendResetPasswordEmail(user.email, token, function(err) {
+          if (err) {
+            return res.status(500).json({
+              message: 'ERROR: sending reset your password email FAILED ',
+              error: err.message
             });
-          });
+          } else {
+            const response = {
+              success: 1,
+              url: token,
+              message: 'Success! Check your mail to reset your password.'
+            };
+            return res.status(200).json(response);
+          }
         });
       });
     });

@@ -16,6 +16,10 @@ const RESETPASSWORD_SCHEMA_DEFINITION = {
   },
   resetPasswordExpires: {
     type: Date
+  },
+  status: {
+    type: Boolean,
+    default: 0
   }
 };
 
