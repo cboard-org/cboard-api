@@ -169,7 +169,7 @@ function activateUser(req, res) {
     } else {
       return res.status(404).json({
         message: 'ERROR: confirming temp user FAILED ',
-        error: err
+        error: err.message
       });
     }
   });
@@ -230,7 +230,7 @@ async function getUser(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error getting user.',
-      error: err
+      error: err.message
     });
   }
 }
@@ -244,7 +244,7 @@ function updateUser(req, res) {
       if (err) {
         return res.status(500).json({
           message: 'Error updating user. ',
-          error: err
+          error: err.message
         });
       }
       if (!user) {
@@ -259,7 +259,7 @@ function updateUser(req, res) {
         if (err) {
           return res.status(500).json({
             message: 'Error saving user. ',
-            error: err
+            error: err.message
           });
         }
         if (!user) {
@@ -310,7 +310,7 @@ function logoutUser(req, res) {
       if (err) {
         return res.status(500).json({
           message: 'Error removing session .',
-          error: err
+          error: err.message
         });
       }
     });
@@ -336,10 +336,11 @@ async function getMe(req, res) {
 
 async function forgotPassword(req, res) {
   const { email } = req.body;
-
+  console.log(email);
   try {
-    const user = await User.findOne({ email: { $in: emails } }).exec();
+    const user = await User.findOne({ email: { $in: email } }).exec();
 
+    console.log(user);
     if (!user) {
       return res.status(404).json({
         message: 'No user found with that email address.'
@@ -357,32 +358,35 @@ async function forgotPassword(req, res) {
       //creating the token to be sent to the forgot password form (react)
       token = crypto.randomBytes(32).toString('hex');
       //hashing the password to store in the db node.js
-      bcrypt.hash(token, null, null, function(err, hash) {
-        ResetPassword.create({
-          userId: user.id,
-          resetPasswordToken: hash,
-          resetPasswordExpires: moment.utc().add(86400, 'seconds')
-        }).then(function(item) {
-          if (!item) {
-            return throwFailed(
-              res,
-              'Oops problem in creating new password record'
-            );
-          }
-          //sending mail to the user where he can reset password.
-          //User id and the token generated are sent as params in a link
-          nev.sendResetPasswordEmail(user.email, token, function(err, info) {
-            if (err) {
-              return res.status(500).json({
-                message: 'ERROR: sending verification email FAILED ' + info
-              });
-            } else {
-              const response = {
-                success: 1,
-                message: 'Check your mail to reset your password.'
-              };
-              return res.status(200).json(response);
+      bcrypt.genSalt(8, function(err, salt) {
+        bcrypt.hash(token, salt, function(err, hash) {
+          ResetPassword.create({
+            userId: user.id,
+            resetPasswordToken: hash,
+            resetPasswordExpires: moment.utc().add(86400, 'seconds')
+          }).then(function(item) {
+            if (!item) {
+              return throwFailed(
+                res,
+                'Oops problem in creating new password record'
+              );
             }
+            //sending mail to the user where he can reset password.
+            //User id and the token generated are sent as params in a link
+            nev.sendResetPasswordEmail(user.email, token, function(err, info) {
+              if (err) {
+                return res.status(500).json({
+                  message:
+                    'ERROR: sending reset your password email FAILED ' + info
+                });
+              } else {
+                const response = {
+                  success: 1,
+                  message: 'Check your mail to reset your password.'
+                };
+                return res.status(200).json(response);
+              }
+            });
           });
         });
       });
@@ -390,7 +394,7 @@ async function forgotPassword(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error resetting user password.',
-      error: err
+      error: err.message
     });
   }
 }

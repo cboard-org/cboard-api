@@ -74,7 +74,7 @@ module.exports = function(locale) {
         html:
           '<p>A request was submitted to reset the password of your Cboard account. </p> \
         <p>This request will expire in 24 hours. Please set a new password as soon as possible.</p> \
-        <p>Please reset your account by clicking<a href = "${URL}">this link</a>. </p> \
+        <p>Please reset your account by clicking <a href = "${URL}">this link</a>. </p> \
         <p>If you are unable to do so, copy and paste the following link into your browser:</p><p>${URL}</p>',
         text:
           'A request was submitted to reset the password of your Cboard account. \
