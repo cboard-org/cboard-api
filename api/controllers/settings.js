@@ -37,7 +37,7 @@ async function updateSettings(req, res) {
   } catch (err) {
     return res.status(409).json({
       message: 'Error saving settings',
-      error: err
+      error: err.message
     });
   }
 }

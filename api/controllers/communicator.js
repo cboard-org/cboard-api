@@ -17,7 +17,7 @@ function createCommunicator(req, res) {
     if (err) {
       return res.status(409).json({
         message: 'Error saving communicator',
-        error: err
+        error: err.message
       });
     }
     return res.status(200).json({
@@ -72,7 +72,7 @@ function getCommunicator(req, res) {
     if (err) {
       return res.status(500).json({
         message: 'Error getting board. ',
-        error: err
+        error: err.message
       });
     }
 
@@ -99,7 +99,7 @@ async function updateCommunicator(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error updating communicator.',
-      error: err
+      error: err.message
     });
   }
 
@@ -112,7 +112,7 @@ async function updateCommunicator(req, res) {
       message: `RootBoard '${rootBoard}' does not exist in boards: ${boards.join(
         ', '
       )}`,
-      error: err
+      error: err.message
     });
   }
 
@@ -132,7 +132,7 @@ async function updateCommunicator(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error saving communicator.',
-      error: err
+      error: err.message
     });
   }
 }
@@ -143,7 +143,7 @@ function removeCommunicator(req, res) {
     if (err) {
       return res.status(404).json({
         message: `Communicator not found. Communicator Id: ${id}`,
-        error: err
+        error: err.message
       });
     }
 

@@ -66,6 +66,12 @@ const USER_SCHEMA_DEFINITION = {
     email: String,
     emails: [{ type: String }],
     photos: [{ type: String }]
+  },
+  resetPasswordToken: {
+    type: String
+  },
+  resetPasswordExpires: {
+    type: Date
   }
 };
 

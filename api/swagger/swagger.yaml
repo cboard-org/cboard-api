@@ -8,7 +8,6 @@ info:
 # host: localhost:10010
 # basePath prefixes all resource paths 
 basePath: /
-# 
 schemes:
   # tip: remove http to make production-grade
   - http
@@ -25,7 +24,6 @@ securityDefinitions:
      to the route /login giving a valid user & password.
      The following syntax must be used in the 'Authorization' header :
          Bearer xxxxxx.yyyyyyy.zzzzzz
-
 # format of bodies a client can send (Content-Type)
 consumes:
   - application/json
@@ -113,7 +111,6 @@ parameters:
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
-    
   /languages:
     x-swagger-router-controller: languages
     get:
@@ -214,7 +211,7 @@ paths:
     x-swagger-router-controller: user
     post:
       operationId: loginUser
-      description: Returns a valid token for a user, that can be used for api authentication.
+      description: Returns a valid token for a user that can be used for api authentication.
       parameters:
         - name: info
           description: User properties
@@ -227,6 +224,48 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/forgot:
+    x-swagger-router-controller: user
+    post:
+      operationId: forgotPassword
+      description: Clear token for a user that can be used for api authentication.
+      parameters:
+        - name: email
+          description: User email
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserForgot"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/store-password:
+    x-swagger-router-controller: user
+    post:
+      operationId: storePassword
+      description: Allows to store a new password using a verification url.
+      parameters:
+        - name: info
+          description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserStorePassword"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
         default:
           description: Error
           schema:
@@ -354,7 +393,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  
   /translate:
     x-swagger-router-controller: translate
     post:
@@ -371,7 +409,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
   /settings:
     x-swagger-router-controller: settings
     post:
@@ -410,7 +447,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
   /communicator:
     x-swagger-router-controller: communicator
     post:
@@ -563,7 +599,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
   /media:
     x-swagger-router-controller: media
     post:
@@ -587,7 +622,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
   /analytics:
     x-swagger-router-controller: analytics
     post:
@@ -611,7 +645,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
   /board:
     x-swagger-router-controller: board
     post:
@@ -755,7 +788,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-            
 # complex objects have schema definitions
 definitions:
   GetLanguageResponse:
@@ -929,6 +961,26 @@ definitions:
       - password
       properties:
         email:
+          type: string
+        password:
+          type: string
+  UserForgot:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+  UserStorePassword:
+      type: object
+      required:
+      - userid
+      - token
+      - password
+      properties:
+        userid:
+          type: string
+        token:
           type: string
         password:
           type: string

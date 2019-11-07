@@ -5,12 +5,12 @@ const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 
 module.exports = {
-    createBoard: createBoard,
-    listBoard: listBoard,
-    deleteBoard: deleteBoard,
-    getBoard: getBoard,
-    updateBoard: updateBoard,
-    getBoardsEmail: getBoardsEmail
+  createBoard: createBoard,
+  listBoard: listBoard,
+  deleteBoard: deleteBoard,
+  getBoard: getBoard,
+  updateBoard: updateBoard,
+  getBoardsEmail: getBoardsEmail
 };
 
 function createBoard(req, res) {
@@ -19,7 +19,7 @@ function createBoard(req, res) {
     if (err) {
       return res.status(409).json({
         message: 'Error saving board',
-        error: err
+        error: err.message
       });
     }
     return res.status(200).json(board.toJSON());
@@ -54,12 +54,12 @@ async function getBoardsEmail(req, res) {
 }
 
 async function deleteBoard(req, res) {
-    const id = req.swagger.params.id.value;
-    Board.findByIdAndDelete(id, function(err, boards) {
+  const id = req.swagger.params.id.value;
+  Board.findByIdAndDelete(id, function(err, boards) {
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
-        error: err
+        error: err.message
       });
     }
     return res.status(200).json(boards);
@@ -67,18 +67,18 @@ async function deleteBoard(req, res) {
 }
 
 function getBoard(req, res) {
-    const id = req.swagger.params.id.value;
-    //  Validate id
-    if (!ObjectId.isValid(id)) {
-        return res.status(404).json({
-            message: 'Invalid ID for a Board. Board Id: ' + id
-        });
-    }
+  const id = req.swagger.params.id.value;
+  //  Validate id
+  if (!ObjectId.isValid(id)) {
+    return res.status(404).json({
+      message: 'Invalid ID for a Board. Board Id: ' + id
+    });
+  }
   Board.findOne({ _id: id }, function(err, boards) {
     if (err) {
       return res.status(500).json({
         message: 'Error getting board. ',
-        error: err
+        error: err.message
       });
     }
     if (!boards) {
@@ -96,7 +96,7 @@ function updateBoard(req, res) {
     if (err) {
       return res.status(500).json({
         message: 'Error updating board. ',
-        error: err
+        error: err.message
       });
     }
     if (!board) {
@@ -111,7 +111,7 @@ function updateBoard(req, res) {
       if (err) {
         return res.status(500).json({
           message: 'Error saving board. ',
-          error: err
+          error: err.message
         });
       }
       if (!board) {

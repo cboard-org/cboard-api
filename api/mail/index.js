@@ -43,6 +43,7 @@ module.exports = function(locale) {
   nev.configure(
     {
       verificationURL: 'https://app.cboard.io/activate/${URL}',
+      resetPasswordURL: 'https://app.cboard.io/reset/${USERID}/${URL}',
       URLLength: 16,
 
       // mongo-stuff
@@ -66,6 +67,20 @@ module.exports = function(locale) {
         subject: 'Cboard - Successfully verified!',
         html: '<p>Your account at Cboard has been successfully verified.</p>',
         text: 'Your account at Cboard has been successfully verified.'
+      },
+      resetPasswordMailOptions: {
+        from: 'Do Not Reply <cboard@cboard.io>',
+        subject: 'Cboard - Password reset',
+        html:
+          '<p>A request was submitted to reset the password of your Cboard account. </p> \
+        <p>This request will expire in 24 hours. Please set a new password as soon as possible.</p> \
+        <p>Please reset your account by clicking <a href = "${URL}">this link</a>. </p> \
+        <p>If you are unable to do so, copy and paste the following link into your browser:</p><p>${URL}</p>',
+        text:
+          'A request was submitted to reset the password of your Cboard account. \
+        This request will expire in 24 hours. Please set a new password as soon as possible. \
+        Please reset your account by clicking ${URL} \
+        If you are unable to do so, copy and paste the following link into your browser: ${URL}'
       },
       hashingFunction: myHasher
     },
