@@ -380,7 +380,7 @@ async function forgotPassword(req, res) {
         });
         //sending mail to the user where he can reset password.
         //User id and the token generated are sent as params in a link
-        nev.sendResetPasswordEmail(user.email, token, function(err) {
+        nev.sendResetPasswordEmail(user.email, user.id, token, function(err) {
           if (err) {
             return res.status(500).json({
               message: 'ERROR: sending reset your password email FAILED ',
@@ -389,6 +389,7 @@ async function forgotPassword(req, res) {
           } else {
             const response = {
               success: 1,
+              userid: user.id,
               url: token,
               message: 'Success! Check your mail to reset your password.'
             };

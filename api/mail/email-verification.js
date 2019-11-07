@@ -45,7 +45,7 @@ module.exports = function(mongoose) {
   // default options
   var options = {
     verificationURL: 'https://app.cboard.io/activate/${URL}',
-    resetPasswordURL: 'https://app.cboard.io/reset/${URL}',
+    resetPasswordURL: 'https://app.cboard.io/reset/${USERID}/${URL}',
     URLLength: 48,
 
     // mongo-stuff
@@ -515,15 +515,16 @@ module.exports = function(mongoose) {
    * @param {string} email - the user's email address.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
-  var sendResetPasswordEmail = function(email, url, callback) {
+  var sendResetPasswordEmail = function(email, userid, url, callback) {
     var r = /\$\{URL\}/g;
+    var u = /\$\{USERID\}/;
 
     // inject newly-created URL into the email's body and FIRE
     // stringify --> parse is used to deep copy
-    var URL = options.resetPasswordURL.replace(r, url),
-      mailOptions = JSON.parse(
-        JSON.stringify(options.resetPasswordMailOptions)
-      );
+    var URL = options.resetPasswordURL.replace(r, url).replace(u, userid);
+    var mailOptions = JSON.parse(
+      JSON.stringify(options.resetPasswordMailOptions)
+    );
 
     mailOptions.to = email;
     mailOptions.html = mailOptions.html.replace(r, URL);
