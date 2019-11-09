@@ -1,27 +1,18 @@
-const { createBlockBlobFromText } = require('../helpers/blob');
-
-const BLOB_CONTAINER_NAME =
-  process.env.ANALYTICS_BLOB_CONTAINER_NAME || 'analytics';
+const Analytics = require('../models/Analytics');
 
 module.exports = {
-  uploadAnalytics
+  saveAnalytics
 };
 
-async function uploadAnalytics(req, res) {
-  let url = null;
-
-  try {
-    const [file, urlResult] = await createBlockBlobFromText(
-      BLOB_CONTAINER_NAME,
-      req.user.email,
-      req.files.file[0],
-      'analytics'
-    );
-    url = urlResult;
-  } catch (err) {
-    return res.status(500).json({
-      message: 'ERROR: Unable to upload analytics file . ' + err.message
-    });
-  }
-  return res.status(200).json({ url });
+async function saveAnalytics(req, res) {
+  const analytics = new Analytics(req.body);
+  analytics.save(function(err, analytics) {
+    if (err) {
+      return res.status(409).json({
+        message: 'Error saving analytics',
+        error: err.message
+      });
+    }
+    return res.status(200).json(analytics.toJSON());
+  });
 }

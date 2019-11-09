@@ -872,6 +872,51 @@
       "response": []
     },
     {
+      "name": "/analytics/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "id": "af69944d-45fb-402e-9dae-f6e6e8cfb3a2",
+            "exec": [
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "id": "8df35307-b429-4f47-b14e-8056ed92b096",
+            "exec": [""],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"action\":\"tileClicked\",\n\t\"label\":\"No puedo hablar\",\n\t\"backgroundColor\":\"rgb(255, 241, 118)\",\n\t\"id\":\"BJwSGCc675tb\",\n\t\"image\":\"/symbols/mulberry/non_speaking.svg\",\n\t\"labelKey\":\"cboard.symbol.iCantSpeak\",\n\t\"user\": {\n\t    \"name\": \"martin\",\n\t    \"email\": \"{{email}}\",\n\t    \"password\": \"123456\"\n\t},\n\t\"locale\": \"es-ES\",\n\t\"source\": \"Android\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/analytics/",
+          "host": ["{{url}}"],
+          "path": ["analytics", ""]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "/user/logout/",
       "event": [
         {

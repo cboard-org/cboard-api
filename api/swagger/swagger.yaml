@@ -73,6 +73,13 @@ parameters:
     type: file
     description: The files to upload.
     required: true
+  Analytics:
+    name: data
+    in: body
+    description: Analytics data to be inserted into the database 
+    required: true
+    schema:
+      $ref: "#/definitions/Analytics"
   User:
     name: user
     in: body
@@ -625,22 +632,15 @@ paths:
   /analytics:
     x-swagger-router-controller: analytics
     post:
-      operationId: uploadAnalytics
-      description: Uploads offline analytics
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      consumes:
-        - multipart/form-data
+      operationId: saveAnalytics
+      description: Saves analytics into the database
       parameters:
-        - $ref: '#/parameters/Media'
+        - $ref: '#/parameters/Analytics'
       responses:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/MediaResponse"
+            $ref: "#/definitions/GeneralResponse"
         default:
           description: Error
           schema:
@@ -790,6 +790,24 @@ paths:
             $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
+  Analytics:
+    type: object
+    required:
+      - user
+      - action
+      - locale
+      - source
+    properties:
+      user:
+        type: object
+      time:
+        type: integer
+      action:
+        type: string
+      locale:
+        type: string
+      source:
+        type: string
   GetLanguageResponse:
     required:
         - locale
