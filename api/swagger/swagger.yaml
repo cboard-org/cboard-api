@@ -801,13 +801,16 @@ definitions:
       user:
         type: object
       time:
-        type: integer
+        type: string
+        format: date-time
       action:
         type: string
       locale:
         type: string
       source:
         type: string
+      payload:
+        type: object
   GetLanguageResponse:
     required:
         - locale

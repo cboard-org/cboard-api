@@ -18,6 +18,9 @@ const ANALYTICS_SCHEMA_DEFINITION = {
   },
   source: {
     type: String
+  },
+  payload: {
+    type: Object
   }
 };
 
