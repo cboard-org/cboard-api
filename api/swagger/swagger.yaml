@@ -972,6 +972,9 @@ definitions:
         type: string
       isPublic:
         type: boolean
+      lastEdited:
+        type: string
+        format: date-time
       locale:
         type: string
         enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
@@ -1132,6 +1135,10 @@ definitions:
       locale:
         type: string
         description: Locale for the board
+      lastEdited:
+        type: string
+        format: date-time
+        description: Last edition for the board
     required:
       - id
       - name
@@ -1264,6 +1271,10 @@ definitions:
       locale:
         type: string
         description: Locale for the board
+      lastEdited:
+        type: string
+        format: date-time
+        description: Last edition for the board
     required:
       - id
       - name
