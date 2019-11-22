@@ -1138,7 +1138,7 @@ definitions:
       lastEdited:
         type: string
         format: date-time
-        description: Last edition for the board
+        description: Last edition time for the board
     required:
       - id
       - name
@@ -1274,7 +1274,7 @@ definitions:
       lastEdited:
         type: string
         format: date-time
-        description: Last edition for the board
+        description: Last edition time for the board
     required:
       - id
       - name
