@@ -16,6 +16,7 @@ module.exports = {
 
 function createBoard(req, res) {
   const board = new Board(req.body);
+  board.lastEdited = moment().format();
   board.save(function(err, board) {
     if (err) {
       return res.status(409).json({
