@@ -1,4 +1,5 @@
 var ObjectId = require('mongoose').Types.ObjectId;
+const moment = require('moment');
 
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
@@ -15,6 +16,7 @@ module.exports = {
 
 function createBoard(req, res) {
   const board = new Board(req.body);
+  board.lastEdited = moment().format();
   board.save(function(err, board) {
     if (err) {
       return res.status(409).json({
@@ -107,6 +109,7 @@ function updateBoard(req, res) {
     for (let key in req.body) {
       board[key] = req.body[key];
     }
+    board.lastEdited = moment().format();
     board.save(function(err, board) {
       if (err) {
         return res.status(500).json({

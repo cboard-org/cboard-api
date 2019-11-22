@@ -48,6 +48,10 @@ const BOARD_SCHEMA_DEFINITION = {
   format: {
     type: String,
     default: constants.DEFAULT_FORMAT
+  },
+  lastEdited: {
+    type: Date,
+    default: Date.now
   }
 };
 
