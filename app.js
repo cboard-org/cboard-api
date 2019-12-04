@@ -8,6 +8,7 @@ const swaggerTools = require('swagger-tools');
 const YAML = require('yamljs');
 const https = require('https');
 const pem = require('pem');
+const bodyParser = require('body-parser');
 const auth = require('./api/helpers/auth');
 const swaggerConfig = YAML.load('./api/swagger/swagger.yaml');
 const db = require('./db');
@@ -24,6 +25,8 @@ const app = express();
 swaggerTools.initializeMiddleware(swaggerConfig, async function(middleware) {
   //Serves the Swagger UI on /docs
   app.use(cors());
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
   app.use(middleware.swaggerMetadata()); // needs to go BEFORE swaggerSecurity
   app.use(
     middleware.swaggerSecurity({
