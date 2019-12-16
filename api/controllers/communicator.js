@@ -111,8 +111,7 @@ async function updateCommunicator(req, res) {
     return res.status(400).json({
       message: `RootBoard '${rootBoard}' does not exist in boards: ${boards.join(
         ', '
-      )}`,
-      error: err.message
+      )}`
     });
   }
 
