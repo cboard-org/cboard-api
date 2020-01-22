@@ -18,7 +18,7 @@ module.exports = {
 function createBoard(req, res) {
   const board = new Board(req.body);
   board.lastEdited = moment().format();
-  board.save(function(err, board) {
+  board.save(function (err, board) {
     if (err) {
       return res.status(409).json({
         message: 'Error saving board',
@@ -73,11 +73,17 @@ async function getPublicBoards(req, res) {
 
 async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
-  Board.findByIdAndRemove(id, function(err, boards) {
+  Board.findByIdAndRemove(id, function (err, boards) {
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
         error: err.message
+      });
+    }
+    if (!boards) {
+      return res.status(404).json({
+        message: 'Board not found. Board Id: ' + id,
+        error: 'Board not found.'
       });
     }
     return res.status(200).json(boards);
@@ -92,7 +98,7 @@ function getBoard(req, res) {
       message: 'Invalid ID for a Board. Board Id: ' + id
     });
   }
-  Board.findOne({ _id: id }, function(err, boards) {
+  Board.findOne({ _id: id }, function (err, boards) {
     if (err) {
       return res.status(500).json({
         message: 'Error getting board. ',
@@ -110,7 +116,7 @@ function getBoard(req, res) {
 
 function updateBoard(req, res) {
   const id = req.swagger.params.id.value;
-  Board.findOne({ _id: id }, function(err, board) {
+  Board.findOne({ _id: id }, function (err, board) {
     if (err) {
       return res.status(500).json({
         message: 'Error updating board. ',
@@ -126,7 +132,7 @@ function updateBoard(req, res) {
       board[key] = req.body[key];
     }
     board.lastEdited = moment().format();
-    board.save(function(err, board) {
+    board.save(function (err, board) {
       if (err) {
         return res.status(500).json({
           message: 'Error saving board. ',
