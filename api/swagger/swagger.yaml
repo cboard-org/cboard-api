@@ -788,6 +788,26 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /board/public:
+    x-swagger-router-controller: board
+    get:
+      operationId: getPublicBoards
+      description: Returns all public boards for all users
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   Analytics:
