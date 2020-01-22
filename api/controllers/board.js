@@ -11,7 +11,8 @@ module.exports = {
   deleteBoard: deleteBoard,
   getBoard: getBoard,
   updateBoard: updateBoard,
-  getBoardsEmail: getBoardsEmail
+  getBoardsEmail: getBoardsEmail,
+  getPublicBoards: getPublicBoards
 };
 
 function createBoard(req, res) {
@@ -55,9 +56,24 @@ async function getBoardsEmail(req, res) {
   return res.status(200).json(response);
 }
 
+async function getPublicBoards(req, res) {
+  const { search = '' } = req.query;
+  const searchFields = ['isPublic'];
+  const query =
+    search && search.length ? getORQuery(searchFields, search, true) : {};
+
+  const response = await paginatedResponse(
+    Board,
+    { query: { ...query, isPublic: true } },
+    req.query
+  );
+
+  return res.status(200).json(response);
+}
+
 async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
-  Board.findByIdAndDelete(id, function(err, boards) {
+  Board.findByIdAndRemove(id, function(err, boards) {
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
