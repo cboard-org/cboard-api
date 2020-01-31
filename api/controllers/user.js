@@ -169,8 +169,8 @@ function activateUser(req, res) {
       });
     } else {
       return res.status(404).json({
-        message: 'ERROR: confirming temp user FAILED ',
-        error: err.message
+        message: 'ERROR: confirming your temporary user FAILED, please try to login again',
+        error:  'ERROR: confirming your temporary user FAILED, please try to login again'
       });
     }
   });
