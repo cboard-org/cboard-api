@@ -58,10 +58,9 @@ async function getBoardsEmail(req, res) {
 
 async function getPublicBoards(req, res) {
   const { search = '' } = req.query;
-  const searchFields = ['isPublic'];
+  const searchFields = ['name', 'author'];
   const query =
     search && search.length ? getORQuery(searchFields, search, true) : {};
-
   const response = await paginatedResponse(
     Board,
     { query: { ...query, isPublic: true } },
