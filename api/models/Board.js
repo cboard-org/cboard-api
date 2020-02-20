@@ -52,6 +52,11 @@ const BOARD_SCHEMA_DEFINITION = {
   lastEdited: {
     type: Date,
     default: Date.now
+  },
+  description: {
+    type: String,
+    unique: false,
+    default: ''
   }
 };
 
