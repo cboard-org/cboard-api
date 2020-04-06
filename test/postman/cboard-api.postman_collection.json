@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "50d24a65-2ee8-4704-8ef5-ff9ab9cdc473",
+		"_postman_id": "6fba04ce-86d5-491b-b3cf-24decde495c8",
 		"name": "cboard-api",
 		"description": "contains tests for all cboard-api calls",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -908,6 +908,144 @@
 					"path": [
 						"board",
 						"{{boardid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/settings/",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"language\":{\"lang\":\"es-ES\"},\n\t\"display\":{\"uiSize\":\"Standard\",\"fontSize\":\"Standard\",\"hideOutputActive\":false,\"labelPosition\":\"Below\",\"darkThemeActive\":false},\n\t\"speech\":{\"voiceURI\":\"Microsoft Sabina Desktop - Spanish (Mexico)\",\"pitch\":1,\"rate\":1},\n\t\"scanning\":{\"active\":false,\"delay\":2000,\"strategy\":\"automatic\"},\n\t\"navigation\":{\"active\":false,\"caBackButtonActive\":false,\"quickUnlockActive\":false,\"removeOutputActive\":true}\n}"
+				},
+				"url": {
+					"raw": "{{url}}/settings/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"settings",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/settings/",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Check response\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var edisplay = {",
+							"        \"uiSize\": \"Standard\",",
+							"        \"fontSize\": \"Standard\",",
+							"        \"hideOutputActive\": false,",
+							"        \"labelPosition\": \"Below\",",
+							"        \"darkThemeActive\": false",
+							"    };",
+							"    pm.expect(jsonData.display).to.eql(edisplay);",
+							"    var elanguage = {",
+							"        \"lang\": \"es-ES\"",
+							"    };",
+							"    pm.expect(jsonData.language).to.eql(elanguage);",
+							"    var enavigation = {",
+							"        \"active\": false,",
+							"        \"caBackButtonActive\": false,",
+							"        \"quickUnlockActive\": false,",
+							"        \"removeOutputActive\": true",
+							"    };",
+							"    pm.expect(jsonData.navigation).to.eql(enavigation);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/settings/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"settings",
+						""
 					]
 				}
 			},
