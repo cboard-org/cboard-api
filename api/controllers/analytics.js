@@ -1,18 +1,60 @@
-const Analytics = require('../models/Analytics');
+'use strict';
+
+const { google } = require('googleapis');
+const analyticsreporting = google.analyticsreporting('v4');
 
 module.exports = {
-  saveAnalytics
+  batchGet: batchGet
 };
 
-async function saveAnalytics(req, res) {
-  const analytics = new Analytics(req.body);
-  analytics.save(function(err, analytics) {
-    if (err) {
-      return res.status(409).json({
-        message: 'Error saving analytics',
-        error: err.message
-      });
-    }
-    return res.status(200).json(analytics.toJSON());
-  });
+async function batchGet(req, res) {
+  const scopes = ['https://www.googleapis.com/auth/analytics'];
+  const auth = new google.auth.GoogleAuth({ scopes: scopes });
+  const authClient = await auth.getClient();
+
+  try {
+    const report = await analyticsreporting.reports.batchGet({
+      auth: authClient,
+      requestBody: {
+        reportRequests: [
+          {
+            viewId: '162469865',
+            dateRanges: [
+              {
+                startDate: '37daysAgo',
+                endDate: 'today'
+              }
+            ],
+            metrics: [
+              {
+                expression: 'ga:totalEvents'
+              }
+            ],
+            dimensions: [
+              {
+                name: 'ga:clientId'
+              }, { name: 'ga:date' }
+            ],
+            "dimensionFilterClauses": [
+              {
+                "filters": [
+                  {
+                    "dimensionName": "ga:clientId",
+                    "operator": "EXACT",
+                    "expressions": ["1635071876.1577121026"]
+                  }
+                ]
+              }
+            ]
+          },
+        ],
+      },
+    });
+    return res.status(200).json(report.data);
+  } catch (err) {
+    return res.status(409).json({
+      message: 'Error getting analytics',
+      error: err.message
+    });
+  }
 }
