@@ -1243,7 +1243,7 @@
 			"response": []
 		},
 		{
-			"name": "/analytics/",
+			"name": "/analytics/batchGet",
 			"event": [
 				{
 					"listen": "test",
@@ -1279,16 +1279,69 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"action\":\"tileClicked\",\n\t\"time\": \"2019-11-09T21:00:21.963Z\",\n\t\"user\": {\n\t    \"name\": \"martin\",\n\t    \"email\": \"{{email}}\",\n\t    \"password\": \"123456\"\n\t},\n\t\"locale\": \"es-ES\",\n\t\"source\": \"Android\",\n\t\"payload\": {\"time\":1573241115538,\"action\":\"tileClicked\",\"label\":\"No puedo hablar\",\"backgroundColor\":\"rgb(255, 241, 118)\",\"id\":\"BJwSGCc675tb\",\"image\":\"/symbols/mulberry/non_speaking.svg\",\"labelKey\":\"cboard.symbol.iCantSpeak\"}\n}"
+					"raw": "{\n\t\"clientId\": \"1635071876.1577121026\",\n\t\"startDate\": \"7daysago\",\n\t\"endDate\": \"today\",\n\t\"metric\": \"totalEvents\",\n\t\"dimension\": \"date\"\n}"
 				},
 				"url": {
-					"raw": "{{url}}/analytics/",
+					"raw": "{{url}}/analytics/batchGet",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"analytics",
-						""
+						"batchGet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/analytics/userActivity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ce2467d1-f737-4f43-a07f-9d9872b2e4cc",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "d242f943-4e7a-485d-90b2-6b56b36efb7e",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payload\": {\"time\":1573241115538,\"action\":\"tileClicked\",\"label\":\"No puedo hablar\",\"backgroundColor\":\"rgb(255, 241, 118)\",\"id\":\"BJwSGCc675tb\",\"image\":\"/symbols/mulberry/non_speaking.svg\",\"labelKey\":\"cboard.symbol.iCantSpeak\"}\n}"
+				},
+				"url": {
+					"raw": "{{url}}/analytics/userActivity/666",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"analytics",
+						"userActivity",
+						"666"
 					]
 				}
 			},

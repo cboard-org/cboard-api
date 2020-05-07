@@ -36,15 +36,18 @@ async function batchGet(req, res) {
             dimensions: [
               {
                 name: 'ga:clientId'
-              }, { name:  `ga:${req.body.dimension}` }
-            ],
-            "dimensionFilterClauses": [
+              },
               {
-                "filters": [
+                name: `ga:${req.body.dimension}`
+              }
+            ],
+            dimensionFilterClauses: [
+              {
+                filters: [
                   {
-                    "dimensionName": "ga:clientId",
-                    "operator": "EXACT",
-                    "expressions": ["1635071876.1577121026"]
+                    dimensionName: "ga:clientId",
+                    operator: "EXACT",
+                    expressions: [req.body.clientId]
                   }
                 ]
               }

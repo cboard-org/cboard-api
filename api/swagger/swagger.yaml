@@ -831,11 +831,14 @@ definitions:
   AnalyticsReport:
     type: object
     required:
+      - clientId
       - startDate
       - endDate
       - metric
       - dimension
     properties:
+      clientId:
+        type: string
       startDate:
         type: string
       endDate:
