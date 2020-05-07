@@ -29,13 +29,13 @@ consumes:
 produces:
   - application/json
 parameters:
-  Analytics:
-    name: data
+  AnalyticsReport:
+    name: report
     in: body
     description: Analytics data to be requested to Google analytics 
     required: true
     schema:
-      $ref: "#/definitions/Analytics"
+      $ref: "#/definitions/AnalyticsReport"
   Board:
     name: board
     in: body
@@ -116,13 +116,33 @@ parameters:
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
-  /analytics:
+  /analytics/batchGet:
     x-swagger-router-controller: analytics
     post:
       operationId: batchGet
-      description: Returns analytics reporting information 
+      description: Returns analytics reporting information based on metrics and dimensions
       parameters:
-        - $ref: '#/parameters/Analytics'
+        - $ref: '#/parameters/AnalyticsReport'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /analytics/userActivity/{id}:
+    x-swagger-router-controller: analytics
+    post:
+      operationId: userActivity
+      description: Returns analytics User Activity data.
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
       responses:
         "200":
           description: Success
@@ -808,11 +828,22 @@ paths:
             $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
-  Analytics:
+  AnalyticsReport:
     type: object
+    required:
+      - startDate
+      - endDate
+      - metric
+      - dimension
     properties:
-      payload:
-        type: object
+      startDate:
+        type: string
+      endDate:
+        type: string
+      metric:
+        type: string
+      dimension:
+        type: string
   GetLanguageResponse:
     required:
         - locale
