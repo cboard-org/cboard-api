@@ -17,45 +17,61 @@ async function gapiAuth() {
 
 async function batchGet(req, res) {
   try {
-    const report = await analyticsreporting.reports.batchGet({
-      requestBody: {
-        reportRequests: [
+    console.log(req.body);
+    const reportRequests = req.body.map(requestReport => {
+      const report = {
+        viewId: '162469865',
+        dateRanges: [
           {
-            viewId: '162469865',
-            dateRanges: [
+            startDate: requestReport.startDate,
+            endDate: requestReport.endDate
+          }
+        ],
+        metrics: [
+          {
+            expression: `ga:${requestReport.metric}`
+          }
+        ],
+        dimensions: [
+          {
+            name: 'ga:clientId'
+          },
+          {
+            name: `ga:${requestReport.dimension}`
+          }
+        ],
+        dimensionFilterClauses: [
+          {
+            filters: [
               {
-                startDate: req.body.startDate,
-                endDate: req.body.endDate
-              }
-            ],
-            metrics: [
-              {
-                expression: `ga:${req.body.metric}`
-              }
-            ],
-            dimensions: [
-              {
-                name: 'ga:clientId'
-              },
-              {
-                name: `ga:${req.body.dimension}`
-              }
-            ],
-            dimensionFilterClauses: [
-              {
-                filters: [
-                  {
-                    dimensionName: "ga:clientId",
-                    operator: "EXACT",
-                    expressions: [req.body.clientId]
-                  }
-                ]
+                dimensionName: "ga:clientId",
+                operator: "EXACT",
+                expressions: [requestReport.clientId]
               }
             ]
-          },
-        ],
-      },
+          }
+        ]
+      };
+      if (requestReport.filter) {
+        const newFilter = {
+          filters: [
+            {
+              dimensionName: `ga:${requestReport.filter.name}`,
+              operator: "EXACT",
+              expressions: [requestReport.filter.value]
+            }
+          ]
+        };
+        report.dimensionFilterClauses.push(newFilter);
+      }
+      return report;
     });
+    const fullRequest = {
+      requestBody: {
+        reportRequests: reportRequests
+      }
+    };
+    const report = await analyticsreporting.reports.batchGet(fullRequest);
     return res.status(200).json(report.data);
   } catch (err) {
     return res.status(409).json({
