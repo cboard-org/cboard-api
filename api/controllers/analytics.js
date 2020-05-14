@@ -17,7 +17,6 @@ async function gapiAuth() {
 
 async function batchGet(req, res) {
   try {
-    console.log(req.body);
     const reportRequests = req.body.map(requestReport => {
       const report = {
         viewId: '162469865',
@@ -32,11 +31,14 @@ async function batchGet(req, res) {
             expression: `ga:${requestReport.metric}`
           }
         ],
+        orderBys:
+          [
+            { fieldName: `ga:${requestReport.metric}`, sortOrder: "DESCENDING" }
+          ],
         dimensions: [
           {
             name: 'ga:clientId'
-          },
-          {
+          }, {
             name: `ga:${requestReport.dimension}`
           }
         ],
@@ -63,6 +65,9 @@ async function batchGet(req, res) {
           ]
         };
         report.dimensionFilterClauses.push(newFilter);
+      }
+      if (requestReport.pageSize) {
+        report['pageSize'] = requestReport.pageSize;
       }
       return report;
     });
