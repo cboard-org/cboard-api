@@ -1,6 +1,5 @@
 const DEFAULT_LANG = 'en-US';
 const DEFAULT_CELL_SIZE = 'medium';
-const DEFAULT_FORMAT = 'obf';
 const APP_LANGS = [
   'ar-SA',
   'bn-BD',
