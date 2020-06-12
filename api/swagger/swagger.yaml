@@ -121,13 +121,18 @@ paths:
     post:
       operationId: batchGet
       description: Returns analytics reporting information based on metrics and dimensions
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
       parameters:
         - $ref: '#/parameters/AnalyticsReport'
       responses:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/GeneralResponse"
+            $ref: "#/definitions/AnalyticsReportResponse"
         default:
           description: Error
           schema:
@@ -829,24 +834,40 @@ paths:
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
+    type: array
+    items:
+      type: object
+      required:
+        - clientId
+        - startDate
+        - endDate
+        - metric
+        - dimension
+      properties:
+        clientId:
+          type: string
+        dimension:
+          type: string
+        endDate:
+          type: string
+        filter:
+          type: object
+        metric:
+          type: string
+        startDate:
+          type: string
+  AnalyticsReportResponse:
     type: object
-    required:
-      - clientId
-      - startDate
-      - endDate
-      - metric
-      - dimension
     properties:
-      clientId:
-        type: string
-      startDate:
-        type: string
-      endDate:
-        type: string
-      metric:
-        type: string
-      dimension:
-        type: string
+      reports:
+        type: array
+        items:
+          type: object
+          properties:
+            columnHeader:
+              type: object
+            data:
+              type: object
   GetLanguageResponse:
     required:
         - locale

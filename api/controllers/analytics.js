@@ -88,18 +88,8 @@ async function batchGet(req, res) {
 
 async function userActivity(req, res) {
   try {
-    const report = await analyticsreporting.userActivity.search({
-      "viewId": "162469865",
-      "dateRange": {
-        "startDate": "2020-05-02",
-        "endDate": "2020-05-02"
-      },
-      "user": {
-        "type": "CLIENT_ID",
-        "userId": "1635071876.1577121026"
-      }
-    });
-    return res.status(200).json(report.data);
+    //TODO
+    return res.status(200).json({});
   } catch (err) {
     return res.status(409).json({
       message: 'Error getting analytics',
