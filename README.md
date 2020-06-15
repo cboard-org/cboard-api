@@ -37,6 +37,24 @@ Start MongoDB. ([See MongoDB docs, if needed](https://docs.mongodb.com/manual/tu
 $ mongod
 ```
 
+### Configure environment variables
+
+The Cboard API is a cloud service, and it needs access to several cloud services, like user authentication, email sending, etc. This is all configured using environment variables on the platform the API is running. Following are the mandatory variables to be defined:
+
+* AZURE_STORAGE_CONNECTION_STRING
+* FACEBOOK_APP_ID
+* FACEBOOK_APP_SECRET
+* FACEBOOK_CALLBACK_URL
+* GCLOUD_PROJECT
+* GOOGLE_APP_ID
+* GOOGLE_APP_SECRET
+* GOOGLE_APPLICATION_CREDENTIALS
+* GOOGLE_CALLBACK_URL
+* JWT_SECRET
+* MONGO_URL
+* REACT_APP_DEV_API_URL
+* SENDGRID_API_KEY
+
 ### Run the API Server
 
 In a separate terminal tab/window, run the Swagger project server.
