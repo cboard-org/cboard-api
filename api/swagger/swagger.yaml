@@ -1,11 +1,9 @@
 swagger: "2.0"
 info:
-  description: "CBoard API provides backend functionality and persistence to the CBoard application"
+  description: "Cboard API provides backend functionality and persistence to the Cboard application"
   version: "0.0.1"
-  title: CBoard API
-  termsOfService: "http://cboard.io"
-# during dev, should point to your local machine
-# host: localhost:10010
+  title: Cboard API
+  termsOfService: "https://www.cboard.io/terms-of-use/"
 # basePath prefixes all resource paths 
 basePath: /
 schemes:
@@ -31,76 +29,13 @@ consumes:
 produces:
   - application/json
 parameters:
-  LanguageParameter:
-    in: query
-    name: lang
-    type: string
-    default: ""
-    description: Language option in format xx-XX (e.g. en-US)
-  PageParameter:
-    in: query
-    name: page
-    type: integer
-    default: 1
-    description: Page
-  LimitParameter:
-    in: query
-    name: limit
-    type: integer
-    default: 0
-    description: The numbers of items to return
-  OffsetParameter:
-    in: query
-    name: offset
-    type: integer
-    default: 0
-    description: The number of items to skip before starting to collect the result set
-  SortParameter:
-    in: query
-    name: sort
-    type: string
-    default: "-_id"
-    description: Sort by
-  SearchParameter:
-    in: query
-    name: search
-    type: string
-    default: ""
-    description: Search by
-  Media:
-    name: file
-    in: formData
-    type: file
-    description: The files to upload.
-    required: true
-  Analytics:
-    name: data
+  AnalyticsReport:
+    name: report
     in: body
-    description: Analytics data to be inserted into the database 
+    description: Analytics data to be requested to Google analytics 
     required: true
     schema:
-      $ref: "#/definitions/Analytics"
-  User:
-    name: user
-    in: body
-    description: User data for creating a new local user 
-    required: true
-    schema:
-      $ref: "#/definitions/User" 
-  Communicator:
-    name: communicator
-    in: body
-    description: Communicator data for creating a new custom communicator
-    required: true
-    schema:
-      $ref: "#/definitions/Communicator" 
-  Settings:
-    name: settings
-    in: body
-    description: Settings data for creating a new custom settings
-    required: true
-    schema:
-      $ref: "#/definitions/Settings" 
+      $ref: "#/definitions/AnalyticsReport"
   Board:
     name: board
     in: body
@@ -108,6 +43,62 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/Board" 
+  Communicator:
+    name: communicator
+    in: body
+    description: Communicator data for creating a new custom communicator
+    required: true
+    schema:
+      $ref: "#/definitions/Communicator" 
+  LanguageParameter:
+    in: query
+    name: lang
+    type: string
+    default: ""
+    description: Language option in format xx-XX (e.g. en-US)
+  LimitParameter:
+    in: query
+    name: limit
+    type: integer
+    default: 0
+    description: The numbers of items to return
+  Media:
+    name: file
+    in: formData
+    type: file
+    description: The files to upload.
+    required: true
+  OffsetParameter:
+    in: query
+    name: offset
+    type: integer
+    default: 0
+    description: The number of items to skip before starting to collect the result set
+  PageParameter:
+    in: query
+    name: page
+    type: integer
+    default: 1
+    description: Page
+  SearchParameter:
+    in: query
+    name: search
+    type: string
+    default: ""
+    description: Search by
+  Settings:
+    name: settings
+    in: body
+    description: Settings data for creating a new custom settings
+    required: true
+    schema:
+      $ref: "#/definitions/Settings" 
+  SortParameter:
+    in: query
+    name: sort
+    type: string
+    default: "-_id"
+    description: Sort by
   Translate:
     name: translate
     in: body
@@ -115,9 +106,372 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/Translate" 
+  User:
+    name: user
+    in: body
+    description: User data for creating a new local user 
+    required: true
+    schema:
+      $ref: "#/definitions/User" 
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
+  /analytics/batchGet:
+    x-swagger-router-controller: analytics
+    post:
+      operationId: batchGet
+      description: Returns analytics reporting information based on metrics and dimensions
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/AnalyticsReport'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AnalyticsReportResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /analytics/userActivity/{id}:
+    x-swagger-router-controller: analytics
+    post:
+      operationId: userActivity
+      description: Returns analytics User Activity data.
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GeneralResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board:
+    x-swagger-router-controller: board
+    post:
+      operationId: createBoard
+      description: Create a new board in database and send an email to notify the user.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Board'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/BoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: listBoard
+      description: Returns the full boards list.
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board/{id}:
+    x-swagger-router-controller: board
+    get:
+      operationId: getBoard
+      description: Returns a specific board
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      operationId: updateBoard
+      description: Updates a specific board
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          description: Board Id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+        - name: info
+          description: Board properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Board"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      operationId: deleteBoard
+      description: Deletes a specific board
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          description: Board id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board/byemail/{email}:
+    x-swagger-router-controller: board
+    get:
+      operationId: getBoardsEmail
+      description: Returns boards for a specific user email
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+        - name: email
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board/public:
+    x-swagger-router-controller: board
+    get:
+      operationId: getPublicBoards
+      description: Returns all public boards for all users
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /communicator:
+    x-swagger-router-controller: communicator
+    post:
+      operationId: createCommunicator
+      description: Creates a new communicator in database and send an email to notify the user.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Communicator'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/CommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: listCommunicators
+      description: Returns the full communicators list.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /communicator/{id}:
+    x-swagger-router-controller: communicator
+    get:
+      operationId: getCommunicator
+      description: Returns a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      operationId: updateCommunicator
+      description: Updates a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          description: Communicator Id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+        - name: info
+          description: Communicator properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Communicator"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      operationId: removeCommunicator
+      description: Deletes a specific communicator
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: id
+          description: Communicator id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /communicator/byemail/{email}:
+    x-swagger-router-controller: communicator
+    get:
+      operationId: getCommunicatorsEmail
+      description: Returns communicators for a specific user email
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: "#/parameters/PageParameter"
+        - $ref: "#/parameters/LimitParameter"
+        - $ref: "#/parameters/OffsetParameter"
+        - $ref: "#/parameters/SortParameter"
+        - $ref: "#/parameters/SearchParameter"
+        - name: email
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetCommunicatorsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /languages:
     x-swagger-router-controller: languages
     get:
@@ -150,6 +504,102 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/GetLanguageResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /me:
+    x-swagger-router-controller: user
+    get:
+      operationId: getMe
+      description: Returns logged user data
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /media:
+    x-swagger-router-controller: media
+    post:
+      operationId: uploadMedia
+      description: Uploads media files and returns a set of urls.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/Media'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/MediaResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /settings:
+    x-swagger-router-controller: settings
+    post:
+      operationId: updateSettings
+      description: Creates or updates a user's settings object in database.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Settings'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SettingsResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: getSettings
+      description: Returns settings for current user
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SettingsResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /translate:
+    x-swagger-router-controller: translate
+    post:
+      operationId: translate
+      description: Translates an array of labels.
+      parameters:
+        - $ref: '#/parameters/Translate'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/TranslateResponse"
         default:
           description: Error
           schema:
@@ -381,456 +831,43 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /me:
-    x-swagger-router-controller: user
-    get:
-      operationId: getMe
-      description: Returns logged user data
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetUserResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /translate:
-    x-swagger-router-controller: translate
-    post:
-      operationId: translate
-      description: Translates an array of labels.
-      parameters:
-        - $ref: '#/parameters/Translate'
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/TranslateResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /settings:
-    x-swagger-router-controller: settings
-    post:
-      operationId: updateSettings
-      description: Creates or updates a user's settings object in database.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - $ref: '#/parameters/Settings'
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/SettingsResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-    get:
-      operationId: getSettings
-      description: Returns settings for current user
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/SettingsResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /communicator:
-    x-swagger-router-controller: communicator
-    post:
-      operationId: createCommunicator
-      description: Creates a new communicator in database and send an email to notify the user.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - $ref: '#/parameters/Communicator'
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/CommunicatorResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-    get:
-      operationId: listCommunicators
-      description: Returns the full communicators list.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - $ref: "#/parameters/PageParameter"
-        - $ref: "#/parameters/LimitParameter"
-        - $ref: "#/parameters/OffsetParameter"
-        - $ref: "#/parameters/SortParameter"
-        - $ref: "#/parameters/SearchParameter"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetCommunicatorsListResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /communicator/{id}:
-    x-swagger-router-controller: communicator
-    get:
-      operationId: getCommunicator
-      description: Returns a specific communicator
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - name: id
-          type: string
-          in: path
-          required: true
-          minimum: 1
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetCommunicatorResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-    put:
-      operationId: updateCommunicator
-      description: Updates a specific communicator
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - name: id
-          description: Communicator Id
-          type: string
-          in: path
-          required: true
-          minimum: 1
-        - name: info
-          description: Communicator properties
-          in: body
-          required: true
-          schema:
-            $ref: "#/definitions/Communicator"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetCommunicatorResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-    delete:
-      operationId: removeCommunicator
-      description: Deletes a specific communicator
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-      parameters:
-        - name: id
-          description: Communicator id
-          type: string
-          in: path
-          required: true
-          minimum: 1
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetCommunicatorResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /communicator/byemail/{email}:
-    x-swagger-router-controller: communicator
-    get:
-      operationId: getCommunicatorsEmail
-      description: Returns communicators for a specific user email
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - $ref: "#/parameters/PageParameter"
-        - $ref: "#/parameters/LimitParameter"
-        - $ref: "#/parameters/OffsetParameter"
-        - $ref: "#/parameters/SortParameter"
-        - $ref: "#/parameters/SearchParameter"
-        - name: email
-          type: string
-          in: path
-          required: true
-          minimum: 1
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetCommunicatorsListResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /media:
-    x-swagger-router-controller: media
-    post:
-      operationId: uploadMedia
-      description: Uploads media files and returns a set of urls.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      consumes:
-        - multipart/form-data
-      parameters:
-        - $ref: '#/parameters/Media'
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/MediaResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /analytics:
-    x-swagger-router-controller: analytics
-    post:
-      operationId: saveAnalytics
-      description: Saves analytics into the database
-      parameters:
-        - $ref: '#/parameters/Analytics'
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GeneralResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /board:
-    x-swagger-router-controller: board
-    post:
-      operationId: createBoard
-      description: Create a new board in database and send an email to notify the user.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - $ref: '#/parameters/Board'
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/BoardResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-    get:
-      operationId: listBoard
-      description: Returns the full boards list.
-      parameters:
-        - $ref: "#/parameters/PageParameter"
-        - $ref: "#/parameters/LimitParameter"
-        - $ref: "#/parameters/OffsetParameter"
-        - $ref: "#/parameters/SortParameter"
-        - $ref: "#/parameters/SearchParameter"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetBoardListResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /board/{id}:
-    x-swagger-router-controller: board
-    get:
-      operationId: getBoard
-      description: Returns a specific board
-      parameters:
-        - name: id
-          type: string
-          in: path
-          required: true
-          minimum: 1
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetBoardResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-    put:
-      operationId: updateBoard
-      description: Updates a specific board
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - name: id
-          description: Board Id
-          type: string
-          in: path
-          required: true
-          minimum: 1
-        - name: info
-          description: Board properties
-          in: body
-          required: true
-          schema:
-            $ref: "#/definitions/Board"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetBoardResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-    delete:
-      operationId: deleteBoard
-      description: Deletes a specific board
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - name: id
-          description: Board id
-          type: string
-          in: path
-          required: true
-          minimum: 1
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetBoardResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /board/byemail/{email}:
-    x-swagger-router-controller: board
-    get:
-      operationId: getBoardsEmail
-      description: Returns boards for a specific user email
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - $ref: "#/parameters/PageParameter"
-        - $ref: "#/parameters/LimitParameter"
-        - $ref: "#/parameters/OffsetParameter"
-        - $ref: "#/parameters/SortParameter"
-        - $ref: "#/parameters/SearchParameter"
-        - name: email
-          type: string
-          in: path
-          required: true
-          minimum: 1
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetBoardListResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /board/public:
-    x-swagger-router-controller: board
-    get:
-      operationId: getPublicBoards
-      description: Returns all public boards for all users
-      parameters:
-        - $ref: "#/parameters/PageParameter"
-        - $ref: "#/parameters/LimitParameter"
-        - $ref: "#/parameters/OffsetParameter"
-        - $ref: "#/parameters/SortParameter"
-        - $ref: "#/parameters/SearchParameter"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/GetBoardListResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
-  Analytics:
+  AnalyticsReport:
+    type: array
+    items:
+      type: object
+      required:
+        - clientId
+        - startDate
+        - endDate
+        - metric
+        - dimension
+      properties:
+        clientId:
+          type: string
+        dimension:
+          type: string
+        endDate:
+          type: string
+        filter:
+          type: object
+        metric:
+          type: string
+        startDate:
+          type: string
+  AnalyticsReportResponse:
     type: object
-    required:
-      - user
-      - action
-      - locale
-      - source
     properties:
-      user:
-        type: object
-      time:
-        type: string
-        format: date-time
-      action:
-        type: string
-      locale:
-        type: string
-      source:
-        type: string
-      payload:
-        type: object
+      reports:
+        type: array
+        items:
+          type: object
+          properties:
+            columnHeader:
+              type: object
+            data:
+              type: object
   GetLanguageResponse:
     required:
         - locale

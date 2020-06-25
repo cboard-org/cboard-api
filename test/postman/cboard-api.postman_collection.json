@@ -49,7 +49,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+					"raw": "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user",
@@ -102,7 +105,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": ""
+					"raw": "",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/activate/{{activation_url}}",
@@ -149,7 +155,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/login/",
@@ -277,7 +286,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
+					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/{{userid}}",
@@ -535,7 +547,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"tiles\": [\n    \t{}\n    \t],\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
+					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"tiles\": [\n    \t{}\n    \t],\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/board/",
@@ -596,7 +611,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
+					"raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/board/",
@@ -692,7 +710,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
+					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/board/{{boardid}}",
@@ -955,7 +976,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"language\":{\"lang\":\"es-ES\"},\n\t\"display\":{\"uiSize\":\"Standard\",\"fontSize\":\"Standard\",\"hideOutputActive\":false,\"labelPosition\":\"Below\",\"darkThemeActive\":false},\n\t\"speech\":{\"voiceURI\":\"Microsoft Sabina Desktop - Spanish (Mexico)\",\"pitch\":1,\"rate\":1},\n\t\"scanning\":{\"active\":false,\"delay\":2000,\"strategy\":\"automatic\"},\n\t\"navigation\":{\"active\":false,\"caBackButtonActive\":false,\"quickUnlockActive\":false,\"removeOutputActive\":true}\n}"
+					"raw": "{\n\t\"language\":{\"lang\":\"es-ES\"},\n\t\"display\":{\"uiSize\":\"Standard\",\"fontSize\":\"Standard\",\"hideOutputActive\":false,\"labelPosition\":\"Below\",\"darkThemeActive\":false},\n\t\"speech\":{\"voiceURI\":\"Microsoft Sabina Desktop - Spanish (Mexico)\",\"pitch\":1,\"rate\":1},\n\t\"scanning\":{\"active\":false,\"delay\":2000,\"strategy\":\"automatic\"},\n\t\"navigation\":{\"active\":false,\"caBackButtonActive\":false,\"quickUnlockActive\":false,\"removeOutputActive\":true}\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/settings/",
@@ -1036,7 +1060,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": ""
+					"raw": "",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/settings/",
@@ -1086,7 +1113,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\"\n}"
+					"raw": "{\n    \"email\": \"{{email}}\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/forgot/",
@@ -1135,7 +1165,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"userid\": \"{{userid}}\",\n    \"password\": \"1234578\",\n    \"token\": \"{{reset_url}}\"\n}"
+					"raw": "{\n    \"userid\": \"{{userid}}\",\n    \"password\": \"1234578\",\n    \"token\": \"{{reset_url}}\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/store-password/",
@@ -1182,7 +1215,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"1234578\"\n}"
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"1234578\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/login/",
@@ -1226,7 +1262,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/login/",
@@ -1243,7 +1282,7 @@
 			"response": []
 		},
 		{
-			"name": "/analytics/",
+			"name": "/analytics/batchGet",
 			"event": [
 				{
 					"listen": "test",
@@ -1253,6 +1292,11 @@
 							"",
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Check report response\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.reports).to.be.a('array');",
+							"    pm.expect(jsonData.reports).to.have.lengthOf(2);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1275,20 +1319,223 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{token}}"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"action\":\"tileClicked\",\n\t\"time\": \"2019-11-09T21:00:21.963Z\",\n\t\"user\": {\n\t    \"name\": \"martin\",\n\t    \"email\": \"{{email}}\",\n\t    \"password\": \"123456\"\n\t},\n\t\"locale\": \"es-ES\",\n\t\"source\": \"Android\",\n\t\"payload\": {\"time\":1573241115538,\"action\":\"tileClicked\",\"label\":\"No puedo hablar\",\"backgroundColor\":\"rgb(255, 241, 118)\",\"id\":\"BJwSGCc675tb\",\"image\":\"/symbols/mulberry/non_speaking.svg\",\"labelKey\":\"cboard.symbol.iCantSpeak\"}\n}"
+					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"dimension\": \"date\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    },\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"dimension\": \"date\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				},
 				"url": {
-					"raw": "{{url}}/analytics/",
+					"raw": "{{url}}/analytics/batchGet",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"analytics",
-						""
+						"batchGet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/analytics/batchGet unauthorized",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "70141dab-0d8f-48f2-87f4-135ffcaa2e0d",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"pm.test(\"Check error response\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.eql('Not valid token');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "fc60f1ed-5194-4823-840a-0194fa80d8fa",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"dimension\": \"date\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    },\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"dimension\": \"date\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/analytics/batchGet",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"analytics",
+						"batchGet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/analytics/batchGet no dimension",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ad1c1904-4798-40b4-9bdb-7a30a48a9423",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 409\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"pm.test(\"Body matches string\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Unknown dimension\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0d12dd9a-346a-4467-8053-5bdc103145a8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"avgSessionDuration\"\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/analytics/batchGet",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"analytics",
+						"batchGet"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/analytics/batchGet dimension days",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fefb4464-35c2-4a2e-8945-66438b0f3b1b",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Check report response\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.reports).to.be.a('array');",
+							"    pm.expect(jsonData.reports).to.have.lengthOf(1);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "162cdd9c-0c91-4dfc-9353-f82d33202cc6",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"17daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"avgSessionDuration\",\n        \"dimension\": \"day\"\n    }\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/analytics/batchGet",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"analytics",
+						"batchGet"
 					]
 				}
 			},
@@ -1330,7 +1577,10 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
 					"raw": "{{url}}/user/logout/",
