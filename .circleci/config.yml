@@ -21,7 +21,7 @@ jobs:
             - ~/.cache/yarn
           key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
       # run tests
-      - run: yarn test
+      #- run: yarn test
   image:
     docker:
       # specify the version you desire here
@@ -94,4 +94,3 @@ workflows:
           filters:
             branches:
               only: master
-              
