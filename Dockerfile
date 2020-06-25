@@ -2,6 +2,7 @@
 FROM node:12
 WORKDIR /opt/cboard-api/
 COPY . /opt/cboard-api/
+COPY /etc/google-auth.json /opt/cboard-api/
 
 RUN npm install -g node-gyp 
 RUN npm install -g swagger
