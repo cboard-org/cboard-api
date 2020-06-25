@@ -20,7 +20,7 @@ async function batchGet(req, res) {
   try {
     const reportRequests = req.body.map(requestReport => {
       const report = {
-        viewId: '162469865',
+        viewId: constants.DEFAULT_GA_VIEW,
         dateRanges: [
           {
             startDate: requestReport.startDate,
