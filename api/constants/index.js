@@ -1,6 +1,7 @@
 const DEFAULT_LANG = 'en-US';
 const DEFAULT_CELL_SIZE = 'medium';
-const DEFAULT_FORMAT = 'obf';
+const DEFAULT_GA_VIEW = '162469865';
+const DEFAULT_FORMAT = 'cboard';
 const APP_LANGS = [
   'ar-SA',
   'bn-BD',
@@ -47,5 +48,7 @@ const APP_LANGS = [
 module.exports = {
   DEFAULT_LANG: DEFAULT_LANG,
   DEFAULT_CELL_SIZE: DEFAULT_CELL_SIZE,
-  APP_LANGS: APP_LANGS
+  APP_LANGS: APP_LANGS,
+  DEFAULT_FORMAT: DEFAULT_FORMAT,
+  DEFAULT_GA_VIEW: DEFAULT_GA_VIEW
 };
