@@ -46,10 +46,12 @@ jobs:
       - setup_remote_docker:   # (2)
           docker_layer_caching: false  # (3)
       - run: |
+          echo env:KEY
+          echo $KEY
           openssl aes-256-cbc -d -md sha256 \
               -in  google-auth.json.cipher \
               -out google-auth.json \
-              -pass $KEY
+              -pass env:KEY
       # build and push Docker image
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
