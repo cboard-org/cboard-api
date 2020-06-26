@@ -45,6 +45,8 @@ jobs:
       # https://circleci.com/docs/2.0/building-docker-images/#overview
       - setup_remote_docker:   # (2)
           docker_layer_caching: false  # (3)
+      - run: |
+          apk add openssl
       # build and push Docker image
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
