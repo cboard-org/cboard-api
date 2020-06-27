@@ -17,6 +17,7 @@ const MongoStore = require('connect-mongo')(session);
 const User = require('./api/models/User');
 const Facebook = require('./api/passport/facebook');
 const Google = require('./api/passport/google');
+const morgan = require('morgan');
 
 const config = require('./config');
 
@@ -25,6 +26,11 @@ const app = express();
 swaggerTools.initializeMiddleware(swaggerConfig, async function(middleware) {
   //Serves the Swagger UI on /docs
   app.use(cors());
+
+  // Log HTTP requests. The `dev` format looks like this:
+  // :method :url :status :response-time ms - :res[content-length]
+  app.use(morgan('dev'));
+
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
   app.use(middleware.swaggerMetadata()); // needs to go BEFORE swaggerSecurity
