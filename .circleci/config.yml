@@ -15,7 +15,7 @@ jobs:
             - yarn-packages-v1-{{ .Branch }}-
             - yarn-packages-v1-
       # Install and save node_modules to cache
-      - run: yarn install --frozen-lockfile --cache-folder ~/.cache/yarn
+      - run: yarn install --cache-folder ~/.cache/yarn
       - save_cache:
           paths:
             - ~/.cache/yarn
@@ -36,7 +36,7 @@ jobs:
             - yarn-packages-v1-{{ .Branch }}-
             - yarn-packages-v1-
       # Install and save node_modules to cache
-      - run: yarn install --frozen-lockfile --cache-folder ~/.cache/yarn
+      - run: yarn install --cache-folder ~/.cache/yarn
       - save_cache:
           paths:
             - ~/.cache/yarn
@@ -97,6 +97,6 @@ workflows:
           context: google-auth
           requires:
             - build
-          filters:
-            branches:
-              only: master
+          # filters:
+          #   branches:
+          #     only: master

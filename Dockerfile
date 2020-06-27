@@ -3,6 +3,8 @@ FROM node:12
 WORKDIR /opt/cboard-api/
 COPY . /opt/cboard-api/
 
+RUN ls -a
+RUN pwd
 RUN npm install -g node-gyp 
 RUN npm install -g swagger
 RUN npm install
