@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.14.0
+version: v1.19.0
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
@@ -32,3 +32,22 @@ patch:
         patched: '2020-01-22T20:53:10.872Z'
     - snyk > @snyk/snyk-cocoapods-plugin > @snyk/cocoapods-lockfile-parser > @snyk/dep-graph > graphlib > lodash:
         patched: '2020-01-22T20:53:10.872Z'
+  SNYK-JS-LODASH-567746:
+    - swagger-tools > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - swagger-tools > async > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - swagger-tools > json-refs > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - swagger-tools > json-refs > graphlib > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - swagger-express-mw > swagger-node-runner > sway > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - translate-api > request-promise > request-promise-core > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - swagger-express-mw > swagger-node-runner > sway > json-refs > graphlib > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - mongoose > async > lodash:
+        patched: '2020-07-29T17:13:08.783Z'
+    - snyk > @snyk/snyk-cocoapods-plugin > @snyk/cocoapods-lockfile-parser > @snyk/ruby-semver > lodash:
+        patched: '2020-07-29T17:13:08.783Z'

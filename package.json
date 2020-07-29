@@ -35,7 +35,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "2.24.0",
-    "mongoose": "4.9.9",
+    "mongoose": "5.4.10",
     "morgan": "^1.10.0",
     "ms": "^2.1.2",
     "nodemailer": "^6.4.2",
@@ -46,7 +46,7 @@
     "rand-token": "0.4.0",
     "sendgrid": "5.2.3",
     "should": "^13.2.3",
-    "snyk": "^1.279.1",
+    "snyk": "^1.369.1",
     "supertest": "^4.0.2",
     "swagger-express-mw": "^0.7.0",
     "swagger-tools": "^0.10.4",
@@ -67,7 +67,7 @@
     "test": "swagger project test",
     "precommit": "lint-staged",
     "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "yarn run snyk-protect"
   },
   "lint-staged": {
     "*.{js,json,css}": [
