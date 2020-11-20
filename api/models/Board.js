@@ -57,7 +57,12 @@ const BOARD_SCHEMA_DEFINITION = {
     type: String,
     unique: false,
     default: ''
-  }
+  },
+  isFixed: {
+    type: Boolean,
+    default: false
+  },
+  grid: {}
 };
 
 const BOARD_SCHEMA_OPTIONS = {
