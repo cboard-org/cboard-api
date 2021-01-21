@@ -2,13 +2,13 @@
 //Require the dev-dependencies
 const chai = require('chai');
 const mongoose = require('mongoose');
-const chaiHttp = require('chai-http');
+var request = require('supertest');
 const { check } = require("prettier");
 const should = chai.should();
 
 const User = require('../api/models/User');
 
-const checkListProperties = body => {
+const verifyListProperties = body => {
     body.should.be.a('object');
     body.should.have.property('total');
     body.should.have.property('page');
@@ -19,17 +19,27 @@ const checkListProperties = body => {
     body.should.have.property('data');
 };
 
+const verifyBoardProperties = body => {
+    body.should.be.a('object');
+    body.should.have.property('id');
+    body.should.have.property('name');
+    body.should.have.property('author');
+    body.should.have.property('email');
+    body.should.have.property('isPublic');
+    body.should.have.property('tiles');
+};
+
 const userData = {
     name: "cboard mocha test",
     email: "anything@cboard.io",
     password: "123456"
 };
 
-const board = {
+const boardData = {
     id: 'root',
     name: 'home',
-    author: 'Cboard',
-    email: 'support@cboard.io',
+    author: 'cboard mocha test',
+    email: 'anything@cboard.io',
     isPublic: true,
     hidden: false,
     tiles: [
@@ -50,31 +60,60 @@ const board = {
     ]
 };
 
-function prepareDb(server, done) {
+function prepareDb() {
     mongoose.connect("mongodb://127.0.0.1:27017/cboard-api", {
         useNewUrlParser: true
     });
     const connection = mongoose.connection;
-    connection.once("open", function () {
-        mongoose.connection.db.dropDatabase(
-            function (err, result) {
-                console.log("Database droped");
-                chai.request(server)
-                    .post('/user')
-                    .send(userData)
-                    .end(function (err, res) {
-                        console.log(res.body);
-                        res.should.have.status(200);
-                        res.body.success.should.to.equal(1);
-                        done();
+
+    return new Promise((resolve, reject) => {
+        connection.once("open", function () {
+            mongoose.connection.db.dropDatabase(
+                function (err, result) {
+                    console.log("Database droped");
+                    resolve();
+                });
+        });
+    });
+}
+
+function prepareUser(server) {
+    var token;
+    var url;
+    return new Promise((resolve, reject) => {
+        request(server)
+            .post('/user')
+            .send(userData)
+            .expect(200)
+            .expect(function (res) {
+                url = res.body.url;
+            })
+            .end(function () {
+                request(server)
+                    .post('/user/activate/' + url)
+                    .send('')
+                    .expect(200)
+                    .end(function () {
+                        request(server)
+                            .post('/user/login')
+                            .send(userData)
+                            .expect(200)
+                            .expect(function (res) {
+                                token = res.body.authToken;
+                            })
+                            .end(function () {
+                                resolve(token);
+                            });
                     });
             });
     });
 }
 
 module.exports = {
-    checkListProperties,
+    verifyListProperties,
+    verifyBoardProperties,
     prepareDb,
-    board,
+    prepareUser,
+    boardData,
     userData
 };
