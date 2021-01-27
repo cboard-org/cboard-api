@@ -71,7 +71,7 @@ function prepareDb() {
             mongoose.connection.db.dropDatabase(
                 function (err, result) {
                     console.log("Database droped");
-                    resolve();
+                    resolve(true);
                 });
         });
     });

@@ -12,6 +12,7 @@ const server = require('../../app');
 const helper = require('../helper');
 const { token } = require('morgan');
 
+const Board = require('../../api/models/Board');
 
 //Parent block
 describe('Board API calls', function () {
@@ -19,7 +20,8 @@ describe('Board API calls', function () {
   var authToken;
   var boardId;
 
-  before((done) => { //Before all we empty the database
+  before(async function (done) { //Before all we empty the database
+    await Board.collection.drop();
     helper.prepareUser(server)
       .then(token => {
         authToken = token;
