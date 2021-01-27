@@ -21,9 +21,6 @@ jobs:
           paths:
             - ~/.cache/yarn
           key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-      # install dependencies 
-      - run: npm install swagger
-      - run: npm install cors
       # run tests
       - run: yarn test
   image:
