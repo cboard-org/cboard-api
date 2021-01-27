@@ -33,14 +33,18 @@ module.exports = {
     ]
   },
   emailTransport: {
-    service: 'Gmail',
-    from: process.env.DEV_ENV_EMAIL_USER || 'cboardorg@gmail.com',
-    host: 'smtp.gmail.com',
+    from: 'cboard@cboard.io',
+    host: 'smtp.sendgrid.net',
     port: 465,
-    secure: true,
+    secure: false,
+    service: 'Sendgrid',
     auth: {
-      user: process.env.DEV_ENV_EMAIL_USER || 'cboardorg@gmail.com',
-      pass: process.env.DEV_ENV_EMAIL_PASS || 'Auth1234'
+      user: 'apikey',
+      pass: process.env.SENDGRID_API_KEY
+    },
+    tls: {
+      ciphers: 'SSLv3',
+      rejectUnauthorized: false
     }
   }
 };
