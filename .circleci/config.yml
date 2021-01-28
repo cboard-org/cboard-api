@@ -5,7 +5,7 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:12
-      - image: circleci/mongo:latest
+      - image: circleci/mongo:4.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -26,7 +26,6 @@ jobs:
               -in  google-auth.json.cipher \
               -out google-auth.json \
               -k $KEY
-      - run: pwd
       # run tests
       - run: yarn test
   image:
