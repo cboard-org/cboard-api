@@ -21,7 +21,7 @@ describe('Board API calls', function () {
   var boardId;
 
   before(async function (done) { //Before all we empty the database
-    await Board.collection.drop();
+    //await Board.collection.drop();
     helper.prepareUser(server)
       .then(token => {
         authToken = token;
