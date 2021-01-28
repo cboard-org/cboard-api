@@ -26,6 +26,7 @@ jobs:
               -in  google-auth.json.cipher \
               -out google-auth.json \
               -k $KEY
+      - run: pwd
       # run tests
       - run: yarn test
   image:
