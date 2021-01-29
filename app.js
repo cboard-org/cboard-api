@@ -18,12 +18,11 @@ const User = require('./api/models/User');
 const Facebook = require('./api/passport/facebook');
 const Google = require('./api/passport/google');
 const morgan = require('morgan');
-
 const config = require('./config');
 
 const app = express();
 
-swaggerTools.initializeMiddleware(swaggerConfig, async function(middleware) {
+swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   //Serves the Swagger UI on /docs
   app.use(cors());
 
@@ -108,7 +107,7 @@ async function startServer(app) {
     console.log('*** Dev Server = HTTPS Enabled ***');
     try {
       server = await new Promise((resolve, reject) => {
-        pem.createCertificate({ days: 365, selfSigned: true }, function(
+        pem.createCertificate({ days: 365, selfSigned: true }, function (
           err,
           keys
         ) {
@@ -129,7 +128,9 @@ async function startServer(app) {
   }
 
   const port = process.env.PORT || 10010;
-  server.listen(port, function() {
+  server.listen(port, function () {
     console.log('Started server on port ' + port);
   });
 }
+
+module.exports = app; // for testing

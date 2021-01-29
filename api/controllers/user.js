@@ -286,8 +286,8 @@ function loginUser(req, res) {
       req.session.userId = userId;
 
       const tokenString = auth.issueToken({
-        id: userId,
-        email
+        email,
+        id: userId
       });
 
       const settings = await getSettings(user);
