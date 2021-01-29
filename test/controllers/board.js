@@ -20,7 +20,7 @@ describe('Board API calls', function () {
   var authToken;
   var boardId;
 
-  before(async function (done) { //Before all we empty the database
+  before(async function (done) {
     //await Board.collection.drop();
     helper.prepareUser(server)
       .then(token => {
@@ -125,4 +125,61 @@ describe('Board API calls', function () {
         done();
       });
   });
+
+  it('it should NOT PUT a board without ID', function (done) {
+    const boardData = { ...helper.boardData };
+    request(server)
+      .put('/board')
+      .send(boardData)
+      .set('Authorization', 'Bearer ' + authToken)
+      .expect(405)
+      .end(function (err, res) {
+        if (err) return done(err);
+        done();
+      });
+  });
+
+  it('it should NOT PUT a board without authorization', function (done) {
+    request(server)
+      .put('/board/' + boardId)
+      .send(helper.boardData)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(403)
+      .end(function (err, res) {
+        if (err) return done(err);
+        done();
+      });
+  });
+
+  it('it should GET a board', function (done) {
+    const boardData = { ...helper.boardData };
+    request(server)
+      .get('/board/' + boardId)
+      .set('Authorization', 'Bearer ' + authToken)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        // Verify response
+        helper.verifyBoardProperties(res.body);
+        done();
+      });
+  });
+
+  it('it should GET a board without authorization', function (done) {
+    request(server)
+      .get('/board/' + boardId)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        // Verify response
+        helper.verifyBoardProperties(res.body);
+        done();
+      });
+  });
+
 });

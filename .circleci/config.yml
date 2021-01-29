@@ -27,7 +27,7 @@ jobs:
               -out google-auth.json \
               -k $KEY
       # run tests
-      - run: yarn test
+      - run: npm test
   image:
     docker:
       # specify the version you desire here
