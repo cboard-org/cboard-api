@@ -21,13 +21,18 @@ jobs:
           paths:
             - ~/.cache/yarn
           key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-      - run: |
+      - run:
+        name: Decrypt the Google auth file 
+        command: |
           openssl aes-256-cbc -d -md sha256 \
-              -in  google-auth.json.cipher \
-              -out google-auth.json \
-              -k $KEY
+          -in  google-auth.json.cipher \
+          -out google-auth.json \
+          -k $KEY
       # run tests
-      - run: npm test
+      - run: 
+        name: Run Unitests
+        command: |
+          npm test
   image:
     docker:
       # specify the version you desire here

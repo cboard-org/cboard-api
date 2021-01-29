@@ -28,10 +28,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
 
   // Log HTTP requests. The `dev` format looks like this:
   // :method :url :status :response-time ms - :res[content-length]
-  //don't show the log when it is test
- // if (process.env.NODE_ENV !== 'test') {
-    app.use(morgan('dev'));
-  //}
+  app.use(morgan('dev'));
 
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));

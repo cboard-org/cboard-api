@@ -4,13 +4,11 @@ process.env.NODE_ENV = 'test';
 //Require the dev-dependencies
 const chai = require('chai');
 var request = require('supertest');
-const { check } = require("prettier");
 var expect = require('chai').expect;
 const should = chai.should();
 
 const server = require('../../app');
 const helper = require('../helper');
-const { token } = require('morgan');
 
 const Board = require('../../api/models/Board');
 

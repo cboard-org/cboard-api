@@ -1,9 +1,7 @@
-
 //Require the dev-dependencies
 const chai = require('chai');
 const mongoose = require('mongoose');
 var request = require('supertest');
-const { check } = require("prettier");
 const should = chai.should();
 
 const User = require('../api/models/User');
