@@ -182,4 +182,56 @@ describe('Board API calls', function () {
       });
   });
 
+  it('it should NOT DELETE a board without authorization', function (done) {
+    request(server)
+      .del('/board/' + boardId)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(403)
+      .end(function (err, res) {
+        if (err) return done(err);
+        done();
+      });
+  });
+
+  it('it should NOT DELETE a board without id', function (done) {
+    request(server)
+      .del('/board/')
+      .set('Accept', 'application/json')
+      .expect(405)
+      .end(function (err, res) {
+        if (err) return done(err);
+        done();
+      });
+  });
+
+  it('it should delete a board', function (done) {
+    const boardData = { ...helper.boardData };
+    request(server)
+      .del('/board/' + boardId)
+      .set('Authorization', 'Bearer ' + authToken)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        // Verify response
+        helper.verifyBoardProperties(res.body);
+        done();
+      });
+  });
+
+  it('it should NOT DELETE a board that was already removed ', function (done) {
+    request(server)
+    .del('/board/' + boardId)
+    .set('Authorization', 'Bearer ' + authToken)
+    .set('Accept', 'application/json')
+    .expect('Content-Type', /json/)
+      .expect(404)
+      .end(function (err, res) {
+        if (err) return done(err);
+        done();
+      });
+  });
+
 });
