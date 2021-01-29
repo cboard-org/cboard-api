@@ -22,7 +22,7 @@ jobs:
             - ~/.cache/yarn
           key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
       - run:
-        name: Decrypt the Google auth file 
+          name: Decrypt the Google auth file 
           command: |
             openssl aes-256-cbc -d -md sha256 \
             -in  google-auth.json.cipher \
