@@ -23,16 +23,16 @@ jobs:
           key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
       - run:
         name: Decrypt the Google auth file 
-        command: |
-          openssl aes-256-cbc -d -md sha256 \
-          -in  google-auth.json.cipher \
-          -out google-auth.json \
-          -k $KEY
+          command: |
+            openssl aes-256-cbc -d -md sha256 \
+            -in  google-auth.json.cipher \
+            -out google-auth.json \
+            -k $KEY
       # run tests
       - run: 
-        name: Run Unitests
-        command: |
-          npm test
+          name: Run Unitests
+          command: |
+            npm test
   image:
     docker:
       # specify the version you desire here
