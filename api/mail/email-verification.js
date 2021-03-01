@@ -382,7 +382,7 @@ module.exports = function(mongoose) {
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
   var sendVerificationEmail = function(email, url, callback) {
-    // const domain = Window.URL.hostname;
+    const domain = Window.URL.hostname;
     var r = /\$\{URL\}/g;
     var d = /\$\{DOMAIN\}/g;
 
