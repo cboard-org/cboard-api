@@ -45,7 +45,7 @@ async function getSettings(user) {
 
 function createUser(req, res) {
   const user = new User(req.body);
-
+  const domain = req.headers.referer;
   nev.createTempUser(user, function(err, existingPersistentUser, newTempUser) {
     if (err) {
       return res.status(404).json({
