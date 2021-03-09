@@ -378,22 +378,22 @@ module.exports = function(mongoose) {
    *
    * @func sendVerificationEmail
    * @param {string} email - the user's email address.
+   * @param {string} domain - the user's domain.
    * @param {string} url - the unique url generated for the user.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
-  var sendVerificationEmail = function(email, url, callback) {
+  var sendVerificationEmail = function(email, domain, url, callback) {
     var r = /\$\{URL\}/g;
-    var d = /\$\{DOMAIN\}/g;
-
+    var d = /DOMAIN/;
     // inject newly-created URL into the email's body and FIRE
     // stringify --> parse is used to deep copy
-    var URL = options.verificationURL.replace(r, url),
+    var URL = options.verificationURL.replace(d, domain),
+      URL = URL.replace(r, url),
       mailOptions = JSON.parse(JSON.stringify(options.verifyMailOptions));
 
     mailOptions.to = email;
     mailOptions.html = mailOptions.html.replace(r, URL);
     mailOptions.text = mailOptions.text.replace(r, URL);
-
     if (!callback) {
       callback = options.verifySendMailCallback;
     }
@@ -473,10 +473,9 @@ module.exports = function(mongoose) {
    * @func resendVerificationEmail
    * @param {object} email - the user's email address
    */
-  var resendVerificationEmail = function(email, callback) {
+  var resendVerificationEmail = function(email, domain, callback) {
     var query = {};
     query[options.emailFieldName] = email;
-
     options.tempUserModel.findOne(query, function(err, tempUser) {
       if (err) {
         return callback(err, null);
@@ -493,6 +492,7 @@ module.exports = function(mongoose) {
 
           sendVerificationEmail(
             getNestedValue(tempUser, options.emailFieldName),
+            domain,
             tempUser[options.URLFieldName],
             function(err) {
               if (err) {

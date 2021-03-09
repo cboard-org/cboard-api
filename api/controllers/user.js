@@ -45,7 +45,6 @@ async function getSettings(user) {
 
 function createUser(req, res) {
   const user = new User(req.body);
-  const domain = req.headers.referer;
   nev.createTempUser(user, function(err, existingPersistentUser, newTempUser) {
     if (err) {
       return res.status(404).json({
@@ -62,7 +61,15 @@ function createUser(req, res) {
     // new user created
     if (newTempUser) {
       const URL = newTempUser[nev.options.URLFieldName];
-      nev.sendVerificationEmail(newTempUser.email, URL, function(err, info) {
+      
+      let domain = req.headers.origin;
+      //if origin is private insert default hostname
+      if (domain == null){ 
+        domain = 'https://app.cboard.io'
+      }
+      console.log(domain);
+
+      nev.sendVerificationEmail(newTempUser.email, domain, URL, function(err, info) {
         if (err) {
           return res.status(500).json({
             message: 'ERROR: sending verification email FAILED ' + info
