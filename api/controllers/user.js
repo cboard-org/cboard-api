@@ -64,10 +64,9 @@ function createUser(req, res) {
       
       let domain = req.headers.origin;
       //if origin is private insert default hostname
-      if (domain == null){ 
+      if (!domain){ 
         domain = 'https://app.cboard.io'
       }
-      console.log(domain);
 
       nev.sendVerificationEmail(newTempUser.email, domain, URL, function(err, info) {
         if (err) {
@@ -386,8 +385,15 @@ async function forgotPassword(req, res) {
           }
         });
         //sending mail to the user where he can reset password.
-        //User id and the token generated are sent as params in a link
-        nev.sendResetPasswordEmail(user.email, user.id, token, function(err) {
+        //User id, the token generated and user domain are sent as params in a link
+
+        let domain = req.headers.origin;
+        //if origin is private insert default hostname
+        if (!domain){ 
+          domain = 'https://app.cboard.io'
+        }
+
+        nev.sendResetPasswordEmail(user.email, domain, user.id, token, function(err) {
           if (err) {
             return res.status(500).json({
               message: 'ERROR: sending reset your password email FAILED ',

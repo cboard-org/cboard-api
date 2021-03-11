@@ -41,8 +41,8 @@ module.exports = function(locale) {
   }
   nev.configure(
     {
-      verificationURL: 'DOMAIN/activate/${URL}',
-      resetPasswordURL: 'https://app.cboard.io/reset/${USERID}/${URL}',
+      verificationURL: '${DOMAIN}/activate/${URL}',
+      resetPasswordURL: '${DOMAIN}/reset/${USERID}/${URL}',
       URLLength: 16,
 
       // mongo-stuff

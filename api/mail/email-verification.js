@@ -384,11 +384,10 @@ module.exports = function(mongoose) {
    */
   var sendVerificationEmail = function(email, domain, url, callback) {
     var r = /\$\{URL\}/g;
-    var d = /DOMAIN/;
+    var d = /\$\{DOMAIN\}/g;
     // inject newly-created URL into the email's body and FIRE
     // stringify --> parse is used to deep copy
-    var URL = options.verificationURL.replace(d, domain),
-      URL = URL.replace(r, url),
+    var URL = options.verificationURL.replace(d, domain).replace(r, url);
       mailOptions = JSON.parse(JSON.stringify(options.verifyMailOptions));
 
     mailOptions.to = email;
@@ -470,8 +469,9 @@ module.exports = function(mongoose) {
   /**
    * Resend the verification email to the user given only their email.
    *
-   * @func resendVerificationEmail
+   * @func resendVerificationEmail     //NEVER IS CALLED
    * @param {object} email - the user's email address
+   * @param {string} domain - dynamic domain
    */
   var resendVerificationEmail = function(email, domain, callback) {
     var query = {};
@@ -513,15 +513,17 @@ module.exports = function(mongoose) {
    *
    * @func sendResetPasswordEmail
    * @param {string} email - the user's email address.
+   * @param {string} domain - dynamic domain of the user
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
-  var sendResetPasswordEmail = function(email, userid, url, callback) {
+  var sendResetPasswordEmail = function(email, domain, userid, url, callback) {
+    var d = /\$\{DOMAIN\}/g;
     var r = /\$\{URL\}/g;
     var u = /\$\{USERID\}/;
 
     // inject newly-created URL into the email's body and FIRE
     // stringify --> parse is used to deep copy
-    var URL = options.resetPasswordURL.replace(r, url).replace(u, userid);
+    var URL = options.resetPasswordURL.replace(d, domain).replace(r, url).replace(u, userid);
     var mailOptions = JSON.parse(
       JSON.stringify(options.resetPasswordMailOptions)
     );
@@ -529,7 +531,7 @@ module.exports = function(mongoose) {
     mailOptions.to = email;
     mailOptions.html = mailOptions.html.replace(r, URL);
     mailOptions.text = mailOptions.text.replace(r, URL);
-
+    
     if (!callback) {
       callback = options.resetPasswordSendMailCallback;
     }
