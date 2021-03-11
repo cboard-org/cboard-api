@@ -387,7 +387,7 @@ module.exports = function(mongoose) {
     var d = /\$\{DOMAIN\}/g;
     // inject newly-created URL into the email's body and FIRE
     // stringify --> parse is used to deep copy
-    var URL = options.verificationURL.replace(d, domain).replace(r, url);
+    var URL = options.verificationURL.replace(d, domain).replace(r, url),
       mailOptions = JSON.parse(JSON.stringify(options.verifyMailOptions));
 
     mailOptions.to = email;
