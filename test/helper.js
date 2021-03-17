@@ -1,6 +1,7 @@
 //Require the dev-dependencies
 const chai = require('chai');
 const mongoose = require('mongoose');
+const { token } = require('morgan');
 var request = require('supertest');
 const should = chai.should();
 
@@ -31,6 +32,12 @@ const userData = {
     name: "cboard mocha test",
     email: "anything@cboard.io",
     password: "123456"
+};
+
+let userForgotPassword = {
+    Userid: "",
+    token: "",
+    password: "newpassword"
 };
 
 const boardData = {
@@ -107,11 +114,18 @@ function prepareUser(server) {
     });
 }
 
+async function giveAdminrole(){
+    let doc = await User.findOneAndUpdate(userData.name, {role: "admin"});
+    console.log(doc.role);
+}
+
 module.exports = {
     verifyListProperties,
     verifyBoardProperties,
     prepareDb,
     prepareUser,
+    giveAdminrole,
     boardData,
-    userData
+    userData,
+    userForgotPassword
 };
