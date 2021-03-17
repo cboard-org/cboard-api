@@ -39,11 +39,10 @@ module.exports = function(locale) {
         (text =
           'Thanks for signup to Cboard!. Please confirm your account by clicking the following link: ${URL}');
   }
-
   nev.configure(
     {
-      verificationURL: 'https://app.cboard.io/activate/${URL}',
-      resetPasswordURL: 'https://app.cboard.io/reset/${USERID}/${URL}',
+      verificationURL: '${DOMAIN}/activate/${URL}',
+      resetPasswordURL: '${DOMAIN}/reset/${USERID}/${URL}',
       URLLength: 16,
 
       // mongo-stuff

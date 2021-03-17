@@ -41,7 +41,6 @@ module.exports = function(mongoose) {
     }
     return obj;
   };
-
   // default options
   var options = {
     verificationURL: 'https://app.cboard.io/activate/${URL}',
@@ -379,21 +378,21 @@ module.exports = function(mongoose) {
    *
    * @func sendVerificationEmail
    * @param {string} email - the user's email address.
+   * @param {string} domain - the user's domain.
    * @param {string} url - the unique url generated for the user.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
-  var sendVerificationEmail = function(email, url, callback) {
+  var sendVerificationEmail = function(email, domain, url, callback) {
     var r = /\$\{URL\}/g;
-
+    var d = /\$\{DOMAIN\}/g;
     // inject newly-created URL into the email's body and FIRE
     // stringify --> parse is used to deep copy
-    var URL = options.verificationURL.replace(r, url),
+    var URL = options.verificationURL.replace(d, domain).replace(r, url),
       mailOptions = JSON.parse(JSON.stringify(options.verifyMailOptions));
 
     mailOptions.to = email;
     mailOptions.html = mailOptions.html.replace(r, URL);
     mailOptions.text = mailOptions.text.replace(r, URL);
-
     if (!callback) {
       callback = options.verifySendMailCallback;
     }
@@ -470,13 +469,13 @@ module.exports = function(mongoose) {
   /**
    * Resend the verification email to the user given only their email.
    *
-   * @func resendVerificationEmail
+   * @func resendVerificationEmail     //NEVER IS CALLED
    * @param {object} email - the user's email address
+   * @param {string} domain - dynamic domain
    */
-  var resendVerificationEmail = function(email, callback) {
+  var resendVerificationEmail = function(email, domain, callback) {
     var query = {};
     query[options.emailFieldName] = email;
-
     options.tempUserModel.findOne(query, function(err, tempUser) {
       if (err) {
         return callback(err, null);
@@ -493,6 +492,7 @@ module.exports = function(mongoose) {
 
           sendVerificationEmail(
             getNestedValue(tempUser, options.emailFieldName),
+            domain,
             tempUser[options.URLFieldName],
             function(err) {
               if (err) {
@@ -513,15 +513,17 @@ module.exports = function(mongoose) {
    *
    * @func sendResetPasswordEmail
    * @param {string} email - the user's email address.
+   * @param {string} domain - dynamic domain of the user
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
-  var sendResetPasswordEmail = function(email, userid, url, callback) {
+  var sendResetPasswordEmail = function(email, domain, userid, url, callback) {
+    var d = /\$\{DOMAIN\}/g;
     var r = /\$\{URL\}/g;
     var u = /\$\{USERID\}/;
 
     // inject newly-created URL into the email's body and FIRE
     // stringify --> parse is used to deep copy
-    var URL = options.resetPasswordURL.replace(r, url).replace(u, userid);
+    var URL = options.resetPasswordURL.replace(d, domain).replace(r, url).replace(u, userid);
     var mailOptions = JSON.parse(
       JSON.stringify(options.resetPasswordMailOptions)
     );
@@ -529,7 +531,7 @@ module.exports = function(mongoose) {
     mailOptions.to = email;
     mailOptions.html = mailOptions.html.replace(r, URL);
     mailOptions.text = mailOptions.text.replace(r, URL);
-
+    
     if (!callback) {
       callback = options.resetPasswordSendMailCallback;
     }
