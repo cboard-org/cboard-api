@@ -232,5 +232,4 @@ describe('Board API calls', function () {
         done();
       });
   });
-
 });

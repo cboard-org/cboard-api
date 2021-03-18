@@ -6,13 +6,51 @@ var assert = chai.assert;
 
 const server = require('../../app');
 const helper = require('../helper');
-const User = require("../../api/models/User");
-const user = require("../../api/controllers/user");
 const { copy } = require("../../app");
 
 //Parent block
 describe('User API calls', function () {
-  var authToken;
+  let authToken;
+  let url;
+  let userid;
+    before(async function (done) {
+      //await Board.collection.drop();
+      helper.deleteUser(server)
+      .then(token => {
+        authToken = token;
+        done();
+      });
+    });
+    
+  it("it should to create a new temporary user",function(done) {
+    this.timeout(5000); //to await the email server process
+    request(server)
+      .post('/user')
+      .send(helper.userData)
+      .expect(200)
+      .expect(function (res) {
+          url = res.body.url;
+      })
+      .end(function(err, res){
+        if (err) done(err);
+        done();
+      }); 
+  })
+
+  it("it should to activate user",function(done) {
+    this.timeout(5000);
+    request(server)
+    .post('/user/activate/' + url)
+    .send('')
+    .expect(200)
+    .expect(function (res) {
+      userid = res.body.userid;
+    })
+      .end(function(err, res){
+        if (err) done(err);
+        done();
+      });
+  })
 
   it("it should NOT Returns a valid token for a wrong email or password", function(done) {
     const badUserData = { ...helper.userData };
@@ -23,7 +61,6 @@ describe('User API calls', function () {
       .expect(401)
       .expect(function (res) {
         authToken = res.body.authToken;
-        userId = res.body
       })
       .end(function(err, res){
         if (err) done(err);
@@ -60,6 +97,34 @@ describe('User API calls', function () {
   it("it should Get the full users list", function(done) {
     request(server)
       .get('/user')
+      .set('Authorization', 'Bearer ' + authToken)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function(err, res){
+        if (err) done(err);
+        done();
+      });
+  });
+
+  it("it should Get a specific user", function(done) {
+    request(server)
+      .get('/user/' + userid)
+      .set('Authorization', 'Bearer ' + authToken)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function(err, res){
+        if (err) done(err);
+        done();
+      });
+  });
+
+  it("it should update a specific user", function(done) {
+    request(server)
+      .put('/user/' + userid)
+      //.send(helper.userData)
+      .send({role: "admin"})
       .set('Authorization', 'Bearer ' + authToken)
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)

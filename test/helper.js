@@ -3,6 +3,7 @@ const chai = require('chai');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
+const user = require('../api/controllers/user');
 const should = chai.should();
 
 const User = require('../api/models/User');
@@ -33,6 +34,8 @@ const userData = {
     email: "anything@cboard.io",
     password: "123456"
 };
+
+let userid = "";
 
 let userForgotPassword = {
     Userid: "",
@@ -98,7 +101,8 @@ function prepareUser(server) {
                     .post('/user/activate/' + url)
                     .send('')
                     .expect(200)
-                    .end(function () {
+                    .end(function (err,res) {
+                        userid = res.body.userid;
                         request(server)
                             .post('/user/login')
                             .send(userData)
@@ -107,16 +111,40 @@ function prepareUser(server) {
                                 token = res.body.authToken;
                             })
                             .end(function () {
-                                resolve(token);
+                                resolve(token, userid);
                             });
                     });
             });
     });
 }
 
+function deleteUser(server) {
+    let authToken;
+    return new Promise((resolve, reject) => {
+        request(server)
+            .post('/user/login')
+            .send(userData)
+            .expect(200)
+            .expect(function (res) {
+                authToken = res.body.authToken;
+            })
+            .end(function(){
+                giveAdminrole();
+                request(server)
+                    .del('/user/'+ userid)
+                    .set('Authorization', 'Bearer ' + authToken)
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', /json/)
+                    .expect(200)
+                    .end(function () {
+                        resolve();
+                    });
+            });  
+    });      
+}
+
 async function giveAdminrole(){
     let doc = await User.findOneAndUpdate(userData.name, {role: "admin"});
-    console.log(doc.role);
 }
 
 module.exports = {
@@ -125,6 +153,7 @@ module.exports = {
     prepareDb,
     prepareUser,
     giveAdminrole,
+    deleteUser,
     boardData,
     userData,
     userForgotPassword
