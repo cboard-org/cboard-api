@@ -14,7 +14,7 @@ describe('User API calls', function () {
   let url;
   let userid;
     before(async function (done) {
-      //await Board.collection.drop();
+      // await Board.collection.drop();
       helper.deleteUser(server)
       .then(token => {
         authToken = token;
