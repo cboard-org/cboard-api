@@ -19,7 +19,7 @@ describe('Board API calls', function () {
   var boardId;
 
   before(async function (done) {
-    //await Board.collection.drop();
+    this.timeout(5000); //to await the email server process
     helper.prepareUser(server)
       .then(token => {
         authToken = token;
@@ -231,5 +231,4 @@ describe('Board API calls', function () {
         done();
       });
   });
-
 });
