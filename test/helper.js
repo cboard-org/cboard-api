@@ -10,13 +10,7 @@ const User = require('../api/models/User');
 
 const verifyListProperties = body => {
     body.should.be.a('object');
-    body.should.have.property('total');
-    body.should.have.property('page');
-    body.should.have.property('limit');
-    body.should.have.property('offset');
-    body.should.have.property('sort');
-    body.should.have.property('search');
-    body.should.have.property('data');
+    body.should.to.have.all.keys('total','page', 'limit', 'offset', 'sort', 'search', 'data');
 };
 
 const verifyBoardProperties = body => {
@@ -28,6 +22,14 @@ const verifyBoardProperties = body => {
     body.should.have.property('isPublic');
     body.should.have.property('tiles');
 };
+
+const verifyUserProperties = user => {
+    user.should.be.a('object');
+    user.should.have.property('id');
+    user.should.have.property('name');
+    user.should.have.property('email');
+    user.should.have.property('password');
+}
 
 const userData = {
     name: "cboard mocha test",
@@ -118,42 +120,46 @@ function prepareUser(server) {
     });
 }
 
-function deleteUser(server) {
-    let authToken;
+function deleteMochaUser(server) {
+    let authToken; 
     return new Promise((resolve, reject) => {
-        request(server)
-            .post('/user/login')
-            .send(userData)
-            .expect(200)
-            .expect(function (res) {
-                authToken = res.body.authToken;
-            })
-            .end(function(){
-                giveAdminrole();
-                request(server)
-                    .del('/user/'+ userid)
-                    .set('Authorization', 'Bearer ' + authToken)
-                    .set('Accept', 'application/json')
-                    .expect('Content-Type', /json/)
-                    .expect(200)
-                    .end(function () {
-                        resolve();
-                    });
-            });  
+        User.findOne({ email: userData.email }, function (err, user) {
+            userid = user._id
+            request(server)
+                .post('/user/login')
+                .send(userData)
+                .expect(200)
+                .expect(function (res) {
+                    authToken = res.body.authToken;
+                })
+                .end(function(){
+                    request(server)
+                        .put('/user/' + userid)
+                        .set('Authorization', 'Bearer ' + authToken)
+                        .send({role: "admin"})
+                        .end(function(){
+                            request(server)
+                                .del('/user/'+ userid)
+                                .set('Authorization', 'Bearer ' + authToken)
+                                .set('Accept', 'application/json')
+                                .expect('Content-Type', /json/)
+                                .expect(200)
+                                .end(function () {
+                                    resolve();
+                                });
+                        })    
+                });  
+        })    
     });      
-}
-
-async function giveAdminrole(){
-    let doc = await User.findOneAndUpdate(userData.name, {role: "admin"});
 }
 
 module.exports = {
     verifyListProperties,
     verifyBoardProperties,
+    verifyUserProperties,
     prepareDb,
     prepareUser,
-    giveAdminrole,
-    deleteUser,
+    deleteMochaUser,
     boardData,
     userData,
     userForgotPassword

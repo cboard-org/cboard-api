@@ -8,31 +8,33 @@ const server = require('../../app');
 const helper = require('../helper');
 const { copy } = require("../../app");
 
+const nev = require('../../api/mail/index');
+
 //Parent block
 describe('User API calls', function () {
   let authToken;
   let url;
   let userid;
-    before(async function (done) {
-      // await Board.collection.drop();
-      helper.deleteUser(server)
-      .then(token => {
-        authToken = token;
-        done();
-      });
+
+  before(async function (done) {
+    helper.deleteMochaUser(server)
+    .then(token => {
+      authToken = token;
+      done();
     });
+  });
     
   it("it should to create a new temporary user",function(done) {
-    this.timeout(5000); //to await the email server process
+    this.timeout(5000); //to set timeout from 2s to 5s because the email server process take time.
     request(server)
       .post('/user')
       .send(helper.userData)
       .expect(200)
-      .expect(function (res) {
-          url = res.body.url;
-      })
       .end(function(err, res){
+        const URLLenght = 16;
         if (err) done(err);
+        url = res.body.url;
+        url.should.be.a('string').with.lengthOf(URLLenght); //nev.options.URLLenght
         done();
       }); 
   })
@@ -41,29 +43,30 @@ describe('User API calls', function () {
     this.timeout(5000);
     request(server)
     .post('/user/activate/' + url)
-    .send('')
+    .expect('Content-Type', /json/)
     .expect(200)
-    .expect(function (res) {
+    .end(function(err, res){
+      if (err) done(err);
       userid = res.body.userid;
-    })
-      .end(function(err, res){
-        if (err) done(err);
-        done();
-      });
+      userid.should.be.a('string');
+      userid.should.not.have.string(' '); //is not recomended negate assertions
+      done();
+    });
   })
 
   it("it should NOT Returns a valid token for a wrong email or password", function(done) {
-    const badUserData = { ...helper.userData };
-    badUserData.password = 'badPassword';
+    const wrongUserData = { ...helper.userData };
+    wrongUserData.password = 'wrongPassword';
     request(server)
       .post('/user/login')
-      .send(badUserData)
+      .send(wrongUserData)
+      .expect('Content-Type', /json/)
       .expect(401)
-      .expect(function (res) {
-        authToken = res.body.authToken;
-      })
       .end(function(err, res){
         if (err) done(err);
+        authToken = res.body.authToken;
+        (authToken === undefined).should.be.true;
+        (res.body.message).should.be.string;
         done();
       });
   });
@@ -72,12 +75,13 @@ describe('User API calls', function () {
     request(server)
       .post('/user/login')
       .send(helper.userData)
+      .expect('Content-Type', /json/)
       .expect(200)
-      .expect(function (res) {
-        authToken = res.body.authToken;
-      })
       .end(function(err, res){
         if (err) done(err);
+        authToken = res.body.authToken;
+        authToken.should.be.a('string');
+        authToken.should.not.have.string(' ');
         done();
       });
   });
@@ -103,6 +107,7 @@ describe('User API calls', function () {
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        helper.verifyListProperties(res.body);
         done();
       });
   });
@@ -116,6 +121,8 @@ describe('User API calls', function () {
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        const getUser = res.body;
+        getUser.should.to.have.any.keys('name', 'role', 'provider', 'email');
         done();
       });
   });
@@ -123,7 +130,6 @@ describe('User API calls', function () {
   it("it should update a specific user", function(done) {
     request(server)
       .put('/user/' + userid)
-      //.send(helper.userData)
       .send({role: "admin"})
       .set('Authorization', 'Bearer ' + authToken)
       .set('Accept', 'application/json')
@@ -131,6 +137,8 @@ describe('User API calls', function () {
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        const updateUser = res.body;
+        updateUser.should.to.have.property('role').to.equal('admin');
         done();
       });
   });
@@ -145,24 +153,27 @@ describe('User API calls', function () {
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        (res.body.message).should.be.string;
         done();
       });
   });
 
   it("it should NOT create a Clear token to auth for a wrong email", function(done) {
-    let BadUserEmail = { ...helper.userData };
-    BadUserEmail.email = 'badEmail@bad.com';
+    let wrongUserEmail = { ...helper.userData };
+    wrongUserEmail.email = 'wrong_email@wrong.com';
     request(server)
       .post('/user/forgot')
-      .send(BadUserEmail)
+      .send(wrongUserEmail)
+      .expect('Content-Type', /json/)
       .expect(404)
-      .end(function(err, res){
+      .end(function(err, res){ 
         if (err) done(err);
+        (res.body.message).should.be.a('string');
         done();
       });
   });
 
-  it("it should create a Clear token to auth", function(done) {
+  it("it should create a Clear token to restore password", function(done) {
     this.timeout(5000); //to await the email server process
     request(server)
       .post('/user/forgot')
@@ -172,6 +183,8 @@ describe('User API calls', function () {
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        const userAndToken = res.body;
+        userAndToken.should.be.a('object').with.any.keys('userid', 'token');
         helper.userForgotPassword.userid = res.body.userid;
         helper.userForgotPassword.token = res.body.token;
         done();
@@ -179,16 +192,17 @@ describe('User API calls', function () {
   });
 
   it("it should NOT allows to store a new password without a verification url.", function(done) {
-    let badVerUrl = { ...helper.userForgotPassword };
-    badVerUrl.token = "";
+    let wrongVerificationUrl = { ...helper.userForgotPassword };
+    wrongVerificationUrl.token = "";
     request(server)
       .post('/user/store-password')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .send(badVerUrl) 
+      .send(wrongVerificationUrl) 
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        (res.body.message).should.be.a('string');
         done();
       });
   });
@@ -202,12 +216,13 @@ describe('User API calls', function () {
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        const storePasswordRes = (res.body);
+        storePasswordRes.should.to.have.all.keys('success', 'message');
         done();
       });
   });
 
   it("it should delete a user", function(done) {
-    helper.giveAdminrole();
     request(server)
       .del('/user/'+ helper.userForgotPassword.userid)
       .set('Authorization', 'Bearer ' + authToken)
@@ -216,19 +231,9 @@ describe('User API calls', function () {
       .expect(200)
       .end(function(err, res){
         if (err) done(err);
+        const userDeleted = (res.body);
+        userDeleted.should.to.have.any.keys('name', 'email' ,'locale');
         done();
       });
   });
-
-  // it('it should removes a temporaly user', (done) => {
-  //   removeHelperUser();
-  //   done();
-//     User.findOneAndRemove({ email: "anything@cboard.io" })
-//       .then(() => User.findOne(helper.userData))
-//       .then((User) => {
-//         assert(User === null);
-//         done();
-//       });
-  // });
-  //User.findByIdAndRemove('604f6e4bd57b972bc4a01e2a');
 });
