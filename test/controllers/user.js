@@ -231,4 +231,17 @@ describe('User API calls', function () {
         done();
       });
   });
+
+  it('it should NOT delete a user that was already removed', function (done) {
+    request(server)
+      .del('/user/' + helper.userForgotPassword.userid)
+      .set('Authorization', 'Bearer ' + authToken)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(403)
+      .end(function (err, res) {
+        if (err) done(err);
+        done();
+      });
+  });
 });
