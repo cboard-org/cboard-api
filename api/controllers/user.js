@@ -208,6 +208,12 @@ function removeUser(req, res) {
         message: 'User not found. User Id: ' + id
       });
     }
+    if (!users) {
+      return res.status(404).json({
+        message: 'User not found. User Id: ' + id,
+        error: 'User not found.'
+      });
+    }
     return res.status(200).json(users);
   });
 }
