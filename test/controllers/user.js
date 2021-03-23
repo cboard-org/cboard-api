@@ -2,13 +2,9 @@ process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
 const chai = require('chai');
-var assert = chai.assert;
 
 const server = require('../../app');
 const helper = require('../helper');
-const { copy } = require('../../app');
-
-const nev = require('../../api/mail/index');
 
 //Parent block
 describe('User API calls', function () {

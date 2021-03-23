@@ -39,6 +39,17 @@ const verifyUserProperties = (user) => {
   user.should.have.property('password');
 };
 
+const verifyCommunicatorProperties = (body) => {
+  body.should.to.have.all.keys(
+    'id',
+    'name',
+    'email',
+    'author',
+    'rootBoard',
+    'boards'
+  );
+};
+
 const userData = {
   name: 'cboard mocha test',
   email: 'anything@cboard.io',
@@ -76,6 +87,15 @@ const boardData = {
       label: 'no',
     },
   ],
+};
+
+const communicatorData = {
+  id: 'root',
+  name: 'home',
+  email: 'anything@cboard.io',
+  author: 'cboard mocha test',
+  rootBoard: 'root',
+  boards: ['root'],
 };
 
 function prepareDb() {
@@ -130,31 +150,39 @@ function prepareUser(server) {
 function deleteMochaUser(server) {
   let authToken;
   return new Promise((resolve, reject) => {
+    request(server)
+      .post('/user/login')
+      .send(userData)
+      .expect(200)
+      .expect(function (res) {
+        authToken = res.body.authToken;
+      })
+      .end(function () {
+        adminRoleToMochaUser(server, authToken).then(() => {
+          request(server)
+            .del('/user/' + userid)
+            .set('Authorization', 'Bearer ' + authToken)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end(function () {
+              resolve();
+            });
+        });
+      });
+  });
+}
+
+function adminRoleToMochaUser(server, authToken) {
+  return new Promise((resolve, reject) => {
     User.findOne({ email: userData.email }, function (err, user) {
       userid = user._id;
       request(server)
-        .post('/user/login')
-        .send(userData)
-        .expect(200)
-        .expect(function (res) {
-          authToken = res.body.authToken;
-        })
+        .put('/user/' + userid)
+        .set('Authorization', 'Bearer ' + authToken)
+        .send({ role: 'admin' })
         .end(function () {
-          request(server)
-            .put('/user/' + userid)
-            .set('Authorization', 'Bearer ' + authToken)
-            .send({ role: 'admin' })
-            .end(function () {
-              request(server)
-                .del('/user/' + userid)
-                .set('Authorization', 'Bearer ' + authToken)
-                .set('Accept', 'application/json')
-                .expect('Content-Type', /json/)
-                .expect(200)
-                .end(function () {
-                  resolve();
-                });
-            });
+          resolve();
         });
     });
   });
@@ -164,10 +192,13 @@ module.exports = {
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
+  verifyCommunicatorProperties,
   prepareDb,
   prepareUser,
   deleteMochaUser,
-  boardData,
+  adminRoleToMochaUser,
   userData,
+  boardData,
+  communicatorData,
   userForgotPassword,
 };
