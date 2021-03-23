@@ -153,47 +153,41 @@ describe('Communicator API calls', function () {
   });
 
   it('it should NOT delete specific communicator without id', function (done) {
-    helper.adminRoleToMochaUser(server, authToken).then(() => {
-      request(server)
-        .del('/communicator/')
-        .set('Accept', 'application/json')
-        .expect(405)
-        .end(function (err, res) {
-          if (err) done(err);
-          done();
-        });
-    });
+    request(server)
+      .del('/communicator/')
+      .set('Accept', 'application/json')
+      .expect(405)
+      .end(function (err, res) {
+        if (err) done(err);
+        done();
+      });
   });
 
   it('it should to delete specific communicator', function (done) {
-    helper.adminRoleToMochaUser(server, authToken).then(() => {
-      request(server)
-        .del('/communicator/' + communicatorid)
-        .set('Authorization', 'Bearer ' + authToken)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end(function (err, res) {
-          if (err) done(err);
-          helper.verifyCommunicatorProperties(res.body);
-          done();
-        });
-    });
+    request(server)
+      .del('/communicator/' + communicatorid)
+      .set('Authorization', 'Bearer ' + authToken)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) done(err);
+        helper.verifyCommunicatorProperties(res.body);
+        done();
+      });
   });
 
   it('it should NOT DELETE a communicator that was already removed', function (done) {
     //this test is failling
-    helper.adminRoleToMochaUser(server, authToken).then(() => {
-      request(server)
-        .del('/communicator/' + communicatorid)
-        .set('Authorization', 'Bearer ' + authToken)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(404)
-        .end(function (err, res) {
-          if (err) done(err);
-          done();
-        });
-    });
+    request(server)
+      .del('/communicator/' + communicatorid)
+      .set('Authorization', 'Bearer ' + authToken)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(404)
+      .end(function (err, res) {
+        if (err) done(err);
+        done();
+      });
   });
 });
