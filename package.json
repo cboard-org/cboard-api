@@ -35,7 +35,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "2.24.0",
-    "mongoose": "^5.9.26",
+    "mongoose": "^5.12.2",
     "morgan": "^1.10.0",
     "ms": "^2.1.2",
     "nodemailer": "^6.4.16",
