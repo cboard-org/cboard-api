@@ -145,7 +145,12 @@ function removeCommunicator(req, res) {
         error: err.message
       });
     }
-
+    if (!communicator) {
+      return res.status(404).json({
+        message: 'communicator not found. communicator Id: ' + id,
+        error: 'communicator not found.'
+      });
+    }
     return res.status(200).json(communicator);
   });
 }
