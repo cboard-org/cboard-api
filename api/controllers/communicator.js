@@ -147,8 +147,8 @@ function removeCommunicator(req, res) {
     }
     if (!communicator) {
       return res.status(404).json({
-        message: 'communicator not found. communicator Id: ' + id,
-        error: 'communicator not found.'
+        message: 'Communicator not found. Communicator Id: ' + id,
+        error: 'Communicator not found.'
       });
     }
     return res.status(200).json(communicator);
