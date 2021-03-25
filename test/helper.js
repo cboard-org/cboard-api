@@ -78,6 +78,15 @@ const boardData = {
   ],
 };
 
+const analyticsReportData = [{
+  clientId: 'test.mocha',
+  dimension: 'nthDay',
+  metric: 'avgSessionDuration',
+  endDate: 'today',
+  mobileView: false,
+  startDate: '30daysago',
+}]
+
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
     useNewUrlParser: true,
@@ -170,4 +179,5 @@ module.exports = {
   boardData,
   userData,
   userForgotPassword,
+  analyticsReportData
 };
