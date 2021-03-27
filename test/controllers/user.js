@@ -3,12 +3,16 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const chai = require('chai');
 var assert = chai.assert;
+const expect = chai.expect;
+
+const uuid = require('uuid');
 
 const server = require('../../app');
 const helper = require('../helper');
 const { copy } = require('../../app');
 
 const nev = require('../../api/mail/index');
+const User = require('../../api/models/User');
 
 //Parent block
 describe('User API calls', function () {
@@ -123,20 +127,60 @@ describe('User API calls', function () {
       });
   });
 
-  it('it should update a specific user', function (done) {
-    request(server)
-      .put('/user/' + userid)
-      .send({ role: 'admin' })
-      .set('Authorization', 'Bearer ' + authToken)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if (err) done(err);
-        const updateUser = res.body;
-        updateUser.should.to.have.property('role').to.equal('admin');
-        done();
+  describe('PUT /user/:userId', function() {
+    it('only allows an admin user to update another user', async function() {
+      const admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: helper.generateEmail(),
       });
+
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      // Try to update another user as a regular user.
+      // This should fail.
+      await request(server)
+        .put(`/user/${admin.userId}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .expect({
+          message: 'Only admins can update another user.',
+        })
+        .expect(403);
+
+      // Try to update another user as an admin user.
+      // This should succeed.
+      await request(server)
+        .put(`/user/${user.userId}`)
+        .set('Authorization', `Bearer ${admin.token}`)
+        .expect(200);
+    });
+
+    it('only allows updating a subset of fields', async function() {
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      const update = {
+        role: 'foobar',
+        name: 'martin',
+        email: 'martin@example.com',
+        password: uuid.v4(),
+      };
+
+      const res = await request(server)
+        .put(`/user/${user.userId}`)
+        .send(update)
+        .set('Authorization', `Bearer ${user.token}`)
+        .expect(200);
+
+      expect(res.body.role).to.equal('user');
+      expect(res.body.password).not.to.equal(update.password);
+      expect(res.body.email).to.equal(update.email);
+      expect(res.body.name).to.equal(update.name);
+    });
   });
 
   it('it should Destroys user session and authentication token', function (done) {
@@ -218,18 +262,21 @@ describe('User API calls', function () {
       });
   });
 
-  it('it should delete a user', function (done) {
-    request(server)
-      .del('/user/' + helper.userForgotPassword.userid)
-      .set('Authorization', 'Bearer ' + authToken)
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if (err) done(err);
-        const userDeleted = res.body;
-        userDeleted.should.to.have.any.keys('name', 'email', 'locale');
-        done();
-      });
+  it('it should delete a user', async function() {
+    const admin = await helper.prepareUser(server, {
+      role: 'admin',
+      email: helper.generateEmail(),
+    });
+
+    const targetUserId = helper.userForgotPassword.userid;
+
+    expect(await User.exists({ _id: targetUserId })).to.equal(true);
+
+    const res = await request(server)
+      .del(`/user/${targetUserId}`)
+      .set('Authorization', `Bearer ${admin.token}`)
+      .expect(200);
+
+    expect(await User.exists({ _id: targetUserId })).to.equal(false);
   });
 });

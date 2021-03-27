@@ -18,13 +18,9 @@ describe('Board API calls', function () {
   var authToken;
   var boardId;
 
-  before(async function (done) {
-    this.timeout(5000); //to await the email server process
-    helper.prepareUser(server)
-      .then(token => {
-        authToken = token;
-        done();
-      });
+  before(async function() {
+    const res = await helper.prepareUser(server);
+    authToken = res.token;
   });
 
   it('it should POST a board', function (done) {
