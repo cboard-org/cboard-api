@@ -164,9 +164,14 @@ describe('User API calls', function () {
       });
 
       const update = {
+        // Updateable.
+        email: 'alice@example.com',
+        name: 'Alice',
+        birthdate: '2001-10-17',
+        locale: 'klingon',
+
+        // Not updateable.
         role: 'foobar',
-        name: 'martin',
-        email: 'martin@example.com',
         password: uuid.v4(),
       };
 
@@ -176,10 +181,13 @@ describe('User API calls', function () {
         .set('Authorization', `Bearer ${user.token}`)
         .expect(200);
 
-      expect(res.body.role).to.equal('user');
-      expect(res.body.password).not.to.equal(update.password);
       expect(res.body.email).to.equal(update.email);
       expect(res.body.name).to.equal(update.name);
+      expect(res.body.birthdate).to.contain(update.birthdate);
+      expect(res.body.locale).to.equal(update.locale);
+
+      expect(res.body.role).to.equal('user');
+      expect(res.body.password).not.to.equal(update.password);
     });
   });
 

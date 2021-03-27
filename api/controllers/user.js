@@ -246,6 +246,7 @@ const UPDATEABLE_FIELDS = [
   'email',
   'name',
   'birthdate',
+  'locale',
 ]
 
 function updateUser(req, res) {
