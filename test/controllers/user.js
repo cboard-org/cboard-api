@@ -16,11 +16,8 @@ describe('User API calls', function () {
   let url;
   let userid;
 
-  before(async function (done) {
-    helper.deleteMochaUser(server).then((token) => {
-      authToken = token;
-      done();
-    });
+  before(async function() {
+    await helper.deleteMochaUser();
   });
 
   it('it should to create a new temporary user', function (done) {

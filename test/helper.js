@@ -127,37 +127,8 @@ function prepareUser(server) {
   });
 }
 
-function deleteMochaUser(server) {
-  let authToken;
-  return new Promise((resolve, reject) => {
-    User.findOne({ email: userData.email }, function (err, user) {
-      userid = user._id;
-      request(server)
-        .post('/user/login')
-        .send(userData)
-        .expect(200)
-        .expect(function (res) {
-          authToken = res.body.authToken;
-        })
-        .end(function () {
-          request(server)
-            .put('/user/' + userid)
-            .set('Authorization', 'Bearer ' + authToken)
-            .send({ role: 'admin' })
-            .end(function () {
-              request(server)
-                .del('/user/' + userid)
-                .set('Authorization', 'Bearer ' + authToken)
-                .set('Accept', 'application/json')
-                .expect('Content-Type', /json/)
-                .expect(200)
-                .end(function () {
-                  resolve();
-                });
-            });
-        });
-    });
-  });
+async function deleteMochaUser() {
+  return User.deleteOne({ email: userData.email });
 }
 
 module.exports = {
