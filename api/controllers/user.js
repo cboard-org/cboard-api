@@ -250,6 +250,13 @@ const UPDATEABLE_FIELDS = [
 
 function updateUser(req, res) {
   const id = req.swagger.params.id.value;
+
+  if (!req.user.isAdmin && req.auth.id !== id) {
+    return res.status(403).json({
+      message: 'Only admins can update another user.'
+    })
+  }
+
   User.findById(id)
     .populate('communicators')
     .populate('boards')
