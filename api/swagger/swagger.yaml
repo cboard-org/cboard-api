@@ -798,7 +798,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/UserUpdate"
+            $ref: "#/definitions/User"
       responses:
         "200":
           description: Success
@@ -943,23 +943,6 @@ definitions:
       locale:
         type: string
         enum:  &APP_LANGS ['ar-SA','bn-BD','cs-CZ','da-DK','de-DE','el-GR','en-US','en-GB','es-ES','fi-FI','fr-FR','he-IL','hi-IN','hu-HU','id-ID','it-IT','ja-JP','km-KH','ko-KR','ne-NP','nl-NL','no-NO','pl-PL','pt-BR','pt-PT','ro-RO','ru-RU','si-LK','sk-SK','sv-SE','th-TH','tr-TR','uk-UA','vi-VN','zh-CN','zu-ZA']
-  UserUpdate:
-    type: object
-    properties:
-      name:
-        type: string
-        example: Alice
-      email:
-        type: string
-        format: email
-        example: alice@example.com
-      birthdate:
-        type: string
-        format: date
-        example: 2001-10-17
-      locale:
-        type: string
-        enum:  *APP_LANGS
   Translate:
       type: object
       required:

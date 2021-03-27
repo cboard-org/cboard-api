@@ -242,22 +242,8 @@ async function getUser(req, res) {
   }
 }
 
-const UPDATEABLE_FIELDS = [
-  'email',
-  'name',
-  'birthdate',
-  'locale',
-]
-
 function updateUser(req, res) {
   const id = req.swagger.params.id.value;
-
-  if (!req.user.isAdmin && req.auth.id !== id) {
-    return res.status(403).json({
-      message: 'Only admins can update another user.'
-    })
-  }
-
   User.findById(id)
     .populate('communicators')
     .populate('boards')
@@ -274,9 +260,7 @@ function updateUser(req, res) {
         });
       }
       for (let key in req.body) {
-        if (UPDATEABLE_FIELDS.includes(key)) {
-          user[key] = req.body[key];
-        }
+        user[key] = req.body[key];
       }
       user.save(function(err, user) {
         if (err) {

@@ -1,6 +1,5 @@
 //Require the dev-dependencies
 const chai = require('chai');
-const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
@@ -95,61 +94,70 @@ function prepareDb() {
   });
 }
 
-function generateEmail() {
-  return `test${Date.now()}@example.com`;
+function prepareUser(server) {
+  var token;
+  var url;
+  return new Promise((resolve, reject) => {
+    request(server)
+      .post('/user')
+      .send(userData)
+      .expect(200)
+      .expect(function (res) {
+        url = res.body.url;
+      })
+      .end(function () {
+        request(server)
+          .post('/user/activate/' + url)
+          .send('')
+          .expect(200)
+          .end(function (err, res) {
+            userid = res.body.userid;
+            request(server)
+              .post('/user/login')
+              .send(userData)
+              .expect(200)
+              .expect(function (res) {
+                token = res.body.authToken;
+              })
+              .end(function () {
+                resolve(token, userid);
+              });
+          });
+      });
+  });
 }
 
-/**
- * A newly created test user.
- * @typedef {Object} PrepareUserResponse
- *
- * @property {string} token
- * @property {string} userId
- */
-
-/**
- * Create a test user and generate a token for them.
- *
- * @param {Express} server
- *
- * @param {Object} options
- * @param {Object} options.overrides - Properties to overwrite the default
- *   user data with.
- *
- * @returns {Promise<PrepareUserResponse>}
- */
-async function prepareUser(server, overrides = {}) {
-  const data = {
-    ...userData,
-    ...overrides,
-  };
-
-  const createUser = await request(server)
-    .post('/user')
-    .send(data)
-    .expect(200);
-
-  const activationUrl = createUser.body.url;
-
-  const activateUser = await request(server)
-    .post(`/user/activate/${activationUrl}`)
-    .send('')
-    .expect(200);
-
-  const userId = activateUser.body.userid;
-
-  const login = await request(server)
-    .post('/user/login')
-    .send(data)
-    .expect(200);
-
-  const token = login.body.authToken;
-
-  return { token, userId };
-}
-
-async function deleteMochaUser() {
-  return User.deleteOne({ email: userData.email });
+function deleteMochaUser(server) {
+  let authToken;
+  return new Promise((resolve, reject) => {
+    User.findOne({ email: userData.email }, function (err, user) {
+      userid = user._id;
+      request(server)
+        .post('/user/login')
+        .send(userData)
+        .expect(200)
+        .expect(function (res) {
+          authToken = res.body.authToken;
+        })
+        .end(function () {
+          request(server)
+            .put('/user/' + userid)
+            .set('Authorization', 'Bearer ' + authToken)
+            .send({ role: 'admin' })
+            .end(function () {
+              request(server)
+                .del('/user/' + userid)
+                .set('Authorization', 'Bearer ' + authToken)
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function () {
+                  resolve();
+                });
+            });
+        });
+    });
+  });
 }
 
 module.exports = {
@@ -162,5 +170,4 @@ module.exports = {
   boardData,
   userData,
   userForgotPassword,
-  generateEmail: generateEmail,
 };
