@@ -242,6 +242,12 @@ async function getUser(req, res) {
   }
 }
 
+const UPDATEABLE_FIELDS = [
+  'email',
+  'name',
+  'birthdate',
+]
+
 function updateUser(req, res) {
   const id = req.swagger.params.id.value;
   User.findById(id)
@@ -260,7 +266,9 @@ function updateUser(req, res) {
         });
       }
       for (let key in req.body) {
-        user[key] = req.body[key];
+        if (UPDATEABLE_FIELDS.includes(key)) {
+          user[key] = req.body[key];
+        }
       }
       user.save(function(err, user) {
         if (err) {
