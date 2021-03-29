@@ -42,7 +42,7 @@ const verifyUserProperties = (user) => {
 
 const userData = {
   name: 'cboard mocha test',
-  email: 'anything@cboard.io',
+  email: 'anything2@cboard.io',
   password: '123456',
 };
 
