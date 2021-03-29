@@ -107,6 +107,10 @@ userSchema.virtual('boards', {
   foreignField: 'email'
 });
 
+userSchema.virtual('isAdmin').get(function() {
+  return this.role === 'admin';
+});
+
 const validatePresenceOf = value => value && value.length;
 
 /**
