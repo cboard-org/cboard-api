@@ -6,6 +6,7 @@ const { token } = require('morgan');
 var request = require('supertest');
 const user = require('../api/controllers/user');
 const should = chai.should();
+const uuid = require('uuid');
 
 const User = require('../api/models/User');
 
@@ -96,7 +97,7 @@ function prepareDb() {
 }
 
 function generateEmail() {
-  return `test${Date.now()}@example.com`;
+  return `test.${uuid.v4()}@example.com`;
 }
 
 /**

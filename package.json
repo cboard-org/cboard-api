@@ -67,7 +67,7 @@
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "test": "swagger project test",
+    "test": "NODE_ENV=test swagger project test",
     "precommit": "lint-staged",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
