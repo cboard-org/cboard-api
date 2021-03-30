@@ -227,4 +227,45 @@ describe('Board API calls', function () {
         done();
       });
   });
+
+  describe('GET /board/byemail/:email', function() {
+    it("only allows an admin to get another user's boards", async function() {
+      const adminEmail = helper.generateEmail();
+      const admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: adminEmail,
+      });
+
+      const userEmail = helper.generateEmail();
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: userEmail,
+      });
+
+      // Try to get another user's boards as a regular user.
+      // This should fail.
+      await request(server)
+        .get(`/board/byemail/${encodeURI(adminEmail)}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .expect({
+          message: "You are not authorized to get this user's boards.",
+        })
+        .expect(403);
+
+      // Try to get another user's boards as an admin user.
+      // This should succeed.
+      await request(server)
+        .get(`/board/byemail/${encodeURI(userEmail)}`)
+        .set('Authorization', `Bearer ${admin.token}`)
+        .expect(200);
+
+
+      // Try to get my own boards as a regular user.
+      // This should succeed.
+      await request(server)
+        .get(`/board/byemail/${encodeURI(userEmail)}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .expect(200);
+    });
+  });
 });
