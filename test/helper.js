@@ -9,7 +9,7 @@ const should = chai.should();
 
 const User = require('../api/models/User');
 
-const verifyListProperties = body => {
+const verifyListProperties = (body) => {
   body.should.be.a('object');
   body.should.to.have.all.keys(
     'total',
@@ -22,7 +22,7 @@ const verifyListProperties = body => {
   );
 };
 
-const verifyBoardProperties = body => {
+const verifyBoardProperties = (body) => {
   body.should.be.a('object');
   body.should.have.property('id');
   body.should.have.property('name');
@@ -32,7 +32,7 @@ const verifyBoardProperties = body => {
   body.should.have.property('tiles');
 };
 
-const verifyUserProperties = user => {
+const verifyUserProperties = (user) => {
   user.should.be.a('object');
   user.should.have.property('id');
   user.should.have.property('name');
@@ -43,19 +43,19 @@ const verifyUserProperties = user => {
 const userData = {
   name: 'cboard mocha test',
   email: 'anythingUser@cboard.io',
-  password: '123456'
+  password: '123456',
 };
 
 const adminData = {
   name: 'cboard admin mocha test',
   email: 'anythingAdmin@cboard.io',
-  password: '123456'
+  password: '123456',
 };
 
 let userForgotPassword = {
   Userid: '',
   token: '',
-  password: 'newpassword'
+  password: 'newpassword',
 };
 
 const boardData = {
@@ -71,27 +71,63 @@ const boardData = {
       image: '/symbols/mulberry/correct.svg',
       id: 'HJVQMR9pX5F-',
       backgroundColor: 'rgb(255, 241, 118)',
-      label: 'yes'
+      label: 'yes',
     },
     {
       labelKey: 'symbol.descriptiveState.no',
       image: '/symbols/mulberry/no.svg',
       id: 'SkBQMRqpX5t-',
       backgroundColor: 'rgb(255, 241, 118)',
-      label: 'no'
-    }
-  ]
+      label: 'no',
+    },
+  ],
+};
+
+const analyticsReportData = [
+  {
+    clientId: 'test.mocha',
+    dimension: 'nthDay',
+    metric: 'avgSessionDuration',
+    endDate: 'today',
+    mobileView: false,
+    startDate: '30daysago',
+  },
+];
+
+const settingsData = {
+  language: { lang: 'es-ES' },
+  speech: {
+    voiceURI:
+      'urn:moz-tts:sapi:Microsoft Helena Desktop - Spanish (Spain)?es-ES',
+    pitch: 1,
+    rate: 0.75,
+  },
+  display: {
+    uiSize: 'Large',
+    fontSize: 'Standard',
+    hideOutputActive: false,
+    labelPosition: 'Above',
+    darkThemeActive: true,
+  },
+  scanning: { active: false, delay: 3000, strategy: 'automatic' },
+  navigation: {
+    active: false,
+    caBackButtonActive: false,
+    quickUnlockActive: false,
+    removeOutputActive: true,
+    vocalizeFolders: false,
+  },
 };
 
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
-    useNewUrlParser: true
+    useNewUrlParser: true,
   });
   const connection = mongoose.connection;
 
   return new Promise((resolve, reject) => {
-    connection.once('open', function() {
-      mongoose.connection.db.dropDatabase(function(err, result) {
+    connection.once('open', function () {
+      mongoose.connection.db.dropDatabase(function (err, result) {
         console.log('Database droped');
         resolve(true);
       });
@@ -125,13 +161,10 @@ function generateEmail() {
 async function prepareUser(server, overrides = {}) {
   const data = {
     ...userData,
-    ...overrides
+    ...overrides,
   };
 
-  const createUser = await request(server)
-    .post('/user')
-    .send(data)
-    .expect(200);
+  const createUser = await request(server).post('/user').send(data).expect(200);
 
   const activationUrl = createUser.body.url;
 
@@ -181,5 +214,7 @@ module.exports = {
   userData,
   adminData,
   userForgotPassword,
-  generateEmail: generateEmail
+  analyticsReportData,
+  settingsData,
+  generateEmail: generateEmail,
 };
