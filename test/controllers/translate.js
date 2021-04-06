@@ -8,7 +8,6 @@ const helper = require('../helper');
 
 //Parent block
 describe('Translate API calls', function () {
-  this.timeout(7000); //some external process take time. We should stumb procces to remove this.
   let user;
 
   before(async function () {
