@@ -2,15 +2,15 @@ process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
 const chai = require('chai');
-var assert = chai.assert;
 const expect = chai.expect;
 
 const uuid = require('uuid');
 
-const server = require('../../app');
 const helper = require('../helper');
-const { copy } = require('../../app');
 
+helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+
+const server = require('../../app');
 const User = require('../../api/models/User');
 
 //Parent block
@@ -18,9 +18,13 @@ describe('User API calls', function () {
   let url;
   let userid;
 
-  before(async function () {
+  beforeEach(async function () {
     await helper.deleteMochaUser();
   });
+  
+  after(async function(){
+    helper.disableMockery;
+  })
 
   describe('POST /user create User', function () {
     it('it should to create a new temporary user', async function () {
@@ -44,10 +48,6 @@ describe('User API calls', function () {
       userid.should.be.a('string');
       userid.should.not.have.string(' '); //is not recomended negate assertions
     });
-
-    after(async function () {
-      await helper.deleteMochaUser();
-    });
   });
 
   describe('POST /user/login', function () {
@@ -58,7 +58,7 @@ describe('User API calls', function () {
     it('it should NOT Returns a valid token for a wrong email or password', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email, //newEmail
+        email: helper.userData.email
       });
 
       const wrongUserData = {
