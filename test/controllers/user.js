@@ -6,17 +6,13 @@ const expect = chai.expect;
 
 const uuid = require('uuid');
 
-const helper = require('../helper');
-
-helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
-
-const server = require('../../app');
-const User = require('../../api/models/User');
-
 //Parent block
 describe('User API calls', function () {
-  let url;
-  let userid;
+  const helper = require('../helper');
+  helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+
+  const server = require('../../app'); //register mocks before require the original dependency
+  const User = require('../../api/models/User');
 
   beforeEach(async function () {
     await helper.deleteMochaUser();
@@ -27,6 +23,9 @@ describe('User API calls', function () {
   })
 
   describe('POST /user create User', function () {
+    let url; 
+    let userid;
+
     it('it should to create a new temporary user', async function () {
       const res = await request(server)
         .post('/user')
