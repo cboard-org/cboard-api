@@ -4,10 +4,24 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
-const user = require('../api/controllers/user');
 const should = chai.should();
 
 const User = require('../api/models/User');
+
+function prepareNodemailerMock(){
+  const mockery = require('mockery');
+  const nodemailerMock = require('nodemailer-mock');
+
+  mockery.enable({
+    warnOnUnregistered: false,
+  });
+
+  mockery.registerMock('nodemailer', nodemailerMock);
+}
+
+function disableMockery(){
+  mockery.disable();
+}
 
 const verifyListProperties = (body) => {
   body.should.be.a('object');
@@ -167,6 +181,8 @@ async function deleteMochaUserById(userid) {
 }
 
 module.exports = {
+  prepareNodemailerMock,
+  disableMockery,
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
