@@ -8,19 +8,19 @@ const should = chai.should();
 
 const User = require('../api/models/User');
 
-function prepareNodemailerMock(){
+function prepareNodemailerMock(isDisabling = 0) {
   const mockery = require('mockery');
   const nodemailerMock = require('nodemailer-mock');
+  if (isDisabling) {
+    mockery.disable();
+    return;
+  }
 
   mockery.enable({
     warnOnUnregistered: false,
   });
 
   mockery.registerMock('nodemailer', nodemailerMock);
-}
-
-function disableMockery(){
-  mockery.disable();
 }
 
 const verifyListProperties = (body) => {
@@ -57,12 +57,6 @@ const verifyUserProperties = (user) => {
 const userData = {
   name: 'cboard mocha test',
   email: 'anythingUser@cboard.io',
-  password: '123456',
-};
-
-const adminData = {
-  name: 'cboard admin mocha test',
-  email: 'anythingAdmin@cboard.io',
   password: '123456',
 };
 
@@ -163,36 +157,15 @@ async function prepareUser(server, overrides = {}) {
   return { token, userId };
 }
 
-async function deleteMochaUser() {
-  if (await User.exists({ email: userData.email })) {
-    await User.deleteOne({ email: userData.email });
-  }
-  if (await User.exists({ email: adminData.email })) {
-    await User.deleteOne({ email: adminData.email });
-  }
-  return;
-}
-
-async function deleteMochaUserById(userid) {
-  if (await User.exists({ _id: userid })) {
-    await User.deleteOne({ _id: userid });
-  }
-  return;
-}
-
 module.exports = {
   prepareNodemailerMock,
-  disableMockery,
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
   prepareDb,
   prepareUser,
-  deleteMochaUser,
-  deleteMochaUserById,
   boardData,
   userData,
-  adminData,
   userForgotPassword,
   generateEmail: generateEmail,
 };
