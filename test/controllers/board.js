@@ -6,20 +6,33 @@ const chai = require('chai');
 var request = require('supertest');
 var expect = require('chai').expect;
 const should = chai.should();
-
-const server = require('../../app');
 const helper = require('../helper');
+
+const User = require('../../api/models/User');
+const Board = require('../../api/models/Board');
 
 //Parent block
 describe('Board API calls', function () {
   let user;
+  let server;
 
   before(async function () {
-    await helper.deleteMochaUser();
+    helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+    server = require('../../app'); //register mocks before require the original dependency
+  });
+
+  beforeEach(async function () {
+    helper.boardData.email = helper.generateEmail();
     user = await helper.prepareUser(server, {
       role: 'user',
-      email: helper.userData.email,
+      email: helper.boardData.email,
     });
+  });
+
+  after(async function () {
+    helper.prepareNodemailerMock(true); //disable mockery
+    await User.deleteMany({ name: 'cboard mocha test' });
+    await Board.deleteMany({ author: 'cboard mocha test' });
   });
 
   describe('POST /board', function () {

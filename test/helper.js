@@ -4,10 +4,22 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
-const user = require('../api/controllers/user');
 const should = chai.should();
 
-const User = require('../api/models/User');
+function prepareNodemailerMock(isDisabling = 0) {
+  const mockery = require('mockery');
+  const nodemailerMock = require('nodemailer-mock');
+  if (isDisabling) {
+    mockery.disable();
+    return;
+  }
+
+  mockery.enable({
+    warnOnUnregistered: false,
+  });
+
+  mockery.registerMock('nodemailer', nodemailerMock);
+}
 
 const verifyListProperties = (body) => {
   body.should.be.a('object');
@@ -43,12 +55,6 @@ const verifyUserProperties = (user) => {
 const userData = {
   name: 'cboard mocha test',
   email: 'anythingUser@cboard.io',
-  password: '123456',
-};
-
-const adminData = {
-  name: 'cboard admin mocha test',
-  email: 'anythingAdmin@cboard.io',
   password: '123456',
 };
 
@@ -149,22 +155,23 @@ async function prepareUser(server, overrides = {}) {
   return { token, userId };
 }
 
-async function deleteMochaUser() {
-  if (await User.exists({ email: userData.email })) {
-    await User.deleteOne({ email: userData.email });
-  }
-  if (await User.exists({ email: adminData.email })) {
-    await User.deleteOne({ email: adminData.email });
-  }
-  return;
-}
+/**
+ * A newly created test Board.
+ * @typedef {Object} createMochaBoard
+ *
+ * @property {string} BoardId
+ */
 
-async function deleteMochaUserById(userid) {
-  if (await User.exists({ _id: userid })) {
-    await User.deleteOne({ _id: userid });
-  }
-  return;
-}
+/**
+ * Create a test Board and return the id.
+ *
+ * @param {Express} server
+ *
+ * @param {string} token
+ *   user data.
+ *
+ * @returns {Promise<createMochaBoard>}
+ */
 
 async function createMochaBoard(server, token) {
   const res = await request(server)
@@ -183,18 +190,16 @@ async function deleteMochaBoard(server, token, boardId) {
 }
 
 module.exports = {
+  prepareNodemailerMock,
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
   prepareDb,
   prepareUser,
-  deleteMochaUser,
-  deleteMochaUserById,
   createMochaBoard,
   deleteMochaBoard,
   boardData,
   userData,
-  adminData,
   userForgotPassword,
   generateEmail: generateEmail,
 };
