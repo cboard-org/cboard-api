@@ -254,7 +254,43 @@ describe('User API calls', function () {
         .with.all.keys('success', 'userid', 'url', 'message');
     });
   });
+
   describe('POST /user/store-password', function () {
+    it('it should NOT allows to store a new password posting /user/forgot and sending data without a verification url.', async function () {
+      const userEmail = helper.generateEmail();
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: userEmail,
+      });
+      await request(server)
+        .post('/user/logout')
+        .send(user)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+      const getVerificationUrl = await request(server)
+        .post('/user/forgot')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .send({ email: userEmail })
+        .expect(200);
+
+      const userid = getVerificationUrl.body.userid;
+      const userStorePassword = {
+        userid: userid,
+        password: 'newPassword',
+        token: '',
+      };
+
+      await request(server)
+        .post('/user/store-password')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .send(userStorePassword)
+        .expect(500);
+    });
+
     it('it should NOT allows to store a new password without a verification url.', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
