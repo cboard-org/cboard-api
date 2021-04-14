@@ -419,7 +419,7 @@ async function forgotPassword(req, res) {
             const response = {
               success: 1,
               userid: user.id,
-              url: token,
+              //url: token,
               message: 'Success! Check your mail to reset your password.'
             };
             return res.status(200).json(response);
@@ -436,7 +436,6 @@ async function forgotPassword(req, res) {
 }
 async function storePassword(req, res) {
   const { userid, password, token } = req.body;
-
   try {
     const resetPassword = await ResetPassword.findOne({
       userId: userid,
@@ -448,10 +447,16 @@ async function storePassword(req, res) {
         error: err.message
       });
     }
-    // the token and the hashed token in the db are verified befor updating the password
-    bcrypt.compare(token, resetPassword.token, function(errBcrypt, resBcrypt) {
-      let expireTime = moment.utc(resetPassword.expire);
+    // the token and the hashed token in the db are verified before updating the password
+    bcrypt.compare(token, resetPassword.resetPasswordToken, function(errBcrypt, resBcrypt) {
+      let expireTime = moment.utc(resetPassword.expire); // expireTime and currentTime is never used
       let currentTime = new Date();
+      if(!resBcrypt){
+        return res.status(500).json({
+          message: 'Error resetting user password.',
+          error: 'invalid Token'
+        });
+      }
       //hashing the password to store in the db node.js
       bcrypt.genSalt(8, function(err, salt) {
         bcrypt.hash(password, salt, async function(err, hash) {
@@ -464,8 +469,8 @@ async function storePassword(req, res) {
               message: 'No user found with that ID.'
             });
           }
-          ResetPassword.findOneAndUpdate(
-            { id: resetPassword.id },
+          ResetPassword.findByIdAndUpdate(
+            resetPassword._id,
             { status: true },
             function(err) {
               if (err) {
