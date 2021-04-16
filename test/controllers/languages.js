@@ -6,7 +6,7 @@ const helper = require('../helper');
 
 //Parent block
 describe('Languages API calls', function () {
-  describe('GET /languajes', function () {
+  describe('GET /languages', function () {
     it('it should return the full Language list.', async function () {
       const res = await request(server)
         .get('/languages')
