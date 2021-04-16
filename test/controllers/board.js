@@ -100,10 +100,6 @@ describe('Board API calls', function () {
       this.boardId = await helper.createMochaBoard(server, user.token);
     });
 
-    after(async function () {
-      await helper.deleteMochaBoard(server, user.token, this.boardId);
-    });
-
     it('it should PUT a board', async function () {
       const boardData = { ...helper.boardData };
       boardData.name = 'edited name';
@@ -140,10 +136,6 @@ describe('Board API calls', function () {
   describe('GET /board/:boardid', function () {
     before(async function () {
       this.boardId = await helper.createMochaBoard(server, user.token);
-    });
-
-    after(async function () {
-      await helper.deleteMochaBoard(server, user.token, this.boardId);
     });
 
     it('it should GET a board', async function () {

@@ -6,6 +6,17 @@ const { token } = require('morgan');
 var request = require('supertest');
 const should = chai.should();
 
+/**helper nodemailer-mock
+ * 
+ * Prepare nodemailer-mock for not sent emails.
+ * @typedef {Object} prepareNodemailerMock
+
+/**
+ * Create a test user and generate a token for them.
+ *
+ * @param {bool} isDisabling -optional to disable mock after use it
+ * @returns {void}
+ */
 function prepareNodemailerMock(isDisabling = 0) {
   const mockery = require('mockery');
   const nodemailerMock = require('nodemailer-mock');
@@ -20,6 +31,8 @@ function prepareNodemailerMock(isDisabling = 0) {
 
   mockery.registerMock('nodemailer', nodemailerMock);
 }
+
+/*should properties helper*/
 
 const verifyListProperties = (body) => {
   body.should.be.a('object');
@@ -52,6 +65,7 @@ const verifyUserProperties = (user) => {
   user.should.have.property('password');
 };
 
+/*Mocks of data*/
 const userData = {
   name: 'cboard mocha test',
   email: 'anythingUser@cboard.io',
@@ -89,6 +103,7 @@ const boardData = {
   ],
 };
 
+/*this is never used */
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
     useNewUrlParser: true,
@@ -105,6 +120,7 @@ function prepareDb() {
   });
 }
 
+/*Test helpers */
 function generateEmail() {
   return `test${Date.now()}@example.com`;
 }
@@ -181,14 +197,6 @@ async function createMochaBoard(server, token) {
   return res.body.id;
 }
 
-async function deleteMochaBoard(server, token, boardId) {
-  const res = await request(server)
-    .del(`/board/${boardId}`)
-    .set('Authorization', `Bearer ${token}`)
-    .set('Accept', 'application/json');
-  return res.body.id;
-}
-
 module.exports = {
   prepareNodemailerMock,
   verifyListProperties,
@@ -197,7 +205,6 @@ module.exports = {
   prepareDb,
   prepareUser,
   createMochaBoard,
-  deleteMochaBoard,
   boardData,
   userData,
   userForgotPassword,
