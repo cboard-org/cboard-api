@@ -4,10 +4,24 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
-const user = require('../api/controllers/user');
 const should = chai.should();
 
 const User = require('../api/models/User');
+
+function prepareNodemailerMock(isDisabling = 0) {
+  const mockery = require('mockery');
+  const nodemailerMock = require('nodemailer-mock');
+  if (isDisabling) {
+    mockery.disable();
+    return;
+  }
+
+  mockery.enable({
+    warnOnUnregistered: false,
+  });
+
+  mockery.registerMock('nodemailer', nodemailerMock);
+}
 
 const verifyListProperties = (body) => {
   body.should.be.a('object');
@@ -42,11 +56,9 @@ const verifyUserProperties = (user) => {
 
 const userData = {
   name: 'cboard mocha test',
-  email: 'anything@cboard.io',
+  email: 'anythingUser@cboard.io',
   password: '123456',
 };
-
-let userid = '';
 
 let userForgotPassword = {
   Userid: '',
@@ -124,10 +136,7 @@ async function prepareUser(server, overrides = {}) {
     ...overrides,
   };
 
-  const createUser = await request(server)
-    .post('/user')
-    .send(data)
-    .expect(200);
+  const createUser = await request(server).post('/user').send(data).expect(200);
 
   const activationUrl = createUser.body.url;
 
@@ -148,17 +157,13 @@ async function prepareUser(server, overrides = {}) {
   return { token, userId };
 }
 
-async function deleteMochaUser() {
-  return User.deleteOne({ email: userData.email });
-}
-
 module.exports = {
+  prepareNodemailerMock,
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
   prepareDb,
   prepareUser,
-  deleteMochaUser,
   boardData,
   userData,
   userForgotPassword,
