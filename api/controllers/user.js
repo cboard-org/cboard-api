@@ -447,10 +447,11 @@ async function storePassword(req, res) {
       userId: userid,
       status: false,
     }).exec();
-    if (!resetPassword) {
+    const expireTime = moment.utc(resetPassword.resetPasswordExpires).isBefore(moment());
+    if (expireTime) {
       return res.status(500).json({
         message: 'Expired time to reset password! ',
-        error: err.message,
+        error: 'Expired time to reset password! ',
       });
     }
     // the token and the hashed token in the db are verified before updating the password
@@ -458,8 +459,6 @@ async function storePassword(req, res) {
       token,
       resetPassword.resetPasswordToken,
       function (errBcrypt, resBcrypt) {
-        let expireTime = moment.utc(resetPassword.expire); // expireTime and currentTime is never used
-        let currentTime = new Date();
         if (!resBcrypt) {
           return res.status(500).json({
             message: 'Error resetting user password.',
