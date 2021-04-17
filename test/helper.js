@@ -121,6 +121,31 @@ const boardData = {
   ],
 };
 
+const settingsData = {
+  language: { lang: 'es-ES' },
+  speech: {
+    voiceURI:
+      'urn:moz-tts:sapi:Microsoft Helena Desktop - Spanish (Spain)?es-ES',
+    pitch: 1,
+    rate: 0.75,
+  },
+  display: {
+    uiSize: 'Large',
+    fontSize: 'Standard',
+    hideOutputActive: false,
+    labelPosition: 'Above',
+    darkThemeActive: true,
+  },
+  scanning: { active: false, delay: 3000, strategy: 'automatic' },
+  navigation: {
+    active: false,
+    caBackButtonActive: false,
+    quickUnlockActive: false,
+    removeOutputActive: true,
+    vocalizeFolders: false,
+  },
+};
+
 const translateData = {
   labels: ['translate this'],
   from: 'zu-ZA',
