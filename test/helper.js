@@ -10,6 +10,21 @@ const should = chai.should();
 
 const User = require('../api/models/User');
 
+function prepareNodemailerMock(isDisabling = 0) {
+  const mockery = require('mockery');
+  const nodemailerMock = require('nodemailer-mock');
+  if (isDisabling) {
+    mockery.disable();
+    return;
+  }
+
+  mockery.enable({
+    warnOnUnregistered: false,
+  });
+
+  mockery.registerMock('nodemailer', nodemailerMock);
+}
+
 const verifyListProperties = (body) => {
   body.should.be.a('object');
   body.should.to.have.all.keys(
@@ -93,6 +108,12 @@ const boardData = {
       label: 'no',
     },
   ],
+};
+
+const translateData = {
+  labels: ['translate this'],
+  from: 'zu-ZA',
+  to: 'zh-CN',
 };
 
 const communicatorData = {
@@ -219,6 +240,7 @@ async function deleteCommunicatorById(communicatorid) {
 }
 
 module.exports = {
+  prepareNodemailerMock,
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
@@ -232,7 +254,9 @@ module.exports = {
   boardData,
   communicatorData,
   userData,
-  adminData,
   userForgotPassword,
+  analyticsReportData,
+  settingsData,
   generateEmail: generateEmail,
+  translateData,
 };
