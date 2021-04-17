@@ -4,6 +4,8 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
+const user = require('../api/controllers/user');
+const Communicator = require('../api/models/Communicator');
 const should = chai.should();
 
 /**helper nodemailer-mock
@@ -65,10 +67,26 @@ const verifyUserProperties = (user) => {
   user.should.have.property('password');
 };
 
-/*Mocks of data*/
+const verifyCommunicatorProperties = (body) => {
+  body.should.to.have.all.keys(
+    'id',
+    'name',
+    'email',
+    'author',
+    'rootBoard',
+    'boards'
+  );
+};
+
 const userData = {
   name: 'cboard mocha test',
   email: 'anythingUser@cboard.io',
+  password: '123456',
+};
+
+const adminData = {
+  name: 'cboard admin mocha test',
+  email: 'anythingAdmin@cboard.io',
   password: '123456',
 };
 
@@ -103,7 +121,21 @@ const boardData = {
   ],
 };
 
-/*this is never used */
+const translateData = {
+  labels: ['translate this'],
+  from: 'zu-ZA',
+  to: 'zh-CN',
+};
+
+const communicatorData = {
+  id: 'root',
+  name: 'home',
+  email: userData.email,
+  author: 'cboard mocha test',
+  rootBoard: 'root',
+  boards: ['root'],
+};
+
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
     useNewUrlParser: true,
@@ -171,6 +203,54 @@ async function prepareUser(server, overrides = {}) {
   return { token, userId };
 }
 
+async function deleteMochaUser() {
+  if (await User.exists({ email: userData.email })) {
+    await User.deleteOne({ email: userData.email });
+  }
+  if (await User.exists({ email: adminData.email })) {
+    await User.deleteOne({ email: adminData.email });
+  }
+  return;
+}
+
+async function deleteMochaUserById(userid) {
+  if (await User.exists({ _id: userid })) {
+    await User.deleteOne({ _id: userid });
+  }
+  return;
+}
+
+/**
+ * A newly created test Communicator.
+ * @typedef {Object} createCommunicatorResponse
+ *
+ * @property {string} communicatorid
+ */
+
+/**
+ * Create a Comunicator and return an id.
+ *
+ * @param {Express} server
+ * @param {token}  userToken
+ *
+ * @returns {Promise<createCommunicatorResponse>}
+ */
+async function createCommunicator(server, userToken) {
+  const createCommunicator = await request(server)
+    .post('/communicator')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send(communicatorData)
+    .expect(200);
+  return createCommunicator.body.id;
+}
+
+async function deleteCommunicatorById(communicatorid) {
+  if (await Communicator.exists({ _id: communicatorid })) {
+    await Communicator.deleteOne({ _id: communicatorid });
+  }
+  return;
+}
+
 /**
  * A newly created test Board.
  * @typedef {Object} createMochaBoard
@@ -202,11 +282,20 @@ module.exports = {
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
+  verifyCommunicatorProperties,
   prepareDb,
   prepareUser,
+  deleteMochaUser,
+  deleteMochaUserById,
+  createCommunicator,
+  deleteCommunicatorById,
   createMochaBoard,
   boardData,
+  communicatorData,
   userData,
   userForgotPassword,
+  analyticsReportData,
+  settingsData,
   generateEmail: generateEmail,
+  translateData,
 };
