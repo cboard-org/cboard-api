@@ -292,6 +292,7 @@ module.exports = {
   createMochaBoard,
   boardData,
   communicatorData,
+  adminData,
   userData,
   userForgotPassword,
   analyticsReportData,
