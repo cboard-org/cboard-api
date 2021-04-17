@@ -2,44 +2,47 @@ process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
 const chai = require('chai');
-var assert = chai.assert;
 const expect = chai.expect;
 
 const uuid = require('uuid');
 
-const server = require('../../app');
 const helper = require('../helper');
-const { copy } = require('../../app');
 
-const nev = require('../../api/mail/index');
 const User = require('../../api/models/User');
-const user = require('../../api/controllers/user');
 
 //Parent block
-describe('User API calls', function() {
-  this.timeout(7000); //some external process take time. We should stumb procces to remove this.
-  let url;
-  let userid;
+describe('User API calls', function () {
+  let server;
 
-  before(async function() {
-    await helper.deleteMochaUser();
+  before(function () {
+    helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+    server = require('../../app'); //register mocks before require the original dependency
   });
 
-  describe('POST /user create User', function() {
-    it('it should to create a new temporary user', async function() {
-      const res = await request(server)
-        .post('/user')
-        .send(helper.userData)
-        .expect(200);
+  after(async function () {
+    helper.prepareNodemailerMock(true); //disable mockery
+    await User.deleteMany({ name: 'cboard mocha test' });
+    await User.deleteMany({ name: 'testAlice' });
+  });
+
+  describe('POST /user create User', function () {
+    let url;
+
+    it('it should to create a new temporary user', async function () {
+      const data = {
+        ...helper.userData,
+        email: helper.generateEmail(),
+      };
+      const res = await request(server).post('/user').send(data).expect(200);
 
       const URLLenght = 16;
       url = res.body.url;
       url.should.be.a('string').with.lengthOf(URLLenght); //nev.options.URLLenght
     });
 
-    it('it should to activate user', async function() {
+    it('it should to activate user', async function () {
       const res = await request(server)
-        .post('/user/activate/' + url)
+        .post(`/user/activate/${url}`)
         .expect('Content-Type', /json/)
         .expect(200);
 
@@ -47,26 +50,18 @@ describe('User API calls', function() {
       userid.should.be.a('string');
       userid.should.not.have.string(' '); //is not recomended negate assertions
     });
-
-    after(async function() {
-      await helper.deleteMochaUser();
-    });
   });
 
-  describe('POST /user/login', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
-
-    it('it should NOT Returns a valid token for a wrong email or password', async function() {
-      const user = await helper.prepareUser(server, {
+  describe('POST /user/login', function () {
+    it('it should NOT Returns a valid token for a wrong email or password', async function () {
+      await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email //newEmail
+        email: helper.generateEmail(),
       });
 
       const wrongUserData = {
         ...helper.userData,
-        password: 'wrongPassword'
+        password: 'wrongPassword',
       };
 
       const res = await request(server)
@@ -80,13 +75,15 @@ describe('User API calls', function() {
       res.body.message.should.be.string;
     });
 
-    it('it should Returns a valid token for a user', async function() {
-      const user = await helper.prepareUser(server, {
+    it('it should Returns a valid token for a user', async function () {
+      const userEmail = helper.generateEmail();
+      await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: userEmail,
       });
       const userData = {
-        ...helper.userData
+        ...helper.userData,
+        email: userEmail,
       };
 
       const res = await request(server)
@@ -101,12 +98,8 @@ describe('User API calls', function() {
     });
   });
 
-  describe('GET /user', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
-
-    it('it should NOT Get the full users list without Bearer Token', async function() {
+  describe('GET /user', function () {
+    it('it should NOT Get the full users list without Bearer Token', async function () {
       await request(server)
         .get('/user')
         .set('Accept', 'application/json')
@@ -114,10 +107,10 @@ describe('User API calls', function() {
         .expect(403);
     });
 
-    it('it should Get the full users list', async function() {
+    it('it should Get the full users list', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: helper.generateEmail(),
       });
       const res = await request(server)
         .get('/user')
@@ -130,15 +123,11 @@ describe('User API calls', function() {
     });
   });
 
-  describe('GET /user/:userId', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
-
-    it('it should Get a specific user', async function() {
+  describe('GET /user/:userId', function () {
+    it('it should Get a specific user', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: helper.generateEmail(),
       });
 
       const res = await request(server)
@@ -153,20 +142,16 @@ describe('User API calls', function() {
     });
   });
 
-  describe('PUT /user/:userId', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
-
-    it('only allows an admin user to update another user', async function() {
+  describe('PUT /user/:userId', function () {
+    it('only allows an admin user to update another user', async function () {
       const admin = await helper.prepareUser(server, {
         role: 'admin',
-        email: helper.adminData.email
+        email: helper.generateEmail(),
       });
 
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: helper.generateEmail(),
       });
 
       // Try to update another user as a regular user.
@@ -175,7 +160,7 @@ describe('User API calls', function() {
         .put(`/user/${admin.userId}`)
         .set('Authorization', `Bearer ${user.token}`)
         .expect({
-          message: 'Only admins can update another user.'
+          message: 'Only admins can update another user.',
         })
         .expect(403);
 
@@ -187,22 +172,22 @@ describe('User API calls', function() {
         .expect(200);
     });
 
-    it('only allows updating a subset of fields', async function() {
+    it('only allows updating a subset of fields', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: helper.generateEmail(),
       });
 
       const update = {
         // Updateable.
         //email: 'alice@example.com',  //until resolve issue #140
-        name: 'Alice',
+        name: 'testAlice',
         birthdate: '2001-10-17',
         locale: 'klingon',
 
         // Not updateable.
         role: 'foobar',
-        password: uuid.v4()
+        password: uuid.v4(),
       };
 
       const res = await request(server)
@@ -218,37 +203,28 @@ describe('User API calls', function() {
 
       expect(res.body.role).to.equal('user');
       expect(res.body.password).not.to.equal(update.password);
-      await helper.deleteMochaUserById(user.userId); //when email update delete with Id
     });
   });
 
-  describe('POST /user/logout', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
-
-    it('it should Destroys user session and authentication token', async function() {
+  describe('POST /user/logout', function () {
+    it('it should Destroys user session and authentication token', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: helper.generateEmail(),
       });
 
-      const res = await request(server)
+      await request(server)
         .post('/user/logout')
         .send(user)
-        .set('Authorization', 'Bearer ' + user.token)
+        .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
     });
   });
 
-  describe('POST /user/forgot', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
-
-    it('it should NOT create a Clear token to restore password for a wrong email', async function() {
+  describe('POST /user/forgot', function () {
+    it('it should NOT create a Clear token to restore password for a wrong email', async function () {
       let wrongUserEmail = 'wrong_email@wrong.com';
       const res = await request(server)
         .post('/user/forgot')
@@ -259,16 +235,17 @@ describe('User API calls', function() {
       res.body.message.should.be.a('string');
     });
 
-    it('it should create a Clear token to restore password', async function() {
-      const user = await helper.prepareUser(server, {
+    it('it should create a Clear token to restore password', async function () {
+      const userEmail = helper.generateEmail();
+      await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: userEmail,
       });
       const res = await request(server)
         .post('/user/forgot')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .send({ email: helper.userData.email })
+        .send({ email: userEmail })
         .expect(200);
 
       const userAndUrl = res.body;
@@ -277,15 +254,47 @@ describe('User API calls', function() {
         .with.all.keys('success', 'userid', 'url', 'message');
     });
   });
-  describe('POST /user/store-password', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
 
-    it('it should NOT allows to store a new password without a verification url.', async function() {
+  describe('POST /user/store-password', function () {
+    it('it should NOT allows to store a new password posting /user/forgot and sending data without a verification url.', async function () {
+      const userEmail = helper.generateEmail();
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: userEmail,
+      });
+      await request(server)
+        .post('/user/logout')
+        .send(user)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+      const getVerificationUrl = await request(server)
+        .post('/user/forgot')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .send({ email: userEmail })
+        .expect(200);
+
+      const userid = getVerificationUrl.body.userid;
+      const userStorePassword = {
+        userid: userid,
+        password: 'newPassword',
+        token: '',
+      };
+
+      await request(server)
+        .post('/user/store-password')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .send(userStorePassword)
+        .expect(500);
+    });
+
+    it('it should NOT allows to store a new password without a verification url.', async function () {
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
       });
       const userStorePassword = { ...user, password: 'newPassword' };
 
@@ -299,16 +308,17 @@ describe('User API calls', function() {
       res.body.message.should.be.a('string');
     });
 
-    it('it should allows to store a new password using a verification url.', async function() {
-      const user = await helper.prepareUser(server, {
+    it('it should allows to store a new password using a verification url.', async function () {
+      const userEmail = helper.generateEmail();
+      await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: userEmail,
       });
       const getVerificationUrl = await request(server)
         .post('/user/forgot')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .send({ email: helper.userData.email })
+        .send({ email: userEmail })
         .expect(200);
 
       const verificationUrl = getVerificationUrl.body.url;
@@ -316,15 +326,16 @@ describe('User API calls', function() {
       const userStorePassword = {
         userid: userid,
         password: 'newPassword',
-        token: verificationUrl
+        token: verificationUrl,
       };
-      console.log(userStorePassword);
+
       const storePasswordRes = await request(server)
         .post('/user/store-password')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .send(userStorePassword)
         .expect(200);
+
       storePasswordRes.body.should.to.have.all.keys(
         'success',
         'url',
@@ -333,19 +344,15 @@ describe('User API calls', function() {
     });
   });
 
-  describe('DELETE /user/:userid', function() {
-    afterEach(async function() {
-      await helper.deleteMochaUser();
-    });
-
-    it('it should delete a user', async function() {
+  describe('DELETE /user/:userid', function () {
+    it('it should delete a user', async function () {
       const admin = await helper.prepareUser(server, {
         role: 'admin',
-        email: helper.adminData.email
+        email: helper.generateEmail(),
       });
       const user = await helper.prepareUser(server, {
         role: 'user',
-        email: helper.userData.email
+        email: helper.generateEmail(),
       });
 
       expect(await User.exists({ _id: user.userId })).to.equal(true);
