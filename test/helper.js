@@ -8,8 +8,17 @@ const user = require('../api/controllers/user');
 const Communicator = require('../api/models/Communicator');
 const should = chai.should();
 
-const User = require('../api/models/User');
+/**helper nodemailer-mock
+ * 
+ * Prepare nodemailer-mock for not sent emails.
+ * @typedef {Object} prepareNodemailerMock
 
+/**
+ * Create a test user and generate a token for them.
+ *
+ * @param {bool} isDisabling -optional to disable mock after use it
+ * @returns {void}
+ */
 function prepareNodemailerMock(isDisabling = 0) {
   const mockery = require('mockery');
   const nodemailerMock = require('nodemailer-mock');
@@ -24,6 +33,8 @@ function prepareNodemailerMock(isDisabling = 0) {
 
   mockery.registerMock('nodemailer', nodemailerMock);
 }
+
+/*should properties helper*/
 
 const verifyListProperties = (body) => {
   body.should.be.a('object');
@@ -89,7 +100,7 @@ const boardData = {
   id: 'root',
   name: 'home',
   author: 'cboard mocha test',
-  email: 'anything@cboard.io',
+  email: userData.email,
   isPublic: true,
   hidden: false,
   tiles: [
@@ -141,6 +152,7 @@ function prepareDb() {
   });
 }
 
+/*Test helpers */
 function generateEmail() {
   return `test${Date.now()}@example.com`;
 }
@@ -239,6 +251,32 @@ async function deleteCommunicatorById(communicatorid) {
   return;
 }
 
+/**
+ * A newly created test Board.
+ * @typedef {Object} createMochaBoard
+ *
+ * @property {string} BoardId
+ */
+
+/**
+ * Create a test Board and return the id.
+ *
+ * @param {Express} server
+ *
+ * @param {string} token
+ *   user data.
+ *
+ * @returns {Promise<createMochaBoard>}
+ */
+
+async function createMochaBoard(server, token) {
+  const res = await request(server)
+    .post('/board')
+    .send(boardData)
+    .set('Authorization', `Bearer ${token}`);
+  return res.body.id;
+}
+
 module.exports = {
   prepareNodemailerMock,
   verifyListProperties,
@@ -251,6 +289,7 @@ module.exports = {
   deleteMochaUserById,
   createCommunicator,
   deleteCommunicatorById,
+  createMochaBoard,
   boardData,
   communicatorData,
   userData,
