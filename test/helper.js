@@ -60,6 +60,12 @@ const userData = {
   password: '123456',
 };
 
+const adminData = {
+  name: 'cboard admin mocha test',
+  email: 'anythingAdmin@cboard.io',
+  password: '123456',
+};
+
 let userForgotPassword = {
   Userid: '',
   token: '',
@@ -89,6 +95,12 @@ const boardData = {
       label: 'no',
     },
   ],
+};
+
+const translateData = {
+  labels: ['translate this'],
+  from: 'zu-ZA',
+  to: 'zh-CN',
 };
 
 function prepareDb() {
@@ -167,5 +179,6 @@ module.exports = {
   boardData,
   userData,
   userForgotPassword,
+  translateData,
   generateEmail: generateEmail,
 };
