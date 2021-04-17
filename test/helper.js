@@ -179,6 +179,8 @@ module.exports = {
   boardData,
   userData,
   userForgotPassword,
-  translateData,
+  analyticsReportData,
+  settingsData,
   generateEmail: generateEmail,
+  translateData,
 };
