@@ -1,11 +1,13 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.14.0
+version: v1.19.0
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:mime:20170907':
     - swagger-express-mw > swagger-node-runner > swagger-tools > superagent > mime:
         patched: '2018-06-26T08:58:22.300Z'
+    - swagger > swagger-tools > superagent > mime:
+        patched: '2021-04-17T16:11:56.600Z'
   'npm:lodash:20180130':
     - swagger-express-mw > swagger-node-runner > lodash:
         patched: '2018-07-03T08:57:30.735Z'
@@ -25,6 +27,10 @@ patch:
         patched: '2018-07-03T08:57:30.735Z'
     - swagger-express-mw > swagger-node-runner > bagpipes > machinepack-http > machinepack-urls > machine > rttc > lodash:
         patched: '2018-07-03T08:57:30.735Z'
+    - swagger > lodash:
+        patched: '2021-04-17T16:11:56.600Z'
+    - swagger > inquirer > lodash:
+        patched: '2021-04-17T16:11:56.600Z'
   SNYK-JS-LODASH-450202:
     - snyk > snyk-nuget-plugin > dotnet-deps-parser > lodash:
         patched: '2020-01-22T20:53:10.872Z'
@@ -32,3 +38,24 @@ patch:
         patched: '2020-01-22T20:53:10.872Z'
     - snyk > @snyk/snyk-cocoapods-plugin > @snyk/cocoapods-lockfile-parser > @snyk/dep-graph > graphlib > lodash:
         patched: '2020-01-22T20:53:10.872Z'
+  'npm:debug:20170905':
+    - swagger > mocha > debug:
+        patched: '2021-04-17T16:11:56.600Z'
+    - swagger > swagger-tools > body-parser > debug:
+        patched: '2021-04-17T16:11:56.600Z'
+  'npm:extend:20180424':
+    - swagger > swagger-tools > superagent > extend:
+        patched: '2021-04-17T16:11:56.600Z'
+  SNYK-JS-LODASH-567746:
+    - swagger > swagger-test-templates > json-schema-deref-sync > lodash:
+        patched: '2021-04-17T16:11:56.600Z'
+    - swagger > swagger-tools > json-refs > graphlib > lodash:
+        patched: '2021-04-17T16:11:56.600Z'
+  'npm:minimatch:20160620':
+    - swagger > mocha > glob > minimatch:
+        patched: '2021-04-17T16:11:56.600Z'
+  'npm:ms:20170412':
+    - swagger > mocha > debug > ms:
+        patched: '2021-04-17T16:11:56.600Z'
+    - swagger > swagger-tools > body-parser > debug > ms:
+        patched: '2021-04-17T16:11:56.600Z'
