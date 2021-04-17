@@ -4,10 +4,24 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
-const user = require('../api/controllers/user');
 const should = chai.should();
 
 const User = require('../api/models/User');
+
+function prepareNodemailerMock(isDisabling = 0) {
+  const mockery = require('mockery');
+  const nodemailerMock = require('nodemailer-mock');
+  if (isDisabling) {
+    mockery.disable();
+    return;
+  }
+
+  mockery.enable({
+    warnOnUnregistered: false,
+  });
+
+  mockery.registerMock('nodemailer', nodemailerMock);
+}
 
 const verifyListProperties = (body) => {
   body.should.be.a('object');
@@ -155,34 +169,15 @@ async function prepareUser(server, overrides = {}) {
   return { token, userId };
 }
 
-async function deleteMochaUser() {
-  if (await User.exists({ email: userData.email })) {
-    await User.deleteOne({ email: userData.email });
-  }
-  if (await User.exists({ email: adminData.email })) {
-    await User.deleteOne({ email: adminData.email });
-  }
-  return;
-}
-
-async function deleteMochaUserById(userid) {
-  if (await User.exists({ _id: userid })) {
-    await User.deleteOne({ _id: userid });
-  }
-  return;
-}
-
 module.exports = {
+  prepareNodemailerMock,
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
   prepareDb,
   prepareUser,
-  deleteMochaUser,
-  deleteMochaUserById,
   boardData,
   userData,
-  adminData,
   userForgotPassword,
   translateData,
   generateEmail: generateEmail,
