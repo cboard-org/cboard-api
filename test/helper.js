@@ -4,12 +4,12 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
-const user = require('../api/controllers/user');
+const User = require('../api/models/User');
 const Communicator = require('../api/models/Communicator');
 const should = chai.should();
 
 /**helper nodemailer-mock
- * 
+ *
  * Prepare nodemailer-mock for not sent emails.
  * @typedef {Object} prepareNodemailerMock
 
