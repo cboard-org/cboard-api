@@ -25,10 +25,6 @@ describe('User API calls', function () {
     await User.deleteMany({ name: 'testAlice' });
   });
 
-  it('fails on purpose', function () {
-    expect('foo').to.equal('bar');
-  });
-
   describe('POST /user create User', function () {
     let url;
 
