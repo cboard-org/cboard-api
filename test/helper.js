@@ -320,7 +320,6 @@ module.exports = {
   adminData,
   userData,
   userForgotPassword,
-  analyticsReportData,
   settingsData,
   generateEmail: generateEmail,
   translateData,

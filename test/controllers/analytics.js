@@ -5,7 +5,7 @@ const server = require('../../app');
 const helper = require('../helper');
 
 //Parent block
-describe('analytics API calls', function () {
+describe.skip('analytics API calls', function () {
   let user;
 
   before(async function () {
