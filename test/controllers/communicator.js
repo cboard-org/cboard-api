@@ -67,10 +67,6 @@ describe('Communicator API calls', function () {
       this.communicatorid = await helper.createCommunicator(server, user.token);
     });
 
-    after(async function () {
-      await helper.deleteCommunicatorById(this.communicatorid);
-    });
-
     it('it should to NOT get specific communicator without auth', async function () {
       const res = await request(server)
         .get(`/communicator/${this.communicatorid}`)
@@ -94,10 +90,6 @@ describe('Communicator API calls', function () {
   describe('put /communicator/:communicatorid', function () {
     before(async function () {
       this.communicatorid = await helper.createCommunicator(server, user.token);
-    });
-
-    after(async function () {
-      await helper.deleteCommunicatorById(this.communicatorid);
     });
 
     it('it should NOT update communicator without auth', async function () {
@@ -130,10 +122,6 @@ describe('Communicator API calls', function () {
     //check this after resolve issue #140
     before(async function () {
       await helper.createCommunicator(server, user.token);
-    });
-
-    after(async function () {
-      await helper.deleteCommunicatorById(this.communicatorid);
     });
 
     it('it should NOT get communicators for a specific user email without auth', async function () {
