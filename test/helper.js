@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
 const User = require('../api/models/User');
-const Communicator = require('../api/models/Communicator');
 const should = chai.should();
 
 /**helper nodemailer-mock
@@ -77,6 +76,10 @@ const verifyCommunicatorProperties = (body) => {
     'boards'
   );
 };
+
+/**
+ * Data Mocks to use on test
+ */
 
 const userData = {
   name: 'cboard mocha test',
@@ -152,6 +155,15 @@ const translateData = {
   to: 'zh-CN',
 };
 
+const analyticsReportData = [{
+  clientId: 'test.mocha',
+  dimension: 'nthDay',
+  metric: 'avgSessionDuration',
+  endDate: 'today',
+  mobileView: false,
+  startDate: '30daysago',
+}]
+
 const communicatorData = {
   id: 'root',
   name: 'home',
@@ -177,9 +189,14 @@ function prepareDb() {
   });
 }
 
-/*Test helpers */
+/*generate email to create new users*/
 function generateEmail() {
   return `test${Date.now()}@example.com`;
+}
+
+/*clean test users*/
+ async function deleteMochaUsers(){
+  await User.deleteMany({ name: 'cboard mocha test' });
 }
 
 /**
@@ -228,23 +245,6 @@ async function prepareUser(server, overrides = {}) {
   return { token, userId };
 }
 
-async function deleteMochaUser() {
-  if (await User.exists({ email: userData.email })) {
-    await User.deleteOne({ email: userData.email });
-  }
-  if (await User.exists({ email: adminData.email })) {
-    await User.deleteOne({ email: adminData.email });
-  }
-  return;
-}
-
-async function deleteMochaUserById(userid) {
-  if (await User.exists({ _id: userid })) {
-    await User.deleteOne({ _id: userid });
-  }
-  return;
-}
-
 /**
  * A newly created test Communicator.
  * @typedef {Object} createCommunicatorResponse
@@ -267,13 +267,6 @@ async function createCommunicator(server, userToken) {
     .send(communicatorData)
     .expect(200);
   return createCommunicator.body.id;
-}
-
-async function deleteCommunicatorById(communicatorid) {
-  if (await Communicator.exists({ _id: communicatorid })) {
-    await Communicator.deleteOne({ _id: communicatorid });
-  }
-  return;
 }
 
 /**
@@ -310,17 +303,16 @@ module.exports = {
   verifyCommunicatorProperties,
   prepareDb,
   prepareUser,
-  deleteMochaUser,
-  deleteMochaUserById,
+  deleteMochaUsers,
   createCommunicator,
-  deleteCommunicatorById,
   createMochaBoard,
   boardData,
   communicatorData,
   adminData,
   userData,
   userForgotPassword,
+  analyticsReportData,
   settingsData,
-  generateEmail: generateEmail,
   translateData,
+  generateEmail: generateEmail,
 };
