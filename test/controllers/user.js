@@ -255,7 +255,7 @@ describe('User API calls', function () {
     });
   });
 
-  describe('POST /user/store-password', function () {
+  describe.skip('POST /user/store-password', function () {
     it('it should NOT allows to store a new password posting /user/forgot and sending data without a verification url.', async function () {
       const userEmail = helper.generateEmail();
       const user = await helper.prepareUser(server, {

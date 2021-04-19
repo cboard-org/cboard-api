@@ -8,7 +8,7 @@ const fs = require('fs');
 const { expect } = require('chai');
 
 //Parent block
-describe('media API calls', function () {
+describe.skip('media API calls', function () {
   var authToken;
 
   before(async function () {

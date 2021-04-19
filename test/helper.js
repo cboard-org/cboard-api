@@ -4,12 +4,12 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
-const user = require('../api/controllers/user');
+const User = require('../api/models/User');
 const Communicator = require('../api/models/Communicator');
 const should = chai.should();
 
 /**helper nodemailer-mock
- * 
+ *
  * Prepare nodemailer-mock for not sent emails.
  * @typedef {Object} prepareNodemailerMock
 
@@ -119,6 +119,31 @@ const boardData = {
       label: 'no',
     },
   ],
+};
+
+const settingsData = {
+  language: { lang: 'es-ES' },
+  speech: {
+    voiceURI:
+      'urn:moz-tts:sapi:Microsoft Helena Desktop - Spanish (Spain)?es-ES',
+    pitch: 1,
+    rate: 0.75,
+  },
+  display: {
+    uiSize: 'Large',
+    fontSize: 'Standard',
+    hideOutputActive: false,
+    labelPosition: 'Above',
+    darkThemeActive: true,
+  },
+  scanning: { active: false, delay: 3000, strategy: 'automatic' },
+  navigation: {
+    active: false,
+    caBackButtonActive: false,
+    quickUnlockActive: false,
+    removeOutputActive: true,
+    vocalizeFolders: false,
+  },
 };
 
 const translateData = {
@@ -292,9 +317,9 @@ module.exports = {
   createMochaBoard,
   boardData,
   communicatorData,
+  adminData,
   userData,
   userForgotPassword,
-  analyticsReportData,
   settingsData,
   generateEmail: generateEmail,
   translateData,

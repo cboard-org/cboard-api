@@ -48,7 +48,7 @@
     "sendgrid": "5.2.3",
     "should": "^13.2.3",
     "snyk": "^1.465.0",
-    "swagger": "^0.7.5",
+    "swagger": "git://github.com/swagger-api/swagger-node.git#fffa399",
     "swagger-express-mw": "^0.7.0",
     "swagger-tools": "^0.10.4",
     "translate-api": "^0.3.18",
