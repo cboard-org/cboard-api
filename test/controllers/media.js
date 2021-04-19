@@ -23,12 +23,12 @@ describe('media API calls', function () {
   });
 
   describe('POST /media', function () {
-    before(async function(){
+    before(async function () {
       user = await helper.prepareUser(server, {
         role: 'user',
         email: helper.generateEmail(),
       });
-    })
+    });
 
     it('it should NOT post a media file without authToken.', async function () {
       const res = await request(server)

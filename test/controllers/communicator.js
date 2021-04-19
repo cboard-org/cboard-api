@@ -18,7 +18,7 @@ describe('Communicator API calls', function () {
   after(async function () {
     helper.prepareNodemailerMock(true);
     helper.deleteMochaUsers();
-    await Communicator.deleteMany({ author: "cboard mocha test" });
+    await Communicator.deleteMany({ author: 'cboard mocha test' });
   });
 
   beforeEach(async function () {

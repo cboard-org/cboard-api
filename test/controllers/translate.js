@@ -16,7 +16,7 @@ describe('Translate API calls', function () {
     helper.userData.email = helper.generateEmail();
     user = await helper.prepareUser(server, {
       role: 'user',
-      email: helper.userData.email
+      email: helper.userData.email,
     });
   });
 

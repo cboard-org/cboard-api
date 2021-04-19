@@ -16,7 +16,7 @@ describe('Settings API calls', function () {
     helper.userData.email = helper.generateEmail();
     user = await helper.prepareUser(server, {
       role: 'user',
-      email: helper.userData.email
+      email: helper.userData.email,
     });
   });
 
@@ -57,7 +57,7 @@ describe('Settings API calls', function () {
   });
 
   describe('GET /settings', function () {
-    before(async function(){
+    before(async function () {
       const res = await request(server)
         .post('/settings')
         .send(helper.settingsData)
@@ -65,7 +65,7 @@ describe('Settings API calls', function () {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
-      console.log(res.body);  
+      console.log(res.body);
     });
 
     it('it should Returns settings for current user', async function () {

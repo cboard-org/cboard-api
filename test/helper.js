@@ -155,14 +155,16 @@ const translateData = {
   to: 'zh-CN',
 };
 
-const analyticsReportData = [{
-  clientId: 'test.mocha',
-  dimension: 'nthDay',
-  metric: 'avgSessionDuration',
-  endDate: 'today',
-  mobileView: false,
-  startDate: '30daysago',
-}]
+const analyticsReportData = [
+  {
+    clientId: 'test.mocha',
+    dimension: 'nthDay',
+    metric: 'avgSessionDuration',
+    endDate: 'today',
+    mobileView: false,
+    startDate: '30daysago',
+  },
+];
 
 const communicatorData = {
   id: 'root',
@@ -195,7 +197,7 @@ function generateEmail() {
 }
 
 /*clean test users*/
- async function deleteMochaUsers(){
+async function deleteMochaUsers() {
   await User.deleteMany({ name: 'cboard mocha test' });
 }
 

@@ -21,12 +21,12 @@ describe('analytics API calls', function () {
   });
 
   describe('POST /analytics/batchGet', function () {
-    before(async function(){
+    before(async function () {
       user = await helper.prepareUser(server, {
         role: 'user',
         email: helper.generateEmail(),
       });
-    })
+    });
 
     it('it should NOT return analytics User data without bearer.', async function () {
       await request(server)
