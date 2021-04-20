@@ -27,6 +27,7 @@ function prepareNodemailerMock(isDisabling = 0) {
   }
 
   mockery.enable({
+    warnOnReplace: false,
     warnOnUnregistered: false,
   });
 

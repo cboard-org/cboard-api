@@ -65,7 +65,6 @@ describe('Settings API calls', function () {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
-      console.log(res.body);
     });
 
     it('it should Returns settings for current user', async function () {
