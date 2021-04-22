@@ -13,10 +13,9 @@ describe('Settings API calls', function () {
   before(async function () {
     helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
     server = require('../../app'); //register mocks before require the original dependency
-    helper.userData.email = helper.generateEmail();
     user = await helper.prepareUser(server, {
       role: 'user',
-      email: helper.userData.email,
+      email: helper.generateEmail(),
     });
   });
 

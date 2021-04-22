@@ -21,7 +21,7 @@ describe('User API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true); //disable mockery
-    await User.deleteMany({ name: 'cboard mocha test' });
+    helper.deleteMochaUsers();
     await User.deleteMany({ name: 'testAlice' });
   });
 

@@ -8,7 +8,6 @@ var expect = require('chai').expect;
 const should = chai.should();
 const helper = require('../helper');
 
-const User = require('../../api/models/User');
 const Board = require('../../api/models/Board');
 
 //Parent block
@@ -31,7 +30,7 @@ describe('Board API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true); //disable mockery
-    await User.deleteMany({ name: 'cboard mocha test' });
+    helper.deleteMochaUsers();
     await Board.deleteMany({ author: 'cboard mocha test' });
   });
 

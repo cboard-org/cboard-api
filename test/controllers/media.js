@@ -1,8 +1,6 @@
 const request = require('supertest');
 const chai = require('chai');
 
-const User = require('../../api/models/User');
-
 const helper = require('../helper');
 
 const fs = require('fs');
@@ -19,7 +17,7 @@ describe('media API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true);
-    await User.deleteMany({ name: 'cboard mocha test' });
+    helper.deleteMochaUsers();
   });
 
   describe('POST /media', function () {

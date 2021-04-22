@@ -1,8 +1,6 @@
 const request = require('supertest');
 const chai = require('chai');
 
-const User = require('../../api/models/User');
-
 const helper = require('../helper');
 
 //Parent block
@@ -17,7 +15,7 @@ describe('analytics API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true);
-    await User.deleteMany({ name: 'cboard mocha test' });
+    helper.deleteMochaUsers();
   });
 
   describe('POST /analytics/batchGet', function () {
