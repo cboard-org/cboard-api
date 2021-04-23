@@ -21,7 +21,7 @@ describe('Settings API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true); //disable mockery
-    helper.deleteMochaUsers();
+    await helper.deleteMochaUsers();
   });
 
   describe('POST /settings', function () {

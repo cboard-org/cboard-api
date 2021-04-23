@@ -17,7 +17,7 @@ describe('media API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true);
-    helper.deleteMochaUsers();
+    await helper.deleteMochaUsers();
   });
 
   describe('POST /media', function () {

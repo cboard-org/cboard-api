@@ -30,7 +30,7 @@ describe('Board API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true); //disable mockery
-    helper.deleteMochaUsers();
+    await helper.deleteMochaUsers();
     await Board.deleteMany({ author: 'cboard mocha test' });
   });
 

@@ -15,7 +15,7 @@ describe('analytics API calls', function () {
 
   after(async function () {
     helper.prepareNodemailerMock(true);
-    helper.deleteMochaUsers();
+    await helper.deleteMochaUsers();
   });
 
   describe('POST /analytics/batchGet', function () {
