@@ -1,26 +1,31 @@
 const request = require('supertest');
 const chai = require('chai');
 
-const server = require('../../app');
 const helper = require('../helper');
 
 //Parent block
-describe.skip('analytics API calls', function () {
+describe('analytics API calls', function () {
+  let server;
   let user;
 
   before(async function () {
-    await helper.deleteMochaUser();
-    user = await helper.prepareUser(server, {
-      role: 'user',
-      email: helper.userData.email,
-    });
+    helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+    server = require('../../app'); //register mocks before require the original dependency
   });
 
   after(async function () {
-    await helper.deleteMochaUser();
+    helper.prepareNodemailerMock(true);
+    await helper.deleteMochaUsers();
   });
 
   describe('POST /analytics/batchGet', function () {
+    before(async function () {
+      user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+    });
+
     it('it should NOT return analytics User data without bearer.', async function () {
       await request(server)
         .post('/analytics/batchGet')

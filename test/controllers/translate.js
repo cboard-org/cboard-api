@@ -3,19 +3,26 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const chai = require('chai');
 
-const server = require('../../app');
 const helper = require('../helper');
 
 //Parent block
 describe('Translate API calls', function () {
   let user;
+  let server;
 
   before(async function () {
-    await helper.deleteMochaUser();
+    helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+    server = require('../../app'); //register mocks before require the original dependency
+    helper.userData.email = helper.generateEmail();
     user = await helper.prepareUser(server, {
       role: 'user',
       email: helper.userData.email,
     });
+  });
+
+  after(async function () {
+    helper.prepareNodemailerMock(true); //disable mockery
+    await helper.deleteMochaUsers();
   });
 
   describe('POST /translate', function () {

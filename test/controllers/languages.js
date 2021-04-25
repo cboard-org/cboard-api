@@ -1,11 +1,16 @@
 const request = require('supertest');
 const chai = require('chai');
 
-const server = require('../../app');
 const helper = require('../helper');
 
 //Parent block
 describe('Languages API calls', function () {
+  let server;
+
+  before(async function () {
+    server = require('../../app');
+  });
+
   describe('GET /languages', function () {
     it('it should return the full Language list.', async function () {
       const res = await request(server)

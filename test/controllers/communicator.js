@@ -1,30 +1,35 @@
 const request = require('supertest');
 const chai = require('chai');
 
-const server = require('../../app');
+const Communicator = require('../../api/models/Communicator');
+
 const helper = require('../helper');
 
 //Parent block
 describe('Communicator API calls', function () {
+  let server;
   let user;
 
   before(async function () {
-    await helper.deleteMochaUser();
-    user = await helper.prepareUser(server, {
-      role: 'user',
-      email: helper.userData.email,
-    });
+    helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+    server = require('../../app'); //register mocks before require the original dependency
   });
 
   after(async function () {
-    await helper.deleteMochaUser();
+    helper.prepareNodemailerMock(true);
+    await helper.deleteMochaUsers();
+    await Communicator.deleteMany({ author: 'cboard mocha test' });
+  });
+
+  beforeEach(async function () {
+    helper.communicatorData.email = helper.generateEmail();
+    user = await helper.prepareUser(server, {
+      role: 'user',
+      email: helper.communicatorData.email,
+    });
   });
 
   describe('POST /communicator create Communicator', function () {
-    after(async function () {
-      await helper.deleteCommunicatorById(this.communicatorid);
-    });
-
     it('it should to create a new communicator', async function () {
       const res = await request(server)
         .post('/communicator')
@@ -33,7 +38,6 @@ describe('Communicator API calls', function () {
         .send(helper.communicatorData)
         .expect('Content-Type', /json/)
         .expect(200);
-
       const communicatorRes = res.body;
       communicatorRes.should.to.have.all.keys(
         'success',
@@ -63,10 +67,6 @@ describe('Communicator API calls', function () {
       this.communicatorid = await helper.createCommunicator(server, user.token);
     });
 
-    after(async function () {
-      await helper.deleteCommunicatorById(this.communicatorid);
-    });
-
     it('it should to NOT get specific communicator without auth', async function () {
       const res = await request(server)
         .get(`/communicator/${this.communicatorid}`)
@@ -90,10 +90,6 @@ describe('Communicator API calls', function () {
   describe('put /communicator/:communicatorid', function () {
     before(async function () {
       this.communicatorid = await helper.createCommunicator(server, user.token);
-    });
-
-    after(async function () {
-      await helper.deleteCommunicatorById(this.communicatorid);
     });
 
     it('it should NOT update communicator without auth', async function () {
@@ -126,10 +122,6 @@ describe('Communicator API calls', function () {
     //check this after resolve issue #140
     before(async function () {
       await helper.createCommunicator(server, user.token);
-    });
-
-    after(async function () {
-      await helper.deleteCommunicatorById(this.communicatorid);
     });
 
     it('it should NOT get communicators for a specific user email without auth', async function () {

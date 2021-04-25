@@ -1,23 +1,33 @@
 const request = require('supertest');
 const chai = require('chai');
 
-const server = require('../../app');
 const helper = require('../helper');
 
 const fs = require('fs');
 const { expect } = require('chai');
 
 //Parent block
-describe.skip('media API calls', function () {
-  var authToken;
+describe('media API calls', function () {
+  let server;
 
   before(async function () {
-    await helper.deleteMochaUser();
-    const res = await helper.prepareUser(server);
-    authToken = res.token;
+    helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
+    server = require('../../app'); //register mocks before require the original dependency
+  });
+
+  after(async function () {
+    helper.prepareNodemailerMock(true);
+    await helper.deleteMochaUsers();
   });
 
   describe('POST /media', function () {
+    before(async function () {
+      user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+    });
+
     it('it should NOT post a media file without authToken.', async function () {
       const res = await request(server)
         .post('/media')
@@ -42,7 +52,7 @@ describe.skip('media API calls', function () {
     it('it should post a media file.', async function () {
       const res = await request(server)
         .post('/media')
-        .set('Authorization', 'Bearer ' + authToken)
+        .set('Authorization', 'Bearer ' + user.token)
         .set('Accept', 'image/webp,*/*')
         .set(
           'Content-Disposition',

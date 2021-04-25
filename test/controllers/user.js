@@ -14,14 +14,14 @@ const User = require('../../api/models/User');
 describe('User API calls', function () {
   let server;
 
-  before(function () {
+  before(async function () {
     helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
     server = require('../../app'); //register mocks before require the original dependency
   });
 
   after(async function () {
     helper.prepareNodemailerMock(true); //disable mockery
-    await User.deleteMany({ name: 'cboard mocha test' });
+    await helper.deleteMochaUsers();
     await User.deleteMany({ name: 'testAlice' });
   });
 
