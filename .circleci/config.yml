@@ -36,6 +36,15 @@ jobs:
           name: Run Unitests
           command: |
             npm test
+            mkdir ~/junit
+            ./node_modules/.bin/mocha --recursive --reporter  mocha-junit-reporter --exit ./test/
+          environment:
+            MOCHA_FILE: ~/junit/test-results.xml
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
   image:
     docker:
       # specify the version you desire here
