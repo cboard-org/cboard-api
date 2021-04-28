@@ -35,7 +35,7 @@ jobs:
       # run tests
       - run: 
           name: Run Unitests
-          command: ./node_modules/.bin/mocha --recursive --reporter  mocha-junit-reporter --exit ./test/
+          command: ./node_modules/.bin/mocha test --recursive --reporter  mocha-junit-reporter
           environment:
             MOCHA_FILE: ~/junit/test-results.xml
           when: always
