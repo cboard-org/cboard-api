@@ -80,21 +80,26 @@ async function getPublicBoards(req, res) {
 }
 
 async function deleteBoard(req, res) {
-  const id = req.swagger.params.id.value;
-  Board.findByIdAndRemove(id, function (err, boards) {
+  Board.findByIdAndRemove(req, function (err, board) {
+    const id = req.swagger.params.id.value;
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
         error: err.message
       });
     }
-    if (!boards) {
+    if (!board) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
         error: 'Board not found.'
       });
     }
-    return res.status(200).json(boards);
+    if (!req.user.isAdmin && req.user !== board.author) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this user's board."
+      });
+    }
+    return res.status(200).json(board);
   });
 }
 
