@@ -31,11 +31,10 @@ jobs:
             -in  google-auth.json.cipher \
             -out google-auth.json \
             -k $KEY
-      - run: mkdir ~/junit
       # run tests
       - run: 
           name: Run Unitests
-          command: MOCHA_FILE=~/junit/test-results.xml ./node_modules/.bin/mocha test --recursive --reporter mocha-junit-reporter --exit
+          command: MOCHA_FILE=~/junit/test-results.xml npm test
           when: always
       - store_test_results:
           path: ~/junit
