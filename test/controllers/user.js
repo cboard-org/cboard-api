@@ -160,7 +160,7 @@ describe('User API calls', function () {
         .put(`/user/${admin.userId}`)
         .set('Authorization', `Bearer ${user.token}`)
         .expect({
-          message: 'Only admins can update another user.',
+          message: 'You are not authorized to update this user.',
         })
         .expect(403);
 
