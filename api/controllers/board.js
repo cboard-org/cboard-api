@@ -15,6 +15,7 @@ module.exports = {
   getPublicBoards: getPublicBoards
 };
 
+// TODO: Use the caller's email instead of getting it from the body.
 function createBoard(req, res) {
   const board = new Board(req.body);
   board.lastEdited = moment().format();

@@ -70,7 +70,7 @@
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "test": "NODE_ENV=test mocha test --recursive --reporter mocha-junit-reporter --exit",
+    "test": "NODE_ENV=test swagger project test",
     "precommit": "lint-staged",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
