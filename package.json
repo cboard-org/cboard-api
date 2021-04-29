@@ -34,6 +34,7 @@
     "googleapis": "^49.0.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
+    "mockery": "^2.1.0",
     "moment": "2.24.0",
     "mongoose": "^5.12.2",
     "morgan": "^1.10.0",
@@ -47,7 +48,7 @@
     "sendgrid": "5.2.3",
     "should": "^13.2.3",
     "snyk": "^1.465.0",
-    "swagger": "^0.7.5",
+    "swagger": "git://github.com/swagger-api/swagger-node.git#fffa399",
     "swagger-express-mw": "^0.7.0",
     "swagger-tools": "^0.10.4",
     "translate-api": "^0.3.18",
@@ -60,8 +61,10 @@
     "husky": "^4.2.0",
     "lint-staged": "^10.0.2",
     "mocha": "^8.2.1",
+    "mocha-junit-reporter": "^2.0.0",
+    "nodemailer-mock": "^1.5.8",
     "nodemon": "^1.19.4",
-    "prettier": "^1.19.1", 
+    "prettier": "^1.19.1",
     "supertest": "^6.1.1"
   },
   "scripts": {
