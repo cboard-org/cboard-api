@@ -198,6 +198,58 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(404);
     });
+
+    it.skip("returns a 404 if the caller is not an admin and doesn't own the board", async function () {
+      const email = helper.generateEmail();
+      const user1 = await helper.prepareUser(server, { email });
+      const user2 = await helper.prepareUser(server, {
+        // The user is not an admin, so they should only be able
+        // to delete their own boards.
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      const { body: { id: boardId } } = await request(server)
+        .post('/board')
+        .send({ ...helper.boardData, email })
+        .set('Authorization', `Bearer ${user1.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      await request(server)
+        .del(`/board/${boardId}`)
+        .set('Authorization', `Bearer ${user2.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+    });
+
+    it.skip("deletes the board if the caller is an admin but doesn't own the board", async function () {
+      const email = helper.generateEmail();
+      const user1 = await helper.prepareUser(server, { email });
+      const user2 = await helper.prepareUser(server, {
+        // The user is an admin, so they should be able to delete
+        // any board.
+        role: 'admin',
+        email: helper.generateEmail(),
+      });
+
+      const { body: { id: boardId } } = await request(server)
+        .post('/board')
+        .send({ ...helper.boardData, email })
+        .set('Authorization', `Bearer ${user1.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      await request(server)
+        .del(`/board/${boardId}`)
+        .set('Authorization', `Bearer ${user2.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
   });
 
   describe('GET /board/byemail/:email', function() {
