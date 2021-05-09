@@ -51,6 +51,13 @@ async function listCommunicators(req, res) {
 
 async function getCommunicatorsEmail(req, res) {
   const email = req.swagger.params.email.value;
+
+  if (!req.user.isAdmin && req.user.email !== email) {
+    return res.status(403).json({
+      message: "You are not authorized to get this user's communicators."
+    });
+  }
+
   const { search = '' } = req.query;
 
   const searchFields = ['name', 'author', 'description'];
