@@ -17,6 +17,7 @@ const MongoStore = require('connect-mongo')(session);
 const User = require('./api/models/User');
 const Facebook = require('./api/passport/facebook');
 const Google = require('./api/passport/google');
+const GoogleToken = require('./api/passport/googleToken');
 const morgan = require('morgan');
 const config = require('./config');
 
@@ -95,6 +96,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
 
   Facebook.configureFacebookStrategy(app);
   Google.configureGoogleStrategy(app);
+  GoogleToken.configureGoogleTokenStrategy(app);
   startServer(app);
 });
 
