@@ -15,6 +15,7 @@ module.exports = {
   getPublicBoards: getPublicBoards
 };
 
+// TODO: Use the caller's email instead of getting it from the body.
 function createBoard(req, res) {
   const board = new Board(req.body);
   board.lastEdited = moment().format();
@@ -41,8 +42,16 @@ async function listBoard(req, res) {
 }
 
 async function getBoardsEmail(req, res) {
-  const { search = '' } = req.query;
   const email = req.swagger.params.email.value;
+
+  if (!req.user.isAdmin && req.user.email !== email) {
+    return res.status(403).json({
+      message: "You are not authorized to get this user's boards."
+    });
+  }
+
+  const { search = '' } = req.query;
+
   const searchFields = ['name', 'author'];
   const query =
     search && search.length ? getORQuery(searchFields, search, true) : {};
