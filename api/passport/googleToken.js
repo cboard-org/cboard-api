@@ -13,7 +13,7 @@ passport.use(
 );
 
 const configureGoogleTokenStrategy = app => {
-    app.get('/auth/google/token',
+    app.post('/auth/google/token',
         passport.authenticate('google-token'),
         (req, res) => {
                 res.send(req.user);
