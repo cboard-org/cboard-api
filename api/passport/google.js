@@ -34,6 +34,20 @@ const configureGoogleStrategy = app => {
       res.json(req.user);
     }
   );
+  passport.use(new GoogleTokenStrategy({
+    clientID: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET
+  },
+    function (accessToken, refreshToken, profile, done) {
+      User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        return done(err, user);
+      });
+    }
+    ));
+    app.get('/auth/google/token', passport.authenticate('google-token'),
+      function (req, res) {
+        res.send(req.user);
+      });
 };
 
 module.exports = {
