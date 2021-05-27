@@ -6,6 +6,7 @@ const { token } = require('morgan');
 var request = require('supertest');
 const User = require('../api/models/User');
 const should = chai.should();
+const uuid = require('uuid');
 
 /**helper nodemailer-mock
  *
@@ -194,7 +195,7 @@ function prepareDb() {
 
 /*generate email to create new users*/
 function generateEmail() {
-  return `test${Date.now()}@example.com`;
+  return `test.${uuid.v4()}@example.com`;
 }
 
 /*clean test users*/

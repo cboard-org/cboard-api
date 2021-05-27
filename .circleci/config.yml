@@ -34,12 +34,7 @@ jobs:
       # run tests
       - run: 
           name: Run Unitests
-          command: |
-            npm test
-            mkdir ~/junit
-            ./node_modules/.bin/mocha --recursive --reporter  mocha-junit-reporter --exit ./test/
-          environment:
-            MOCHA_FILE: ~/junit/test-results.xml
+          command: MOCHA_FILE=~/junit/test-results.xml ./node_modules/.bin/mocha test --recursive --reporter mocha-junit-reporter --exit
           when: always
       - store_test_results:
           path: ~/junit

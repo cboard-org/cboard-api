@@ -45,3 +45,5 @@ config/env/production.js
 *.njsproj.*
 *.sln
 /.vs
+
+test-results.xml
