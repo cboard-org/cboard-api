@@ -20,6 +20,8 @@ const Google = require('./api/passport/google');
 const GoogleToken = require('./api/passport/googleToken');
 const morgan = require('morgan');
 const config = require('./config');
+//added
+const passport = require('passport')
 
 const app = express();
 
@@ -84,6 +86,10 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
     })
   );
 
+  //added
+  app.use(passport.initialize())
+  app.use(passport.session())
+    
   const routerConfig = {
     controllers: './api/controllers',
     useStubs: false,
