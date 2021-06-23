@@ -550,7 +550,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /mediaurl:
+  /media/url:
     x-swagger-router-controller: media
     post:
       operationId: uploadMediaFromUrl
