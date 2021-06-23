@@ -550,6 +550,34 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /mediaurl:
+    x-swagger-router-controller: media
+    post:
+      operationId: uploadMediaFromUrl
+      description: Uploads media from url. store on azure and returns a set of urls.
+      consumes:
+        - application/json
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: url
+          description: url for dowload media
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/MediaUrl"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/MediaResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
   /settings:
     x-swagger-router-controller: settings
     post:
@@ -921,6 +949,13 @@ definitions:
         type: string
       hair:
         type: string
+  MediaUrl:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string        
   User:
     type: object
     required:
