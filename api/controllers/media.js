@@ -1,6 +1,5 @@
 const { createBlockBlobFromText } = require('../helpers/blob');
-
-const https =require("https");
+const { downloadFileFromUrl } = require('../helpers/urlToBlob')
 
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
@@ -8,36 +7,6 @@ module.exports = {
   uploadMedia,
   uploadMediaFromUrl
 };
-
-async function downloadFileFromUrl(baseUrl){
-  let uploadedFile = undefined;
-
-  return new Promise((resolve, reject) => {
-    try{  
-      https.get(baseUrl, function(res){
-        let data = [];
-        
-        res.on('data', function(chunk) {
-          data.push(chunk);
-        })
-        .on('end', function() {
-            var buffer = Buffer.concat(data);
-            uploadedFile = {
-              fieldname: 'file',
-              originalname: 'GphotosMedia', //parse res.rawheaders to get original name and mimetype
-              mimetype: 'image/jpg',
-              buffer: buffer,
-              size: 74399
-            };
-            resolve(uploadedFile);
-        });
-      })}catch(err){
-        throw(err);
-      }
-  })  
-}
-
-
 
 async function uploadMediaFromUrl(req, res) {
   let url = null;
