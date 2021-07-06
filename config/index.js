@@ -5,7 +5,9 @@ const production = require('./env/production');
 
 const defaults = {
   host: process.env.HOST || 'mongodb',
-  port: process.env.PORT || 8100
+  port: process.env.PORT || 8100,
+  googleCallbackPath: 'login/google/callback',
+  facebookCallbackPath: 'login/facebook/callback'  
 };
 
 function getConfig() {

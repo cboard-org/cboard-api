@@ -6,24 +6,34 @@ const UserController = require('../controllers/user');
 const FBStrategy = {
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: process.env.FACEBOOK_CALLBACK_URL,
   profileFields: ['id', 'emails', 'name', 'displayName', 'gender', 'picture']
 };
 
 passport.use(new FacebookStrategy(FBStrategy, UserController.facebookLogin));
 
 const configureFacebookStrategy = app => {
-  app.get(
-    '/login/facebook',
-    passport.authenticate('facebook', {
+  let domain;
+  app.get('/login/facebook', (req, res, next) => {
+    domain = req.headers.referer;
+    //if referer is private insert default hostname
+    if (!domain) {
+      domain = 'https://app.cboard.io/';
+    }
+    return passport.authenticate('facebook', {
       session: false,
-      scope: config.facebook.SCOPE
-    })
-  );
+      scope: config.facebook.SCOPE,
+      callbackURL: domain + config.facebookCallbackPath
+    })(req, res, next);
+  });
 
   app.get(
     '/login/facebook/callback',
-    passport.authenticate('facebook', { session: false }),
+    (req, res, next) => {
+      return passport.authenticate('facebook', {
+        session: false,
+        callbackURL: domain + config.facebookCallbackPath
+      })(req, res, next);
+    },
     (req, res) => {
       res.json(req.user);
     }
