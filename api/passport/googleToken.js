@@ -5,8 +5,8 @@ const UserController = require('../controllers/user');
 const url = require('url');
 
 const GoogleTokenStrategyConfig = {
-  clientID: process.env.GOOGLE_APP_ID,//config.google.APP_ID,
-  clientSecret: process.env.GOOGLE_APP_SECRET//config.google.APP_SECRET
+  clientID: process.env.GOOGLE_APP_ID, //config.google.APP_ID,
+  clientSecret: process.env.GOOGLE_APP_SECRET //config.google.APP_SECRET
 };
 
 passport.use(
@@ -21,7 +21,6 @@ const configureGoogleTokenStrategy = app => {
       session: false
     }),
     (req, res) => {
-      //res.redirect('http://10.0.2.2:5554/login/google/callback'); Esta funcion deberia redirigir la app a dicho endpoint con los datos
       res.json(req.user);
       console.log(req.user);
     }
