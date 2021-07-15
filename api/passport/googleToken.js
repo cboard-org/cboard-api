@@ -14,14 +14,19 @@ passport.use(
 );
 
 const configureGoogleTokenStrategy = app => {
-  app.get('/login/callback/googletoken',
-    passport.authenticate('google-token', { failureRedirect: '/', session: false }),
+  app.get(
+    '/login/googletoken/callback',
+    passport.authenticate('google-token', {
+      failureRedirect: '/',
+      session: false
+    }),
     (req, res) => {
       //res.redirect('http://10.0.2.2:5554/login/google/callback'); Esta funcion deberia redirigir la app a dicho endpoint con los datos
       res.json(req.user);
       console.log(req.user);
-    });
-}
+    }
+  );
+};
 
 module.exports = {
   configureGoogleTokenStrategy
