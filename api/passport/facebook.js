@@ -12,17 +12,11 @@ const FBStrategy = {
 passport.use(new FacebookStrategy(FBStrategy, UserController.facebookLogin));
 
 const configureFacebookStrategy = app => {
-  let domain;
   app.get('/login/facebook', (req, res, next) => {
-    domain = req.headers.referer;
-    //if referer is private insert default hostname
-    if (!domain) {
-      domain = 'https://app.cboard.io/';
-    }
     return passport.authenticate('facebook', {
       session: false,
       scope: config.facebook.SCOPE,
-      callbackURL: domain + config.facebookCallbackPath
+      callbackURL: req.domain + config.facebookCallbackPath
     })(req, res, next);
   });
 
@@ -31,7 +25,7 @@ const configureFacebookStrategy = app => {
     (req, res, next) => {
       return passport.authenticate('facebook', {
         session: false,
-        callbackURL: domain + config.facebookCallbackPath
+        callbackURL: req.domain + config.facebookCallbackPath
       })(req, res, next);
     },
     (req, res) => {

@@ -13,17 +13,11 @@ passport.use(
 );
 
 const configureGoogleStrategy = app => {
-  let domain;
   app.get('/login/google', (req, res, next) => {
-    domain = req.headers.referer;
-    //if referer is private insert default hostname
-    if (!domain) {
-      domain = 'https://app.cboard.io/';
-    }
     return passport.authenticate('google', {
       session: false,
       scope: config.google.SCOPE,
-      callbackURL: domain + config.googleCallbackPath
+      callbackURL: req.domain + config.googleCallbackPath
     })(req, res, next);
   });
 
@@ -36,7 +30,7 @@ const configureGoogleStrategy = app => {
     '/login/google/callback',
     (req, res, next) => {
       return passport.authenticate('google', {
-        callbackURL: domain + config.googleCallbackPath,
+        callbackURL: req.domain + config.googleCallbackPath,
         failureRedirect: '/',
         session: false
       })(req, res, next);
