@@ -3,6 +3,8 @@ const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
 const config = require('../../config');
 const UserController = require('../controllers/user');
 
+const urljoin = require('url-join');
+
 const GoogleStrategyConfig = {
   clientID: config.google.APP_ID,
   clientSecret: config.google.APP_SECRET
@@ -30,7 +32,7 @@ const configureGoogleStrategy = app => {
     '/login/google/callback',
     (req, res, next) => {
       return passport.authenticate('google', {
-        callbackURL: req.domain + config.googleCallbackPath,
+        callbackURL: urljoin(req.domain, config.googleCallbackPath),
         failureRedirect: '/',
         session: false
       })(req, res, next);

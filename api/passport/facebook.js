@@ -3,6 +3,8 @@ const { Strategy: FacebookStrategy } = require('passport-facebook');
 const config = require('../../config');
 const UserController = require('../controllers/user');
 
+const urljoin = require('url-join');
+
 const FBStrategy = {
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
@@ -16,7 +18,7 @@ const configureFacebookStrategy = app => {
     return passport.authenticate('facebook', {
       session: false,
       scope: config.facebook.SCOPE,
-      callbackURL: req.domain + config.facebookCallbackPath
+      callbackURL: urljoin(req.domain, config.facebookCallbackPath)
     })(req, res, next);
   });
 
