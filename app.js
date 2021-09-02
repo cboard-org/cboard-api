@@ -18,7 +18,7 @@ const User = require('./api/models/User');
 const Facebook = require('./api/passport/facebook');
 const Google = require('./api/passport/google');
 const GoogleToken = require('./api/passport/googleToken');
-const GooglePhotos = require('./api/passport/google_photos');
+const GooglePhotos = require('./api/passport/google-photos');
 const morgan = require('morgan');
 const config = require('./config');
 

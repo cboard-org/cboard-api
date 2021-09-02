@@ -11,12 +11,12 @@ const GoogleStrategyConfig = {
 };
 
 passport.use(
-  new GoogleStrategy(GoogleStrategyConfig, UserController.googleLogin)
+  "googleLogin",new GoogleStrategy(GoogleStrategyConfig, UserController.googleLogin)
 );
 
 const configureGoogleStrategy = app => {
   app.get('/login/google', (req, res, next) => 
-    passport.authenticate('google', {
+    passport.authenticate('googleLogin', {
       session: false,
       scope: config.google.SCOPE,
       callbackURL: urljoin(req.domain, config.googleCallbackPath)
@@ -31,7 +31,7 @@ const configureGoogleStrategy = app => {
   app.get(
     '/login/google/callback',
     (req, res, next) => 
-      passport.authenticate('google', {
+      passport.authenticate('googleLogin', {
         callbackURL: urljoin(req.domain, config.googleCallbackPath),
         failureRedirect: '/',
         session: false
