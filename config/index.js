@@ -7,6 +7,7 @@ const defaults = {
   host: process.env.HOST || 'mongodb',
   port: process.env.PORT || 8100,
   googleCallbackPath: 'login/google/callback',
+  googlePhotosCallbackPath: '/',
   facebookCallbackPath: 'login/facebook/callback'  
 };
 

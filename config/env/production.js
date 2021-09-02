@@ -33,7 +33,8 @@ module.exports = {
     SCOPE: [
       'https://www.googleapis.com/auth/plus.login',
       'https://www.googleapis.com/auth/userinfo.email'
-    ]
+    ],
+    GOOGLE_PHOTOS_SCOPE: ['https://www.googleapis.com/auth/plus.login','https://www.googleapis.com/auth/photoslibrary.readonly']
   },
   emailTransport: {
     from: 'cboard@cboard.io',
