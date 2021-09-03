@@ -11,11 +11,12 @@ const GoogleStrategyConfig = {
 };
 
 passport.use(
-  "googleLogin",new GoogleStrategy(GoogleStrategyConfig, UserController.googleLogin)
+  'googleLogin',
+  new GoogleStrategy(GoogleStrategyConfig, UserController.googleLogin)
 );
 
 const configureGoogleStrategy = app => {
-  app.get('/login/google', (req, res, next) => 
+  app.get('/login/google', (req, res, next) =>
     passport.authenticate('googleLogin', {
       session: false,
       scope: config.google.SCOPE,
@@ -30,13 +31,12 @@ const configureGoogleStrategy = app => {
   //   which, in this example, will redirect the user to the home page.
   app.get(
     '/login/google/callback',
-    (req, res, next) => 
+    (req, res, next) =>
       passport.authenticate('googleLogin', {
         callbackURL: urljoin(req.domain, config.googleCallbackPath),
         failureRedirect: '/',
         session: false
-      })(req, res, next)
-    ,
+      })(req, res, next),
     (req, res) => {
       res.json(req.user);
     }

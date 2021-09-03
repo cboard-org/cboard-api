@@ -11,17 +11,23 @@ const GooglePhotosStrategyConfig = {
 };
 
 passport.use(
-  "googlePhotosLogin",new GoogleStrategy(GooglePhotosStrategyConfig, function(accessToken, refreshToken, profile, done) {
-    console.log("response")
+  'googlePhotosLogin',
+  new GoogleStrategy(GooglePhotosStrategyConfig, function(
+    accessToken,
+    refreshToken,
+    profile,
+    done
+  ) {
+    console.log('response');
     const response = {
-      access_token: accessToken,
-      };
-    return done(null, response );
-} )
+      access_token: accessToken
+    };
+    return done(null, response);
+  })
 );
 
 const configureGooglePhotosStrategy = app => {
-  app.get('/auth/google-photos', (req, res, next) => 
+  app.get('/auth/google-photos', (req, res, next) =>
     passport.authenticate('googlePhotosLogin', {
       session: false,
       scope: config.google.GOOGLE_PHOTOS_SCOPE,
@@ -31,13 +37,12 @@ const configureGooglePhotosStrategy = app => {
 
   app.get(
     '/auth/google-photos/callback',
-    (req, res, next) => 
+    (req, res, next) =>
       passport.authenticate('googlePhotosLogin', {
         callbackURL: urljoin(req.domain, config.googlePhotosCallbackPath),
         failureRedirect: '/',
         session: false
-      })(req, res, next)
-    ,
+      })(req, res, next),
     (req, res) => {
       res.json(req.user);
     }
