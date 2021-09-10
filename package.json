@@ -22,6 +22,7 @@
   ],
   "main": "app.js",
   "dependencies": {
+    "axios": "^0.21.1",
     "azure-storage": "^2.10.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "1.19.0",

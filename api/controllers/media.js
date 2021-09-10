@@ -1,5 +1,5 @@
 const { createBlockBlobFromText } = require('../helpers/blob');
-const { downloadFileFromUrl } = require('../helpers/urlToBlob')
+const { downloadFileFromUrl } = require('../helpers/url-to-blob');
 
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
