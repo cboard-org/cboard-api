@@ -4,7 +4,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: cimg/node:12
+      - image: cimg/node:16.12.0
         auth:
           username: cboardci
           password: $DOCKERHUB_PASSWORD
@@ -49,7 +49,7 @@ jobs:
   image:
     docker:
       # specify the version you desire here
-      - image: cimg/node:12
+      - image: cimg/node:16.12.0
         auth:
           username: cboardci
           password: $DOCKERHUB_PASSWORD 
