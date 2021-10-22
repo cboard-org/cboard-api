@@ -5,7 +5,13 @@ jobs:
     docker:
       # specify the version you desire here
       - image: cimg/node:12
+        auth:
+          username: cboardci
+          password: $DOCKERHUB_PASSWORD
       - image: cimg/mongo:4.0
+        auth:
+          username: cboardci
+          password: $DOCKERHUB_PASSWORD 
     working_directory: ~/repo
     steps:
       - checkout
@@ -44,6 +50,9 @@ jobs:
     docker:
       # specify the version you desire here
       - image: cimg/node:12
+        auth:
+          username: cboardci
+          password: $DOCKERHUB_PASSWORD 
     working_directory: ~/repo
     steps:
       - checkout
