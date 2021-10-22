@@ -4,8 +4,8 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/node:12
-      - image: circleci/mongo:4.0
+      - image: cimg/node:12
+      - image: cimg/mongo:4.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -43,7 +43,7 @@ jobs:
   image:
     docker:
       # specify the version you desire here
-      - image: circleci/node:12
+      - image: cimg/node:12
     working_directory: ~/repo
     steps:
       - checkout
