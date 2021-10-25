@@ -4,10 +4,38 @@ const { Express } = require('express');
 const mongoose = require('mongoose');
 const { token } = require('morgan');
 var request = require('supertest');
-const user = require('../api/controllers/user');
-const should = chai.should();
-
 const User = require('../api/models/User');
+const should = chai.should();
+const uuid = require('uuid');
+
+/**helper nodemailer-mock
+ *
+ * Prepare nodemailer-mock for not sent emails.
+ * @typedef {Object} prepareNodemailerMock
+
+/**
+ * Create a test user and generate a token for them.
+ *
+ * @param {bool} isDisabling -optional to disable mock after use it
+ * @returns {void}
+ */
+function prepareNodemailerMock(isDisabling = 0) {
+  const mockery = require('mockery');
+  const nodemailerMock = require('nodemailer-mock');
+  if (isDisabling) {
+    mockery.disable();
+    return;
+  }
+
+  mockery.enable({
+    warnOnReplace: false,
+    warnOnUnregistered: false,
+  });
+
+  mockery.registerMock('nodemailer', nodemailerMock);
+}
+
+/*should properties helper*/
 
 const verifyListProperties = (body) => {
   body.should.be.a('object');
@@ -40,13 +68,32 @@ const verifyUserProperties = (user) => {
   user.should.have.property('password');
 };
 
+const verifyCommunicatorProperties = (body) => {
+  body.should.to.have.all.keys(
+    'id',
+    'name',
+    'email',
+    'author',
+    'rootBoard',
+    'boards'
+  );
+};
+
+/**
+ * Data Mocks to use on test
+ */
+
 const userData = {
   name: 'cboard mocha test',
-  email: 'anything@cboard.io',
+  email: 'anythingUser@cboard.io',
   password: '123456',
 };
 
-let userid = '';
+const adminData = {
+  name: 'cboard admin mocha test',
+  email: 'anythingAdmin@cboard.io',
+  password: '123456',
+};
 
 let userForgotPassword = {
   Userid: '',
@@ -58,7 +105,7 @@ const boardData = {
   id: 'root',
   name: 'home',
   author: 'cboard mocha test',
-  email: 'anything@cboard.io',
+  email: userData.email,
   isPublic: true,
   hidden: false,
   tiles: [
@@ -79,6 +126,57 @@ const boardData = {
   ],
 };
 
+const settingsData = {
+  language: { lang: 'es-ES' },
+  speech: {
+    voiceURI:
+      'urn:moz-tts:sapi:Microsoft Helena Desktop - Spanish (Spain)?es-ES',
+    pitch: 1,
+    rate: 0.75,
+  },
+  display: {
+    uiSize: 'Large',
+    fontSize: 'Standard',
+    hideOutputActive: false,
+    labelPosition: 'Above',
+    darkThemeActive: true,
+  },
+  scanning: { active: false, delay: 3000, strategy: 'automatic' },
+  navigation: {
+    active: false,
+    caBackButtonActive: false,
+    quickUnlockActive: false,
+    removeOutputActive: true,
+    vocalizeFolders: false,
+  },
+};
+
+const translateData = {
+  labels: ['translate this'],
+  from: 'zu-ZA',
+  to: 'zh-CN',
+};
+
+const analyticsReportData = [
+  {
+    clientId: 'test.mocha',
+    dimension: 'nthDay',
+    metric: 'avgSessionDuration',
+    endDate: 'today',
+    mobileView: false,
+    startDate: '30daysago',
+  },
+];
+
+const communicatorData = {
+  id: 'root',
+  name: 'home',
+  email: userData.email,
+  author: 'cboard mocha test',
+  rootBoard: 'root',
+  boards: ['root'],
+};
+
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
     useNewUrlParser: true,
@@ -95,8 +193,14 @@ function prepareDb() {
   });
 }
 
+/*generate email to create new users*/
 function generateEmail() {
-  return `test${Date.now()}@example.com`;
+  return `test.${uuid.v4()}@example.com`;
+}
+
+/*clean test users*/
+async function deleteMochaUsers() {
+  await User.deleteMany({ name: 'cboard mocha test' });
 }
 
 /**
@@ -124,10 +228,7 @@ async function prepareUser(server, overrides = {}) {
     ...overrides,
   };
 
-  const createUser = await request(server)
-    .post('/user')
-    .send(data)
-    .expect(200);
+  const createUser = await request(server).post('/user').send(data).expect(200);
 
   const activationUrl = createUser.body.url;
 
@@ -148,19 +249,74 @@ async function prepareUser(server, overrides = {}) {
   return { token, userId };
 }
 
-async function deleteMochaUser() {
-  return User.deleteOne({ email: userData.email });
+/**
+ * A newly created test Communicator.
+ * @typedef {Object} createCommunicatorResponse
+ *
+ * @property {string} communicatorid
+ */
+
+/**
+ * Create a Comunicator and return an id.
+ *
+ * @param {Express} server
+ * @param {token}  userToken
+ *
+ * @returns {Promise<createCommunicatorResponse>}
+ */
+async function createCommunicator(server, userToken) {
+  const createCommunicator = await request(server)
+    .post('/communicator')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send(communicatorData)
+    .expect(200);
+  return createCommunicator.body.id;
+}
+
+/**
+ * A newly created test Board.
+ * @typedef {Object} createMochaBoard
+ *
+ * @property {string} BoardId
+ */
+
+/**
+ * Create a test Board and return the id.
+ *
+ * @param {Express} server
+ *
+ * @param {string} token
+ *   user data.
+ *
+ * @returns {Promise<createMochaBoard>}
+ */
+
+async function createMochaBoard(server, token) {
+  const res = await request(server)
+    .post('/board')
+    .send(boardData)
+    .set('Authorization', `Bearer ${token}`);
+  return res.body.id;
 }
 
 module.exports = {
+  prepareNodemailerMock,
   verifyListProperties,
   verifyBoardProperties,
   verifyUserProperties,
+  verifyCommunicatorProperties,
   prepareDb,
   prepareUser,
-  deleteMochaUser,
+  deleteMochaUsers,
+  createCommunicator,
+  createMochaBoard,
   boardData,
+  communicatorData,
+  adminData,
   userData,
   userForgotPassword,
+  analyticsReportData,
+  settingsData,
+  translateData,
   generateEmail: generateEmail,
 };

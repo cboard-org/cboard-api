@@ -256,8 +256,8 @@ function updateUser(req, res) {
 
   if (!req.user.isAdmin && req.auth.id !== id) {
     return res.status(403).json({
-      message: 'Only admins can update another user.',
-    });
+      message: 'You are not authorized to update this user.'
+    })
   }
 
   User.findById(id)
