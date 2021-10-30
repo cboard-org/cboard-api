@@ -441,59 +441,65 @@ async function storePassword(req, res) {
       userId: userid,
       status: false
     }).exec();
-    const expireTime = moment
-      .utc(resetPassword.resetPasswordExpires)
-      .isBefore(moment());
-    if (expireTime) {
-      return res.status(500).json({
-        message: 'Expired time to reset password! ',
-        error: 'Expired time to reset password! '
-      });
-    }
-    // the token and the hashed token in the db are verified before updating the password
-    bcrypt.compare(token, resetPassword.resetPasswordToken, function(
-      errBcrypt,
-      resBcrypt
-    ) {
-      if (!resBcrypt) {
+    if (resetPassword) {
+      const expireTime = moment
+        .utc(resetPassword.resetPasswordExpires)
+        .isBefore(moment());
+      if (expireTime) {
         return res.status(500).json({
-          message: 'Error resetting user password.',
-          error: 'invalid Token'
+          message: 'Expired time to reset password! ',
+          error: 'Expired time to reset password! '
         });
       }
-      //hashing the password to store in the db node.js
-      bcrypt.genSalt(8, function(err, salt) {
-        bcrypt.hash(password, salt, async function(err, hash) {
-          const user = await User.findOneAndUpdate(
-            { _id: userid },
-            { password: hash }
-          );
-          if (!user) {
-            return res.status(404).json({
-              message: 'No user found with that ID.'
-            });
-          }
-          ResetPassword.findByIdAndDelete(resetPassword._id, function(
-            err,
-            docs
-          ) {
-            if (err) {
-              return res.status(500).json({
-                message: 'ERROR: reset your password email FAILED ',
-                error: err.message
+      // the token and the hashed token in the db are verified before updating the password
+      bcrypt.compare(token, resetPassword.resetPasswordToken, function(
+        errBcrypt,
+        resBcrypt
+      ) {
+        if (!resBcrypt) {
+          return res.status(500).json({
+            message: 'Error resetting user password.',
+            error: 'invalid Token'
+          });
+        }
+        //hashing the password to store in the db node.js
+        bcrypt.genSalt(8, function(err, salt) {
+          bcrypt.hash(password, salt, async function(err, hash) {
+            const user = await User.findOneAndUpdate(
+              { _id: userid },
+              { password: hash }
+            );
+            if (!user) {
+              return res.status(404).json({
+                message: 'No user found with that ID.'
               });
-            } else {
-              const response = {
-                success: 1,
-                url: token,
-                message: 'Success! We have reset your password.'
-              };
-              return res.status(200).json(response);
             }
+            ResetPassword.findByIdAndDelete(resetPassword._id, function(
+              err,
+              docs
+            ) {
+              if (err) {
+                return res.status(500).json({
+                  message: 'ERROR: reset your password email FAILED ',
+                  error: err.message
+                });
+              } else {
+                const response = {
+                  success: 1,
+                  url: token,
+                  message: 'Success! We have reset your password.'
+                };
+                return res.status(200).json(response);
+              }
+            });
           });
         });
       });
-    });
+      return;
+    }
+    throw new Error(
+      'we did not detect that the user wants to restore his password'
+    );
   } catch (err) {
     return res.status(500).json({
       message: 'Error resetting user password.',
