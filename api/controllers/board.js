@@ -5,6 +5,9 @@ const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 
+const mailing = require('../mail');
+const nev = mailing('en');
+
 module.exports = {
   createBoard: createBoard,
   listBoard: listBoard,
@@ -12,7 +15,8 @@ module.exports = {
   getBoard: getBoard,
   updateBoard: updateBoard,
   getBoardsEmail: getBoardsEmail,
-  getPublicBoards: getPublicBoards
+  getPublicBoards: getPublicBoards,
+  reportPublicBoard: reportPublicBoard
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
@@ -155,4 +159,11 @@ function updateBoard(req, res) {
     });
     return res.status(200).json(board.toJSON());
   });
+}
+
+function reportPublicBoard(req,res){
+  
+  nev.sendReportEmail('rodri.sanchez1998@gmail.com');
+
+  return res.status(200).json(response);
 }

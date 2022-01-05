@@ -115,7 +115,22 @@ module.exports = function(mongoose) {
         console.log(info.response);
       }
     },
-    hashingFunction: null
+    hashingFunction: null,
+    reportPublicBoardEmailOptions:{
+      from: 'Do Not Reply <user@gmail.com>',
+      subject: 'Public Board Report',
+      html:
+        '<p>The user ${whistleBlowerUser} reported that the board ${reportedBoardId} contains inappropiate contet. </p> ',
+      text:
+        'The user ${whistleBlowerUser} reported that the board ${reportedBoardId} contains inappropiate contet. '
+    },
+    confirmSendMailReportCallback: function(err, info) {
+      if (err) {
+        throw err;
+      } else {
+        console.log(info.response);
+      }
+    }
   };
 
   var transporter;
@@ -538,6 +553,22 @@ module.exports = function(mongoose) {
     transporter.sendMail(mailOptions, callback);
   };
 
+    /**
+   * Send an email to the Cboard support reporting a public board.
+   *
+   * @func sendConfirmationEmail
+   * @param {string} email - the user's email address.
+   * @param {function} callback - the callback to pass to Nodemailer's transporter
+   */
+     var sendReportEmail = function(email, callback) {
+      var mailOptions = JSON.parse(JSON.stringify(options.reportPublicBoardEmailOptions));
+      mailOptions.to = email;
+      if (!callback) {
+        callback = options.confirmSendMailReportCallback;
+      }
+      transporter.sendMail(mailOptions, callback);
+    };
+
   return {
     options: options,
     configure: configure,
@@ -547,6 +578,7 @@ module.exports = function(mongoose) {
     resendVerificationEmail: resendVerificationEmail,
     sendConfirmationEmail: sendConfirmationEmail,
     sendVerificationEmail: sendVerificationEmail,
-    sendResetPasswordEmail: sendResetPasswordEmail
+    sendResetPasswordEmail: sendResetPasswordEmail,
+    sendReportEmail: sendReportEmail
   };
 };
