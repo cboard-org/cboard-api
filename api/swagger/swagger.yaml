@@ -1408,6 +1408,10 @@ definitions:
           $ref: "#/definitions/Board"
   BoardReport:
     type: object
+    required:
+      - reportedBoardData
+      - whistleblowerData
+      - reportReason
     properties:
       reportedBoardData:
         type: object
@@ -1418,9 +1422,9 @@ definitions:
               type: string
           boardDescription:
               type: string
-          boardInfoId:
+          boardId:
               type: string
-          boardInfoUrl:
+          boardUrl:
               type: string
       whistleblowerData:
         type: object

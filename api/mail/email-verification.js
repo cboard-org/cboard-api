@@ -117,12 +117,44 @@ module.exports = function(mongoose) {
     },
     hashingFunction: null,
     reportPublicBoardEmailOptions:{
-      from: 'Do Not Reply <user@gmail.com>',
+      from: 'Cboard Support <cboard@cboard.io>',
       subject: 'Public Board Report',
       html:
-        '<p>The user ${whistleBlowerUser} reported that the board ${reportedBoardId} contains inappropiate contet. </p> ',
+        '<p>The user ${whistleblowerName} reported that the board ${boardName} from the user ${boardAuthor} contains inappropiate contet. </p> \
+        <p>The report reason is: ${reportReason}</p>\
+        <p>Detailed information:</p>\
+        <ul>\
+          <li>Reported board info:\
+            <ul>\
+              <li>Board name: ${boardName}</li>\
+              <li>Board author: ${boardAuthor}</li>\
+              <li>Board id: ${boardId}</li>\
+              <li>Board description: ${boardDescription}</li>\
+              <li>Board URL: ${boardUrl}</li>\
+            </ul>\
+          </li>\
+          <li>Whistleblower Info\
+            <ul>\
+                <li>User name: ${whistleblowerName}</li>\
+                <li>User email: ${whistleblowerEmail}</li>\
+                <li>User language: ${whistleblowerLanguage}</li>\
+              </ul>\
+          </li>\
+        </ul>',
       text:
-        'The user ${whistleBlowerUser} reported that the board ${reportedBoardId} contains inappropiate contet. '
+        'The user ${whistleBlowerName} reported that the board ${reportedBoardName} from the user ${reportedBoardAuthor} contains inappropiate contet. \
+        The report reason is: ${reportReason}\
+        Detailed information:\
+        Reported board info:\
+              - Board name: ${board\
+              - Board author: ${boardAuthor}\
+              - Board id: ${boardId}\
+              - Board description: ${boardDescription}\
+              - Board URL: ${boardUrl}\
+        Whistleblower Info\
+              - User name: ${whistleblowerName}\
+              - User email: ${whistleblowerEmail}\
+              - User language: ${whistleblowerLanguage}'
     },
     confirmSendMailReportCallback: function(err, info) {
       if (err) {
@@ -560,9 +592,37 @@ module.exports = function(mongoose) {
    * @param {string} email - the user's email address.
    * @param {function} callback - the callback to pass to Nodemailer's transporter
    */
-     var sendReportEmail = function(email, callback) {
-      var mailOptions = JSON.parse(JSON.stringify(options.reportPublicBoardEmailOptions));
-      mailOptions.to = email;
+     var sendReportEmail = function(data, callback) {
+       const {reportedBoardData: reportedBD, whistleblowerData: wbD, reportReason} = data;
+
+      if(!wbD.whistleblowerName){
+        wbD.whistleblowerName = 'Anonymus';
+        wbD.whistleblowerEmail = 'Anonymus';
+        wbD.whistleblowerLanguage = 'en';
+      }
+      let mailOptions = JSON.parse(JSON.stringify(options.reportPublicBoardEmailOptions));
+      mailOptions.html= mailOptions.html
+                          .replaceAll('${whistleblowerName}', wbD.whistleblowerName)
+                          .replaceAll('${whistleblowerEmail}', wbD.whistleblowerEmail)
+                          .replace('${whistleblowerLanguage}', wbD.whistleblowerLanguage)
+                          .replaceAll('${boardName}', reportedBD.boardName)
+                          .replaceAll('${boardAuthor}', reportedBD.boardAuthor)
+                          .replace('${boardId}', reportedBD.boardId)
+                          .replace('${boardDescription}', reportedBD.boardDescription)
+                          .replace('${boardUrl}', reportedBD.boardUrl)
+                          .replace('${reportReason}', reportReason)
+      mailOptions.text= mailOptions.text
+                          .replaceAll('${whistleblowerName}', wbD.whistleblowerName)
+                          .replaceAll('${whistleblowerEmail}', wbD.whistleblowerEmail)
+                          .replace('${whistleblowerLanguage}', wbD.whistleblowerLanguage)
+                          .replaceAll('${boardName}', reportedBD.boardName)
+                          .replaceAll('${boardAuthor}', reportedBD.boardAuthor)
+                          .replace('${boardId}', reportedBD.boardId)
+                          .replace('${boardDescription}', reportedBD.boardDescription)
+                          .replace('${boardUrl}', reportedBD.boardUrl)
+                          .replace('${reportReason}', reportReason)
+
+      mailOptions.to = 'support@cboard.io';
       if (!callback) {
         callback = options.confirmSendMailReportCallback;
       }

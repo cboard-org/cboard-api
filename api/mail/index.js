@@ -103,7 +103,6 @@ function configNev(locale) {
       'generated temp user model: ' + (typeof tempUserModel === 'function')
     );
   });
-  console.log("hola")
   return nev;
 };
 

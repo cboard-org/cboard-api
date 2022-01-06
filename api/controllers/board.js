@@ -162,8 +162,12 @@ function updateBoard(req, res) {
 }
 
 function reportPublicBoard(req,res){
-  
-  nev.sendReportEmail('rodri.sanchez1998@gmail.com');
+  nev.sendReportEmail(req.body,function(err, info) {
+    if (err) {
+      return res.status(500).json({
+        message: 'ERROR: sending report email FAILED ' + info
+      });
+    }});
 
-  return res.status(200).json({message: 'Dale'});
+  return res.status(200).json({message: 'Email sent successfuly'});
 }
