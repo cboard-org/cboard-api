@@ -5,8 +5,8 @@ const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 
-const mailing = require('../mail');
-const nev = mailing('en');
+const {nev} = require('../mail');
+
 
 module.exports = {
   createBoard: createBoard,
@@ -165,5 +165,5 @@ function reportPublicBoard(req,res){
   
   nev.sendReportEmail('rodri.sanchez1998@gmail.com');
 
-  return res.status(200).json(response);
+  return res.status(200).json({message: 'Dale'});
 }

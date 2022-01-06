@@ -322,25 +322,27 @@ paths:
             $ref: "#/definitions/ErrorResponse"
   /board/report:
     x-swagger-router-controller: board
-      post:
-        operationId: reportPublicBoard
-        description: Send an email to report a public board containing inappropriate content.
-        security:
-          - Bearer: []
-        x-security-scopes:
-          - admin
-          - user
-        parameters:
-          - $ref: '#/parameters/Board'
-        responses:
-          "200":
-            description: Success
+    post:
+      operationId: reportPublicBoard
+      description: Send an email to report that a public board contains inappropriate content.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+          - name: report
+            in: body
+            description: Information about the reported board, the whistleblower and the report reason.
             schema:
-              $ref: "#/definitions/BoardResponse"
-          default:
-            description: Error
-            schema:
-              $ref: "#/definitions/ErrorResponse"
+              $ref: "#/definitions/BoardReport"
+      responses:
+        "200":
+          description: Mail sent successfully
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /communicator:
     x-swagger-router-controller: communicator
     post:
@@ -1409,3 +1411,28 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Board"
+  BoardReport:
+    type: object
+    properties:
+      reportedBoardData:
+        type: object
+        properties:
+          boardName:
+              type: string
+          boardAuthor:
+              type: string
+          boardDescription:
+              type: string
+          boardInfoId:
+              type: string
+          boardInfoUrl:
+              type: string
+      whistleblowerData:
+        type: object
+        properties:
+          whistleblowerName:
+              type: string
+          whistleblowerEmail:
+              type: string
+      reportReason:
+        type: string
