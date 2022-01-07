@@ -598,7 +598,6 @@ module.exports = function(mongoose) {
       if(!whistleblower.name){
         whistleblower.name = 'Anonymus';
         whistleblower.email = 'Anonymus';
-        whistleblower.language = 'en';
       }
       let mailOptions = JSON.parse(JSON.stringify(options.reportPublicBoardEmailOptions));
       mailOptions.html= mailOptions.html
