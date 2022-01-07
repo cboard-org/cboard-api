@@ -320,6 +320,24 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /board/report:
+    x-swagger-router-controller: board
+    post:
+      operationId: reportPublicBoard
+      description: Send an email to report that a public board contains inappropriate content.
+      parameters:
+          - name: report
+            in: body
+            description: Information about the reported board, the whistleblower and the report reason.
+            schema:
+              $ref: "#/definitions/BoardReport"
+      responses:
+        "200":
+          description: Mail sent successfully
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /communicator:
     x-swagger-router-controller: communicator
     post:
@@ -1388,3 +1406,35 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Board"
+  BoardReport:
+    type: object
+    required:
+      - name
+      - author
+      - description
+      - id
+      - url
+      - reason
+      - whistleblower
+    properties:
+      name:
+          type: string
+      author:
+          type: string
+      description:
+          type: string
+      id:
+          type: string
+      url:
+          type: string
+      reason:
+          type: string
+      whistleblower:
+        type: object
+        properties:
+          name:
+              type: string
+          email:
+              type: string
+          language: 
+              type: string

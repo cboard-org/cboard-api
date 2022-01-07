@@ -5,6 +5,9 @@ const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 
+const {nev} = require('../mail');
+
+
 module.exports = {
   createBoard: createBoard,
   listBoard: listBoard,
@@ -12,7 +15,8 @@ module.exports = {
   getBoard: getBoard,
   updateBoard: updateBoard,
   getBoardsEmail: getBoardsEmail,
-  getPublicBoards: getPublicBoards
+  getPublicBoards: getPublicBoards,
+  reportPublicBoard: reportPublicBoard
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
@@ -154,5 +158,16 @@ function updateBoard(req, res) {
       }
     });
     return res.status(200).json(board.toJSON());
+  });
+}
+
+function reportPublicBoard(req,res){
+  nev.sendReportEmail(req.body,function(err, info) {
+    if (err) {
+      return res.status(500).json({
+        message: 'ERROR: sending report email FAILED ' + info
+      });
+    }
+    return res.status(200).json({message: 'Email sent successfuly'});
   });
 }

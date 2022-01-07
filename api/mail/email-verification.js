@@ -115,7 +115,54 @@ module.exports = function(mongoose) {
         console.log(info.response);
       }
     },
-    hashingFunction: null
+    hashingFunction: null,
+    reportPublicBoardEmailOptions:{
+      from: 'Cboard Support <cboard@cboard.io>',
+      subject: 'Public Board Report',
+      html:
+        '<p>The user ${whistleblowerName} reported that the board ${name} from the user ${author} contains inappropiate contet. </p> \
+        <p>The report reason is: ${reason}</p>\
+        <p>Detailed information:</p>\
+        <ul>\
+          <li>Reported board info:\
+            <ul>\
+              <li>Board name: ${name}</li>\
+              <li>Board author: ${author}</li>\
+              <li>Board id: ${id}</li>\
+              <li>Board description: ${description}</li>\
+              <li>Board URL: ${url}</li>\
+            </ul>\
+          </li>\
+          <li>Whistleblower Info\
+            <ul>\
+                <li>User name: ${whistleblowerName}</li>\
+                <li>User email: ${whistleblowerEmail}</li>\
+                <li>User language: ${whistleblowerLanguage}</li>\
+              </ul>\
+          </li>\
+        </ul>',
+      text:
+        'The user ${whistleBlowerName} reported that the board ${name} from the user ${author} contains inappropiate contet. \
+        The report reason is: ${reason}\
+        Detailed information:\
+        Reported board info:\
+              - Board name: ${name}\
+              - Board author: ${author}\
+              - Board id: ${id}\
+              - Board description: ${description}\
+              - Board URL: ${url}\
+        Whistleblower Info\
+              - User name: ${whistleblowerName}\
+              - User email: ${whistleblowerEmail}\
+              - User language: ${whistleblowerLanguage}'
+    },
+    confirmSendMailReportCallback: function(err, info) {
+      if (err) {
+        throw err;
+      } else {
+        console.log(info.response);
+      }
+    }
   };
 
   var transporter;
@@ -538,6 +585,49 @@ module.exports = function(mongoose) {
     transporter.sendMail(mailOptions, callback);
   };
 
+    /**
+   * Send an email to the Cboard support reporting a public board.
+   *
+   * @func sendReportEmail
+   * @param {object} data - Information about the reported board, the whistleblower and the report reason.
+   * @param {function} callback - the callback to pass to Nodemailer's transporter
+   */
+     var sendReportEmail = function(data, callback) {
+      const {id,name,author,url,description,reason, whistleblower} = data;
+
+      if(!whistleblower.name){
+        whistleblower.name = 'Anonymus';
+        whistleblower.email = 'Anonymus';
+      }
+      let mailOptions = JSON.parse(JSON.stringify(options.reportPublicBoardEmailOptions));
+      mailOptions.html= mailOptions.html
+                          .replace(/\$\{whistleblowerName\}/g, whistleblower.name)
+                          .replace(/\$\{whistleblowerEmail\}/g, whistleblower.email)
+                          .replace('${whistleblowerLanguage}', whistleblower.language)
+                          .replace(/\$\{name\}/g, name)
+                          .replace(/\$\{author\}/g, author)
+                          .replace('${id}', id)
+                          .replace('${description}', description)
+                          .replace('${url}', url)
+                          .replace('${reason}', reason)
+      mailOptions.text= mailOptions.text
+                          .replace(/\$\{whistleblowerName\}/g, whistleblower.name)
+                          .replace(/\$\{whistleblowerEmail\}/g, whistleblower.email)
+                          .replace('${whistleblowerLanguage}', whistleblower.language)
+                          .replace(/\$\{name\}/g, name)
+                          .replace(/\$\{author\}/g, author)
+                          .replace('${id}', id)
+                          .replace('${description}', description)
+                          .replace('${url}', url)
+                          .replace('${reason}', reason)
+
+      mailOptions.to = 'support@cboard.io';
+      if (!callback) {
+        callback = options.confirmSendMailReportCallback;
+      }
+      transporter.sendMail(mailOptions, callback);
+    };
+
   return {
     options: options,
     configure: configure,
@@ -547,6 +637,7 @@ module.exports = function(mongoose) {
     resendVerificationEmail: resendVerificationEmail,
     sendConfirmationEmail: sendConfirmationEmail,
     sendVerificationEmail: sendVerificationEmail,
-    sendResetPasswordEmail: sendResetPasswordEmail
+    sendResetPasswordEmail: sendResetPasswordEmail,
+    sendReportEmail: sendReportEmail
   };
 };

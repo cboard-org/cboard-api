@@ -7,8 +7,7 @@ const { getORQuery } = require('../helpers/query');
 const User = require('../models/User');
 const ResetPassword = require('../models/ResetPassword');
 const Settings = require('../models/Settings');
-const mailing = require('../mail');
-const nev = mailing('en');
+const {nev} = require('../mail');
 const auth = require('../helpers/auth');
 
 module.exports = {
@@ -24,7 +23,7 @@ module.exports = {
   facebookLogin: facebookLogin,
   googleLogin: googleLogin,
   forgotPassword: forgotPassword,
-  storePassword: storePassword
+  storePassword: storePassword,
 };
 
 const USER_MODEL_ID_TYPE = {
