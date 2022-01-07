@@ -167,7 +167,7 @@ function reportPublicBoard(req,res){
       return res.status(500).json({
         message: 'ERROR: sending report email FAILED ' + info
       });
-    }});
-
-  return res.status(200).json({message: 'Email sent successfuly'});
+    }
+    return res.status(200).json({message: 'Email sent successfuly'});
+  });
 }

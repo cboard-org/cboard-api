@@ -1409,29 +1409,32 @@ definitions:
   BoardReport:
     type: object
     required:
-      - reportedBoardData
-      - whistleblowerData
-      - reportReason
+      - name
+      - author
+      - description
+      - id
+      - url
+      - reason
+      - whistleblower
     properties:
-      reportedBoardData:
+      name:
+          type: string
+      author:
+          type: string
+      description:
+          type: string
+      id:
+          type: string
+      url:
+          type: string
+      reason:
+          type: string
+      whistleblower:
         type: object
         properties:
-          boardName:
+          name:
               type: string
-          boardAuthor:
+          email:
               type: string
-          boardDescription:
+          language: 
               type: string
-          boardId:
-              type: string
-          boardUrl:
-              type: string
-      whistleblowerData:
-        type: object
-        properties:
-          whistleblowerName:
-              type: string
-          whistleblowerEmail:
-              type: string
-      reportReason:
-        type: string
