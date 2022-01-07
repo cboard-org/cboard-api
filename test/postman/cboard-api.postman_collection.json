@@ -12,22 +12,19 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "af69944d-45fb-402e-9dae-f6e6e8cfb3a2",
-						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Body match+es string\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"An email has been sent to you. Please check it to verify your account\");",
 							"});",
 							"pm.globals.set(\"activation_url\",pm.response.json().url);",
 							"console.log(pm.globals.get(\"activation_url\"));"
-						]
+						],
+						"type": "text/javascript"
 					}
 				},
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "8df35307-b429-4f47-b14e-8056ed92b096",
-						"type": "text/javascript",
 						"exec": [
 							"email_key = Math.random().toString(36).substring(7);",
 							"",
@@ -35,7 +32,8 @@
 							"",
 							"pm.globals.set(\"username\", email_key );",
 							""
-						]
+						],
+						"type": "text/javascript"
 					}
 				}
 			],
@@ -45,14 +43,16 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json"
+					},
+					{
+						"key": "Origin",
+						"value": "http://localhost:3000",
+						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user",
@@ -72,7 +72,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "3d4cf118-a5a0-449d-bbae-0beac9ad3db7",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -82,7 +81,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "7ddf9877-e1f7-45d3-8fd0-47ed6a4f8f8b",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Body matches string\", function () {",
@@ -105,10 +103,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {}
-					}
+					"raw": ""
 				},
 				"url": {
 					"raw": "{{url}}/user/activate/{{activation_url}}",
@@ -130,7 +125,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
 							"",
 							"",
@@ -155,10 +149,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user/login/",
@@ -180,7 +171,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "8a65cc47-7cab-47c1-9b01-19c5f3577972",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
@@ -221,7 +211,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "e3034a60-7774-4342-822f-7c4611c6694e",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
@@ -262,7 +251,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "86020fc2-9539-4ef1-9f64-b571b5b1a0be",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
@@ -286,10 +274,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user/{{userid}}",
@@ -310,7 +295,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "8a65cc47-7cab-47c1-9b01-19c5f3577972",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -360,7 +344,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "8a65cc47-7cab-47c1-9b01-19c5f3577972",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -409,7 +392,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "8a65cc47-7cab-47c1-9b01-19c5f3577972",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -458,7 +440,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "8a65cc47-7cab-47c1-9b01-19c5f3577972",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -507,7 +488,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 200\", function () {",
@@ -522,7 +502,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
 						"exec": [
 							"board_key = Math.random().toString(36).substring(7);",
 							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
@@ -547,10 +526,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"tiles\": [\n    \t{}\n    \t],\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"tiles\": [\n    \t{}\n    \t],\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/board/",
@@ -571,7 +547,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 200\", function () {",
@@ -586,7 +561,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
 						"exec": [
 							"board_key = Math.random().toString(36).substring(7);",
 							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
@@ -611,10 +585,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/board/",
@@ -635,7 +606,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "de06fe90-74c9-44d6-8c11-ddc1f08c60d5",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
@@ -647,7 +617,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "05073d7b-085d-4be3-8aee-321e6e5551ae",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -686,7 +655,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "86020fc2-9539-4ef1-9f64-b571b5b1a0be",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
@@ -710,10 +678,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/board/{{boardid}}",
@@ -734,7 +699,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "e3034a60-7774-4342-822f-7c4611c6694e",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
@@ -775,7 +739,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "e3034a60-7774-4342-822f-7c4611c6694e",
 						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
@@ -817,7 +780,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "e3034a60-7774-4342-822f-7c4611c6694e",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -853,12 +815,69 @@
 			"response": []
 		},
 		{
+			"name": "/board/report/",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"board_key = Math.random().toString(36).substring(7);",
+							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
+							"",
+							"pm.environment.unset(\"variable_key\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\", \n  \"description\": \"this is a description\",\n  \"id\": \"123456\",\n  \"url\": \"https://cboard.io/888888\",\n  \"reason\": \"soffensive content\",\n  \"whistleblower\": {\n    \"name\": \"string\",\n    \"email\": \"string\",\n    \"language\": \"string\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/board/report",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"board",
+						"report"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/board/{id}",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
-						"id": "e3034a60-7774-4342-822f-7c4611c6694e",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -899,7 +918,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "e3034a60-7774-4342-822f-7c4611c6694e",
 						"exec": [
 							"pm.test(\"Status code is 404\", function () {",
 							"    pm.response.to.have.status(404);",
@@ -940,7 +958,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 200\", function () {",
@@ -954,7 +971,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
 						"exec": [
 							""
 						],
@@ -976,10 +992,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"language\":{\"lang\":\"es-ES\"},\n\t\"display\":{\"uiSize\":\"Standard\",\"fontSize\":\"Standard\",\"hideOutputActive\":false,\"labelPosition\":\"Below\",\"darkThemeActive\":false},\n\t\"speech\":{\"voiceURI\":\"Microsoft Sabina Desktop - Spanish (Mexico)\",\"pitch\":1,\"rate\":1},\n\t\"scanning\":{\"active\":false,\"delay\":2000,\"strategy\":\"automatic\"},\n\t\"navigation\":{\"active\":false,\"caBackButtonActive\":false,\"quickUnlockActive\":false,\"removeOutputActive\":true}\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n\t\"language\":{\"lang\":\"es-ES\"},\n\t\"display\":{\"uiSize\":\"Standard\",\"fontSize\":\"Standard\",\"hideOutputActive\":false,\"labelPosition\":\"Below\",\"darkThemeActive\":false},\n\t\"speech\":{\"voiceURI\":\"Microsoft Sabina Desktop - Spanish (Mexico)\",\"pitch\":1,\"rate\":1},\n\t\"scanning\":{\"active\":false,\"delay\":2000,\"strategy\":\"automatic\"},\n\t\"navigation\":{\"active\":false,\"caBackButtonActive\":false,\"quickUnlockActive\":false,\"removeOutputActive\":true}\n}"
 				},
 				"url": {
 					"raw": "{{url}}/settings/",
@@ -1000,7 +1013,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "14be0c7b-122f-4bc6-8073-1e2a168842f9",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 200\", function () {",
@@ -1035,7 +1047,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "7fea3c84-699b-42c4-86a8-b014fba76009",
 						"exec": [
 							""
 						],
@@ -1060,10 +1071,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {}
-					}
+					"raw": ""
 				},
 				"url": {
 					"raw": "{{url}}/settings/",
@@ -1084,7 +1092,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
 							"",
 							"",
@@ -1113,10 +1120,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"email\": \"{{email}}\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user/forgot/",
@@ -1138,7 +1142,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
 							"",
 							"",
@@ -1165,10 +1168,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"userid\": \"{{userid}}\",\n    \"password\": \"1234578\",\n    \"token\": \"{{reset_url}}\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"userid\": \"{{userid}}\",\n    \"password\": \"1234578\",\n    \"token\": \"{{reset_url}}\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user/store-password/",
@@ -1190,7 +1190,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
 							"",
 							"",
@@ -1215,10 +1214,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"1234578\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"1234578\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user/login/",
@@ -1240,7 +1236,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
 							"",
 							"",
@@ -1262,10 +1257,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user/login/",
@@ -1287,7 +1279,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "af69944d-45fb-402e-9dae-f6e6e8cfb3a2",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 200\", function () {",
@@ -1305,7 +1296,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "8df35307-b429-4f47-b14e-8056ed92b096",
 						"exec": [
 							""
 						],
@@ -1354,7 +1344,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "70141dab-0d8f-48f2-87f4-135ffcaa2e0d",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 403\", function () {",
@@ -1371,7 +1360,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "fc60f1ed-5194-4823-840a-0194fa80d8fa",
 						"exec": [
 							""
 						],
@@ -1415,7 +1403,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "ad1c1904-4798-40b4-9bdb-7a30a48a9423",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 409\", function () {",
@@ -1431,7 +1418,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "0d12dd9a-346a-4467-8053-5bdc103145a8",
 						"exec": [
 							""
 						],
@@ -1480,7 +1466,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "fefb4464-35c2-4a2e-8945-66438b0f3b1b",
 						"exec": [
 							"",
 							"pm.test(\"Status code is 200\", function () {",
@@ -1498,7 +1483,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "162cdd9c-0c91-4dfc-9353-f82d33202cc6",
 						"exec": [
 							""
 						],
@@ -1547,7 +1531,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "11abaa21-b246-46bc-b4f8-08a21e856580",
 						"exec": [
 							"",
 							"",
@@ -1577,10 +1560,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/user/logout/",
@@ -1596,6 +1576,5 @@
 			},
 			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
