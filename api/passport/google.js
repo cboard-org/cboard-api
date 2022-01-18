@@ -3,10 +3,11 @@ const { OAuth2Strategy: GoogleStrategy } = require('passport-google-oauth');
 const config = require('../../config');
 const UserController = require('../controllers/user');
 
+const urljoin = require('url-join');
+
 const GoogleStrategyConfig = {
   clientID: config.google.APP_ID,
-  clientSecret: config.google.APP_SECRET,
-  callbackURL: config.google.CALLBACK_URL
+  clientSecret: config.google.APP_SECRET
 };
 
 passport.use(
@@ -14,12 +15,12 @@ passport.use(
 );
 
 const configureGoogleStrategy = app => {
-  app.get(
-    '/login/google',
+  app.get('/login/google', (req, res, next) => 
     passport.authenticate('google', {
       session: false,
-      scope: config.google.SCOPE
-    })
+      scope: config.google.SCOPE,
+      callbackURL: urljoin(req.domain, config.googleCallbackPath)
+    })(req, res, next)
   );
 
   // GET /login/google/callback
@@ -29,7 +30,13 @@ const configureGoogleStrategy = app => {
   //   which, in this example, will redirect the user to the home page.
   app.get(
     '/login/google/callback',
-    passport.authenticate('google', { failureRedirect: '/', session: false }),
+    (req, res, next) => 
+      passport.authenticate('google', {
+        callbackURL: urljoin(req.domain, config.googleCallbackPath),
+        failureRedirect: '/',
+        session: false
+      })(req, res, next)
+    ,
     (req, res) => {
       res.json(req.user);
     }

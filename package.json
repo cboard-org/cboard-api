@@ -52,6 +52,7 @@
     "swagger-express-mw": "^0.7.0",
     "swagger-tools": "^0.10.4",
     "translate-api": "^0.3.18",
+    "url-join": "^4.0.1",
     "uuid": "^3.4.0",
     "validator": "^13.6.0",
     "yamljs": "^0.3.0",

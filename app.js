@@ -94,6 +94,11 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
 
   app.use(middleware.swaggerUi());
 
+  app.use((req, res, next) => {
+    req.domain = req.headers.referer || 'https://app.cboard.io/';
+    next();
+  });
+
   Facebook.configureFacebookStrategy(app);
   Google.configureGoogleStrategy(app);
   GoogleToken.configureGoogleTokenStrategy(app);
