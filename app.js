@@ -18,6 +18,7 @@ const User = require('./api/models/User');
 const Facebook = require('./api/passport/facebook');
 const Google = require('./api/passport/google');
 const GoogleToken = require('./api/passport/googleToken');
+const FacebookToken = require('./api/passport/facebookToken');
 const morgan = require('morgan');
 const config = require('./config');
 
@@ -97,6 +98,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   Facebook.configureFacebookStrategy(app);
   Google.configureGoogleStrategy(app);
   GoogleToken.configureGoogleTokenStrategy(app);
+  FacebookToken.configureFacebookTokenStrategy(app);
   startServer(app);
 });
 
