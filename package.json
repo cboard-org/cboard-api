@@ -22,7 +22,7 @@
   ],
   "main": "app.js",
   "dependencies": {
-    "azure-storage": "^2.10.4",
+    "azure-storage": "^2.10.6",
     "bcryptjs": "^2.4.3",
     "body-parser": "1.19.0",
     "connect-mongo": "^3.2.0",
@@ -54,7 +54,7 @@
     "swagger-tools": "^0.10.4",
     "translate-api": "^0.3.18",
     "uuid": "^3.4.0",
-    "validator": "^13.7.0",
+    "validator": "^13.6.0",
     "yamljs": "^0.3.0",
     "@snyk/protect": "latest"
   },
