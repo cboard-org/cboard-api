@@ -1,0 +1,27 @@
+version : "3.0"
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - "./:/opt/cboard-api/"
+    ports:
+      - "8080:10010"
+    environment:
+      - AZURE_STORAGE_CONNECTION_STRING
+      - FACEBOOK_APP_ID=1234567890
+      - FACEBOOK_APP_SECRET
+      - FACEBOOK_CALLBACK_URL
+      - GCLOUD_PROJECT
+      - GOOGLE_APP_ID=1234567890
+      - GOOGLE_APP_SECRET
+      - GOOGLE_APPLICATION_CREDENTIALS
+      - GOOGLE_CALLBACK_URL=http://localhost:8080/
+      - JWT_SECRET="1234567890qwertyuiop"
+      - MONGO_URL=mongodb://db/cboard-api
+      - REACT_APP_DEV_API_URL
+      - SENDGRID_API_KEY
+    command: "npm run dev"
+  db:
+    image: arm64v8/mongo
