@@ -18,6 +18,7 @@ module.exports = {
   getUser: getUser,
   updateUser: updateUser,
   loginUser: loginUser,
+  loginJwt: loginJwt,
   logoutUser: logoutUser,
   getMe: getMe,
   facebookLogin: facebookLogin,
@@ -323,6 +324,12 @@ function loginUser(req, res) {
       return res.status(200).json(response);
     }
   });
+}
+
+function loginJwt(req, res){
+  console.log(req.body)
+  const {token} = req.body;
+  return res.status(200).json({})
 }
 
 function logoutUser(req, res) {
