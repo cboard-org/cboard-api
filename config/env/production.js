@@ -10,7 +10,8 @@ module.exports = {
   },
   jwt: {
     secret: process.env.JWT_SECRET,
-    issuer: process.env.JWT_ISSUER || constants.JWT_DEFAULT_ISSUER
+    issuer: process.env.JWT_ISSUER || constants.JWT_DEFAULT_ISSUER,
+    publicKey: process.env.JWT_PUBLIC_KEY,
   },
   facebook: {
     APP_ID: process.env.FACEBOOK_APP_ID,

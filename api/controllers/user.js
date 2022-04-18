@@ -29,7 +29,8 @@ module.exports = {
 
 const USER_MODEL_ID_TYPE = {
   facebook: 'facebook.id',
-  google: 'google.id'
+  google: 'google.id',
+  thirdParty: 'thirdParty.id',
 };
 
 async function getSettings(user) {
@@ -153,6 +154,22 @@ async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
 
   const userModelFn = existingUser ? fnMap[type].update : fnMap[type].create;
   const user = await User[userModelFn](mergedProfile, existingUser);
+
+  return user;
+}
+
+async function createOrUpdateSsoUser(tokenData) {
+  const fnMap = {
+    create: 'createUserFromThirdParty',
+    update: 'updateUserFromThirdParty'
+  };
+
+  // const emails = profile.emails.map(email => email.value);
+  const existingUser = await User.findOne({ 'thirdParty.id' : tokenData.id }).exec();
+  console.log(existingUser)
+  console.log(tokenData)
+  const userModelFn = existingUser ? fnMap.update : fnMap.create;
+  const user = await User[userModelFn](tokenData, existingUser);
 
   return user;
 }
@@ -326,10 +343,25 @@ function loginUser(req, res) {
   });
 }
 
-function loginJwt(req, res){
+async function loginJwt(req, res){
   console.log(req.body)
   const {token} = req.body;
-  return res.status(200).json({})
+  const tokenData = auth.getSsoTokenData(token)
+  if(tokenData === null){
+    return res.status(401).json({"message": "UNAUTHORIZED"})
+  }
+  const user = await createOrUpdateSsoUser(tokenData)
+  const settings = await getSettings(user)
+  const tokenString = auth.issueToken({
+    email: user.email,
+    id: user._id
+  });
+  const response = {
+    ...user.toJSON(),
+    settings,
+    authToken: tokenString
+  }
+  return res.status(200).json(response);
 }
 
 function logoutUser(req, res) {
