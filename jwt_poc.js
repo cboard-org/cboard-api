@@ -1,17 +1,21 @@
 const fs   = require('fs');
 const jwt = require('jsonwebtoken');
 
-const signOptions = { issuer: 'RESTORE-Skills', subject: "user@restoreskills.com", audience: "http://localhost:8080", expiresIn: "12h", algorithm: "RS256" }
+const signOptions = { issuer: 'RESTORE-Skills', subject: "123", audience: "http://localhost:8080", expiresIn: "12h", algorithm: "RS256" }
 const payload = {
-    data1: "Data 1",
-    data2: "Data 2",
-    data3: "Data 3",
-    data4: "Data 4",
-   };
+    id: 123,
+    firstName: 'Sample',
+    lastName: 'John',
+    businessGroupId: 12,
+    organizationId: 23,
+    email: 'sample@restoreskills.com',
+    role: 'user'
+  };
 
 const privateKEY  = fs.readFileSync('./private.key', 'utf8');
 
 const token = jwt.sign(payload, privateKEY, signOptions)
+// const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkYXRhMSI6IkRhdGEgMSIsImRhdGEyIjoiRGF0YSAyIiwiZGF0YTMiOiJEYXRhIDMiLCJkYXRhNCI6IkRhdGEgNCIsImlhdCI6MTY1MDExNjI4MywiZXhwIjoxNjUwMTU5NDgzLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpc3MiOiJSRVNUT1JFLVNraWxscyIsInN1YiI6InVzZXJAcmVzdG9yZXNraWxscy5jb20ifQ.M2iGSh5rbcbxdrmVWFNZ5kHaN5Zt-EdXSIIo-fi0FXActwf5O3Z5mXjXrpKE5OuRrjkvQ01n6QMpXZwv93kTUw'
 
 console.log(token)
 
