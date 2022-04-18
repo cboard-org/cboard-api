@@ -19,6 +19,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS
       - GOOGLE_CALLBACK_URL=http://localhost:8080/
       - JWT_SECRET="1234567890qwertyuiop"
+      - JWT_PUBLIC_KEY
       - MONGO_URL=mongodb://db/cboard-api
       - REACT_APP_DEV_API_URL
       - SENDGRID_API_KEY
