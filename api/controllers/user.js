@@ -342,11 +342,13 @@ function loginUser(req, res) {
 }
 
 async function loginJwt(req, res){
-  console.log(req.body)
   const {token} = req.body;
   const tokenData = auth.getSsoTokenData(token)
   if(tokenData === null){
     return res.status(401).json({"message": "UNAUTHORIZED"})
+  }
+  if(!('id' in tokenData) || !('role' in tokenData)){
+    return res.status(415).json({"message": "'id' and 'role' are required in Token Data"})
   }
   const user = await createOrUpdateSsoUser(tokenData)
   const settings = await getSettings(user)

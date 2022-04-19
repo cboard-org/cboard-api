@@ -710,7 +710,7 @@ paths:
       description: Returns a valid token for a user that can be used for api authentication.
       parameters:
         - name: token
-          description: JWT token
+          description: "JWT token containing { id: 123, firstName: 'Sample', lastName: 'John', businessGroupId: 12, organizationId: 23, email: 'sample@restoreskills.com', role: 'user' }"
           in: body
           required: true
           schema:

@@ -10,6 +10,7 @@ const helper = require('../helper');
 
 const User = require('../../api/models/User');
 
+
 //Parent block
 describe('User API calls', function () {
   let server;
@@ -97,6 +98,61 @@ describe('User API calls', function () {
       authToken.should.not.have.string(' ');
     });
   });
+
+  describe('POST /user/login/jwt', function() {
+    it('it will return 401 if no token is provided', async function () {
+      const res = await request(server)
+        .post('/user/login/jwt')
+        .send({token:null})
+        .expect('Content-Type', /json/)
+        .expect(401)
+
+      const authToken = res.body.authToken;
+      (authToken === undefined).should.be.true;
+      res.body.message.should.be.string;
+    })
+
+    it('it will return 401 if EXPIRED token is provided', async function () {
+      const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkYXRhMSI6IkRhdGEgMSIsImRhdGEyIjoiRGF0YSAyIiwiZGF0YTMiOiJEYXRhIDMiLCJkYXRhNCI6IkRhdGEgNCIsImlhdCI6MTY1MDExNjI4MywiZXhwIjoxNjUwMTU5NDgzLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpc3MiOiJSRVNUT1JFLVNraWxscyIsInN1YiI6InVzZXJAcmVzdG9yZXNraWxscy5jb20ifQ.M2iGSh5rbcbxdrmVWFNZ5kHaN5Zt-EdXSIIo-fi0FXActwf5O3Z5mXjXrpKE5OuRrjkvQ01n6QMpXZwv93kTUw'
+      const res = await request(server)
+        .post('/user/login/jwt')
+        .send({token})
+        .expect('Content-Type', /json/)
+        .expect(401)
+
+      const authToken = res.body.authToken;
+      (authToken === undefined).should.be.true;
+      res.body.message.should.be.string;
+    })
+
+    it('it will return 415 if no id is provided in token', async function () {
+      const token = helper.createValidSsoJWtToken(null, 'user');
+      const payload = {token}
+      const res = await request(server)
+        .post('/user/login/jwt')
+        .send(payload)
+        .expect('Content-Type', /json/)
+        .expect(415)
+
+      const authToken = res.body.authToken;
+      (authToken === undefined).should.be.true;
+      res.body.message.should.be.string;
+    })
+
+    it('it will return return a valid token for a new user created via profile in JWT', async function(){
+      const token = helper.createValidSsoJWtToken(321, 'user');
+      const payload = {token}
+      const res = await request(server)
+        .post('/user/login/jwt')
+        .send(payload)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const authToken = res.body.authToken;
+      authToken.should.be.a('string');
+      authToken.should.not.have.string(' ');
+    })
+  })
 
   describe('GET /user', function () {
     it('it should NOT Get the full users list without Bearer Token', async function () {
