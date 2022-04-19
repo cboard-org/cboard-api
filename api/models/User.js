@@ -360,7 +360,7 @@ function getUserFromProfile(profile, type = 'facebook', Model = User) {
   return user;
 }
 
-function ssoUserProfileFromToken(tokenData){
+function getSsoUserProfileFromToken(tokenData){
   const exclusionList = ['iat','exp','aud','iss','sub']
   return Object.fromEntries(Object.entries(tokenData).filter(([key,value])=>!exclusionList.includes(key)))
 }
@@ -368,7 +368,7 @@ function ssoUserProfileFromToken(tokenData){
 function getSsoUserFromToken(tokenData, Model = User) {
   const user = new Model();
 
-  const profile = ssoUserProfileFromToken(tokenData);
+  const profile = getSsoUserProfileFromToken(tokenData);
   user['thirdParty'] = profile;
   user.name = `${profile.firstName} ${profile.lastName}`
   user.email = profile.email || `${tokenData.id}@restoreskills.com`;
@@ -378,7 +378,7 @@ function getSsoUserFromToken(tokenData, Model = User) {
 
 function updateUserFromTokenData(tokenData, existingUser) {
 
-  const profile = ssoUserProfileFromToken(tokenData);
+  const profile = getSsoUserProfileFromToken(tokenData);
   existingUser['thirdParty'] = profile;
 
   return existingUser;

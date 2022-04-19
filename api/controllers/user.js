@@ -166,8 +166,6 @@ async function createOrUpdateSsoUser(tokenData) {
 
   // const emails = profile.emails.map(email => email.value);
   const existingUser = await User.findOne({ 'thirdParty.id' : tokenData.id }).exec();
-  console.log(existingUser)
-  console.log(tokenData)
   const userModelFn = existingUser ? fnMap.update : fnMap.create;
   const user = await User[userModelFn](tokenData, existingUser);
 
