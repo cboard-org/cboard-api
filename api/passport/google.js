@@ -14,6 +14,10 @@ passport.use(
 );
 
 const configureGoogleStrategy = app => {
+  if(GoogleStrategyConfig.clientSecret === null){
+    console.warn("GoogleStrategy is not configured. Missing credentials.")
+    return;
+  }
   app.get(
     '/login/google',
     passport.authenticate('google', {

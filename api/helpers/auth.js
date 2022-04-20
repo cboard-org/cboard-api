@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 
-const { secret: jwtSecret, issuer } = config.jwt;
+const { secret: jwtSecret, issuer, publicKey } = config.jwt;
 
 const getTokenData = token => {
   let data = null;
@@ -9,6 +9,18 @@ const getTokenData = token => {
   try {
     data = jwt.verify(token, jwtSecret);
   } catch (err) {}
+
+  return data;
+};
+
+const getSsoTokenData = token => {
+  let data = null;
+
+  try {
+    data = jwt.verify(token, publicKey);
+  } catch (err) {
+    console.warn(err)
+  }
 
   return data;
 };
@@ -54,6 +66,7 @@ const issueToken = ({ email, id }) => {
 
 module.exports = {
   getTokenData,
+  getSsoTokenData,
   authorizeRequest,
   verifyToken,
   issueToken

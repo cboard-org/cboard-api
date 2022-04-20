@@ -12,6 +12,10 @@ const FBStrategy = {
 passport.use(new FacebookTokenStrategy(FBStrategy, UserController.facebookLogin));
 
 const configureFacebookTokenStrategy = app => {
+    if(FBStrategy.clientSecret === null){
+      console.warn("FBStrategy is not configured. Configuration values missing");
+      return;
+    }
     app.get(
       '/login/facebooktoken/callback',
       passport.authenticate('facebook-token', {

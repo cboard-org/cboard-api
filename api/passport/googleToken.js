@@ -14,6 +14,10 @@ passport.use(
 );
 
 const configureGoogleTokenStrategy = app => {
+  if(GoogleTokenStrategyConfig.clientSecret === null){
+    console.warn("GoogleTokenStrategy credentials not provided.")
+    return;
+  }
   app.get(
     '/login/googletoken/callback',
     passport.authenticate('google-token', {

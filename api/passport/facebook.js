@@ -13,6 +13,10 @@ const FBStrategy = {
 passport.use(new FacebookStrategy(FBStrategy, UserController.facebookLogin));
 
 const configureFacebookStrategy = app => {
+  if(FBStrategy.clientSecret === null){
+    console.warn("FBStrategy credentials not provided.")
+    return;
+  }
   app.get(
     '/login/facebook',
     passport.authenticate('facebook', {

@@ -99,4 +99,4 @@ async function userActivity(req, res) {
   }
 }
 
-gapiAuth();
+// gapiAuth();

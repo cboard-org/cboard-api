@@ -703,6 +703,27 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /user/login/jwt:
+    x-swagger-router-controller: user
+    post:
+      operationId: loginJwt
+      description: Returns a valid token for a user that can be used for api authentication.
+      parameters:
+        - name: token
+          description: "JWT token containing { id: 123, firstName: 'Sample', lastName: 'John', businessGroupId: 12, organizationId: 23, email: 'sample@restoreskills.com', role: 'user' }"
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/JwtUserLogin"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /user/forgot:
     x-swagger-router-controller: user
     post:
@@ -1085,6 +1106,13 @@ definitions:
         email:
           type: string
         password:
+          type: string
+  JwtUserLogin:
+      type: object
+      required:
+      - token
+      properties:
+        token:
           type: string
   UserForgot:
       type: object

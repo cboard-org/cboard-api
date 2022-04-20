@@ -72,7 +72,7 @@
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "test": "NODE_ENV=test swagger project test",
+    "test": "NODE_ENV=test JWT_PUBLIC_KEY=$(cat ./test/test-public.key) swagger project test",
     "precommit": "lint-staged",
     "snyk-protect": "snyk-protect",
     "prepare": "npm run snyk-protect"

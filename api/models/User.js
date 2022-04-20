@@ -67,6 +67,15 @@ const USER_SCHEMA_DEFINITION = {
     emails: [{ type: String }],
     photos: [{ type: String }]
   },
+  thirdParty:{
+    id: String,
+    firstName: String,
+    lastName: String,
+    businessGroupId: String,
+    organizationId: String,
+    email: String,
+    role: String
+  },
   resetPasswordToken: {
     type: String
   },
@@ -149,8 +158,8 @@ userSchema.path('email').validate(async function(email) {
 userSchema.path('password').validate(function(password) {
   if (this.skipValidation()) return true;
 
-  const { facebook, google } = this;
-  if (facebook.token || google.token) return true;
+  const { facebook, google, thirdParty } = this;
+  if (facebook.token || google.token || thirdParty.id) return true;
 
   return password.length;
 }, 'Password cannot be blank');
@@ -161,9 +170,9 @@ userSchema.path('password').validate(function(password) {
 userSchema.pre('save', function(next) {
   if (!this.isNew) return next();
 
-  const { facebook, google, password } = this;
+  const { facebook, google, password, thirdParty } = this;
   const isValidUser =
-    validatePresenceOf(password) || facebook.token || google.token;
+    validatePresenceOf(password) || facebook.token || google.token || thirdParty.id;
 
   if (!isValidUser && !this.skipValidation()) {
     next(new Error('Invalid password'));
@@ -291,6 +300,14 @@ userSchema.statics = {
     return dbUser;
   },
 
+  // Create user from a thrd Party Profile (+ accessToken)
+  // Return a promise
+  createUserFromThirdParty: async function(tokenData) {
+    const user = getSsoUserFromToken(tokenData, User);
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
   // Updates an user from a Facebook Profile (+ accessToken)
   // Returns a promise
   updateUserFromFacebook: async function(profile, existingUser) {
@@ -303,6 +320,13 @@ userSchema.statics = {
   // Returns a promise
   updateUserFromGoogle: async function(profile, existingUser) {
     const user = updateUserFromProfile(profile, existingUser, 'google');
+    const dbUser = await user.save();
+    return dbUser;
+  },
+  // Updates user from a thrd Party Profile (+ accessToken)
+  // Return a promise
+  updateUserFromThirdParty: async function(profile, existingUser) {
+    const user = updateUserFromTokenData(profile, existingUser, 'thirdParty');
     const dbUser = await user.save();
     return dbUser;
   }
@@ -336,9 +360,26 @@ function getUserFromProfile(profile, type = 'facebook', Model = User) {
   return user;
 }
 
-function updateUserFromProfile(profile, existingUser, type = 'facebook') {
-  const userType = getUserType(profile);
-  existingUser[type] = userType;
+function getSsoUserProfileFromToken(tokenData){
+  const exclusionList = ['iat','exp','aud','iss','sub']
+  return Object.fromEntries(Object.entries(tokenData).filter(([key,value])=>!exclusionList.includes(key)))
+}
+
+function getSsoUserFromToken(tokenData, Model = User) {
+  const user = new Model();
+
+  const profile = getSsoUserProfileFromToken(tokenData);
+  user['thirdParty'] = profile;
+  user.name = `${profile.firstName} ${profile.lastName}`
+  user.email = profile.email || `${tokenData.id}@restoreskills.com`;
+  user.role = profile.role;
+  return user;
+}
+
+function updateUserFromTokenData(tokenData, existingUser) {
+
+  const profile = getSsoUserProfileFromToken(tokenData);
+  existingUser['thirdParty'] = profile;
 
   return existingUser;
 }
