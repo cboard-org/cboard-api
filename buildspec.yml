@@ -6,10 +6,10 @@ env:
     AWS_ACCOUNT_ID: "211905799377"
     IMAGE_REPO_NAME: "cboard-api"
 
-pahses:
-  shell: bash
+phases:
   install:
     commands:
+      - echo -e '[url "https://github.com/"]\n  insteadOf = "git://github.com/"' >> ~/.gitconfig
       - yarn install
   pre_build:
     commands:
@@ -35,7 +35,7 @@ pahses:
       - echo Writing image definitions file...
       - printf '[{"name":"stage-cboard-api","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
       - printf '[{"name":"production-cboard-api","imageUri":"%s"}]' $REPOSITORY_URI:stable > prod_imagedefinitions.json
-  artifacts:
+artifacts:
   files:
     - imagedefinitions.json
     - prod_imagedefinitions.json
