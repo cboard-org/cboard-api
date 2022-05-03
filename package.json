@@ -22,7 +22,7 @@
   ],
   "main": "app.js",
   "dependencies": {
-    "@snyk/protect": "latest",
+    "@snyk/protect": "^1.914.0",
     "azure-storage": "^2.10.6",
     "bcryptjs": "^2.4.3",
     "body-parser": "1.19.0",
