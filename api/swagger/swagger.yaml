@@ -870,6 +870,20 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /healthcheck:
+    x-swagger-router-controller: system
+    get:
+      operationId: healthCheck
+      description: Healthcheck validation of system function
+      responses:
+          "200":
+            description: Success
+            schema:
+              $ref: "#/definitions/HealthChekResponse"
+          default:
+            description: Error
+            schema:
+              $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1226,6 +1240,12 @@ definitions:
           type: string
         locale:
           type: string
+  HealthChekResponse:
+    required:
+      - healthcheck
+    properties:
+      healthcheck:
+        type: boolean
   LogoutResponse:
     required:
       - message

@@ -1,0 +1,42 @@
+version: 0.2
+env:
+  shell: bash
+  variables:
+    AWS_DEFAULT_REGION: "us-east-1"
+    AWS_ACCOUNT_ID: "211905799377"
+    IMAGE_REPO_NAME: "cboard-api"
+
+phases:
+  install:
+    commands:
+      - echo -e '[url "https://github.com/"]\n  insteadOf = "git://github.com/"' >> ~/.gitconfig
+      - yarn install
+  pre_build:
+    commands:
+      - echo logging into Amazon ECR
+      - aws --version
+      - AWS_DOCKER_REPOSITORY=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - AWS_LOGIN_PASSWORD=$(aws ecr get-login-password)
+      - docker login -u AWS -p $AWS_LOGIN_PASSWORD https://$AWS_DOCKER_REPOSITORY
+      - REPOSITORY_URI=$AWS_DOCKER_REPOSITORY/$IMAGE_REPO_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completted on `date`
+      - echo Pushing docker images ...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"stage-cboard-api","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"production-cboard-api","imageUri":"%s"}]' $REPOSITORY_URI:stable > prod_imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json
+    - prod_imagedefinitions.json
+    # - prod_deploy_buildspec.yml
