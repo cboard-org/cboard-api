@@ -1,5 +1,8 @@
 'use strict';
 
+// This line must come before importing any instrumented module.
+const tracer = require('dd-trace').init();
+
 require('dotenv-defaults').config();
 
 const cors = require('cors');
