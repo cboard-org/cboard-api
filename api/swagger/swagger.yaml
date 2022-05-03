@@ -870,7 +870,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /healtcheck:
+  /healthcheck:
     x-swagger-router-controller: system
     get:
       operationId: healthCheck
