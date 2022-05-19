@@ -10,6 +10,8 @@ const Settings = require('../models/Settings');
 const {nev} = require('../mail');
 const auth = require('../helpers/auth');
 
+const axios = require('axios');
+
 module.exports = {
   createUser: createUser,
   activateUser: activateUser,
@@ -42,7 +44,8 @@ async function getSettings(user) {
   return settings;
 }
 
-function createUser(req, res) {
+async function createUser(req, res) {
+  //req.body.location = await getLocation(req.ip);
   const user = new User(req.body);
   nev.createTempUser(user, function(err, existingPersistentUser, newTempUser) {
     if (err) {
@@ -93,7 +96,7 @@ function createUser(req, res) {
 }
 
 // Login from Facebook or Google
-async function passportLogin(type, accessToken, refreshToken, profile, done) {
+async function passportLogin(ip ,type, accessToken, refreshToken, profile, done) {
   try {
     const propertyId = USER_MODEL_ID_TYPE[type];
     let user = await User.findOne({ [propertyId]: profile.id })
@@ -104,6 +107,8 @@ async function passportLogin(type, accessToken, refreshToken, profile, done) {
     if (!user) {
       user = await createOrUpdateUser(accessToken, profile, type);
     }
+
+    await updateUserLocation(ip,user);
 
     const { _id: userId, email } = user;
     const tokenString = auth.issueToken({
@@ -126,12 +131,14 @@ async function passportLogin(type, accessToken, refreshToken, profile, done) {
   }
 }
 
-async function facebookLogin(accessToken, refreshToken, profile, done) {
-  return passportLogin('facebook', accessToken, refreshToken, profile, done);
+async function facebookLogin(req,accessToken, refreshToken, profile, done) {
+  const ip = req.ip;
+  return passportLogin(ip,'facebook', accessToken, refreshToken, profile, done);
 }
 
-async function googleLogin(accessToken, refreshToken, profile, done) {
-  return passportLogin('google', accessToken, refreshToken, profile, done);
+async function googleLogin(req,accessToken, refreshToken, profile, done) {
+  const ip = req.ip;
+  return passportLogin(ip,'google', accessToken, refreshToken, profile, done);
 }
 
 async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
@@ -320,9 +327,57 @@ function loginUser(req, res) {
         authToken: tokenString
       };
 
-      return res.status(200).json(response);
+      res.status(200).send(response);
+      updateUserLocation(req.ip,user);
+      return;
     }
   });
+}
+
+async function updateUserLocation(ip,user){
+  const ipConst = "191.213.233.161";
+  if(!user.location) {  // || user.location.ip !== ipConst ) {
+    const newLocation = await getLocation(ipConst);
+    if(newLocation){
+      user.location = newLocation;
+      await user.save(function(err, dbUser) {
+        if (err) {
+          console.log("Error saving user location", err)
+          user.location = {};
+          return ;
+        }
+        if (!dbUser) {
+          console.log("User not founded on DB while updating location")
+          user.location = {};
+          return ;
+        }
+        console.log("User location updated")
+      })
+    }
+  }
+}
+
+async function getLocation(ip){
+  const ipConst = "191.213.233.161";
+  return new Promise((resolve,reject)=>
+    axios
+      .get(`http://www.geoplugin.net/json.gp?ip=${ipConst}`)
+      .then(res => {
+        const data = res.data;
+        const location = {
+          ip : data.geoplugin_request,
+          continent: data.geoplugin_continentName,
+          country : data.geoplugin_countryName,
+          region: data.geoplugin_region,
+          city: data.geoplugin_city,
+        }
+        resolve (location)
+      })
+      .catch(error => {
+          console.error(error);
+          reject(null);
+      })
+  );
 }
 
 function logoutUser(req, res) {

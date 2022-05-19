@@ -7,7 +7,8 @@ const FBStrategy = {
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
   callbackURL: process.env.FACEBOOK_CALLBACK_URL,
-  profileFields: ['id', 'emails', 'name', 'displayName', 'gender', 'picture']
+  profileFields: ['id', 'emails', 'name', 'displayName', 'gender', 'picture'],
+  passReqToCallback: true
 };
 
 passport.use(new FacebookStrategy(FBStrategy, UserController.facebookLogin));

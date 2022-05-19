@@ -72,6 +72,13 @@ const USER_SCHEMA_DEFINITION = {
   },
   resetPasswordExpires: {
     type: Date
+  },
+  location: {
+    ip: String,
+    continent: String,
+    country: String,
+    region: String,
+    city: String,
   }
 };
 
@@ -88,6 +95,9 @@ const USER_SCHEMA_OPTIONS = {
       delete ret.password;
       if (ret.authToken) {
         delete ret.authToken;
+      }
+      if(ret.location){
+        delete ret.location;
       }
     }
   }
