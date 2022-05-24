@@ -44,8 +44,7 @@ async function getSettings(user) {
   return settings;
 }
 
-async function createUser(req, res) {
-  //req.body.location = await getLocation(req.ip);
+function createUser(req, res) {
   const user = new User(req.body);
   nev.createTempUser(user, function(err, existingPersistentUser, newTempUser) {
     if (err) {
@@ -253,6 +252,7 @@ const UPDATEABLE_FIELDS = [
   'name',
   'birthdate',
   'locale',
+  'location'
 ]
 
 function updateUser(req, res) {
@@ -267,7 +267,7 @@ function updateUser(req, res) {
   User.findById(id)
     .populate('communicators')
     .populate('boards')
-    .exec(function(err, user) {
+    .exec(async function(err, user) {
       if (err) {
         return res.status(500).json({
           message: 'Error updating user. ',
@@ -281,6 +281,10 @@ function updateUser(req, res) {
       }
       for (let key in req.body) {
         if (UPDATEABLE_FIELDS.includes(key)) {
+          if(key === 'location') 
+            if(!user.location) req.body.location = await getLocation(req.ip);
+            else  break;
+
           user[key] = req.body[key];
         }
       }
@@ -358,7 +362,7 @@ async function updateUserLocation(ip,user){
 }
 
 async function getLocation(ip){
-  const ipConst = "191.213.233.161";
+  const ipConst = "191.213.200.161";
   return new Promise((resolve,reject)=>
     axios
       .get(`http://www.geoplugin.net/json.gp?ip=${ipConst}`)
