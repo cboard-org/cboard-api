@@ -96,8 +96,8 @@ const USER_SCHEMA_OPTIONS = {
       if (ret.authToken) {
         delete ret.authToken;
       }
-      if(ret.location){
-        delete ret.location;
+      if(ret.location && ret.location.ip){
+        delete ret.location.ip;
       }
     }
   }

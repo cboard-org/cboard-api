@@ -6,7 +6,8 @@ const UserController = require('../controllers/user');
 const FBStrategy = {
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    fbGraphVersion: 'v3.0'
+    fbGraphVersion: 'v3.0',
+    passReqToCallback: true
   };
 
 passport.use(new FacebookTokenStrategy(FBStrategy, UserController.facebookLogin));
@@ -20,7 +21,6 @@ const configureFacebookTokenStrategy = app => {
       }),
       (req, res) => {
         res.json(req.user);
-        console.log(req.user);
       }
     );
 };

@@ -44,7 +44,8 @@ async function getSettings(user) {
   return settings;
 }
 
-function createUser(req, res) {
+async function createUser(req, res) {
+  req.body.location = await getLocation(req.ip);
   const user = new User(req.body);
   nev.createTempUser(user, function(err, existingPersistentUser, newTempUser) {
     if (err) {
@@ -104,10 +105,8 @@ async function passportLogin(ip ,type, accessToken, refreshToken, profile, done)
       .exec();
 
     if (!user) {
-      user = await createOrUpdateUser(accessToken, profile, type);
+      user = await createOrUpdateUser(accessToken, profile, type, ip);
     }
-
-    await updateUserLocation(ip,user);
 
     const { _id: userId, email } = user;
     const tokenString = auth.issueToken({
@@ -140,7 +139,7 @@ async function googleLogin(req,accessToken, refreshToken, profile, done) {
   return passportLogin(ip,'google', accessToken, refreshToken, profile, done);
 }
 
-async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
+async function createOrUpdateUser(accessToken, profile, type = 'facebook', ip) {
   const fnMap = {
     facebook: {
       create: 'createUserFromFacebook',
@@ -158,7 +157,9 @@ async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
 
   const userModelFn = existingUser ? fnMap[type].update : fnMap[type].create;
   const user = await User[userModelFn](mergedProfile, existingUser);
-
+  if(!existingUser)
+    await updateUserLocation(ip,user);
+  
   return user;
 }
 
@@ -282,26 +283,27 @@ function updateUser(req, res) {
       for (let key in req.body) {
         if (UPDATEABLE_FIELDS.includes(key)) {
           if(key === 'location') 
-            if(!user.location) req.body.location = await getLocation(req.ip);
-            else  break;
+            if(user.location && user.location.ip) continue;
+            req.body.location = await getLocation(req.ip);
 
           user[key] = req.body[key];
         }
       }
-      user.save(function(err, user) {
-        if (err) {
-          return res.status(500).json({
-            message: 'Error saving user. ',
-            error: err.message
-          });
-        }
-        if (!user) {
+      try{
+        const dbUser = await user.save();
+        if(!dbUser){
           return res.status(404).json({
             message: 'Unable to find user. User id: ' + id
           });
         }
-      });
-      return res.status(200).json(user);
+        return res.status(200).json(user);
+      }
+      catch(e){
+        return res.status(500).json({
+          message: 'Error saving user. ',
+          error: err.message
+        });
+      }
     });
 }
 
@@ -329,35 +331,34 @@ function loginUser(req, res) {
         settings,
         birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
         authToken: tokenString
-      };
-
-      res.status(200).send(response);
-      updateUserLocation(req.ip,user);
-      return;
+      };  
+      
+      return res.status(200).send(response);
     }
   });
 }
 
 async function updateUserLocation(ip,user){
   const ipConst = "191.213.233.161";
-  if(!user.location) {  // || user.location.ip !== ipConst ) {
+  console.log("Entro a update")
+  if(!user.location || !user.location.ip) {  // || user.location.ip !== ipConst ) {
     const newLocation = await getLocation(ipConst);
-    if(newLocation){
+    if(newLocation && newLocation.ip){
       user.location = newLocation;
-      await user.save(function(err, dbUser) {
-        if (err) {
+      try{
+        const dbUser = await user.save();
+        if(!dbUser){
+          user.location = {};
+          console.log("Unable to find user on the DB")
+          return;
+        }
+      }
+      catch (err){
           console.log("Error saving user location", err)
           user.location = {};
           return ;
-        }
-        if (!dbUser) {
-          console.log("User not founded on DB while updating location")
-          user.location = {};
-          return ;
-        }
-        console.log("User location updated")
-      })
-    }
+      }
+   }
   }
 }
 
@@ -379,7 +380,7 @@ async function getLocation(ip){
       })
       .catch(error => {
           console.error(error);
-          reject(null);
+          reject({});
       })
   );
 }
