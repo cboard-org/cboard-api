@@ -26,7 +26,6 @@ const config = require('./config');
 const app = express();
 
 if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY) {
-  console.log("Entro al insigth")
   appInsights
     .setup()
     .setAutoDependencyCorrelation(true)
