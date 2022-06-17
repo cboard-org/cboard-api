@@ -2,6 +2,7 @@
 
 require('dotenv-defaults').config();
 
+const appInsights = require('applicationinsights');
 const cors = require('cors');
 const express = require('express');
 const swaggerTools = require('swagger-tools');
@@ -23,6 +24,24 @@ const morgan = require('morgan');
 const config = require('./config');
 
 const app = express();
+
+if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY) {
+  appInsights
+    .setup()
+    .setAutoDependencyCorrelation(true)
+    .setAutoCollectRequests(true)
+    .setAutoCollectPerformance(true)
+    .setAutoCollectExceptions(true)
+    .setAutoCollectDependencies(true)
+    .setAutoCollectConsole(true, false)
+    .setUseDiskRetryCaching(true)
+    .setDistributedTracingMode(appInsights.DistributedTracingModes.AI_AND_W3C)
+    .setSendLiveMetrics(true)
+
+  appInsights.defaultClient.setAutoPopulateAzureProperties(true);
+
+  appInsights.start()
+}
 
 swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   //Serves the Swagger UI on /docs
