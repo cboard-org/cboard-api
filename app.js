@@ -3,6 +3,7 @@
 require('dotenv-defaults').config();
 
 const appInsights = require('applicationinsights');
+
 const cors = require('cors');
 const express = require('express');
 const swaggerTools = require('swagger-tools');
@@ -25,12 +26,13 @@ const config = require('./config');
 
 const app = express();
 
-if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY) {
+
+if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING && config.env === 'production' ) {
   appInsights
     .setup()
     .setAutoDependencyCorrelation(true)
     .setAutoCollectRequests(true)
-    .setAutoCollectPerformance(true)
+    .setAutoCollectPerformance(true,true)
     .setAutoCollectExceptions(true)
     .setAutoCollectDependencies(true)
     .setAutoCollectConsole(true, false)
@@ -38,8 +40,7 @@ if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY) {
     .setDistributedTracingMode(appInsights.DistributedTracingModes.AI_AND_W3C)
     .setSendLiveMetrics(true)
 
-  appInsights.defaultClient.setAutoPopulateAzureProperties(true);
-
+  appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "Cboard API";
   appInsights.start()
 }
 
