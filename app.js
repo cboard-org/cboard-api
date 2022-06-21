@@ -27,7 +27,7 @@ const config = require('./config');
 const app = express();
 
 
-if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING && config.env === 'production' ) {
+if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING ) {
   appInsights
     .setup()
     .setAutoDependencyCorrelation(true)
@@ -42,6 +42,8 @@ if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING && config.env === 'product
 
   appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.cloudRole] = "Cboard API";
   appInsights.start()
+
+  console.log("Application Insights started");
 }
 
 swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
