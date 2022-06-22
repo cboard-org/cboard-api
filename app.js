@@ -27,9 +27,9 @@ const config = require('./config');
 const app = express();
 
 
-if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING ) {
+//if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING ) {
   appInsights
-    .setup()
+    .setup('InstrumentationKey=874487ac-304c-4160-b8f3-a221541eab61;IngestionEndpoint=https://westus2-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/')
     .setAutoDependencyCorrelation(true)
     .setAutoCollectRequests(true)
     .setAutoCollectPerformance(true,true)
@@ -44,7 +44,7 @@ if (process.env.APPLICATIONINSIGHTS_CONNECTION_STRING ) {
   appInsights.start()
 
   console.log("Application Insights started");
-}
+//}
 
 swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   //Serves the Swagger UI on /docs
