@@ -49,5 +49,6 @@ module.exports = {
       ciphers: 'SSLv3',
       rejectUnauthorized: false
     }
-  }
+  },
+  appInsightConnectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING
 };
