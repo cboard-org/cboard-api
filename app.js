@@ -26,12 +26,7 @@ const config = require('./config');
 
 const app = express();
 
-console.log("process.env.APPLICATIONINSIGHTS_CONNECTION_STRING: ", process.env.APPLICATIONINSIGHTS_CONNECTION_STRING);
-console.log("config.appInsightConnectionString: ", config.appInsightConnectionString);
-console.log("REACT_APP_INTERSTITIAL_ADVICE_UNIT_ID: ", process.env.REACT_APP_INTERSTITIAL_ADVICE_UNIT_ID)
-console.log("AZURE_STORAGE_CONNECTION_STRING: ",process.env.AZURE_STORAGE_CONNECTION_STRING)
-
-if (config.appInsightConnectionString ) {
+if (config.appInsightConnectionString && config.env === 'production') {
   appInsights
     .setup()
     .setAutoDependencyCorrelation(true)
