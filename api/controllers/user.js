@@ -7,10 +7,11 @@ const { getORQuery } = require('../helpers/query');
 const User = require('../models/User');
 const ResetPassword = require('../models/ResetPassword');
 const Settings = require('../models/Settings');
-const {nev} = require('../mail');
+const { nev } = require('../mail');
 const auth = require('../helpers/auth');
 
-const axios = require('axios');
+const { IPinfoWrapper , ApiLimitError} = require("node-ipinfo");
+const ipinfo = new IPinfoWrapper(process.env.IP_INFO_TOKEN);
 
 module.exports = {
   createUser: createUser,
@@ -39,7 +40,7 @@ async function getSettings(user) {
   try {
     settings = await Settings.getOrCreate({ id: user.id || user._id });
     delete settings.user;
-  } catch (e) {}
+  } catch (e) { }
 
   return settings;
 }
@@ -47,7 +48,7 @@ async function getSettings(user) {
 async function createUser(req, res) {
   req.body.location = await getLocation(req.ip);
   const user = new User(req.body);
-  nev.createTempUser(user, function(err, existingPersistentUser, newTempUser) {
+  nev.createTempUser(user, function (err, existingPersistentUser, newTempUser) {
     if (err) {
       return res.status(404).json({
         message: err
@@ -63,14 +64,14 @@ async function createUser(req, res) {
     // new user created
     if (newTempUser) {
       const URL = newTempUser[nev.options.URLFieldName];
-      
+
       let domain = req.headers.origin;
       //if origin is private insert default hostname
-      if (!domain){ 
+      if (!domain) {
         domain = 'https://app.cboard.io'
       }
 
-      nev.sendVerificationEmail(newTempUser.email, domain, URL, function(err, info) {
+      nev.sendVerificationEmail(newTempUser.email, domain, URL, function (err, info) {
         if (err) {
           return res.status(500).json({
             message: 'ERROR: sending verification email FAILED ' + info
@@ -96,7 +97,7 @@ async function createUser(req, res) {
 }
 
 // Login from Facebook or Google
-async function passportLogin(ip ,type, accessToken, refreshToken, profile, done) {
+async function passportLogin(ip, type, accessToken, refreshToken, profile, done) {
   try {
     const propertyId = USER_MODEL_ID_TYPE[type];
     let user = await User.findOne({ [propertyId]: profile.id })
@@ -104,9 +105,13 @@ async function passportLogin(ip ,type, accessToken, refreshToken, profile, done)
       .populate('boards')
       .exec();
 
+
     if (!user) {
-      user = await createOrUpdateUser(accessToken, profile, type, ip);
+      user = await createOrUpdateUser(accessToken, profile, type);
     }
+
+    if (!user.location || !user.location.ip)
+      await updateUserLocation(ip, user);
 
     const { _id: userId, email } = user;
     const tokenString = auth.issueToken({
@@ -129,17 +134,17 @@ async function passportLogin(ip ,type, accessToken, refreshToken, profile, done)
   }
 }
 
-async function facebookLogin(req,accessToken, refreshToken, profile, done) {
+async function facebookLogin(req, accessToken, refreshToken, profile, done) {
   const ip = req.ip;
-  return passportLogin(ip,'facebook', accessToken, refreshToken, profile, done);
+  return passportLogin(ip, 'facebook', accessToken, refreshToken, profile, done);
 }
 
-async function googleLogin(req,accessToken, refreshToken, profile, done) {
+async function googleLogin(req, accessToken, refreshToken, profile, done) {
   const ip = req.ip;
-  return passportLogin(ip,'google', accessToken, refreshToken, profile, done);
+  return passportLogin(ip, 'google', accessToken, refreshToken, profile, done);
 }
 
-async function createOrUpdateUser(accessToken, profile, type = 'facebook', ip) {
+async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
   const fnMap = {
     facebook: {
       create: 'createUserFromFacebook',
@@ -157,17 +162,15 @@ async function createOrUpdateUser(accessToken, profile, type = 'facebook', ip) {
 
   const userModelFn = existingUser ? fnMap[type].update : fnMap[type].create;
   const user = await User[userModelFn](mergedProfile, existingUser);
-  if(!existingUser)
-    await updateUserLocation(ip,user);
-  
+
   return user;
 }
 
 function activateUser(req, res) {
   const url = req.swagger.params.url.value;
-  nev.confirmTempUser(url, function(err, user) {
+  nev.confirmTempUser(url, function (err, user) {
     if (user) {
-      nev.sendConfirmationEmail(user.email, function(err, info) {
+      nev.sendConfirmationEmail(user.email, function (err, info) {
         if (err) {
           return res.status(404).json({
             message: 'ERROR: sending confirmation email FAILED ' + info
@@ -182,7 +185,7 @@ function activateUser(req, res) {
     } else {
       return res.status(404).json({
         message: 'ERROR: confirming your temporary user FAILED, please try to login again',
-        error:  'ERROR: confirming your temporary user FAILED, please try to login again'
+        error: 'ERROR: confirming your temporary user FAILED, please try to login again'
       });
     }
   });
@@ -208,7 +211,7 @@ async function listUser(req, res) {
 
 function removeUser(req, res) {
   const id = req.swagger.params.id.value;
-  User.findByIdAndRemove(id, function(err, users) {
+  User.findByIdAndRemove(id, function (err, users) {
     if (err) {
       return res.status(404).json({
         message: 'User not found. User Id: ' + id
@@ -268,7 +271,7 @@ function updateUser(req, res) {
   User.findById(id)
     .populate('communicators')
     .populate('boards')
-    .exec(async function(err, user) {
+    .exec(async function (err, user) {
       if (err) {
         return res.status(500).json({
           message: 'Error updating user. ',
@@ -282,23 +285,23 @@ function updateUser(req, res) {
       }
       for (let key in req.body) {
         if (UPDATEABLE_FIELDS.includes(key)) {
-          if(key === 'location') 
-            if(user.location && user.location.ip) continue;
-            req.body.location = await getLocation(req.ip);
+          if (key === 'location')
+            if (user.location && user.location.ip) continue;
+          req.body.location = await getLocation(req.ip);
 
           user[key] = req.body[key];
         }
       }
-      try{
+      try {
         const dbUser = await user.save();
-        if(!dbUser){
+        if (!dbUser) {
           return res.status(404).json({
             message: 'Unable to find user. User id: ' + id
           });
         }
         return res.status(200).json(user);
       }
-      catch(e){
+      catch (e) {
         return res.status(500).json({
           message: 'Error saving user. ',
           error: err.message
@@ -324,6 +327,9 @@ function loginUser(req, res) {
         id: userId
       });
 
+      if(!user.location || !user.location.ip)
+        await updateUserLocation(req.ip, user);
+
       const settings = await getSettings(user);
 
       const response = {
@@ -331,58 +337,61 @@ function loginUser(req, res) {
         settings,
         birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
         authToken: tokenString
-      };  
-      
-      return res.status(200).send(response);
+      };
+      return res.status(200).json(response);
     }
   });
 }
 
-async function updateUserLocation(ip,user){
-  const ipConst = "191.213.233.161";
-  console.log("Entro a update")
-  if(!user.location || !user.location.ip) {  // || user.location.ip !== ipConst ) {
+async function updateUserLocation(ip, user) {
+  // const ipConst = "191.213.233.161";
+   const ipConst = "127.0.0.1";
+  if (!user.location || !user.location.ip) { 
     const newLocation = await getLocation(ipConst);
-    if(newLocation && newLocation.ip){
+    if (newLocation && newLocation.country) {
       user.location = newLocation;
-      try{
+      try {
         const dbUser = await user.save();
-        if(!dbUser){
+        if (!dbUser) {
           user.location = {};
           console.log("Unable to find user on the DB")
           return;
         }
       }
-      catch (err){
-          console.log("Error saving user location", err)
-          user.location = {};
-          return ;
+      catch (err) {
+        console.log("Error saving user location", err)
+        user.location = {};
+        return;
       }
-   }
+    }
   }
 }
 
-async function getLocation(ip){
-  const ipConst = "191.213.200.161";
-  return new Promise((resolve,reject)=>
-    axios
-      .get(`http://www.geoplugin.net/json.gp?ip=${ipConst}`)
-      .then(res => {
-        const data = res.data;
+async function getLocation(ip) {
+  //const ipConst = "191.213.200.161";
+  return new Promise((resolve, reject) => {
+    ipinfo.lookupIp(ip).then(
+      res => {
+        if(!res.country)
+          throw Error("The location retrieved from Ip Info was incorrect")
+
         const location = {
-          ip : data.geoplugin_request,
-          continent: data.geoplugin_continentName,
-          country : data.geoplugin_countryName,
-          region: data.geoplugin_region,
-          city: data.geoplugin_city,
+          ip: res.ip,
+          country: res.country,
+          region: res.region,
+          city: res.city,
         }
-        resolve (location)
+        resolve(location)
       })
-      .catch(error => {
-          console.error(error);
-          reject({});
-      })
-  );
+      .catch((error) => {
+        if (error instanceof ApiLimitError) {
+          console.error("IP info API limit")
+        } else {
+          console.error(error)
+        }
+        resolve({});
+      });
+  })
 }
 
 function logoutUser(req, res) {
@@ -431,7 +440,7 @@ async function forgotPassword(req, res) {
     }).exec();
     if (resetPassword) {
       //remove entry if exist
-      await ResetPassword.deleteOne({ _id: resetPassword.id }, function(err) {
+      await ResetPassword.deleteOne({ _id: resetPassword.id }, function (err) {
         if (err) {
           return res.status(500).json({
             message: 'ERROR: delete reset password FAILED ',
@@ -443,15 +452,15 @@ async function forgotPassword(req, res) {
     //creating the token to be sent to the forgot password form
     token = crypto.randomBytes(32).toString('hex');
     //hashing the password to store in the db node.js
-    bcrypt.genSalt(8, function(err, salt) {
-      bcrypt.hash(token, salt, function(err, hash) {
+    bcrypt.genSalt(8, function (err, salt) {
+      bcrypt.hash(token, salt, function (err, hash) {
         const item = new ResetPassword({
           userId: user.id,
           resetPasswordToken: hash,
           resetPasswordExpires: moment.utc().add(86400, 'seconds'),
           status: false
         });
-        item.save(function(err, rstPassword) {
+        item.save(function (err, rstPassword) {
           if (err) {
             return res.status(500).json({
               message: 'ERROR: create reset password FAILED ',
@@ -464,11 +473,11 @@ async function forgotPassword(req, res) {
 
         let domain = req.headers.origin;
         //if origin is private insert default hostname
-        if (!domain){ 
+        if (!domain) {
           domain = 'https://app.cboard.io'
         }
 
-        nev.sendResetPasswordEmail(user.email, domain, user.id, token, function(err) {
+        nev.sendResetPasswordEmail(user.email, domain, user.id, token, function (err) {
           if (err) {
             return res.status(500).json({
               message: 'ERROR: sending reset your password email FAILED ',
@@ -508,12 +517,12 @@ async function storePassword(req, res) {
       });
     }
     // the token and the hashed token in the db are verified befor updating the password
-    bcrypt.compare(token, resetPassword.token, function(errBcrypt, resBcrypt) {
+    bcrypt.compare(token, resetPassword.token, function (errBcrypt, resBcrypt) {
       let expireTime = moment.utc(resetPassword.expire);
       let currentTime = new Date();
       //hashing the password to store in the db node.js
-      bcrypt.genSalt(8, function(err, salt) {
-        bcrypt.hash(password, salt, async function(err, hash) {
+      bcrypt.genSalt(8, function (err, salt) {
+        bcrypt.hash(password, salt, async function (err, hash) {
           const user = await User.findOneAndUpdate(
             { _id: userid },
             { password: hash }
@@ -526,7 +535,7 @@ async function storePassword(req, res) {
           ResetPassword.findOneAndUpdate(
             { id: resetPassword.id },
             { status: true },
-            function(err) {
+            function (err) {
               if (err) {
                 return res.status(500).json({
                   message: 'ERROR: reset your password email FAILED ',
