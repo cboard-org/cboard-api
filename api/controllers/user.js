@@ -10,7 +10,7 @@ const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
 
-const { IPinfoWrapper , ApiLimitError} = require("node-ipinfo");
+const { IPinfoWrapper, ApiLimitError } = require("node-ipinfo");
 const ipinfo = new IPinfoWrapper(process.env.IP_INFO_TOKEN);
 
 module.exports = {
@@ -110,7 +110,7 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
       user = await createOrUpdateUser(accessToken, profile, type);
     }
 
-    if (!user.location || !user.location.ip)
+    if (!user.location || !user.location.country)
       await updateUserLocation(ip, user);
 
     const { _id: userId, email } = user;
@@ -285,9 +285,13 @@ function updateUser(req, res) {
       }
       for (let key in req.body) {
         if (UPDATEABLE_FIELDS.includes(key)) {
-          if (key === 'location')
-            if (user.location && user.location.ip) continue;
-          req.body.location = await getLocation(req.ip);
+
+          if (key === 'location') {
+            if (user.location && user.location.country) continue;
+            const newLocation = await getLocation(req.ip);
+            if (!newLocation) continue;
+            req.body.location = newLocation;
+          }
 
           user[key] = req.body[key];
         }
@@ -327,7 +331,7 @@ function loginUser(req, res) {
         id: userId
       });
 
-      if(!user.location || !user.location.ip)
+      if (!user.location || !user.location.country)
         await updateUserLocation(req.ip, user);
 
       const settings = await getSettings(user);
@@ -344,10 +348,8 @@ function loginUser(req, res) {
 }
 
 async function updateUserLocation(ip, user) {
-  // const ipConst = "191.213.233.161";
-   const ipConst = "127.0.0.1";
-  if (!user.location || !user.location.ip) { 
-    const newLocation = await getLocation(ipConst);
+  if (!user.location || !user.location.country) {
+    const newLocation = await getLocation(ip);
     if (newLocation && newLocation.country) {
       user.location = newLocation;
       try {
@@ -368,11 +370,10 @@ async function updateUserLocation(ip, user) {
 }
 
 async function getLocation(ip) {
-  //const ipConst = "191.213.200.161";
   return new Promise((resolve, reject) => {
     ipinfo.lookupIp(ip).then(
       res => {
-        if(!res.country)
+        if (!res.country)
           throw Error("The location retrieved from Ip Info was incorrect")
 
         const location = {
@@ -387,9 +388,9 @@ async function getLocation(ip) {
         if (error instanceof ApiLimitError) {
           console.error("IP info API limit")
         } else {
-          console.error(error)
+          console.error(error.message)
         }
-        resolve({});
+        resolve(null);
       });
   })
 }
