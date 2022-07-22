@@ -10,7 +10,7 @@ const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
 
-const { IPinfoWrapper, ApiLimitError } = require("node-ipinfo");
+const { IPinfoWrapper } = require("node-ipinfo");
 const ipinfo = new IPinfoWrapper(process.env.IP_INFO_TOKEN);
 
 module.exports = {
@@ -46,7 +46,11 @@ async function getSettings(user) {
 }
 
 async function createUser(req, res) {
-  req.body.location = await getLocation(req.ip);
+  try {
+    req.body.location = await getLocation(req.ip);
+  } catch (error) {
+    console.error(error);
+  }
   const user = new User(req.body);
   nev.createTempUser(user, function (err, existingPersistentUser, newTempUser) {
     if (err) {
@@ -111,7 +115,11 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
     }
 
     if (!user.location || !user.location.country)
-      await updateUserLocation(ip, user);
+      try {
+        await updateUserLocation(ip, user);
+      } catch (error) {
+        console.error(error);
+      }
 
     const { _id: userId, email } = user;
     const tokenString = auth.issueToken({
@@ -288,9 +296,12 @@ function updateUser(req, res) {
 
           if (key === 'location') {
             if (user.location && user.location.country) continue;
-            const newLocation = await getLocation(req.ip);
-            if (!newLocation) continue;
-            req.body.location = newLocation;
+            try {
+              req.body.location = await getLocation(req.ip);
+            } catch (error) {
+              console.error(error);
+              continue;
+            }
           }
 
           user[key] = req.body[key];
@@ -332,7 +343,11 @@ function loginUser(req, res) {
       });
 
       if (!user.location || !user.location.country)
-        await updateUserLocation(req.ip, user);
+        try {
+          await updateUserLocation(req.ip, user);
+        } catch (error) {
+          console.error(error);
+        }
 
       const settings = await getSettings(user);
 
@@ -349,22 +364,27 @@ function loginUser(req, res) {
 
 async function updateUserLocation(ip, user) {
   if (!user.location || !user.location.country) {
-    const newLocation = await getLocation(ip);
-    if (newLocation && newLocation.country) {
-      user.location = newLocation;
-      try {
-        const dbUser = await user.save();
-        if (!dbUser) {
-          user.location = {};
-          console.log("Unable to find user on the DB")
+    try {
+      const newLocation = await getLocation(ip);
+      if (newLocation && newLocation.country) {
+        user.location = newLocation;
+        try {
+          const dbUser = await user.save();
+          if (!dbUser) {
+            user.location = null;
+            console.log("Unable to find user on the DB")
+            return;
+          }
+        }
+        catch (err) {
+          console.log("Error saving user location", err)
+          user.location = null;
           return;
         }
       }
-      catch (err) {
-        console.log("Error saving user location", err)
-        user.location = {};
-        return;
-      }
+    }
+    catch (error) {
+      console.error(error);
     }
   }
 }
@@ -374,7 +394,7 @@ async function getLocation(ip) {
     ipinfo.lookupIp(ip).then(
       res => {
         if (!res.country)
-          throw Error("The location retrieved from Ip Info was incorrect")
+          return reject("The location retrieved from Ip Info was incorrect")
 
         const location = {
           ip: res.ip,
@@ -382,15 +402,10 @@ async function getLocation(ip) {
           region: res.region,
           city: res.city,
         }
-        resolve(location)
+        return resolve(location)
       })
       .catch((error) => {
-        if (error instanceof ApiLimitError) {
-          console.error("IP info API limit")
-        } else {
-          console.error(error.message)
-        }
-        resolve(null);
+        return reject(error);
       });
   })
 }
