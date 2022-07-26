@@ -9,7 +9,7 @@ const ResetPassword = require('../models/ResetPassword');
 const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
-const { findIpLocation, isLocalIp } = require('./location')
+const { findIpLocation, isLocalIp } = require('../helpers/localize')
 
 module.exports = {
   createUser: createUser,
