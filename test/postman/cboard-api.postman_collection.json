@@ -1575,6 +1575,47 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "/location",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"    url: 'https://api64.ipify.org?format=json',\r",
+							"    method: 'GET'\r",
+							"}, function (err, res) {\r",
+							"    if (err === null) {\r",
+							"        pm.environment.set(\"publicIp\", res.json().ip);\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Forwarded-For",
+						"value": "{{publicIp}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/location",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"location"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

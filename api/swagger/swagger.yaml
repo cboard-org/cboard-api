@@ -113,6 +113,14 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/User" 
+  Location:
+    name: X-Forwarded-For
+    in: header
+    description: Contains the remote IP address of the request
+    required: true
+    type: array
+    items:
+      type: string
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -849,6 +857,22 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /location:
+    x-swagger-router-controller: location
+    get:
+      operationId: location
+      description: Get location of unlogged user
+      parameters: 
+        - $ref: "#/parameters/Location"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LocationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"   
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1381,6 +1405,18 @@ definitions:
       - tiles
   TranslateResponse:
     type: object
+  LocationResponse:
+    type: object
+    properties:
+      country: 
+        type: string
+        description: Country of Ip
+      city:
+        type: string
+        description: City of Ip
+      region: 
+        type: string
+        description: Region of Ip 
   GetBoardListResponse:
     required:
       - total

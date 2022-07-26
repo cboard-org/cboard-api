@@ -9,9 +9,7 @@ const ResetPassword = require('../models/ResetPassword');
 const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
-
-const { IPinfoWrapper } = require("node-ipinfo");
-const ipinfo = new IPinfoWrapper(process.env.IP_INFO_TOKEN);
+const { findIpLocation, isLocalIp } = require('./location')
 
 module.exports = {
   createUser: createUser,
@@ -26,7 +24,7 @@ module.exports = {
   facebookLogin: facebookLogin,
   googleLogin: googleLogin,
   forgotPassword: forgotPassword,
-  storePassword: storePassword,
+  storePassword: storePassword
 };
 
 const USER_MODEL_ID_TYPE = {
@@ -47,9 +45,10 @@ async function getSettings(user) {
 
 async function createUser(req, res) {
   try {
-    req.body.location = await getLocation(req.ip);
+    if(!isLocalIp(req.ip))
+      req.body.location = await findIpLocation(req.ip);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
   }
   const user = new User(req.body);
   nev.createTempUser(user, function (err, existingPersistentUser, newTempUser) {
@@ -118,7 +117,7 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
       try {
         await updateUserLocation(ip, user);
       } catch (error) {
-        console.error(error);
+        console.error(error.message);
       }
 
     const { _id: userId, email } = user;
@@ -295,11 +294,11 @@ function updateUser(req, res) {
         if (UPDATEABLE_FIELDS.includes(key)) {
 
           if (key === 'location') {
-            if (user.location && user.location.country) continue;
+            if ((user.location && user.location.country) || isLocalIp(req.ip)) continue;
             try {
-              req.body.location = await getLocation(req.ip);
+              req.body.location = await findIpLocation(req.ip);
             } catch (error) {
-              console.error(error);
+              console.error(error.message);
               continue;
             }
           }
@@ -346,7 +345,7 @@ function loginUser(req, res) {
         try {
           await updateUserLocation(req.ip, user);
         } catch (error) {
-          console.error(error);
+          console.error(error.message);
         }
 
       const settings = await getSettings(user);
@@ -363,9 +362,9 @@ function loginUser(req, res) {
 }
 
 async function updateUserLocation(ip, user) {
-  if (!user.location || !user.location.country) {
+  if ((!user.location || !user.location.country) && !isLocalIp(ip)) {
     try {
-      const newLocation = await getLocation(ip);
+      const newLocation = await findIpLocation(ip);
       if (newLocation && newLocation.country) {
         user.location = newLocation;
         try {
@@ -384,31 +383,11 @@ async function updateUserLocation(ip, user) {
       }
     }
     catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   }
 }
 
-async function getLocation(ip) {
-  return new Promise((resolve, reject) => {
-    ipinfo.lookupIp(ip).then(
-      res => {
-        if (!res.country)
-          return reject("The location retrieved from Ip Info was incorrect")
-
-        const location = {
-          ip: res.ip,
-          country: res.country,
-          region: res.region,
-          city: res.city,
-        }
-        return resolve(location)
-      })
-      .catch((error) => {
-        return reject(error);
-      });
-  })
-}
 
 function logoutUser(req, res) {
   if (req.session) {
