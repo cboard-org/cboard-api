@@ -25,6 +25,7 @@ async function findIpLocation(ip) {
                 const location = {
                     ip: res.ip,
                     country: res.country,
+                    countryCode: res.countryCode,
                     region: res.region,
                     city: res.city,
                 }

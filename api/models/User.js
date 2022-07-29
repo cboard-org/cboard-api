@@ -76,6 +76,7 @@ const USER_SCHEMA_DEFINITION = {
   location: {
     ip: String,
     country: String,
+    countryCode: String,
     region: String,
     city: String,
   }
