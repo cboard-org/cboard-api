@@ -6,7 +6,8 @@ const url = require('url');
 
 const GoogleTokenStrategyConfig = {
   clientID: process.env.GOOGLE_APP_ID, //config.google.APP_ID,
-  clientSecret: process.env.GOOGLE_APP_SECRET //config.google.APP_SECRET
+  clientSecret: process.env.GOOGLE_APP_SECRET, //config.google.APP_SECRET
+  passReqToCallback: true
 };
 
 passport.use(
@@ -22,7 +23,6 @@ const configureGoogleTokenStrategy = app => {
     }),
     (req, res) => {
       res.json(req.user);
-      console.log(req.user);
     }
   );
 };

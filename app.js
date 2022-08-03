@@ -116,6 +116,8 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
 
   app.use(middleware.swaggerUi());
 
+  app.enable('trust proxy')
+
   Facebook.configureFacebookStrategy(app);
   Google.configureGoogleStrategy(app);
   GoogleToken.configureGoogleTokenStrategy(app);

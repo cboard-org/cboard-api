@@ -299,6 +299,27 @@ async function createMochaBoard(server, token) {
   return res.body.id;
 }
 
+/* Get the public IP of the device that is running the test */
+
+async function getPublicIp() { 
+  const https = require('https');
+
+  const url = 'https://api64.ipify.org?format=json'
+
+  return new Promise((resolve, reject) => {
+    var data = '';
+    https.get(url, res => {
+      res.on('data', chunk => { data += chunk })
+      res.on('end', () => {
+        const parse = JSON.parse(data);
+        if(parse.ip)
+          return resolve(parse.ip);
+        return reject();
+      })
+    })
+  });
+}
+
 module.exports = {
   prepareNodemailerMock,
   verifyListProperties,
@@ -319,4 +340,5 @@ module.exports = {
   settingsData,
   translateData,
   generateEmail: generateEmail,
+  getPublicIp
 };

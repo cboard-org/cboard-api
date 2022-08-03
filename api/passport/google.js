@@ -6,7 +6,8 @@ const UserController = require('../controllers/user');
 const GoogleStrategyConfig = {
   clientID: config.google.APP_ID,
   clientSecret: config.google.APP_SECRET,
-  callbackURL: config.google.CALLBACK_URL
+  callbackURL: config.google.CALLBACK_URL,
+  passReqToCallback: true
 };
 
 passport.use(
