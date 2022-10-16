@@ -5,6 +5,7 @@ const constants = require('../constants');
 module.exports = {
   env: 'production',
   databaseUrl: process.env.MONGO_URL || 'mongodb://localhost/cboard-api',
+  supportEmail: process.env.EMAIL_SUPPORT || 'support@cboard.io',
   session: {
     secret: process.env.API_SESSION_SECRET || 's3Cur3'
   },
@@ -36,7 +37,7 @@ module.exports = {
     ]
   },
   emailTransport: {
-    from: 'cboard@cboard.io',
+    from: process.env.EMAIL_FROM || 'cboard@cboard.io',
     host: 'smtp.sendgrid.net',
     port: 465,
     secure: false,

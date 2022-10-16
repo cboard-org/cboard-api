@@ -3,7 +3,7 @@
 const { google } = require('googleapis');
 const analyticsreporting = google.analyticsreporting('v4');
 const constants = require('../constants');
-const config = require("../../config");
+const config = require('../../config');
 
 module.exports = {
   batchGet: batchGet,

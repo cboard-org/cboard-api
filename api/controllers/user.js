@@ -71,7 +71,7 @@ async function createUser(req, res) {
       let domain = req.headers.origin;
       //if origin is private insert default hostname
       if (!domain) {
-        domain = 'https://app.cboard.io'
+        domain = `https://${process.env.APP_DOMAIN}`
       }
 
       nev.sendVerificationEmail(newTempUser.email, domain, URL, function (err, info) {
@@ -469,7 +469,7 @@ async function forgotPassword(req, res) {
         let domain = req.headers.origin;
         //if origin is private insert default hostname
         if (!domain) {
-          domain = 'https://app.cboard.io'
+          domain = `https://${process.env.APP_DOMAIN}`
         }
 
         nev.sendResetPasswordEmail(user.email, domain, user.id, token, function (err) {

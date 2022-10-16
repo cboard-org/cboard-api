@@ -1,7 +1,8 @@
 'use strict';
 
 var randtoken = require('rand-token'),
-  nodemailer = require('nodemailer');
+  nodemailer = require('nodemailer'),
+  config = require('../../config');
 
 module.exports = function(mongoose) {
   var isPositiveInteger = function(x) {
@@ -43,8 +44,8 @@ module.exports = function(mongoose) {
   };
   // default options
   var options = {
-    verificationURL: 'https://app.cboard.io/activate/${URL}',
-    resetPasswordURL: 'https://app.cboard.io/reset/${USERID}/${URL}',
+    verificationURL: `https://${process.env.APP_DOMAIN}/activate/\${URL}`,
+    resetPasswordURL: `https://${process.env.APP_DOMAIN}/reset/\${USERID}/\${URL}`,
     URLLength: 48,
 
     // mongo-stuff
@@ -65,7 +66,7 @@ module.exports = function(mongoose) {
       }
     },
     verifyMailOptions: {
-      from: 'Do Not Reply <cboard@cboard.io>',
+      from: `Do Not Reply <${config.emailTransport.from}>`,
       subject: 'Confirm your account',
       html:
         '<p>Please verify your account by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
@@ -82,7 +83,7 @@ module.exports = function(mongoose) {
     },
     shouldSendConfirmation: true,
     confirmMailOptions: {
-      from: 'Do Not Reply<cboard@cboard.io>',
+      from: `Do Not Reply<${config.emailTransport.from}>`,
       subject: 'Successfully verified!',
       html: '<p>Your account has been successfully verified.</p>',
       text: 'Your account has been successfully verified.'
@@ -95,7 +96,7 @@ module.exports = function(mongoose) {
       }
     },
     resetPasswordEmailOptions: {
-      from: 'Do Not Reply <user@gmail.com>',
+      from: `Do Not Reply <${config.emailTransport.from}>`,
       subject: 'Cboard - Password reset',
       html:
         '<p>A request was submitted to reset the password of your Cboard account. </p> \
@@ -110,7 +111,7 @@ module.exports = function(mongoose) {
     },
     hashingFunction: null,
     reportPublicBoardEmailOptions:{
-      from: 'Cboard Support <cboard@cboard.io>',
+      from: `Cboard Support <${config.emailTransport.from}>`,
       subject: 'Public Board Report',
       html:
         '<p>The user ${whistleblowerName} reported that the board ${name} from the user ${author} contains inappropiate contet. </p> \
@@ -614,7 +615,7 @@ module.exports = function(mongoose) {
                           .replace('${url}', url)
                           .replace('${reason}', reason)
 
-      mailOptions.to = 'support@cboard.io';
+      mailOptions.to = config.supportEmail;
       if (!callback) {
         callback = options.confirmSendMailReportCallback;
       }

@@ -57,20 +57,20 @@ function configNev(locale) {
       // emailing options
       transportOptions: config.emailTransport,
       verifyMailOptions: {
-        from: 'Do Not Reply <cboard@cboard.io>',
+        from: `Do Not Reply <${config.emailTransport.from}>`,
         subject: subject,
         html: html,
         text: text
       },
       shouldSendConfirmation: true,
       confirmMailOptions: {
-        from: 'Do Not Reply <cboard@cboard.io>',
+        from: `Do Not Reply <${config.emailTransport.from}>`,
         subject: 'Cboard - Successfully verified!',
         html: '<p>Your account at Cboard has been successfully verified.</p>',
         text: 'Your account at Cboard has been successfully verified.'
       },
       resetPasswordMailOptions: {
-        from: 'Do Not Reply <cboard@cboard.io>',
+        from: `Do Not Reply <${config.emailTransport.from}>`,
         subject: 'Cboard - Password reset',
         html:
           '<p>A request was submitted to reset the password of your Cboard account. </p> \
