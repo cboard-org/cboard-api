@@ -121,6 +121,20 @@ parameters:
     type: array
     items:
       type: string
+  Subscriber:
+    name: subscriber
+    in: body
+    description: Subscriber data 
+    required: true
+    schema:
+      $ref: "#/definitions/Subscriber" 
+  Transaction:
+    name: transaction
+    in: body
+    description: transaction data 
+    required: true
+    schema:
+      $ref: "#/definitions/PostTransaction"         
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -873,6 +887,106 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"   
+  /subscriptions:
+    post:
+      x-security-scopes:
+        - admin
+      responses:
+        "200":
+          description: Success  
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"  
+    put:
+      x-security-scopes:
+        - admin
+      responses:
+        "200":
+          description: Success  
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"  
+    delete:    
+      x-security-scopes:
+        - admin      
+      responses:
+        "200":
+          description: Success  
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"  
+  /subscriber:
+    x-swagger-router-controller: subscriber
+    post:
+      operationId: createSubscriber
+      description: Create subscriber object in database.
+      parameters: 
+        - $ref: "#/parameters/Subscriber"
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SubscriberResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /subscriber/{id}:  
+    delete:
+      operationId: deleteSubscriber 
+      description: delete a subscriber
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SubscriberResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"    
+  /subscriber/{id}/transaction:
+    x-swagger-router-controller: subscriber
+    post:
+      operationId: postTransaction
+      description: create transaction for a subscriber
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+        - $ref: "#/parameters/Transaction"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PostTransactionResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"            
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1474,3 +1588,99 @@ definitions:
               type: string
           language: 
               type: string
+  Subscriber:
+    type: object
+    required:
+      - userID
+      - country
+      - status
+    properties:
+      userID:
+        type: string
+      country:
+        type: string
+      status:
+        type: string
+  SubscriberResponse:
+    type: object
+    required:
+      - id
+      - userId
+      - country
+      - status
+    properties:
+      id: 
+        type: string
+        description: Self-generated id for the subscriber  
+      userId:
+        type: string
+      country: 
+        type: string
+      status:
+        type: string
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time      
+  PostTransaction:
+    type: object
+    required:
+      - additionalData
+      - alias
+      - currency
+      - description
+      - subscriptionId
+      - loaded
+      - price
+      - priceMicros
+      - state
+      - title
+      - transaction
+    properties:
+      additionalData:
+        type: string
+      alias:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      subscriptionId:
+        type: string
+      loaded:
+        type: boolean
+      price:
+        type: string
+      priceMicros:
+        type: number
+      state:
+        type: string
+      title:
+        type: string
+      transaction:
+        type: object          
+      # createdAt:
+      #   type: string
+      #   format: date-time
+      # updatedAt:
+      #   type: string
+      #   format: date-time
+  PostTransactionResponse:
+    type: object
+    required:
+      - ok
+      - data
+    properties:
+      ok: 
+        type: boolean
+      data:
+        type: object
+        properties:
+          transaction:
+            type: object
+          code:
+            type: number  
+      error:
+        $ref: "#/definitions/ErrorResponse"          
