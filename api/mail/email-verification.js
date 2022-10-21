@@ -108,13 +108,6 @@ module.exports = function(mongoose) {
         Please reset your account by clicking ${URL} \
         If you are unable to do so, copy and paste the following link into your browser: ${URL}'
     },
-    verifySendMailCallback: function(err, info) {
-      if (err) {
-        throw err;
-      } else {
-        console.log(info.response);
-      }
-    },
     hashingFunction: null,
     reportPublicBoardEmailOptions:{
       from: 'Cboard Support <cboard@cboard.io>',
@@ -578,7 +571,7 @@ module.exports = function(mongoose) {
     mailOptions.to = email;
     mailOptions.html = mailOptions.html.replace(r, URL);
     mailOptions.text = mailOptions.text.replace(r, URL);
-    
+
     if (!callback) {
       callback = options.resetPasswordSendMailCallback;
     }
