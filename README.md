@@ -54,21 +54,27 @@ The Cboard API is a cloud service, and it needs access to several cloud services
 In a separate terminal tab/window, run the project server.
 
 ```bash
-$ npm run dev
+$ npm run dev 
 ```
+For automatically restarting the server when file changes in the directory are detected
 
-This will start a server process listening on port 10010. You will now be able to make calls to the API.
+or 
+
+```bash
+$ npm run start
+```
+Both of them start a server process listening on port 10010. You will now be able to make calls to the API.
 
 (If you are having trouble, make sure you have successfully installed the pre-requisites -- see "Pre-requisites" section above.)
 
 ## See API Paths
 
-Swagger provides an interactive, browser-based editor. To visualize available API endpoints, start the editor:
+Swagger provides an interactive, browser-based editor. To visualize available API endpoints:
 
 ```bash
-$ swagger project edit
+$ localhost:10010/docs/
 ```
-That should open a browser window and show API swagger editor (as shown below):
+That show API swagger editor (as shown below):
 
 <img src='https://i.imgur.com/pt0eJVQ.png' width='600' alt='Cboard API Swagger'>
 
