@@ -940,8 +940,9 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
   /subscriber/{id}:  
+    x-swagger-router-controller: subscriber
     delete:
-      operationId: deleteSubscriber 
+      operationId: deleteSubscriber
       description: delete a subscriber
       parameters:
         - name: id

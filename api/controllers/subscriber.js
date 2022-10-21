@@ -4,6 +4,7 @@ const moment = require('moment');
 
 module.exports = {
   createSubscriber,
+  deleteSubscriber,
   postTransaction
 };
 
@@ -22,4 +23,10 @@ function createSubscriber(req, res) {
   //   });
 }
 
-function postTransaction(req, res) {}
+function deleteSubscriber(req, res) {
+  return res.end();
+}
+
+function postTransaction(req, res) {
+  return res.status(200).json({ ok: true });
+}

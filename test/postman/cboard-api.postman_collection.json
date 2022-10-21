@@ -1616,6 +1616,320 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "/subscriber unlogged",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Only registered users can access \", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"United States\",\n    \"status\": \"processing\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const schema = {  ",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"id\": {\"type\":\"string\"},",
+							"        \"userId\": {\"type\":\"string\"},",
+							"        \"country\": {\"type\":\"string\"},",
+							"        \"status\": {\"type\":\"string\"},",
+							"        \"createdAt\": {\"type\": \"string\"},",
+							"        \"updatedAt\": {\"type\":\"string\"}",
+							"    },",
+							"    \"required\":[\"id\",\"userId\",\"country\",\"status\",\"createdAt\",\"updatedAt\"]",
+							"}        ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"to have required props\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"    pm.globals.set(\"id\",pm.response.json().subscriberId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"United States\",\n    \"status\": \"processing\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber unahutorized",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
+							"pm.test(\"only admin user can delete\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/{id}/transaction unlogged",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Only registered users can access \", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"additionalData\" : null,\n    \"alias\": \"One Year Subscription\",\n    \"currency\": \"USD\",\n    \"description\": \"annual subscription\",\n    \"id\": \"one_year_subscription\",\n    \"loaded\": true,\n    \"price\": \"$12.99\",\n    \"priceMicros\": 12990000,\n    \"state\": \"approved\",\n    \"title\": \"The Monthly Subscription Title\",\n    \"transaction\": { \n        \"type\": \"paid subscription\",\n        \"valid\": true\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/invalidId/transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const schema = {  ",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"ok\": {\"type\":\"boolean\"},",
+							"        \"data\":{\"code\": {\"type\":\"number\"}},",
+							"    },",
+							"    \"required\":[\"ok\",\"data\"]",
+							"}        ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"to ok prop be false\", function () {",
+							"   pm.expect(pm.response.json().ok).to.be.false;",
+							"});",
+							"",
+							"pm.test(\"to have required props\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"additionalData\" : null,\n    \"alias\": \"One Year Subscription\",\n    \"currency\": \"USD\",\n    \"description\": \"annual subscription\",\n    \"id\": \"one_year_subscription\",\n    \"loaded\": true,\n    \"price\": \"$12.99\",\n    \"priceMicros\": 12990000,\n    \"state\": \"approved\",\n    \"title\": \"The Monthly Subscription Title\",\n    \"transaction\": { \n        \"type\": \"paid subscription\",\n        \"valid\": true\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/invalid/transaction",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"invalid",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/{id}/transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const schema = {  ",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"ok\": {\"type\":\"boolean\"},",
+							"        \"data\":{\"transaction\": {\"type\":\"object\"}},",
+							"    },",
+							"    \"required\":[\"ok\",\"transaction\"]",
+							"}        ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"to have required props\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"additionalData\" : null,\n    \"alias\": \"One Year Subscription\",\n    \"currency\": \"USD\",\n    \"description\": \"annual subscription\",\n    \"id\": \"one_year_subscription\",\n    \"loaded\": true,\n    \"price\": \"$12.99\",\n    \"priceMicros\": 12990000,\n    \"state\": \"approved\",\n    \"title\": \"The Monthly Subscription Title\",\n    \"transaction\": { \n        \"type\": \"paid subscription\",\n        \"valid\": true\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}",
+						"transaction"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
