@@ -80,13 +80,13 @@ async function createUser(req, res) {
             message: 'ERROR: sending verification email FAILED ' + info
           });
         }
-      });
 
-      return res.status(200).json({
-        success: 1,
-        url: URL,
-        message:
-          'An email has been sent to you. Please check it to verify your account.'
+        return res.status(200).json({
+          success: 1,
+          url: URL,
+          message:
+              'An email has been sent to you. Please check it to verify your account.'
+        });
       });
 
       // user already exists in temporary collection!
