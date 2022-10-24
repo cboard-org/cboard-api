@@ -177,6 +177,45 @@ const communicatorData = {
   boards: ['root'],
 };
 
+const subscriberData = {
+  country: 'United States',
+  status: "unpaid",
+  product: {
+    planId: 'one_year_subscription',
+    subscriptionId: '123456',
+    status: "unpaid"
+  }
+};
+
+const transactionData = {
+  additionalData : null,
+  alias: "One Year Subscription",
+  currency: "USD",
+  description: "annual subscription",
+  id: "one_year_subscription",
+  loaded: true,
+  price: "$12.99",
+  priceMicros: 12990000,
+  state: "approved",
+  title: "The Monthly Subscription Title",
+  transaction: {
+    developerPayload : undefined,
+    id : "idString",
+    purchaseToken : "purchaseTokenString",
+    // NOTE: receipt's value is string and will need to be parsed
+    receipt: `{
+    "autoRenewing":true,
+    "orderId":"orderIdString",
+    "packageName":"com.unicef.cboard",
+    "purchaseTime":1555217574101,
+    "purchaseState":0,
+    "purchaseToken":"purchaseTokenString"
+    }`,
+    signature : "signatureString",
+    type: "android-playstore",
+  }  
+}
+
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
     useNewUrlParser: true,
@@ -339,6 +378,8 @@ module.exports = {
   analyticsReportData,
   settingsData,
   translateData,
+  subscriberData,
+  transactionData,
   generateEmail: generateEmail,
   getPublicIp
 };
