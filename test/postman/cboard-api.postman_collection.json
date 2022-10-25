@@ -3,8 +3,7 @@
 		"_postman_id": "f8bd131f-6f49-404d-afc7-2a1c15d2400b",
 		"name": "cboard-api",
 		"description": "contains tests for all cboard-api calls",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "2589634"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{

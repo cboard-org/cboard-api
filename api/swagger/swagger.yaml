@@ -1634,4 +1634,5 @@ definitions:
           code:
             type: number  
       error:
-        $ref: "#/definitions/ErrorResponse"          
+        $ref: "#/definitions/ErrorResponse"
+          
