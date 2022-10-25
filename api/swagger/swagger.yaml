@@ -128,13 +128,6 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/Subscriber" 
-  Transaction:
-    name: transaction
-    in: body
-    description: transaction data 
-    required: true
-    schema:
-      $ref: "#/definitions/PostTransaction"         
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -978,7 +971,7 @@ paths:
           type: string
           in: path
           required: true
-        - $ref: "#/parameters/Transaction"
+          minimum: 1
       responses:
         "200":
           description: Success
@@ -1625,49 +1618,6 @@ definitions:
       updatedAt:
         type: string
         format: date-time      
-  PostTransaction:
-    type: object
-    required:
-      - additionalData
-      - alias
-      - currency
-      - description
-      - subscriptionId
-      - loaded
-      - price
-      - priceMicros
-      - state
-      - title
-      - transaction
-    properties:
-      additionalData:
-        type: string
-      alias:
-        type: string
-      currency:
-        type: string
-      description:
-        type: string
-      subscriptionId:
-        type: string
-      loaded:
-        type: boolean
-      price:
-        type: string
-      priceMicros:
-        type: number
-      state:
-        type: string
-      title:
-        type: string
-      transaction:
-        type: object          
-      # createdAt:
-      #   type: string
-      #   format: date-time
-      # updatedAt:
-      #   type: string
-      #   format: date-time
   PostTransactionResponse:
     type: object
     required:

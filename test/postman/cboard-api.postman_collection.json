@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "6fba04ce-86d5-491b-b3cf-24decde495c8",
+		"_postman_id": "f8bd131f-6f49-404d-afc7-2a1c15d2400b",
 		"name": "cboard-api",
 		"description": "contains tests for all cboard-api calls",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2589634"
 	},
 	"item": [
 		{
@@ -1594,6 +1595,15 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -1668,14 +1678,16 @@
 							"const schema = {  ",
 							"    \"type\": \"object\",",
 							"    \"properties\": {",
-							"        \"id\": {\"type\":\"string\"},",
+							"        \"_id\": {\"type\":\"string\"},",
 							"        \"userId\": {\"type\":\"string\"},",
 							"        \"country\": {\"type\":\"string\"},",
 							"        \"status\": {\"type\":\"string\"},",
+							"        \"transaction\": {\"type\":\"object\"},",
+							"        \"product\": {\"type\":\"object\"},",
 							"        \"createdAt\": {\"type\": \"string\"},",
 							"        \"updatedAt\": {\"type\":\"string\"}",
 							"    },",
-							"    \"required\":[\"id\",\"userId\",\"country\",\"status\",\"createdAt\",\"updatedAt\"]",
+							"    \"required\":[\"_id\",\"userId\",\"country\",\"status\",\"product\",\"createdAt\",\"updatedAt\"]",
 							"}        ",
 							"",
 							"pm.test(\"Status code is 200\", function () {",
@@ -1684,7 +1696,7 @@
 							"",
 							"pm.test(\"to have required props\", function () {",
 							"    pm.response.to.have.jsonSchema(schema);",
-							"    pm.globals.set(\"id\",pm.response.json().subscriberId);",
+							"    pm.globals.set(\"subscriberId\",pm.response.json()._id);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1706,7 +1718,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"United States\",\n    \"status\": \"processing\"\n}"
+					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"'United States'\",\n    \"status\": \"free-trial\",\n    \"product\": {\n        \"planId\": \"one_year_subscription\",\n        \"subscriptionId\": \"123456\",\n        \"status\": \"requested\"\n    }\n}"
 				},
 				"url": {
 					"raw": "{{url}}/subscriber/",
@@ -1723,6 +1735,53 @@
 		},
 		{
 			"name": "/subscriber unahutorized",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
+							"pm.test(\"only admin user can delete\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber",
 			"event": [
 				{
 					"listen": "test",
@@ -1883,9 +1942,15 @@
 							"    \"type\": \"object\",",
 							"    \"properties\": {",
 							"        \"ok\": {\"type\":\"boolean\"},",
-							"        \"data\":{\"transaction\": {\"type\":\"object\"}},",
+							"        \"data\":{ ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"transaction\": {\"type\":\"object\"}",
+							"            },",
+							"            \"required\":[\"transaction\"]",
+							"        }    ",
 							"    },",
-							"    \"required\":[\"ok\",\"transaction\"]",
+							"    \"required\":[\"ok\",\"data\"]",
 							"}        ",
 							"",
 							"pm.test(\"Status code is 200\", function () {",

@@ -58,7 +58,7 @@ describe('Subscriber API calls', function () {
         .expect(200);
 
       const subscriberRes = res.body;
-      subscriberRes.should.to.have.property('id');
+      subscriberRes.should.to.have.property('_id');
       subscriberRes.userId.should.to.equal(user.userId);
       subscriberRes.country.should.to.deep.equal(mockSubscriberData.country);
       subscriberRes.status.should.to.deep.equal(mockSubscriberData.status);
@@ -94,7 +94,7 @@ describe('Subscriber API calls', function () {
     it('it should not creates a transaction field if user is not registered', async function () {
         const mockTransactionData = helper.transactionData;
         const res = await request(server)
-          .post(`/subscriber/${subscriber.id}/transaction`)
+          .post(`/subscriber/${subscriber._id}/transaction`)
           .send(mockTransactionData)
           .set('Accept', 'application/json')
           .expect('Content-Type', /json/)
@@ -116,13 +116,10 @@ describe('Subscriber API calls', function () {
     });
 
     it('it should creates a transaction field in subsciber.', async function () {
-        const receiptObject = JSON.parse(helper.transaction.receipt)
-        const mockTransactionData = {
-            ...helper.transactionData,
-            receipt: receiptObject
-        };
+        const receiptObject = JSON.parse(helper.transactionData.transaction.receipt);
+        const mockTransactionData = helper.transactionData;
         const res = await request(server)
-          .post(`/subscriber/${subscriber.id}/transaction`)
+          .post(`/subscriber/${subscriber._id}/transaction`)
           .send(mockTransactionData)
           .set('Authorization', `Bearer ${user.token}`)
           .set('Accept', 'application/json')
@@ -132,16 +129,16 @@ describe('Subscriber API calls', function () {
         const transactionRes = res.body;
 
         transactionRes.ok.should.to.equal(true);
-        transactionRes.data.transaction.should.to.equal(mockTransactionData.transaction);
+        transactionRes.data.transaction.should.to.deep.equal({...mockTransactionData.transaction, receipt:receiptObject});
     });
   });
 
   describe('DELETE /subscriber/${subscriber.id}', function () {
     let subscriber;
     let adminUser;
+    const mockSubscriberData = helper.subscriberData;
 
     before(async function () {
-        const mockSubscriberData = helper.subscriberData;
         const subscriberData = {
             ...mockSubscriberData,
             userId: user.userId
@@ -162,7 +159,7 @@ describe('Subscriber API calls', function () {
 
     it('it should not delete a subscriber if auth is not present', async function () {
         const res = await request(server)
-          .delete(`/subscriber/${subscriber.id}`)
+          .delete(`/subscriber/${subscriber._id}`)
           .set('Accept', 'application/json')
           .expect('Content-Type', /json/)
           .expect(403);
@@ -171,7 +168,7 @@ describe('Subscriber API calls', function () {
     //THIS BREAK API
     // it('it should not delete a subscriber if user is not admin', async function () {
     //     const res = await request(server)
-    //       .delete(`/subscriber/${subscriber.id}`)
+    //       .delete(`/subscriber/${subscriber._id}`)
     //       .set('Accept', 'application/json')
     //       .set('Authorization', `Bearer ${user.token}`)
     //       .expect('Content-Type', /json/)
@@ -180,14 +177,14 @@ describe('Subscriber API calls', function () {
 
     it('it should delete a subscriber.', async function () {
         const res = await request(server)
-        .delete(`/subscriber/${subscriber.id}`)
+        .delete(`/subscriber/${subscriber._id}`)
           .set('Authorization', `Bearer ${adminUser.token}`)
           .set('Accept', 'application/json')
-        //   .expect('Content-Type', /json/)
+          .expect('Content-Type', /json/)
           .expect(200);
-  
+
           const subscriberRes = res.body;
-          subscriberRes.should.to.have.property('id');
+          subscriberRes.should.to.have.property('_id');
           subscriberRes.userId.should.to.equal(user.userId);
           subscriberRes.country.should.to.deep.equal(mockSubscriberData.country);
           subscriberRes.status.should.to.deep.equal(mockSubscriberData.status);

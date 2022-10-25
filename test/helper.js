@@ -179,11 +179,11 @@ const communicatorData = {
 
 const subscriberData = {
   country: 'United States',
-  status: "unpaid",
+  status: "free-trial",
   product: {
     planId: 'one_year_subscription',
     subscriptionId: '123456',
-    status: "unpaid"
+    status: "requested"
   }
 };
 
@@ -199,7 +199,7 @@ const transactionData = {
   state: "approved",
   title: "The Monthly Subscription Title",
   transaction: {
-    developerPayload : undefined,
+    developerPayload : null,
     id : "idString",
     purchaseToken : "purchaseTokenString",
     // NOTE: receipt's value is string and will need to be parsed
