@@ -85,8 +85,9 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
         if (!isRequestValid) {
           const authorizationError = new Error(errorMessage);
           authorizationError.statusCode = 403;
+          req.res.status(403).json({ message: errorMessage });
           cb(authorizationError);
-          return req.res.status(403).json({ message: errorMessage });
+          return
         }
 
         cb();
