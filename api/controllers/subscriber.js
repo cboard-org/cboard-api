@@ -1,6 +1,9 @@
 const moment = require('moment');
 const ObjectId = require('mongoose').Types.ObjectId;
 
+const { google } = require('googleapis');
+const androidpublisher = google.androidpublisher('v3');
+
 const Subscriber = require('../models/Subscribers');
 
 module.exports = {
@@ -19,7 +22,7 @@ function createSubscriber(req, res) {
   const subscriber = new Subscriber(newSubscriber);
   subscriber.save(function(err, subscriber) {
     if (err) {
-      console.log('error', err);
+      console.error('error', err);
       return res.status(409).json({
         message: 'Error saving subscriber',
         error: err.message
@@ -63,15 +66,70 @@ async function postTransaction(req, res) {
     }
     return transaction;
   };
+  const verifyAndroidPurchase = async () => {
+    const auth = new google.auth.GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/androidpublisher']
+    });
+
+    const authClient = await auth.getClient();
+    google.options({ auth: authClient });
+
+    const res = await androidpublisher.purchases.subscriptions.get({
+      packageName: 'com.unicef.cboard',
+      subscriptionId: 'one_year_subscription',
+      token: 'placeholder-value'
+    });
+
+    if (res.data?.status !== 200 && res.data.resource?.paymentState !== 1) {
+      console.error(res.data.errors);
+      throw { code: 6778001, message: res.data.errors };
+    }
+  };
   const transaction = parseTransactionReceipt(req.body.transaction);
 
   if (!ObjectId.isValid(subscriberId)) {
     return res.status(200).json({
       ok: false,
       data: {
+        code: 6778001 //INVALID_PAYLOAD
+      },
+      error: {
+        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId
+      }
+    });
+  }
+
+  if (transaction.type !== 'android-playstore')
+    return res.status(200).json({
+      ok: false,
+      data: {
+        code: 6778001 //INVALID_PAYLOAD
+      },
+      error: {
+        message: 'only android-playstore purchases are allowed'
+      }
+    });
+
+  try {
+    await verifyAndroidPurchase();
+  } catch (error) {
+    if (error.code === 400 || error.code === 6778001)
+      return res.status(200).json({
+        ok: false,
+        data: {
+          code: 6778001 //INVALID_PAYLOAD
+        },
         error: {
-          message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId
+          message: error.message
         }
+      });
+    return res.status(200).json({
+      ok: false,
+      data: {
+        code: 6778002 //CONNECTION_FAILED
+      },
+      error: {
+        message: error.message
       }
     });
   }
@@ -89,9 +147,10 @@ async function postTransaction(req, res) {
         return res.status(200).json({
           ok: false,
           data: {
-            error: {
-              message: err
-            }
+            code: 6778005 //INTERNAL_ERROR
+          },
+          error: {
+            message: err
           }
         });
       }
