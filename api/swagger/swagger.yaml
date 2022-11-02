@@ -880,10 +880,20 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"   
-  /subscriptions:
+  /subscription/{subscriptionId}:
+    x-swagger-router-controller: subscription
     post:
+      operationId: createSubscription
+      security:
+        - Bearer: []
       x-security-scopes:
         - admin
+      parameters:
+        - name: subscriptionId
+          type: string
+          in: path
+          required: true
+          minimum: 1  
       responses:
         "200":
           description: Success  
@@ -891,9 +901,37 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"  
+    get:
+      operationId: getSubscription
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: subscriptionId
+          type: string
+          in: path
+          required: true
+          minimum: 1  
+      responses:
+        "200":
+          description: Success  
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
     put:
+      operationId: updateSubscription
+      security:
+        - Bearer: []
       x-security-scopes:
         - admin
+      parameters:
+        - name: subscriptionId
+          type: string
+          in: path
+          required: true
+          minimum: 1    
       responses:
         "200":
           description: Success  
@@ -901,9 +939,18 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"  
-    delete:    
+    delete:
+      operationId: deleteSubscription
+      security:
+        - Bearer: []    
       x-security-scopes:
         - admin      
+      parameters:
+        - name: subscriptionId
+          type: string
+          in: path
+          required: true
+          minimum: 1    
       responses:
         "200":
           description: Success  

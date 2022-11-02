@@ -7,6 +7,7 @@ var request = require('supertest');
 const User = require('../api/models/User');
 const should = chai.should();
 const uuid = require('uuid');
+const Subscription = require('../api/models/subscriptions');
 
 /**helper nodemailer-mock
  *
@@ -216,6 +217,61 @@ const transactionData = {
   }  
 }
 
+const subscription = {
+  subscriptionId: "subscription-id",
+  subscriptionData: {
+    name: 'mock subscription',
+    status: "active",
+    platform: "android-playstore",
+    benefits: [
+      "feature","feature2","feature3"
+    ],
+    plans:[{
+      name:"mocked plan",
+      planId:"mocked-plan-id",
+      status:"active",
+      countries:["Argentina"],
+      period:"unlimited",
+      renovation:"anual",
+    }
+    ]
+  },
+  updateSubscriptionData: {
+    name: 'mock subscription',
+    status: "active",
+    platform: "android-playstore",
+    benefits: [
+      "feature4","feature5","feature6"
+    ],
+    plans:[{
+      name:"updated mocked plan",
+      planId:"updated-mocked-plan-id",
+      status:"active",
+      countries:["Argentina","Perú"],
+      period:"unlimited",
+      renovation:"anual",
+    }
+    ]
+  },
+  createSubscription: async () =>{
+    const moment = "2022-11-01T14:51:15.000Z";
+    const {subscriptionData, subscriptionId} = subscription;
+    const plansWithMoment = subscriptionData.plans.map(plan => ({...plan, createdAt:moment,updatedAt:moment}))
+    const newSubscription = {
+      ...subscriptionData,
+      plans: plansWithMoment,
+      subscriptionId:subscriptionId,
+      createdAt: moment,
+      updatedAt: moment,
+    }
+    const mockedSubscription = new Subscription(newSubscription);
+    await mockedSubscription.save();
+  },
+  deleteSubscription: async () =>{
+    await Subscription.findOneAndRemove({subscriptionId:subscription.subscriptionId})
+  }
+}
+
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
     useNewUrlParser: true,
@@ -378,6 +434,7 @@ module.exports = {
   analyticsReportData,
   settingsData,
   translateData,
+  subscription,
   subscriberData,
   transactionData,
   generateEmail: generateEmail,
