@@ -8,32 +8,32 @@ const PRODUCT_SCHEMA_DEFINITION = {
     type: String,
     unique: true,
     required: true,
-    trim: true
+    trim: true,
   },
   subscriptionId: {
     type: String,
     unique: true,
     required: true,
-    trim: true
+    trim: true,
   },
   status: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   createdAt: {
     type: Date,
-    required: true
+    required: true,
   },
   updatedAt: {
     type: Date,
-    required: true
-  }
+    required: true,
+  },
 };
 
 const productSchema = new Schema(PRODUCT_SCHEMA_DEFINITION, {
   autoIndex: false,
-  strict: true
+  strict: true,
 });
 
 const SUBSCRIBERS_SCHEMA_DEFINITION = {
@@ -41,39 +41,38 @@ const SUBSCRIBERS_SCHEMA_DEFINITION = {
     type: String,
     unique: true,
     required: true,
-    trim: true
+    trim: true,
   },
   country: {
     type: String,
     required: true,
     unique: true,
-    trim: true
+    trim: true,
   },
   status: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   createdAt: {
     type: Date,
-    required: true
+    required: true,
   },
 
   updatedAt: {
     type: Date,
-    required: true
+    required: true,
   },
   // transaction: { type: transactionSchema },
-  transaction: {
-  },
+  transaction: {},
   product: {
-    type: productSchema
-  }
+    type: productSchema,
+  },
 };
 
 const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
   autoIndex: false,
-  strict: true
+  strict: true,
 });
 
 const Subscribers = mongoose.model('Subscribers', subscribersSchema);

@@ -180,29 +180,29 @@ const communicatorData = {
 
 const subscriberData = {
   country: 'United States',
-  status: "free-trial",
+  status: 'free-trial',
   product: {
     planId: 'one_year_subscription',
     subscriptionId: '123456',
-    status: "requested"
-  }
+    status: 'requested',
+  },
 };
 
 const transactionData = {
-  additionalData : null,
-  alias: "One Year Subscription",
-  currency: "USD",
-  description: "annual subscription",
-  id: "one_year_subscription",
+  additionalData: null,
+  alias: 'One Year Subscription',
+  currency: 'USD',
+  description: 'annual subscription',
+  id: 'one_year_subscription',
   loaded: true,
-  price: "$12.99",
+  price: '$12.99',
   priceMicros: 12990000,
-  state: "approved",
-  title: "The Monthly Subscription Title",
+  state: 'approved',
+  title: 'The Monthly Subscription Title',
   transaction: {
-    developerPayload : null,
-    id : "idString",
-    purchaseToken : "purchaseTokenString",
+    developerPayload: null,
+    id: 'idString',
+    purchaseToken: 'purchaseTokenString',
     // NOTE: receipt's value is string and will need to be parsed
     receipt: `{
     "autoRenewing":true,
@@ -212,65 +212,69 @@ const transactionData = {
     "purchaseState":0,
     "purchaseToken":"purchaseTokenString"
     }`,
-    signature : "signatureString",
-    type: "android-playstore",
-  }  
-}
+    signature: 'signatureString',
+    type: 'android-playstore',
+  },
+};
 
 const subscription = {
-  subscriptionId: "subscription-id",
+  subscriptionId: 'subscription-id',
   subscriptionData: {
     name: 'mock subscription',
-    status: "active",
-    platform: "android-playstore",
-    benefits: [
-      "feature","feature2","feature3"
+    status: 'active',
+    platform: 'android-playstore',
+    benefits: ['feature', 'feature2', 'feature3'],
+    plans: [
+      {
+        name: 'mocked plan',
+        planId: 'mocked-plan-id',
+        status: 'active',
+        countries: ['Argentina'],
+        period: 'unlimited',
+        renovation: 'anual',
+      },
     ],
-    plans:[{
-      name:"mocked plan",
-      planId:"mocked-plan-id",
-      status:"active",
-      countries:["Argentina"],
-      period:"unlimited",
-      renovation:"anual",
-    }
-    ]
   },
   updateSubscriptionData: {
     name: 'mock subscription',
-    status: "active",
-    platform: "android-playstore",
-    benefits: [
-      "feature4","feature5","feature6"
+    status: 'active',
+    platform: 'android-playstore',
+    benefits: ['feature4', 'feature5', 'feature6'],
+    plans: [
+      {
+        name: 'updated mocked plan',
+        planId: 'updated-mocked-plan-id',
+        status: 'active',
+        countries: ['Argentina', 'Perú'],
+        period: 'unlimited',
+        renovation: 'anual',
+      },
     ],
-    plans:[{
-      name:"updated mocked plan",
-      planId:"updated-mocked-plan-id",
-      status:"active",
-      countries:["Argentina","Perú"],
-      period:"unlimited",
-      renovation:"anual",
-    }
-    ]
   },
-  createSubscription: async () =>{
-    const moment = "2022-11-01T14:51:15.000Z";
-    const {subscriptionData, subscriptionId} = subscription;
-    const plansWithMoment = subscriptionData.plans.map(plan => ({...plan, createdAt:moment,updatedAt:moment}))
+  createSubscription: async () => {
+    const moment = '2022-11-01T14:51:15.000Z';
+    const { subscriptionData, subscriptionId } = subscription;
+    const plansWithMoment = subscriptionData.plans.map((plan) => ({
+      ...plan,
+      createdAt: moment,
+      updatedAt: moment,
+    }));
     const newSubscription = {
       ...subscriptionData,
       plans: plansWithMoment,
-      subscriptionId:subscriptionId,
+      subscriptionId: subscriptionId,
       createdAt: moment,
       updatedAt: moment,
-    }
+    };
     const mockedSubscription = new Subscription(newSubscription);
     await mockedSubscription.save();
   },
-  deleteSubscription: async () =>{
-    await Subscription.findOneAndRemove({subscriptionId:subscription.subscriptionId})
-  }
-}
+  deleteSubscription: async () => {
+    await Subscription.findOneAndRemove({
+      subscriptionId: subscription.subscriptionId,
+    });
+  },
+};
 
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
@@ -438,5 +442,5 @@ module.exports = {
   subscriberData,
   transactionData,
   generateEmail: generateEmail,
-  getPublicIp
+  getPublicIp,
 };

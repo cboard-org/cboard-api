@@ -9,7 +9,7 @@ const Subscriber = require('../models/Subscribers');
 module.exports = {
   createSubscriber,
   deleteSubscriber,
-  postTransaction
+  postTransaction,
 };
 
 function createSubscriber(req, res) {
@@ -25,7 +25,7 @@ function createSubscriber(req, res) {
       console.error('error', err);
       return res.status(409).json({
         message: 'Error saving subscriber',
-        error: err.message
+        error: err.message,
       });
     }
     return res.status(200).json(subscriber.toJSON());
@@ -38,8 +38,8 @@ function deleteSubscriber(req, res) {
   if (!ObjectId.isValid(subscriberId)) {
     return res.status(400).json({
       error: {
-        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId
-      }
+        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId,
+      },
     });
   }
 
@@ -48,8 +48,8 @@ function deleteSubscriber(req, res) {
       console.log(err);
       return res.status(200).json({
         error: {
-          message: err
-        }
+          message: err,
+        },
       });
     }
     return res.status(200).json(subscriber);
@@ -58,7 +58,7 @@ function deleteSubscriber(req, res) {
 
 async function postTransaction(req, res) {
   const subscriberId = req.swagger.params.id.value;
-  const parseTransactionReceipt = transaction => {
+  const parseTransactionReceipt = (transaction) => {
     const receipt = transaction?.receipt;
 
     if (receipt && typeof transaction?.receipt === 'string') {
@@ -68,7 +68,7 @@ async function postTransaction(req, res) {
   };
   const verifyAndroidPurchase = async () => {
     const auth = new google.auth.GoogleAuth({
-      scopes: ['https://www.googleapis.com/auth/androidpublisher']
+      scopes: ['https://www.googleapis.com/auth/androidpublisher'],
     });
 
     const authClient = await auth.getClient();
@@ -77,7 +77,7 @@ async function postTransaction(req, res) {
     const res = await androidpublisher.purchases.subscriptions.get({
       packageName: 'com.unicef.cboard',
       subscriptionId: 'one_year_subscription',
-      token: 'placeholder-value'
+      token: 'placeholder-value',
     });
 
     if (res.data?.status !== 200 && res.data.resource?.paymentState !== 1) {
@@ -91,11 +91,11 @@ async function postTransaction(req, res) {
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001 //INVALID_PAYLOAD
+        code: 6778001, //INVALID_PAYLOAD
       },
       error: {
-        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId
-      }
+        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId,
+      },
     });
   }
 
@@ -103,11 +103,11 @@ async function postTransaction(req, res) {
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001 //INVALID_PAYLOAD
+        code: 6778001, //INVALID_PAYLOAD
       },
       error: {
-        message: 'only android-playstore purchases are allowed'
-      }
+        message: 'only android-playstore purchases are allowed',
+      },
     });
 
   try {
@@ -117,20 +117,20 @@ async function postTransaction(req, res) {
       return res.status(200).json({
         ok: false,
         data: {
-          code: 6778001 //INVALID_PAYLOAD
+          code: 6778001, //INVALID_PAYLOAD
         },
         error: {
-          message: error.message
-        }
+          message: error.message,
+        },
       });
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778002 //CONNECTION_FAILED
+        code: 6778002, //CONNECTION_FAILED
       },
       error: {
-        message: error.message
-      }
+        message: error.message,
+      },
     });
   }
 
@@ -138,7 +138,7 @@ async function postTransaction(req, res) {
     subscriberId,
     {
       updatedAt: moment().format(),
-      transaction
+      transaction,
     },
     { new: true },
     function(err, subscriber) {
@@ -147,18 +147,18 @@ async function postTransaction(req, res) {
         return res.status(200).json({
           ok: false,
           data: {
-            code: 6778005 //INTERNAL_ERROR
+            code: 6778005, //INTERNAL_ERROR
           },
           error: {
-            message: err
-          }
+            message: err,
+          },
         });
       }
       return res.status(200).json({
         ok: true,
         data: {
-          transaction: subscriber.transaction
-        }
+          transaction: subscriber.transaction,
+        },
       });
     }
   );

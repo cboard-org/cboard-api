@@ -6,7 +6,7 @@ module.exports = {
   createSubscription,
   getSubscription,
   updateSubscription,
-  deleteSubscription
+  deleteSubscription,
 };
 
 function createSubscription(req, res) {
@@ -16,10 +16,10 @@ function createSubscription(req, res) {
   newSubscription.subscriptionId = subscriptionId;
   newSubscription.createdAt = actualMoment;
   newSubscription.updatedAt = actualMoment;
-  newSubscription.plans = newSubscription.plans?.map(plan => ({
+  newSubscription.plans = newSubscription.plans?.map((plan) => ({
     ...plan,
     createdAt: actualMoment,
-    updatedAt: actualMoment
+    updatedAt: actualMoment,
   }));
   const subscription = new Subscription(newSubscription);
   subscription.save(function(err, subscription) {
@@ -27,7 +27,7 @@ function createSubscription(req, res) {
       console.error('error', err);
       return res.status(409).json({
         message: 'Error saving subscription',
-        error: err.message
+        error: err.message,
       });
     }
     return res.status(200).json(subscription.toJSON());
@@ -41,13 +41,13 @@ function getSubscription(req, res) {
     if (err) {
       return res.status(500).json({
         message: 'Error getting Subscription. ',
-        error: err.message
+        error: err.message,
       });
     }
     if (!subscription) {
       return res.status(404).json({
         message:
-          'Subscription does not exist. Subscription Id: ' + subscriptionId
+          'Subscription does not exist. Subscription Id: ' + subscriptionId,
       });
     }
     return res.status(200).json(subscription.toJSON());
@@ -61,26 +61,29 @@ function updateSubscription(req, res) {
     if (err) {
       return res.status(500).json({
         message: 'Error updating subscription. ',
-        error: err.message
+        error: err.message,
       });
     }
     if (!subscription) {
       return res.status(404).json({
         message:
-          'Subscription does not exist. Subscription Id: ' + subscriptionId
+          'Subscription does not exist. Subscription Id: ' + subscriptionId,
       });
     }
     const actualMoment = moment().format();
     for (let key in req.body) {
       if (key === 'plans') {
-        const updatedPlans = req.body[key]?.map(plan => {
-          const planExisted = subscription.plans?.filter( oldPlan => oldPlan.planId === plan.planId)[0] || null;
+        const updatedPlans = req.body[key]?.map((plan) => {
+          const planExisted =
+            subscription.plans?.filter(
+              (oldPlan) => oldPlan.planId === plan.planId
+            )[0] || null;
           const createdAt = planExisted ? planExisted.createdAt : actualMoment;
-          return ({
-          ...plan,
-          createdAt: createdAt,
-          updatedAt: actualMoment
-          })
+          return {
+            ...plan,
+            createdAt: createdAt,
+            updatedAt: actualMoment,
+          };
         });
         subscription[key] = updatedPlans;
         continue;
@@ -92,13 +95,13 @@ function updateSubscription(req, res) {
       if (err) {
         return res.status(500).json({
           message: 'Error saving subscription. ',
-          error: err.message
+          error: err.message,
         });
       }
       if (!subscription) {
         return res.status(404).json({
           message:
-            'Unable to find subscription. subscription id: ' + subscriptionId
+            'Unable to find subscription. subscription id: ' + subscriptionId,
         });
       }
     });
@@ -109,17 +112,20 @@ function updateSubscription(req, res) {
 function deleteSubscription(req, res) {
   const subscriptionId = req.swagger.params.subscriptionId.value;
 
-  Subscription.findOneAndDelete({ subscriptionId }, function(err, subscription) {
+  Subscription.findOneAndDelete({ subscriptionId }, function(
+    err,
+    subscription
+  ) {
     if (err) {
       return res.status(500).json({
         message: 'Error deleting subscription. ',
-        error: err.message
+        error: err.message,
       });
     }
     if (!subscription) {
       return res.status(404).json({
         message:
-          'Subscription does not exist. Subscription Id: ' + subscriptionId
+          'Subscription does not exist. Subscription Id: ' + subscriptionId,
       });
     }
     return res.status(200).json(subscription.toJSON());

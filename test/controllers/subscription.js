@@ -8,18 +8,23 @@ describe('Subscription API calls', function() {
   let user;
   let server;
   let adminUser;
-  const { subscriptionId, subscriptionData, createSubscription, deleteSubscription }= helper.subscription;
+  const {
+    subscriptionId,
+    subscriptionData,
+    createSubscription,
+    deleteSubscription,
+  } = helper.subscription;
 
   before(async function() {
     helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
     server = require('../../app'); //register mocks before require the original dependency
     user = await helper.prepareUser(server, {
       role: 'user',
-      email: helper.generateEmail()
+      email: helper.generateEmail(),
     });
     adminUser = await helper.prepareUser(server, {
       role: 'admin',
-      email: helper.generateEmail()
+      email: helper.generateEmail(),
     });
     await deleteSubscription();
   });
@@ -30,8 +35,7 @@ describe('Subscription API calls', function() {
   });
 
   describe('POST /subscription/{subscriptionId}', function() {
-  
-    after(async function () {
+    after(async function() {
       await deleteSubscription();
     });
     // it('it should not create a subscription object in database if user is not loged.', async function() {
@@ -97,11 +101,11 @@ describe('Subscription API calls', function() {
   });
 
   describe('GET /subscription/{subscriptionId}', function() {
-    before(async function () {
+    before(async function() {
       await createSubscription();
     });
-  
-    after(async function () {
+
+    after(async function() {
       await deleteSubscription();
     });
     // it('it should not get a subscription object if user is not loged.', async function() {
@@ -164,11 +168,11 @@ describe('Subscription API calls', function() {
   describe('PUT /subscription/{subscriptionId}', function() {
     const updateSubscriptionData = helper.subscription.updateSubscriptionData;
 
-    before(async function () {
+    before(async function() {
       await createSubscription();
     });
-  
-    after(async function () {
+
+    after(async function() {
       await deleteSubscription();
     });
 
@@ -236,20 +240,22 @@ describe('Subscription API calls', function() {
       subscriptionRes.platform.should.to.deep.equal(
         updateSubscriptionData.platform
       );
-      subscriptionRes.benefits.should.to.deep.equal(updateSubscriptionData.benefits);
+      subscriptionRes.benefits.should.to.deep.equal(
+        updateSubscriptionData.benefits
+      );
       subscriptionRes.plans[0].should.to.have.property('createdAt');
     });
   });
 
   describe('DELETE /subscription/{subscriptionId}', function() {
-    before(async function () {
+    before(async function() {
       await createSubscription();
     });
 
-    after(async function () {
+    after(async function() {
       await deleteSubscription();
     });
-  
+
     // it('it should not DELETE a subscription object in database if user is not loged.', async function() {
     //   const res = await request(server)
     //     .delete(`/subscription/${subscriptionId}`)
