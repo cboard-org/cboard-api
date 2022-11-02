@@ -8,6 +8,7 @@ const User = require('../api/models/User');
 const should = chai.should();
 const uuid = require('uuid');
 const Subscription = require('../api/models/subscriptions');
+const Subscriber = require('../api/models/Subscribers');
 
 /**helper nodemailer-mock
  *
@@ -178,33 +179,34 @@ const communicatorData = {
   boards: ['root'],
 };
 
-const subscriberData = {
-  country: 'United States',
-  status: 'free-trial',
-  product: {
-    planId: 'one_year_subscription',
-    subscriptionId: '123456',
-    status: 'requested',
+const subscriber = {
+  subscriberData: {
+    country: 'United States',
+    status: 'free-trial',
+    product: {
+      planId: 'one_year_subscription',
+      subscriptionId: '123456',
+      status: 'requested',
+    },
   },
-};
 
-const transactionData = {
-  additionalData: null,
-  alias: 'One Year Subscription',
-  currency: 'USD',
-  description: 'annual subscription',
-  id: 'one_year_subscription',
-  loaded: true,
-  price: '$12.99',
-  priceMicros: 12990000,
-  state: 'approved',
-  title: 'The Monthly Subscription Title',
-  transaction: {
-    developerPayload: null,
-    id: 'idString',
-    purchaseToken: 'purchaseTokenString',
-    // NOTE: receipt's value is string and will need to be parsed
-    receipt: `{
+  transactionData: {
+    additionalData: null,
+    alias: 'One Year Subscription',
+    currency: 'USD',
+    description: 'annual subscription',
+    id: 'one_year_subscription',
+    loaded: true,
+    price: '$12.99',
+    priceMicros: 12990000,
+    state: 'approved',
+    title: 'The Monthly Subscription Title',
+    transaction: {
+      developerPayload: null,
+      id: 'idString',
+      purchaseToken: 'purchaseTokenString',
+      // NOTE: receipt's value is string and will need to be parsed
+      receipt: `{
     "autoRenewing":true,
     "orderId":"orderIdString",
     "packageName":"com.unicef.cboard",
@@ -212,8 +214,23 @@ const transactionData = {
     "purchaseState":0,
     "purchaseToken":"purchaseTokenString"
     }`,
-    signature: 'signatureString',
-    type: 'android-playstore',
+      signature: 'signatureString',
+      type: 'android-playstore',
+    },
+  },
+  createSubscriber: async (userId) => {
+    const newSubscriber = subscriber.subscriberData;
+    const actualMoment = '2022-11-01T14:51:15.000Z';
+    newSubscriber.userId = userId;
+    newSubscriber.createdAt = actualMoment;
+    newSubscriber.updatedAt = actualMoment;
+    newSubscriber.product.createdAt = actualMoment;
+    newSubscriber.product.updatedAt = actualMoment;
+    const createdSubscriber = new Subscriber(newSubscriber);
+    return await createdSubscriber.save();
+  },
+  deleteSubscriber: async (userId) => {
+    return await Subscriber.deleteMany({ userId });
   },
 };
 
@@ -439,8 +456,7 @@ module.exports = {
   settingsData,
   translateData,
   subscription,
-  subscriberData,
-  transactionData,
+  subscriber,
   generateEmail: generateEmail,
   getPublicIp,
 };

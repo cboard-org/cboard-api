@@ -8,6 +8,12 @@ const helper = require('../helper');
 describe('Subscriber API calls', function() {
   let user;
   let server;
+  const {
+    subscriberData: mockSubscriberData,
+    transactionData,
+    createSubscriber,
+    deleteSubscriber,
+  } = helper.subscriber;
 
   before(async function() {
     helper.prepareNodemailerMock(); //enable mockery and replace nodemailer with nodemailerMock
@@ -24,8 +30,11 @@ describe('Subscriber API calls', function() {
   });
 
   describe('POST /subscriber', function() {
+    after(async function() {
+      await deleteSubscriber(user.userId);
+    });
+
     it('it should not create a subscriber object in database if user is not loged.', async function() {
-      const mockSubscriberData = helper.subscriberData;
       const subscriberData = {
         ...mockSubscriberData,
         userId: user.userId,
@@ -43,7 +52,6 @@ describe('Subscriber API calls', function() {
     });
 
     it('it should creates a subscriber object in database.', async function() {
-      const mockSubscriberData = helper.subscriberData;
       const subscriberData = {
         ...mockSubscriberData,
         userId: user.userId,
@@ -58,19 +66,19 @@ describe('Subscriber API calls', function() {
 
       const subscriberRes = res.body;
       subscriberRes.should.to.have.property('_id');
-      subscriberRes.userId.should.to.equal(user.userId);
-      subscriberRes.country.should.to.deep.equal(mockSubscriberData.country);
-      subscriberRes.status.should.to.deep.equal(mockSubscriberData.status);
+      subscriberRes.userId.should.to.equal(subscriberData.userId);
+      subscriberRes.country.should.to.deep.equal(subscriberData.country);
+      subscriberRes.status.should.to.deep.equal(subscriberData.status);
       subscriberRes.should.to.have.property('createdAt');
       subscriberRes.should.to.have.property('updatedAt');
       subscriberRes.product.planId.should.to.deep.equal(
-        mockSubscriberData.product.planId
+        subscriberData.product.planId
       );
       subscriberRes.product.subscriptionId.should.to.deep.equal(
-        mockSubscriberData.product.subscriptionId
+        subscriberData.product.subscriptionId
       );
       subscriberRes.product.status.should.to.deep.equal(
-        mockSubscriberData.product.status
+        subscriberData.product.status
       );
       subscriberRes.product.should.to.have.property('createdAt');
       subscriberRes.product.should.to.have.property('updatedAt');
@@ -81,22 +89,14 @@ describe('Subscriber API calls', function() {
     let subscriber;
 
     before(async function() {
-      const mockSubscriberData = helper.subscriberData;
-      const subscriberData = {
-        ...mockSubscriberData,
-        userId: user.userId,
-      };
-      const res = await request(server)
-        .post('/subscriber')
-        .send(subscriberData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json');
-
-      subscriber = res.body;
+      subscriber = await createSubscriber(user.userId);
+    });
+    after(async function() {
+      await deleteSubscriber(user.userId);
     });
 
     it('it should not creates a transaction field if user is not registered', async function() {
-      const mockTransactionData = helper.transactionData;
+      const mockTransactionData = transactionData;
       const res = await request(server)
         .post(`/subscriber/${subscriber._id}/transaction`)
         .send(mockTransactionData)
@@ -106,7 +106,7 @@ describe('Subscriber API calls', function() {
     });
 
     it('it should not creates a transaction field if id not match.', async function() {
-      const mockTransactionData = helper.transactionData;
+      const mockTransactionData = transactionData;
       const res = await request(server)
         .post(`/subscriber/invalid/transaction`)
         .send(mockTransactionData)
@@ -120,10 +120,8 @@ describe('Subscriber API calls', function() {
     });
 
     it('it should creates a transaction field in subsciber.', async function() {
-      const receiptObject = JSON.parse(
-        helper.transactionData.transaction.receipt
-      );
-      const mockTransactionData = helper.transactionData;
+      const receiptObject = JSON.parse(transactionData.transaction.receipt);
+      const mockTransactionData = transactionData;
       const res = await request(server)
         .post(`/subscriber/${subscriber._id}/transaction`)
         .send(mockTransactionData)
@@ -145,25 +143,16 @@ describe('Subscriber API calls', function() {
   describe('DELETE /subscriber/${subscriber.id}', function() {
     let subscriber;
     let adminUser;
-    const mockSubscriberData = helper.subscriberData;
 
     before(async function() {
-      const subscriberData = {
-        ...mockSubscriberData,
-        userId: user.userId,
-      };
-      const res = await request(server)
-        .post('/subscriber')
-        .send(subscriberData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json');
-
-      subscriber = res.body;
-
+      subscriber = await createSubscriber(user.userId);
       adminUser = await helper.prepareUser(server, {
         role: 'admin',
         email: helper.generateEmail(),
       });
+    });
+    after(async function() {
+      deleteSubscriber(user.userId);
     });
 
     it('it should not delete a subscriber if auth is not present', async function() {
@@ -195,8 +184,8 @@ describe('Subscriber API calls', function() {
       const subscriberRes = res.body;
       subscriberRes.should.to.have.property('_id');
       subscriberRes.userId.should.to.equal(user.userId);
-      subscriberRes.country.should.to.deep.equal(mockSubscriberData.country);
-      subscriberRes.status.should.to.deep.equal(mockSubscriberData.status);
+      subscriberRes.country.should.to.deep.equal(subscriber.country);
+      subscriberRes.status.should.to.deep.equal(subscriber.status);
       subscriberRes.should.to.have.property('createdAt');
       subscriberRes.should.to.have.property('updatedAt');
     });
