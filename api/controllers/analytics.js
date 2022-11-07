@@ -3,6 +3,7 @@
 const { google } = require('googleapis');
 const analyticsreporting = google.analyticsreporting('v4');
 const constants = require('../constants');
+const config = require("../../config");
 
 module.exports = {
   batchGet: batchGet,
@@ -20,7 +21,7 @@ async function batchGet(req, res) {
   try {
     const reportRequests = req.body.map(requestReport => {
       const report = {
-        viewId: requestReport.mobileView ? constants.MOBILE_GA_VIEW : constants.DEFAULT_GA_VIEW,
+        viewId: requestReport.mobileView ? config.MOBILE_GA_VIEW : config.DEFAULT_GA_VIEW,
         dateRanges: [
           {
             startDate: requestReport.startDate,
@@ -99,4 +100,7 @@ async function userActivity(req, res) {
   }
 }
 
-gapiAuth();
+
+if (config.MOBILE_GA_VIEW || config.DEFAULT_GA_VIEW) {
+  gapiAuth();
+}
