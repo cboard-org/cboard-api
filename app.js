@@ -17,8 +17,6 @@ const db = require('./db');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const User = require('./api/models/User');
-const Facebook = require('./api/passport/facebook');
-const FacebookToken = require('./api/passport/facebookToken');
 const morgan = require('morgan');
 const config = require('./config');
 
@@ -117,7 +115,13 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
 
   app.enable('trust proxy')
 
-  Facebook.configureFacebookStrategy(app);
+  if (config.facebook?.APP_ID ) {
+    const Facebook = require('./api/passport/facebook');
+    const FacebookToken = require('./api/passport/facebookToken');
+
+    Facebook.configureFacebookStrategy(app);
+    FacebookToken.configureFacebookTokenStrategy(app);
+  }
 
   if (config.google?.APP_ID) {
     const Google = require('./api/passport/google');
@@ -127,7 +131,6 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
     GoogleToken.configureGoogleTokenStrategy(app);
   }
 
-  FacebookToken.configureFacebookTokenStrategy(app);
   startServer(app);
 });
 
