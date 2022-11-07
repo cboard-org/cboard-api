@@ -47,3 +47,6 @@ config/env/production.js
 /.vs
 
 test-results.xml
+
+# Uploaded images
+public/uploads/

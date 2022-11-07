@@ -1,8 +1,9 @@
 const uuidv1 = require('uuid/v1');
 const azure = require('azure-storage');
-const blobService = azure.createBlobService(
+const file = require('./file-storage');
+const blobService = process.env.AZURE_STORAGE_CONNECTION_STRING ? azure.createBlobService(
   process.env.AZURE_STORAGE_CONNECTION_STRING
-);
+) : file.createBlobService();
 
 module.exports = {
   createBlockBlobFromText

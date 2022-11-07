@@ -88,7 +88,6 @@ async function createUser(req, res) {
               'An email has been sent to you. Please check it to verify your account.'
         });
       });
-
       // user already exists in temporary collection!
     } else {
       return res.status(409).json({

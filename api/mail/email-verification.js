@@ -74,13 +74,6 @@ module.exports = function(mongoose) {
       text:
         'Please verify your account by clicking the following link, or by copying and pasting it into your browser: ${URL}'
     },
-    verifySendMailCallback: function(err, info) {
-      if (err) {
-        throw err;
-      } else {
-        console.log(info.response);
-      }
-    },
     shouldSendConfirmation: true,
     confirmMailOptions: {
       from: `Do Not Reply<${config.emailTransport.from}>`,
