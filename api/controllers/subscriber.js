@@ -66,7 +66,7 @@ async function postTransaction(req, res) {
     }
     return transaction;
   };
-  const verifyAndroidPurchase = async () => {
+  const verifyAndroidPurchase = async (transaction) => {
     const auth = new google.auth.GoogleAuth({
       scopes: ['https://www.googleapis.com/auth/androidpublisher'],
     });
@@ -74,17 +74,22 @@ async function postTransaction(req, res) {
     const authClient = await auth.getClient();
     google.options({ auth: authClient });
 
-    const res = await androidpublisher.purchases.subscriptions.get({
-      packageName: 'com.unicef.cboard',
-      subscriptionId: 'one_year_subscription',
-      token: 'placeholder-value',
-    });
+    if (transaction.subscriptionId) {
+      const res = await androidpublisher.purchases.subscriptions.get({
+        packageName: 'com.unicef.cboard',
+        subscriptionId: transaction.subscriptionId,
+        token: transaction.purchaseToken,
+      });
 
-    if (res.data?.status !== 200 && res.data.resource?.paymentState !== 1) {
-      console.error(res.data.errors);
-      throw { code: 6778001, message: res.data.errors };
+      if (res.data?.status !== 200 && res.data.resource?.paymentState !== 1) {
+        console.error(res.data.errors);
+        throw { code: 6778001, message: res.data.errors };
+      }
+      return;
     }
+    throw { code: 6778001, message: 'Subscription Id is not provided' };
   };
+
   const transaction = parseTransactionReceipt(req.body.transaction);
 
   if (!ObjectId.isValid(subscriberId)) {
@@ -99,6 +104,17 @@ async function postTransaction(req, res) {
     });
   }
 
+  if (!transaction)
+    return res.status(200).json({
+      ok: false,
+      data: {
+        code: 6778001, //INVALID_PAYLOAD
+      },
+      error: {
+        message: 'transaction object is not provided',
+      },
+    });
+
   if (transaction.type !== 'android-playstore')
     return res.status(200).json({
       ok: false,
@@ -111,7 +127,10 @@ async function postTransaction(req, res) {
     });
 
   try {
-    await verifyAndroidPurchase();
+    await verifyAndroidPurchase({
+      ...transaction,
+      subscriptionId: req.body.id,
+    });
   } catch (error) {
     if (error.code === 400 || error.code === 6778001)
       return res.status(200).json({
