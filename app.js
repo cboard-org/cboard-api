@@ -56,6 +56,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
   app.use(middleware.swaggerMetadata()); // needs to go BEFORE swaggerSecurity
+  app.use('/docs', middleware.swaggerUi());
   app.use(
     middleware.swaggerSecurity({
       // Manage token function and authorization in the 'auth' module

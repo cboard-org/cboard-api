@@ -10,18 +10,11 @@ Learn more about the [Cboard project](https://github.com/cboard-org/cboard).
 Before installing and running the Cboard API, be sure you have **locally** installed the following tools:
 * Node.js > 12.0.0 (download [here](https://nodejs.org/en/download/))
 * MongoDB > 4.0.0 (download [here](https://docs.mongodb.com/manual/installation/))
-* Swagger
 
-Install Swagger globally using npm: 
-
-`npm install -g swagger`
-
-If needed, check out the Swagger docs [here](https://github.com/swagger-api/swagger-node/blob/master/docs/install.md).
 
 Use the following commands to check that you have them successfully installed, and/or to double-check your versions:
 * `node -v`
 * `mongo --version`
-* `swagger --version`
 
 ## Install
 Clone the repository and install npm dependencies:
@@ -58,24 +51,30 @@ The Cboard API is a cloud service, and it needs access to several cloud services
 
 ## Run the API Server
 
-In a separate terminal tab/window, run the Swagger project server.
+In a separate terminal tab/window, run the project server.
 
 ```bash
-$ swagger project start
+$ npm run dev 
 ```
+For automatically restarting the server when file changes in the directory are detected
 
-This will start a server process listening on port 10010. You will now be able to make calls to the API.
+or 
+
+```bash
+$ npm run start
+```
+Both of them start a server process listening on port 10010. You will now be able to make calls to the API.
 
 (If you are having trouble, make sure you have successfully installed the pre-requisites -- see "Pre-requisites" section above.)
 
 ## See API Paths
 
-Swagger provides an interactive, browser-based editor. To visualize available API endpoints, start the editor:
+Swagger provides an interactive, browser-based editor. To visualize available API endpoints:
 
 ```bash
-$ swagger project edit
+$ localhost:10010/docs/
 ```
-That should open a browser window and show API swagger editor (as shown below):
+That show API swagger editor (as shown below):
 
 <img src='https://i.imgur.com/pt0eJVQ.png' width='600' alt='Cboard API Swagger'>
 
