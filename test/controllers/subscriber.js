@@ -83,6 +83,24 @@ describe('Subscriber API calls', function() {
       subscriberRes.product.should.to.have.property('createdAt');
       subscriberRes.product.should.to.have.property('updatedAt');
     });
+
+    it('it should not create a subscriber object in database for an already subscribed user.', async function() {
+      const subscriberData = {
+        ...mockSubscriberData,
+        userId: user.userId,
+      };
+      const res = await request(server)
+        .post('/subscriber')
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(409);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+    });
   });
 
   describe('POST /subscriber/${subscriber.id}/transaction', function() {

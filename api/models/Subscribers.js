@@ -71,7 +71,6 @@ const SUBSCRIBERS_SCHEMA_DEFINITION = {
 };
 
 const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
-  autoIndex: false,
   strict: true,
 });
 
