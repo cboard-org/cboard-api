@@ -981,6 +981,29 @@ paths:
             $ref: "#/definitions/ErrorResponse"
   /subscriber/{id}:  
     x-swagger-router-controller: subscriber
+    get:
+      operationId: getSubscriber
+      description: get a subscriber whith a userId
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - user
+        - admin
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SubscriberResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
     delete:
       operationId: deleteSubscriber
       description: delete a subscriber

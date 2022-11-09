@@ -158,6 +158,131 @@ describe('Subscriber API calls', function() {
     });
   });
 
+  describe('get /subscriber/${subscriber.userId}', function() {
+    let subscriber;
+    let diferentUser;
+    let adminUser;
+    before(async function() {
+      subscriber = await createSubscriber(user.userId);
+
+      const server = require('../../app'); //register mocks before require the original dependency
+      diferentUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      adminUser = await helper.prepareUser(server, {
+        role: 'admin',
+        email: helper.generateEmail(),
+      });
+    });
+
+    after(async function() {
+      await deleteSubscriber(user.userId);
+    });
+
+    it('it should not get a subscriber object in database if user is not loged.', async function() {
+      const res = await request(server)
+        .get(`/subscriber/${user.userId}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+    });
+
+    it('it should not get a subscriber object in database if user token not match.', async function() {
+      const res = await request(server)
+        .get(`/subscriber/${user.userId}`)
+        .set('Authorization', `Bearer ${diferentUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(401);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+    });
+
+    it('it should not get a subscriber object in database if subscriber not exists.', async function() {
+      const res = await request(server)
+        .get(`/subscriber/${diferentUser.userId}`)
+        .set('Authorization', `Bearer ${diferentUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+    });
+
+    it('it should get a subscriber object.', async function() {
+      const subscriberData = {
+        ...mockSubscriberData,
+        userId: user.userId,
+      };
+      const res = await request(server)
+        .get(`/subscriber/${user.userId}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.have.property('_id');
+      subscriberRes.userId.should.to.equal(subscriberData.userId);
+      subscriberRes.country.should.to.deep.equal(subscriberData.country);
+      subscriberRes.status.should.to.deep.equal(subscriberData.status);
+      subscriberRes.should.to.have.property('createdAt');
+      subscriberRes.should.to.have.property('updatedAt');
+      subscriberRes.product.planId.should.to.deep.equal(
+        subscriberData.product.planId
+      );
+      subscriberRes.product.subscriptionId.should.to.deep.equal(
+        subscriberData.product.subscriptionId
+      );
+      subscriberRes.product.status.should.to.deep.equal(
+        subscriberData.product.status
+      );
+      subscriberRes.product.should.to.have.property('createdAt');
+      subscriberRes.product.should.to.have.property('updatedAt');
+    });
+
+    it('it should get a subscriber object whith an admin token', async function() {
+      const subscriberData = {
+        ...mockSubscriberData,
+        userId: user.userId,
+      };
+      const res = await request(server)
+        .get(`/subscriber/${user.userId}`)
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.have.property('_id');
+      subscriberRes.userId.should.to.equal(subscriberData.userId);
+      subscriberRes.country.should.to.deep.equal(subscriberData.country);
+      subscriberRes.status.should.to.deep.equal(subscriberData.status);
+      subscriberRes.should.to.have.property('createdAt');
+      subscriberRes.should.to.have.property('updatedAt');
+      subscriberRes.product.planId.should.to.deep.equal(
+        subscriberData.product.planId
+      );
+      subscriberRes.product.subscriptionId.should.to.deep.equal(
+        subscriberData.product.subscriptionId
+      );
+      subscriberRes.product.status.should.to.deep.equal(
+        subscriberData.product.status
+      );
+      subscriberRes.product.should.to.have.property('createdAt');
+      subscriberRes.product.should.to.have.property('updatedAt');
+    });
+  });
+
   describe('DELETE /subscriber/${subscriber.id}', function() {
     let subscriber;
     let adminUser;

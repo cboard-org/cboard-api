@@ -5,9 +5,11 @@ const { google } = require('googleapis');
 const androidpublisher = google.androidpublisher('v3');
 
 const Subscriber = require('../models/Subscribers');
+const { getAuthDataFromReq } = require('../helpers/auth');
 
 module.exports = {
   createSubscriber,
+  getSubscriber,
   deleteSubscriber,
   postTransaction,
 };
@@ -26,6 +28,37 @@ function createSubscriber(req, res) {
       return res.status(409).json({
         message: 'Error saving subscriber',
         error: err.message,
+      });
+    }
+    return res.status(200).json(subscriber.toJSON());
+  });
+}
+
+function getSubscriber(req, res) {
+  const userId = req.swagger.params.id.value;
+
+  //this would be implemented like a middleware
+  const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
+
+  if (!isRequestedByAdmin && (!requestedBy || userId != requestedBy)) {
+    return res.status(401).json({
+      message: 'Error getting subscriber',
+      error:
+        'unhautorized request, subscriber object is only accesible with subscribered user authToken',
+    });
+  }
+
+  Subscriber.findOne({ userId: userId }, function(err, subscriber) {
+    if (err) {
+      return res.status(409).json({
+        message: 'Error getting subscriber',
+        error: err.message,
+      });
+    }
+    if (!subscriber) {
+      return res.status(404).json({
+        message: 'Error getting subscriber',
+        error: 'subscriber not found',
       });
     }
     return res.status(200).json(subscriber.toJSON());
