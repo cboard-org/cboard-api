@@ -153,7 +153,9 @@ describe('Subscriber API calls', function() {
 
       const transactionRes = res.body;
       transactionRes.ok.should.to.equal(false);
-      transactionRes.error.message.should.to.equal('Invalid Value');
+      transactionRes.error.message.should.to.equal(
+        'Validation failed: transaction: error verifying purchase. Check if the purchase token is valid'
+      );
     });
 
     it('it should creates a transaction field in subscriber.', async function() {

@@ -1,11 +1,7 @@
 const ObjectId = require('mongoose').Types.ObjectId;
 
-const { google } = require('googleapis');
-const androidpublisher = google.androidpublisher('v3');
-
 const Subscriber = require('../models/Subscribers');
 const { getAuthDataFromReq } = require('../helpers/auth');
-const { GOOGLE_PLAY_CREDENTIALS } = require('../../config');
 
 module.exports = {
   createSubscriber,
@@ -100,32 +96,6 @@ async function postTransaction(req, res) {
     }
     return transaction;
   };
-  const verifyAndroidPurchase = async ({ productId, purchaseToken }) => {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: GOOGLE_PLAY_CREDENTIALS,
-      scopes: ['https://www.googleapis.com/auth/androidpublisher'],
-    });
-
-    const authClient = await auth.getClient();
-    google.options({ auth: authClient });
-
-    if (productId) {
-      const res = await androidpublisher.purchases.subscriptions.get({
-        packageName: 'com.unicef.cboard',
-        subscriptionId: productId,
-        token: purchaseToken,
-      });
-      if (!res.data) {
-        throw { code: 6778001, message: 'error verifying purchase' };
-      }
-      if (res.status !== 200 && res.data.acknowledgementState !== 1) {
-        console.error(res.data.errors);
-        throw { code: 6778001, message: res.data.errors };
-      }
-      return;
-    }
-    throw { code: 6778001, message: 'Subscription Id is not provided' };
-  };
 
   const transaction = parseTransactionReceipt(req.body);
 
@@ -163,47 +133,21 @@ async function postTransaction(req, res) {
       },
     });
 
-  try {
-    await verifyAndroidPurchase(transaction.nativePurchase);
-  } catch (error) {
-    console.error(error);
-    if (error.code === 400 || error.code === 6778001)
-      return res.status(200).json({
-        ok: false,
-        data: {
-          code: 6778001, //INVALID_PAYLOAD
-        },
-        error: {
-          message: error.message,
-        },
-      });
-    return res.status(200).json({
-      ok: false,
-      data: {
-        code: 6778002, //CONNECTION_FAILED
-      },
-      error: {
-        message: error.message,
-      },
-    });
-  }
-
-  Subscriber.findByIdAndUpdate(
-    subscriberId,
+  Subscriber.findOneAndUpdate(
+    { _id: subscriberId },
     {
-      transaction
+      transaction,
     },
-    { new: true },
+    { new: true, runValidators: true, useFindAndModify: true },
     function(err, subscriber) {
       if (err) {
-        console.log(err);
         return res.status(200).json({
           ok: false,
           data: {
-            code: 6778005, //INTERNAL_ERROR
+            code: 6778001, //INVALID_PAYLOAD
           },
           error: {
-            message: err,
+            message: err.message,
           },
         });
       }

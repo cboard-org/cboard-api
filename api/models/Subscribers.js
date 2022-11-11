@@ -1,5 +1,9 @@
 'use strict';
 
+const { GOOGLE_PLAY_CREDENTIALS } = require('../../config');
+const { google } = require('googleapis');
+const androidpublisher = google.androidpublisher('v3');
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -20,7 +24,7 @@ const PRODUCT_SCHEMA_DEFINITION = {
     type: String,
     required: true,
     trim: true,
-  }
+  },
 };
 
 const productSchema = new Schema(PRODUCT_SCHEMA_DEFINITION, {
@@ -58,6 +62,46 @@ const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
   strict: true,
   timestamps: true,
 });
+
+subscribersSchema.path('transaction').validate(async function(transaction) {
+  const verifyAndroidPurchase = async ({ productId, purchaseToken }) => {
+    const auth = new google.auth.GoogleAuth({
+      keyFile: GOOGLE_PLAY_CREDENTIALS,
+      scopes: ['https://www.googleapis.com/auth/androidpublisher'],
+    });
+
+    const authClient = await auth.getClient();
+    google.options({ auth: authClient });
+    if (productId) {
+      try {
+        const res = await androidpublisher.purchases.subscriptions.get({
+          packageName: 'com.unicef.cboard',
+          subscriptionId: productId,
+          token: purchaseToken,
+        });
+
+        if (!res.data) {
+          throw { code: 6778001, message: 'error verifying purchase' };
+        }
+        if (res.status !== 200 && res.data.acknowledgementState !== 1) {
+          console.error(res.data.errors);
+          throw { code: 6778001, message: res.data.errors };
+        }
+        return;
+      } catch (error) {
+        throw {
+          code: 6778001,
+          message:
+            'error verifying purchase. Check if the purchase token is valid',
+        };
+      }
+    }
+    throw { code: 6778001, message: 'Subscription Id is not provided' };
+  };
+
+  await verifyAndroidPurchase(transaction.nativePurchase);
+  return true;
+}, 'transaction puchase token error');
 
 const Subscribers = mongoose.model('Subscribers', subscribersSchema);
 
