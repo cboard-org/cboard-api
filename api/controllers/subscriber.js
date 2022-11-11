@@ -6,6 +6,7 @@ const androidpublisher = google.androidpublisher('v3');
 
 const Subscriber = require('../models/Subscribers');
 const { getAuthDataFromReq } = require('../helpers/auth');
+const { GOOGLE_PLAY_CREDENTIALS } = require('../../config');
 
 module.exports = {
   createSubscriber,
@@ -101,6 +102,7 @@ async function postTransaction(req, res) {
   };
   const verifyAndroidPurchase = async (transaction) => {
     const auth = new google.auth.GoogleAuth({
+      keyFile: GOOGLE_PLAY_CREDENTIALS,
       scopes: ['https://www.googleapis.com/auth/androidpublisher'],
     });
 
