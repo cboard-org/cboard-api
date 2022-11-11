@@ -106,6 +106,8 @@ describe('Subscriber API calls', function() {
   describe('POST /subscriber/${subscriber.id}/transaction', function() {
     let subscriber;
 
+    const { mockPurchaseTokenVerification } = helper.subscriber;
+
     before(async function() {
       subscriber = await createSubscriber(user.userId);
     });
@@ -137,8 +139,9 @@ describe('Subscriber API calls', function() {
       transactionRes.ok.should.to.equal(false);
     });
 
-    it('it should creates a transaction field in subsciber.', async function() {
-      const receiptObject = JSON.parse(transactionData.transaction.receipt);
+    it('it should not creates a transaction request if purchase token is invalid', async function() {
+      mockPurchaseTokenVerification({ isValidToken: false });
+
       const mockTransactionData = transactionData;
       const res = await request(server)
         .post(`/subscriber/${subscriber._id}/transaction`)
@@ -149,10 +152,26 @@ describe('Subscriber API calls', function() {
         .expect(200);
 
       const transactionRes = res.body;
+      transactionRes.ok.should.to.equal(false);
+      transactionRes.error.message.should.to.equal('Invalid Value');
+    });
 
+    it('it should creates a transaction field in subscriber.', async function() {
+      const receiptObject = JSON.parse(transactionData.nativePurchase.receipt);
+      const mockTransactionData = transactionData;
+      mockPurchaseTokenVerification({ isValidToken: true });
+      const res = await request(server)
+        .post(`/subscriber/${subscriber._id}/transaction`)
+        .send(mockTransactionData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const transactionRes = res.body;
       transactionRes.ok.should.to.equal(true);
-      transactionRes.data.transaction.should.to.deep.equal({
-        ...mockTransactionData.transaction,
+      transactionRes.data.transaction.nativePurchase.should.to.deep.equal({
+        ...mockTransactionData.nativePurchase,
         receipt: receiptObject,
       });
     });

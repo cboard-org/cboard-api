@@ -8,7 +8,9 @@ const User = require('../api/models/User');
 const should = chai.should();
 const uuid = require('uuid');
 const Subscription = require('../api/models/subscriptions');
+
 const Subscriber = require('../api/models/Subscribers');
+const nock = require('nock');
 
 /**helper nodemailer-mock
  *
@@ -191,32 +193,42 @@ const subscriber = {
   },
 
   transactionData: {
-    additionalData: null,
-    alias: 'One Year Subscription',
-    currency: 'USD',
-    description: 'annual subscription',
-    id: 'one_year_subscription',
-    loaded: true,
-    price: '$12.99',
-    priceMicros: 12990000,
+    className: 'Transaction',
+    transactionId: 'GPA.3332-8799-5619-52658',
     state: 'approved',
-    title: 'The Monthly Subscription Title',
-    transaction: {
-      developerPayload: null,
-      id: 'idString',
-      purchaseToken: 'purchaseTokenString',
-      // NOTE: receipt's value is string and will need to be parsed
-      receipt: `{
-    "autoRenewing":true,
-    "orderId":"orderIdString",
-    "packageName":"com.unicef.cboard",
-    "purchaseTime":1555217574101,
-    "purchaseState":0,
-    "purchaseToken":"purchaseTokenString"
-    }`,
-      signature: 'signatureString',
-      type: 'android-playstore',
+    products: [
+      {
+        productId: 'premium_full',
+      },
+    ],
+    platform: 'android-playstore',
+    nativePurchase: {
+      orderId: 'GPA.3332-8799-5619-52658',
+      packageName: 'com.unicef.cboard',
+      productId: 'premium_full',
+      purchaseTime: 1668093831727,
+      purchaseState: 0,
+      purchaseToken:
+        'M0cKeDsldjaskljdsljdasklj.AO-J1OyLtEdnhjRTGH5635yl3lP5bS2Wi7CN2QvBj0AvSt-1jlasdnbakuFtzIg',
+      quantity: 1,
+      autoRenewing: true,
+      acknowledged: false,
+      productIds: ['premium_full'],
+      getPurchaseState: 1,
+      developerPayload: '',
+      accountId: '',
+      profileId: '',
+      signature:
+        'XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==',
+      receipt:
+        '{"orderId":"GPA.3332-8799-5619-52658","packageName":"com.unicef.cboard","productId":"premium_full","purchaseTime":1668093831727,"purchaseState":0,"purchaseToken":"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg","quantity":1,"autoRenewing":true,"acknowledged":false}',
     },
+    purchaseId:
+      'afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg',
+    purchaseDate: '2022-11-10T15:23:51.727Z',
+    isPending: false,
+    isAcknowledged: false,
+    renewalIntent: 'Renew',
   },
   createSubscriber: async (userId) => {
     const newSubscriber = subscriber.subscriberData;
@@ -231,6 +243,48 @@ const subscriber = {
   },
   deleteSubscriber: async (userId) => {
     return await Subscriber.deleteMany({ userId });
+  },
+  mockPurchaseTokenVerification: ({ isValidToken }) => {
+    const {
+      productId,
+      purchaseToken,
+    } = subscriber.transactionData.nativePurchase;
+    nock('https://www.googleapis.com')
+      .post('/oauth2/v4/token')
+      .reply(200);
+    if (isValidToken) {
+      nock(
+        `https://www.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptions/${productId}/tokens/${purchaseToken}`
+      )
+        .get('')
+        .reply(200, {
+          startTimeMillis: '1668093831727',
+          expiryTimeMillis: '1668097424042',
+          autoRenewing: false,
+          priceCurrencyCode: 'USD',
+          priceAmountMicros: '3000000',
+          countryCode: 'AR',
+          developerPayload: '',
+          cancelReason: 0,
+          userCancellationTimeMillis: '1668097284403',
+          orderId: 'GPA.0000-0000-0000-0000..0',
+          purchaseType: 0,
+          acknowledgementState: 1,
+          kind: 'androidpublisher#subscriptionPurchase',
+        });
+      return;
+    }
+    nock(
+      `https://www.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptions/${productId}/tokens/${purchaseToken}`
+    )
+      .get('')
+      .reply(400, {
+        error: {
+          errors: [
+            { message: 'Invalid Value', domain: 'global', reason: 'invalid' },
+          ],
+        },
+      });
   },
 };
 
