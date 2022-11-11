@@ -93,14 +93,20 @@ function deleteSubscriber(req, res) {
 async function postTransaction(req, res) {
   const subscriberId = req.swagger.params.id.value;
   const parseTransactionReceipt = (transaction) => {
-    const receipt = transaction?.receipt;
+    const receipt = transaction?.nativePurchase?.receipt;
 
-    if (receipt && typeof transaction?.receipt === 'string') {
-      return { ...transaction, receipt: JSON.parse(receipt) };
+    if (receipt && typeof receipt === 'string') {
+      return {
+        ...transaction,
+        nativePurchase: {
+          ...transaction.nativePurchase,
+          receipt: JSON.parse(receipt),
+        },
+      };
     }
     return transaction;
   };
-  const verifyAndroidPurchase = async (transaction) => {
+  const verifyAndroidPurchase = async ({ productId, purchaseToken }) => {
     const auth = new google.auth.GoogleAuth({
       keyFile: GOOGLE_PLAY_CREDENTIALS,
       scopes: ['https://www.googleapis.com/auth/androidpublisher'],
@@ -109,14 +115,16 @@ async function postTransaction(req, res) {
     const authClient = await auth.getClient();
     google.options({ auth: authClient });
 
-    if (transaction.subscriptionId) {
+    if (productId) {
       const res = await androidpublisher.purchases.subscriptions.get({
         packageName: 'com.unicef.cboard',
-        subscriptionId: transaction.subscriptionId,
-        token: transaction.purchaseToken,
+        subscriptionId: productId,
+        token: purchaseToken,
       });
-
-      if (res.data?.status !== 200 && res.data.resource?.paymentState !== 1) {
+      if (!res.data) {
+        throw { code: 6778001, message: 'error verifying purchase' };
+      }
+      if (res.status !== 200 && res.data.acknowledgementState !== 1) {
         console.error(res.data.errors);
         throw { code: 6778001, message: res.data.errors };
       }
@@ -125,7 +133,7 @@ async function postTransaction(req, res) {
     throw { code: 6778001, message: 'Subscription Id is not provided' };
   };
 
-  const transaction = parseTransactionReceipt(req.body.transaction);
+  const transaction = parseTransactionReceipt(req.body);
 
   if (!ObjectId.isValid(subscriberId)) {
     return res.status(200).json({
@@ -150,7 +158,7 @@ async function postTransaction(req, res) {
       },
     });
 
-  if (transaction.type !== 'android-playstore')
+  if (transaction.platform !== 'android-playstore')
     return res.status(200).json({
       ok: false,
       data: {
@@ -162,11 +170,9 @@ async function postTransaction(req, res) {
     });
 
   try {
-    await verifyAndroidPurchase({
-      ...transaction,
-      subscriptionId: req.body.id,
-    });
+    await verifyAndroidPurchase(transaction.nativePurchase);
   } catch (error) {
+    console.error(error);
     if (error.code === 400 || error.code === 6778001)
       return res.status(200).json({
         ok: false,
