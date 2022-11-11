@@ -1,5 +1,3 @@
-const moment = require('moment');
-
 const Subscription = require('../models/subscriptions');
 
 module.exports = {
@@ -12,7 +10,6 @@ module.exports = {
 function createSubscription(req, res) {
   const subscriptionId = req.swagger.params.subscriptionId.value;
   const newSubscription = req.body;
-  const actualMoment = moment().format();
   newSubscription.subscriptionId = subscriptionId;
   const subscription = new Subscription(newSubscription);
   subscription.save(function(err, subscription) {

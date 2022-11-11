@@ -1,4 +1,3 @@
-const moment = require('moment');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const { google } = require('googleapis');
@@ -192,8 +191,7 @@ async function postTransaction(req, res) {
   Subscriber.findByIdAndUpdate(
     subscriberId,
     {
-      updatedAt: moment().format(),
-      transaction,
+      transaction
     },
     { new: true },
     function(err, subscriber) {
