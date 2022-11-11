@@ -217,33 +217,39 @@ describe('Subscription API calls', function() {
     });
 
     it('it should update a subscription object in database.', async function() {
-      const res = await request(server)
-        .put(`/subscription/${subscriptionId}`)
-        .send(updateSubscriptionData)
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
+      function delay(updateTest) {
+        return new Promise((updateTest) => setTimeout(updateTest, 500));
+      }
+      const updateTest = async () => {
+        const res = await request(server)
+          .put(`/subscription/${subscriptionId}`)
+          .send(updateSubscriptionData)
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(200);
 
-      const subscriptionRes = res.body;
-      subscriptionRes.should.to.have.property('createdAt');
-      subscriptionRes.should.to.have.property('updatedAt');
-      subscriptionRes.updatedAt.should.to.not.deep.equal(
-        subscriptionRes.createdAt
-      );
-      subscriptionRes.should.to.have.property('_id');
-      subscriptionRes.subscriptionId.should.to.equal(subscriptionId);
-      subscriptionRes.name.should.to.deep.equal(updateSubscriptionData.name);
-      subscriptionRes.status.should.to.deep.equal(
-        updateSubscriptionData.status
-      );
-      subscriptionRes.platform.should.to.deep.equal(
-        updateSubscriptionData.platform
-      );
-      subscriptionRes.benefits.should.to.deep.equal(
-        updateSubscriptionData.benefits
-      );
-      subscriptionRes.plans[0].should.to.have.property('createdAt');
+        const subscriptionRes = res.body;
+        subscriptionRes.should.to.have.property('createdAt');
+        subscriptionRes.should.to.have.property('updatedAt');
+        subscriptionRes.updatedAt.should.to.not.deep.equal(
+          subscriptionRes.createdAt
+        );
+        subscriptionRes.should.to.have.property('_id');
+        subscriptionRes.subscriptionId.should.to.equal(subscriptionId);
+        subscriptionRes.name.should.to.deep.equal(updateSubscriptionData.name);
+        subscriptionRes.status.should.to.deep.equal(
+          updateSubscriptionData.status
+        );
+        subscriptionRes.platform.should.to.deep.equal(
+          updateSubscriptionData.platform
+        );
+        subscriptionRes.benefits.should.to.deep.equal(
+          updateSubscriptionData.benefits
+        );
+        subscriptionRes.plans[0].should.to.have.property('createdAt');
+      };
+      await delay(updateTest);
     });
   });
 

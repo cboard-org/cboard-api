@@ -20,20 +20,13 @@ const PRODUCT_SCHEMA_DEFINITION = {
     type: String,
     required: true,
     trim: true,
-  },
-  createdAt: {
-    type: Date,
-    required: true,
-  },
-  updatedAt: {
-    type: Date,
-    required: true,
-  },
+  }
 };
 
 const productSchema = new Schema(PRODUCT_SCHEMA_DEFINITION, {
   autoIndex: false,
   strict: true,
+  timestamps: true,
 });
 
 const SUBSCRIBERS_SCHEMA_DEFINITION = {
@@ -54,15 +47,6 @@ const SUBSCRIBERS_SCHEMA_DEFINITION = {
     required: true,
     trim: true,
   },
-  createdAt: {
-    type: Date,
-    required: true,
-  },
-
-  updatedAt: {
-    type: Date,
-    required: true,
-  },
   // transaction: { type: transactionSchema },
   transaction: {},
   product: {
@@ -72,6 +56,7 @@ const SUBSCRIBERS_SCHEMA_DEFINITION = {
 
 const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
   strict: true,
+  timestamps: true,
 });
 
 const Subscribers = mongoose.model('Subscribers', subscribersSchema);

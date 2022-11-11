@@ -38,17 +38,12 @@ const PLANS_SCHEMA_DEFINITION = {
     required: true,
     trim: true,
   },
-  createdAt: {
-    type: Date,
-    required: true,
-  },
-  updatedAt: {
-    type: Date,
-    required: true,
-  },
 };
 
-const plansSchema = new Schema(PLANS_SCHEMA_DEFINITION, { autoIndex: false });
+const plansSchema = new Schema(PLANS_SCHEMA_DEFINITION, {
+  autoIndex: false,
+  timestamps: true,
+});
 
 const SUBSCRIPTIONS_SCHEMA_DEFINITION = {
   subscriptionId: {
@@ -81,17 +76,11 @@ const SUBSCRIPTIONS_SCHEMA_DEFINITION = {
     },
   ],
   plans: [{ type: plansSchema }],
-  createdAt: {
-    type: Date,
-    required: true,
-  },
-  updatedAt: {
-    type: Date,
-    required: true,
-  },
 };
 
-const subscriptionsSchema = new Schema(SUBSCRIPTIONS_SCHEMA_DEFINITION);
+const subscriptionsSchema = new Schema(SUBSCRIPTIONS_SCHEMA_DEFINITION, {
+  timestamps: true,
+});
 
 const Subscription = mongoose.model('Subscription', subscriptionsSchema);
 

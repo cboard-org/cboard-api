@@ -232,12 +232,7 @@ const subscriber = {
   },
   createSubscriber: async (userId) => {
     const newSubscriber = subscriber.subscriberData;
-    const actualMoment = '2022-11-01T14:51:15.000Z';
     newSubscriber.userId = userId;
-    newSubscriber.createdAt = actualMoment;
-    newSubscriber.updatedAt = actualMoment;
-    newSubscriber.product.createdAt = actualMoment;
-    newSubscriber.product.updatedAt = actualMoment;
     const createdSubscriber = new Subscriber(newSubscriber);
     return await createdSubscriber.save();
   },
@@ -323,19 +318,10 @@ const subscription = {
     ],
   },
   createSubscription: async () => {
-    const moment = '2022-11-01T14:51:15.000Z';
     const { subscriptionData, subscriptionId } = subscription;
-    const plansWithMoment = subscriptionData.plans.map((plan) => ({
-      ...plan,
-      createdAt: moment,
-      updatedAt: moment,
-    }));
     const newSubscription = {
       ...subscriptionData,
-      plans: plansWithMoment,
       subscriptionId: subscriptionId,
-      createdAt: moment,
-      updatedAt: moment,
     };
     const mockedSubscription = new Subscription(newSubscription);
     await mockedSubscription.save();

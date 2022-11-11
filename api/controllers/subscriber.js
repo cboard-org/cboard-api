@@ -17,11 +17,6 @@ module.exports = {
 
 function createSubscriber(req, res) {
   const newSubscriber = req.body;
-  const actualMoment = moment().format();
-  newSubscriber.createdAt = actualMoment;
-  newSubscriber.updatedAt = actualMoment;
-  newSubscriber.product.createdAt = actualMoment;
-  newSubscriber.product.updatedAt = actualMoment;
   const subscriber = new Subscriber(newSubscriber);
   subscriber.save(function(err, subscriber) {
     if (err) {

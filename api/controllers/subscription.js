@@ -14,13 +14,6 @@ function createSubscription(req, res) {
   const newSubscription = req.body;
   const actualMoment = moment().format();
   newSubscription.subscriptionId = subscriptionId;
-  newSubscription.createdAt = actualMoment;
-  newSubscription.updatedAt = actualMoment;
-  newSubscription.plans = newSubscription.plans?.map((plan) => ({
-    ...plan,
-    createdAt: actualMoment,
-    updatedAt: actualMoment,
-  }));
   const subscription = new Subscription(newSubscription);
   subscription.save(function(err, subscription) {
     if (err) {
@@ -70,27 +63,9 @@ function updateSubscription(req, res) {
           'Subscription does not exist. Subscription Id: ' + subscriptionId,
       });
     }
-    const actualMoment = moment().format();
     for (let key in req.body) {
-      if (key === 'plans') {
-        const updatedPlans = req.body[key]?.map((plan) => {
-          const planExisted =
-            subscription.plans?.filter(
-              (oldPlan) => oldPlan.planId === plan.planId
-            )[0] || null;
-          const createdAt = planExisted ? planExisted.createdAt : actualMoment;
-          return {
-            ...plan,
-            createdAt: createdAt,
-            updatedAt: actualMoment,
-          };
-        });
-        subscription[key] = updatedPlans;
-        continue;
-      }
       subscription[key] = req.body[key];
     }
-    subscription.updatedAt = actualMoment;
     subscription.save(function(err, subscription) {
       if (err) {
         return res.status(500).json({
