@@ -76,8 +76,8 @@ function updateSubscription(req, res) {
             'Unable to find subscription. subscription id: ' + subscriptionId,
         });
       }
+      return res.status(200).json(subscription.toJSON());
     });
-    return res.status(200).json(subscription.toJSON());
   });
 }
 
