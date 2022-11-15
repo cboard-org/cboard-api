@@ -1004,6 +1004,29 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+    patch:
+      operationId: updateSubscriber
+      description: update a subscriber 
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SubscriberResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
     delete:
       operationId: deleteSubscriber
       description: delete a subscriber

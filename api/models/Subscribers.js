@@ -63,6 +63,21 @@ const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
   timestamps: true,
 });
 
+subscribersSchema.pre('save', function() {
+  if (
+    this.product?.status === 'owned' &&
+    this.transaction?.state !== 'approved'
+  ) {
+    throw {
+      product: {
+        code: 6778001,
+        message:
+          'product status can t be owned if an approved transaction is not present',
+      },
+    };
+  }
+  return true;
+});
 subscribersSchema.path('transaction').validate(async function(transaction) {
   const verifyAndroidPurchase = async ({ productId, purchaseToken }) => {
     const auth = new google.auth.GoogleAuth({

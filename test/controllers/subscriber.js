@@ -304,6 +304,157 @@ describe('Subscriber API calls', function() {
     });
   });
 
+  describe('patch /subscriber/${subscriberId}', function() {
+    const { subscriberData: newSubscriberData } = helper.subscriber;
+    const { mockPurchaseTokenVerification } = helper.subscriber;
+    before(async function() {
+      subscriber = await createSubscriber(user.userId);
+
+      const server = require('../../app');
+      diferentUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+    });
+
+    after(async function() {
+      await deleteSubscriber(user.userId);
+    });
+
+    it('it should not update a subscriber object in database if user is not loged.', async function() {
+      const subscriberData = {
+        ...newSubscriberData,
+        userId: user.userId,
+      };
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+    });
+
+    it('it should not update a subscriber object in database if user Auth not match for userId.', async function() {
+      const subscriberData = {
+        ...newSubscriberData,
+        userId: user.userId,
+      };
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${diferentUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+    });
+
+    it('it should not update a subscriber object in database if the transaction purchase token is invalid.', async function() {
+      const subscriberData = {
+        ...newSubscriberData,
+        userId: user.userId,
+        transaction: transactionData,
+      };
+      mockPurchaseTokenVerification({ isValidToken: false });
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+    });
+
+    it('it should not update a subscriber object in database if new product status is "owned" and a aproved transaction is not present.', async function() {
+      const subscriberData = {
+        product: {
+          ...newSubscriberData.product,
+          status: 'owned',
+        },
+      };
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(401);
+
+      const subscriberRes = res.body;
+      subscriberRes.should.to.not.have.property('createdAt');
+      subscriberRes.should.to.not.have.property('updatedAt');
+      subscriberRes.error.should.to.deep.equal(
+        'product status can t be owned if an approved transaction is not present'
+      );
+    });
+
+    it('it should update a subscriber object in database if new product status is "owned" and a aproved transaction is present.', async function() {
+      const subscriberData = {
+        product: {
+          ...newSubscriberData.product,
+          status: 'owned',
+        },
+        transaction: transactionData,
+      };
+      mockPurchaseTokenVerification({ isValidToken: true });
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const subscriberRes = res.body;
+      subscriberRes.product.status.should.to.deep.equal(
+        subscriberData.product.status
+      );
+    });
+
+    it('it should updates a subscriber object in database.', async function() {
+      const subscriberData = {
+        ...newSubscriberData,
+        userId: user.userId,
+      };
+      mockPurchaseTokenVerification({ isValidToken: true });
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+      const subscriberRes = res.body;
+      subscriberRes.should.to.have.property('_id');
+      subscriberRes.userId.should.to.equal(subscriberData.userId);
+      subscriberRes.country.should.to.deep.equal(subscriberData.country);
+      subscriberRes.status.should.to.deep.equal(subscriberData.status);
+      subscriberRes.should.to.have.property('createdAt');
+      subscriberRes.should.to.have.property('updatedAt');
+      subscriberRes.product.planId.should.to.deep.equal(
+        subscriberData.product.planId
+      );
+      subscriberRes.product.subscriptionId.should.to.deep.equal(
+        subscriberData.product.subscriptionId
+      );
+      subscriberRes.product.status.should.to.deep.equal(
+        subscriberData.product.status
+      );
+      subscriberRes.product.should.to.have.property('createdAt');
+      subscriberRes.product.should.to.have.property('updatedAt');
+    });
+  });
+
   describe('DELETE /subscriber/${subscriber.id}', function() {
     let subscriber;
     let adminUser;

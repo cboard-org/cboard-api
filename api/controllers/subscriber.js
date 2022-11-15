@@ -6,6 +6,7 @@ const { getAuthDataFromReq } = require('../helpers/auth');
 module.exports = {
   createSubscriber,
   getSubscriber,
+  updateSubscriber,
   deleteSubscriber,
   postTransaction,
 };
@@ -53,6 +54,74 @@ function getSubscriber(req, res) {
       });
     }
     return res.status(200).json(subscriber.toJSON());
+  });
+}
+
+function updateSubscriber(req, res) {
+  const subscriberId = req.swagger.params.id.value;
+
+  const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
+
+  Subscriber.findOne({ _id: subscriberId }, function(err, subscriber) {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({
+        message: 'Error updating subscriber. ',
+        error: err.message,
+      });
+    }
+    if (!subscriber) {
+      return res.status(404).json({
+        message: 'Subscriber does not exist. Subscriber Id: ' + subscriberId,
+      });
+    }
+
+    if (
+      !isRequestedByAdmin &&
+      (!requestedBy || subscriber.userId != requestedBy)
+    ) {
+      return res.status(401).json({
+        message: 'Error updating subscriber',
+        error:
+          'unhautorized request, subscriber object is only accesible with subscribered user authToken',
+      });
+    }
+
+    for (let key in req.body) {
+      const keyCreatedAt = subscriber[key]?.createdAt;
+      subscriber[key] = keyCreatedAt
+        ? { ...req.body[key], createdAt: keyCreatedAt }
+        : req.body[key];
+    }
+    subscriber.save(function(err, subscriber) {
+      if (err) {
+        const errorValidatingTransaction = err.errors?.transaction;
+        const errorValidatingProduct = err.product;
+        if (errorValidatingTransaction) {
+          console.log('errrtgdsd', errorValidatingTransaction);
+          return res.status(403).json({
+            message: 'Error saving subscriber. ',
+            error: errorValidatingTransaction.properties?.message,
+          });
+        }
+        if (errorValidatingProduct) {
+          return res.status(401).json({
+            message: 'Error saving subscriber. ',
+            error: errorValidatingProduct.message,
+          });
+        }
+        return res.status(500).json({
+          message: 'Error saving subscriber. ',
+          error: err.message,
+        });
+      }
+      if (!subscriber) {
+        return res.status(404).json({
+          message: 'Unable to find subscriber. subscriber id: ' + subscriberId,
+        });
+      }
+      return res.status(200).json(subscriber);
+    });
   });
 }
 
