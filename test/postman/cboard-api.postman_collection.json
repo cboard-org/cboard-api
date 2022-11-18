@@ -1852,7 +1852,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"additionalData\" : null,\n    \"alias\": \"One Year Subscription\",\n    \"currency\": \"USD\",\n    \"description\": \"annual subscription\",\n    \"id\": \"one_year_subscription\",\n    \"loaded\": true,\n    \"price\": \"$12.99\",\n    \"priceMicros\": 12990000,\n    \"state\": \"approved\",\n    \"title\": \"The Monthly Subscription Title\",\n    \"transaction\": { \n        \"type\": \"paid subscription\",\n        \"valid\": true\n    }\n}"
+					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
@@ -1914,7 +1914,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"additionalData\" : null,\n    \"alias\": \"One Year Subscription\",\n    \"currency\": \"USD\",\n    \"description\": \"annual subscription\",\n    \"id\": \"one_year_subscription\",\n    \"loaded\": true,\n    \"price\": \"$12.99\",\n    \"priceMicros\": 12990000,\n    \"state\": \"approved\",\n    \"title\": \"The Monthly Subscription Title\",\n    \"transaction\": { \n        \"type\": \"paid subscription\",\n        \"valid\": true\n    }\n}"
+					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/subscriber/invalid/transaction",
@@ -1979,7 +1979,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"additionalData\" : null,\n    \"alias\": \"One Year Subscription\",\n    \"currency\": \"USD\",\n    \"description\": \"annual subscription\",\n    \"id\": \"one_year_subscription\",\n    \"loaded\": true,\n    \"price\": \"$12.99\",\n    \"priceMicros\": 12990000,\n    \"state\": \"approved\",\n    \"title\": \"The Monthly Subscription Title\",\n    \"transaction\": { \n        \"type\": \"paid subscription\",\n        \"valid\": true\n    }\n}"
+					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
@@ -2019,6 +2019,138 @@
 					"path": [
 						"subscriber",
 						"{{userid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} product requested to other plan Id",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} to owned with diferent plan Id",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} to owned",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"premium_full\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} transaction to null",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    },\n    \"transaction\": null\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
 					]
 				}
 			},
