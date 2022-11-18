@@ -78,6 +78,27 @@ subscribersSchema.pre('save', function() {
   }
   return true;
 });
+
+subscribersSchema.pre('save', async function() {
+  if (
+    this.transaction?.state === 'approved' &&
+    this.product?.status === 'owned'
+  ) {
+    if (this.transaction.nativePurchase?.productId === this.product.planId) {
+      return true;
+    }
+    throw {
+      errors: {
+        transaction: {
+          code: 6778001,
+          message:
+            'subscriber product plan Id is different than transaction plan Id',
+        },
+      },
+    };
+  }
+});
+
 subscribersSchema.path('transaction').validate(async function(transaction) {
   const verifyAndroidPurchase = async ({ productId, purchaseToken }) => {
     const auth = new google.auth.GoogleAuth({
@@ -104,6 +125,7 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
         }
         return;
       } catch (error) {
+        console.log('err', error);
         throw {
           code: 6778001,
           message:

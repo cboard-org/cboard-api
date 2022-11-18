@@ -186,7 +186,7 @@ const subscriber = {
     country: 'United States',
     status: 'free-trial',
     product: {
-      planId: 'one_year_subscription',
+      planId: 'premium_full',
       subscriptionId: '123456',
       status: 'requested',
     },

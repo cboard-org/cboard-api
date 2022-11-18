@@ -398,7 +398,39 @@ describe('Subscriber API calls', function() {
       );
     });
 
-    it('it should update a subscriber object in database if new product status is "owned" and a aproved transaction is present.', async function() {
+    it('it should update a subscriber object in database if new product status is "owned" and a aproved transaction is present before', async function() {
+      const subscriberData = {
+        transaction: transactionData,
+      };
+      mockPurchaseTokenVerification({ isValidToken: true });
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json');
+
+      const subscriberDatatoOwned = {
+        product: {
+          ...newSubscriberData.product,
+          status: 'owned',
+        },
+      };
+      mockPurchaseTokenVerification({ isValidToken: true });
+      const resToOwned = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberDatatoOwned)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const subscriberRes = resToOwned.body;
+      subscriberRes.product.status.should.to.deep.equal(
+        subscriberDatatoOwned.product.status
+      );
+    });
+
+    it('it should update a subscriber object in database if new product status is "owned" and a aproved transaction is present on the same request.', async function() {
       const subscriberData = {
         product: {
           ...newSubscriberData.product,
@@ -419,6 +451,28 @@ describe('Subscriber API calls', function() {
       subscriberRes.product.status.should.to.deep.equal(
         subscriberData.product.status
       );
+    });
+
+    it('it should not update a subscriber object in database if product status is "owned" and the planId not match with the productId of the transaction.', async function() {
+      const subscriberData = {
+        product: {
+          ...newSubscriberData.product,
+          planId: 'wrong-plan-id',
+          status: 'owned',
+        },
+        transaction: transactionData,
+      };
+      mockPurchaseTokenVerification({ isValidToken: true });
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+
+      const subscriberRes = res.body;
+      subscriberRes.message.should.to.deep.equal('Error saving subscriber.');
     });
 
     it('it should updates a subscriber object in database.', async function() {
