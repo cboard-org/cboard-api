@@ -100,7 +100,9 @@ function updateSubscriber(req, res) {
         if (errorValidatingTransaction) {
           return res.status(403).json({
             message: 'Error saving subscriber.',
-            error: errorValidatingTransaction.properties?.message,
+            error:
+              errorValidatingTransaction.message ??
+              errorValidatingTransaction.properties?.message,
           });
         }
         if (errorValidatingProduct) {
