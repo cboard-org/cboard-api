@@ -98,20 +98,19 @@ function updateSubscriber(req, res) {
         const errorValidatingTransaction = err.errors?.transaction;
         const errorValidatingProduct = err.product;
         if (errorValidatingTransaction) {
-          console.log('errrtgdsd', errorValidatingTransaction);
           return res.status(403).json({
-            message: 'Error saving subscriber. ',
+            message: 'Error saving subscriber.',
             error: errorValidatingTransaction.properties?.message,
           });
         }
         if (errorValidatingProduct) {
           return res.status(401).json({
-            message: 'Error saving subscriber. ',
+            message: 'Error saving subscriber.',
             error: errorValidatingProduct.message,
           });
         }
         return res.status(500).json({
-          message: 'Error saving subscriber. ',
+          message: 'Error saving subscriber.',
           error: err.message,
         });
       }
