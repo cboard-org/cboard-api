@@ -135,7 +135,7 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
     }
     throw { code: 6778001, message: 'Subscription Id is not provided' };
   };
-
+  if (!transaction) return true;
   await verifyAndroidPurchase(transaction.nativePurchase);
   return true;
 }, 'transaction puchase token error');

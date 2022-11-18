@@ -475,6 +475,23 @@ describe('Subscriber API calls', function() {
       subscriberRes.message.should.to.deep.equal('Error saving subscriber.');
     });
 
+    it('it should update transaction to null.', async function() {
+      const subscriberData = {
+        product: {
+          ...newSubscriberData.product,
+          status: 'requested',
+        },
+        transaction: null,
+      };
+      const res = await request(server)
+        .patch(`/subscriber/${subscriber._id}`)
+        .send(subscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+    });
+
     it('it should updates a subscriber object in database.', async function() {
       const subscriberData = {
         ...newSubscriberData,
