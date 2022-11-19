@@ -345,6 +345,22 @@ describe('User API calls', function () {
   });
 
   describe('DELETE /user/:userid', function () {
+    it('it should not delete a user with a user Auth token', async function () {
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      expect(await User.exists({ _id: user.userId })).to.equal(true);
+
+      const res = await request(server)
+        .del(`/user/${user.userId}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .expect(403);
+
+      expect(await User.exists({ _id: user.userId })).to.equal(true);
+    });
+
     it('it should delete a user', async function () {
       const admin = await helper.prepareUser(server, {
         role: 'admin',
