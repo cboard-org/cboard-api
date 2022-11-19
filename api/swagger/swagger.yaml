@@ -113,6 +113,14 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/User" 
+  Location:
+    name: X-Forwarded-For
+    in: header
+    description: Contains the remote IP address of the request
+    required: true
+    type: array
+    items:
+      type: string
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -316,6 +324,24 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board/report:
+    x-swagger-router-controller: board
+    post:
+      operationId: reportPublicBoard
+      description: Send an email to report that a public board contains inappropriate content.
+      parameters:
+          - name: report
+            in: body
+            description: Information about the reported board, the whistleblower and the report reason.
+            schema:
+              $ref: "#/definitions/BoardReport"
+      responses:
+        "200":
+          description: Mail sent successfully
         default:
           description: Error
           schema:
@@ -831,6 +857,22 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /location:
+    x-swagger-router-controller: location
+    get:
+      operationId: location
+      description: Get location of unlogged user
+      parameters: 
+        - $ref: "#/parameters/Location"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/LocationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"   
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1363,6 +1405,18 @@ definitions:
       - tiles
   TranslateResponse:
     type: object
+  LocationResponse:
+    type: object
+    properties:
+      country: 
+        type: string
+        description: Country of Ip
+      city:
+        type: string
+        description: City of Ip
+      region: 
+        type: string
+        description: Region of Ip 
   GetBoardListResponse:
     required:
       - total
@@ -1388,3 +1442,35 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Board"
+  BoardReport:
+    type: object
+    required:
+      - name
+      - author
+      - description
+      - id
+      - url
+      - reason
+      - whistleblower
+    properties:
+      name:
+          type: string
+      author:
+          type: string
+      description:
+          type: string
+      id:
+          type: string
+      url:
+          type: string
+      reason:
+          type: string
+      whistleblower:
+        type: object
+        properties:
+          name:
+              type: string
+          email:
+              type: string
+          language: 
+              type: string

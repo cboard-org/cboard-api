@@ -6,7 +6,9 @@ var mongoose = require('mongoose');
 var nev = require('./email-verification')(mongoose);
 var bcrypt = require('bcryptjs');
 
-module.exports = function(locale) {
+const nevInstance = configNev('en');
+
+function configNev(locale) {
   var myHasher = function(password, tempUserData, insertTempUser, callback) {
     bcrypt.genSalt(8, function(err, salt) {
       bcrypt.hash(password, salt, function(err, hash) {
@@ -101,6 +103,9 @@ module.exports = function(locale) {
       'generated temp user model: ' + (typeof tempUserModel === 'function')
     );
   });
-
   return nev;
 };
+
+module.exports = {
+  nev: nevInstance
+}
