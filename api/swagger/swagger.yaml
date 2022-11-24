@@ -1052,7 +1052,7 @@ paths:
   /subscriber/{id}/transaction:
     x-swagger-router-controller: subscriber
     post:
-      operationId: postTransaction
+      operationId: createTransaction
       description: create transaction for a subscriber
       security:
         - Bearer: []

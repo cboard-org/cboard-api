@@ -8,7 +8,7 @@ module.exports = {
   getSubscriber,
   updateSubscriber,
   deleteSubscriber,
-  postTransaction,
+  createTransaction,
 };
 
 function createSubscriber(req, res) {
@@ -150,7 +150,7 @@ function deleteSubscriber(req, res) {
   });
 }
 
-async function postTransaction(req, res) {
+async function createTransaction(req, res) {
   const subscriberId = req.swagger.params.id.value;
   const parseTransactionReceipt = (transaction) => {
     const receipt = transaction?.nativePurchase?.receipt;
