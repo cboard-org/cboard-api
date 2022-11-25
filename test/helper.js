@@ -240,7 +240,11 @@ const subscriber = {
   deleteSubscriber: async (userId) => {
     return await Subscriber.deleteMany({ userId });
   },
-  mockPurchaseTokenVerification: ({ isValidToken }) => {
+  mockPurchaseTokenVerification: ({
+    isValidToken,
+    isExpired = false,
+    isBillingRetryPeriod = false,
+  }) => {
     const {
       productId,
       purchaseToken,
@@ -250,9 +254,22 @@ const subscriber = {
       .reply(200);
     if (isValidToken) {
       const getExpiryTimeMillis = () => {
+        if (!isExpired && !isBillingRetryPeriod)
+          return moment()
+            .add(1, 'y')
+            .valueOf()
+            .toString();
+        console.log(isBillingRetryPeriod);
+        if (isBillingRetryPeriod)
+          return moment()
+            .subtract(7, 'days')
+            .valueOf()
+            .toString();
+
         return moment()
-          .add(1, 'y')
-          .valueOf();
+          .subtract(28, 'days')
+          .valueOf()
+          .toString();
       };
       const verifiedPurchaseReply = {
         startTimeMillis: moment().valueOf(),

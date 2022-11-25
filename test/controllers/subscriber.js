@@ -200,6 +200,94 @@ describe('Subscriber API calls', function() {
         false
       );
     });
+
+    it('it should should response that transaction is expired.', async function() {
+      const receiptObject = JSON.parse(transactionData.nativePurchase.receipt);
+      const mockTransactionData = transactionData;
+      const verifiedPurchaseReply = mockPurchaseTokenVerification({
+        isValidToken: true,
+        isExpired: true,
+      });
+      const res = await request(server)
+        .post(`/subscriber/${subscriber._id}/transaction`)
+        .send(mockTransactionData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const transactionRes = res.body;
+      const expectedExpiryDate = new Date(
+        Number(verifiedPurchaseReply.expiryTimeMillis)
+      ).toISOString();
+
+      transactionRes.ok.should.to.equal(true);
+      transactionRes.data.id.should.to.deep.equal(
+        mockTransactionData.nativePurchase.productId
+      );
+      transactionRes.data.latest_receipt.should.to.deep.equal(true);
+      transactionRes.data.transaction.type.should.to.deep.equal(
+        mockTransactionData.platform
+      );
+      transactionRes.data.transaction.data.transaction.nativePurchase.should.to.deep.equal(
+        {
+          ...mockTransactionData.nativePurchase,
+          receipt: receiptObject,
+        }
+      );
+      transactionRes.data.transaction.data.success.should.to.deep.equal(true);
+      transactionRes.data.collection.expiryDate.should.to.deep.equal(
+        expectedExpiryDate
+      );
+      transactionRes.data.collection.isExpired.should.to.deep.equal(true);
+      transactionRes.data.collection.isBillingRetryPeriod.should.to.deep.equal(
+        false
+      );
+    });
+
+    it('it should should response that transaction is expired and is on billing retry period.', async function() {
+      const receiptObject = JSON.parse(transactionData.nativePurchase.receipt);
+      const mockTransactionData = transactionData;
+      const verifiedPurchaseReply = mockPurchaseTokenVerification({
+        isValidToken: true,
+        isBillingRetryPeriod: true,
+      });
+      const res = await request(server)
+        .post(`/subscriber/${subscriber._id}/transaction`)
+        .send(mockTransactionData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const transactionRes = res.body;
+      const expectedExpiryDate = new Date(
+        Number(verifiedPurchaseReply.expiryTimeMillis)
+      ).toISOString();
+
+      transactionRes.ok.should.to.equal(true);
+      transactionRes.data.id.should.to.deep.equal(
+        mockTransactionData.nativePurchase.productId
+      );
+      transactionRes.data.latest_receipt.should.to.deep.equal(true);
+      transactionRes.data.transaction.type.should.to.deep.equal(
+        mockTransactionData.platform
+      );
+      transactionRes.data.transaction.data.transaction.nativePurchase.should.to.deep.equal(
+        {
+          ...mockTransactionData.nativePurchase,
+          receipt: receiptObject,
+        }
+      );
+      transactionRes.data.transaction.data.success.should.to.deep.equal(true);
+      transactionRes.data.collection.expiryDate.should.to.deep.equal(
+        expectedExpiryDate
+      );
+      transactionRes.data.collection.isExpired.should.to.deep.equal(true);
+      transactionRes.data.collection.isBillingRetryPeriod.should.to.deep.equal(
+        true
+      );
+    });
   });
 
   describe('get /subscriber/${subscriber.userId}', function() {
