@@ -38,34 +38,34 @@ describe('Subscription API calls', function() {
     after(async function() {
       await deleteSubscription();
     });
-    // it('it should not create a subscription object in database if user is not loged.', async function() {
-    //   const mockSubscriberData = helper.subscriptionData;
-    //   const res = await request(server)
-    //     .post(`/subscription/${subscriptionId}`)
-    //     .send(mockSubscriberData)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     // .expect(403);
+    it('it should not create a subscription object in database if user is not loged.', async function() {
+      const mockSubscriberData = helper.subscriptionData;
+      const res = await request(server)
+        .post(`/subscription/${subscriptionId}`)
+        .send(mockSubscriberData)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
 
-    //   const subscriptionRes = res.body;
-    //   subscriptionRes.should.to.not.have.property('createdAt');
-    //   subscriptionRes.should.to.not.have.property('updatedAt');
-    // });
+      const subscriptionRes = res.body;
+      subscriptionRes.should.to.not.have.property('createdAt');
+      subscriptionRes.should.to.not.have.property('updatedAt');
+    });
 
-    // it('it should not create a subscription object in database if user is not admin.', async function() {
-    //   const mockSubscriberData = helper.subscriptionData;
-    //   const res = await request(server)
-    //     .post(`/subscription/${subscriptionId}`)
-    //     .send(mockSubscriberData)
-    //     .set('Authorization', `Bearer ${user.token}`)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     .expect(403);
+    it('it should not create a subscription object in database if user is not admin.', async function() {
+      const mockSubscriberData = helper.subscriptionData;
+      const res = await request(server)
+        .post(`/subscription/${subscriptionId}`)
+        .send(mockSubscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
 
-    //   const subscriptionRes = res.body;
-    //   subscriptionRes.should.to.not.have.property('createdAt');
-    //   subscriptionRes.should.to.not.have.property('updatedAt');
-    // });
+      const subscriptionRes = res.body;
+      subscriptionRes.should.to.not.have.property('createdAt');
+      subscriptionRes.should.to.not.have.property('updatedAt');
+    });
 
     it('it should create a subscription object in database.', async function() {
       const res = await request(server)
@@ -108,22 +108,22 @@ describe('Subscription API calls', function() {
     after(async function() {
       await deleteSubscription();
     });
-    // it('it should not get a subscription object if user is not loged.', async function() {
-    //   const res = await request(server)
-    //     .get(`/subscription/${subscriptionId}`)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     .expect(403);
-    // });
+    it('it should not get a subscription object if user is not loged.', async function() {
+      const res = await request(server)
+        .get(`/subscription/${subscriptionId}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
 
-    // it('it should not get a subscription object in database if user is not admin.', async function() {
-    //   const res = await request(server)
-    //     .get(`/subscription/${subscriptionId}`)
-    //     .set('Authorization', `Bearer ${user.token}`)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     .expect(403);
-    // });
+    it('it should not get a subscription object in database if user is not admin.', async function() {
+      const res = await request(server)
+        .get(`/subscription/${subscriptionId}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
 
     it('it should not get a subscription object for a non-existing subscription Id.', async function() {
       const nonExistingSubscriptionId = 'non-existing-id';
@@ -176,26 +176,26 @@ describe('Subscription API calls', function() {
       await deleteSubscription();
     });
 
-    // it('it should not update a subscription object in database if user is not loged.', async function() {
-    //   const mockSubscriberData = helper.subscriptionData;
-    //   const res = await request(server)
-    //     .put(`/subscription/${subscriptionId}`)
-    //     .send(mockSubscriberData)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     .expect(403);
-    // });
+    it('it should not update a subscription object in database if user is not loged.', async function() {
+      const mockSubscriberData = helper.subscriptionData;
+      const res = await request(server)
+        .put(`/subscription/${subscriptionId}`)
+        .send(mockSubscriberData)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
 
-    // it('it should not update a subscription object in database if user is not admin.', async function() {
-    //   const mockSubscriberData = helper.subscriptionData;
-    //   const res = await request(server)
-    //     .put(`/subscription/${subscriptionId}`)
-    //     .send(mockSubscriberData)
-    //     .set('Authorization', `Bearer ${user.token}`)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     .expect(403);
-    // });
+    it('it should not update a subscription object in database if user is not admin.', async function() {
+      const mockSubscriberData = helper.subscriptionData;
+      const res = await request(server)
+        .put(`/subscription/${subscriptionId}`)
+        .send(mockSubscriberData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
     it('it should not update a subscription object for a non-existing subscription Id.', async function() {
       const nonExistingSubscriptionId = 'non-existing-id';
       const res = await request(server)
@@ -262,22 +262,22 @@ describe('Subscription API calls', function() {
       await deleteSubscription();
     });
 
-    // it('it should not DELETE a subscription object in database if user is not loged.', async function() {
-    //   const res = await request(server)
-    //     .delete(`/subscription/${subscriptionId}`)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     .expect(403);
-    // });
+    it('it should not DELETE a subscription object in database if user is not loged.', async function() {
+      const res = await request(server)
+        .delete(`/subscription/${subscriptionId}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
 
-    // it('it should not DELETE a subscription object in database if user is not admin.', async function() {
-    //   const res = await request(server)
-    //     .delete(`/subscription/${subscriptionId}`)
-    //     .set('Authorization', `Bearer ${user.token}`)
-    //     .set('Accept', 'application/json')
-    //     .expect('Content-Type', /json/)
-    //     .expect(403);
-    // });
+    it('it should not DELETE a subscription object in database if user is not admin.', async function() {
+      const res = await request(server)
+        .delete(`/subscription/${subscriptionId}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
 
     it('it should DELETE a subscription object in database.', async function() {
       const res = await request(server)
