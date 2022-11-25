@@ -2195,6 +2195,184 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "/subscription/{id} createSubscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"mock subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature\",\n    \"feature2\",\n    \"feature3\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Argentina\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/{id} get Subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/{id} update Subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"mock updated subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature3\",\n    \"feature4\",\n    \"feature5\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Perú\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/{id} delete Subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
