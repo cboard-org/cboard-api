@@ -173,6 +173,10 @@ describe('Subscriber API calls', function() {
         .expect(200);
 
       const transactionRes = res.body;
+      const expectedExpiryDate = new Date(
+        Number(verifiedPurchaseReply.expiryTimeMillis)
+      ).toISOString();
+
       transactionRes.ok.should.to.equal(true);
       transactionRes.data.id.should.to.deep.equal(
         mockTransactionData.nativePurchase.productId
@@ -189,9 +193,9 @@ describe('Subscriber API calls', function() {
       );
       transactionRes.data.transaction.data.success.should.to.deep.equal(true);
       transactionRes.data.collection.expiryDate.should.to.deep.equal(
-        new Date(verifiedPurchaseReply.expiryTimeMillis)
+        expectedExpiryDate
       );
-      transactionRes.data.collection.isExpired.should.to.deep.equal(true);
+      transactionRes.data.collection.isExpired.should.to.deep.equal(false);
       transactionRes.data.collection.isBillingRetryPeriod.should.to.deep.equal(
         false
       );
