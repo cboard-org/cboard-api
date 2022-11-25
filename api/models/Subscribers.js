@@ -110,6 +110,32 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
     google.options({ auth: authClient });
     if (productId) {
       try {
+        const setExpireDatesOptions = (expiryTimeMillis) => {
+          const expiryTimeMillisNumber = Number(expiryTimeMillis);
+          const nowInMillis = Date.now();
+          const isExpired = nowInMillis > expiryTimeMillisNumber;
+          const getRetryBillingRetryPeriodFinish = () => {
+            const addBillingRetryPeriod = (expiryTimeMillisNumber, days) => {
+              const expiryDate = new Date(expiryTimeMillisNumber);
+              expiryDate.setDate(expiryDate.getDate() + days);
+              return expiryDate;
+            };
+
+            return addBillingRetryPeriod(expiryTimeMillisNumber, 14);
+          };
+
+          transaction.expiryDate = new Date(expiryTimeMillisNumber);
+          transaction.isExpired = isExpired;
+
+          if (!isExpired) {
+            transaction.isBillingRetryPeriod = false;
+            return;
+          }
+
+          transaction.isBillingRetryPeriod =
+            nowInMillis > getRetryBillingRetryPeriodFinish() ? false : true;
+        };
+
         const res = await androidpublisher.purchases.subscriptions.get({
           packageName: 'com.unicef.cboard',
           subscriptionId: productId,
@@ -123,6 +149,7 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
           console.error(res.data.errors);
           throw { code: 6778001, message: res.data.errors };
         }
+        setExpireDatesOptions(res.data.expiryTimeMillis);
         return;
       } catch (error) {
         console.log('err', error);

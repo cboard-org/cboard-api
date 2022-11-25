@@ -221,10 +221,21 @@ async function createTransaction(req, res) {
           },
         });
       }
+      const transaction = subscriber.transaction;
       return res.status(200).json({
         ok: true,
         data: {
-          transaction: subscriber.transaction,
+          id: transaction.nativePurchase.productId,
+          latest_receipt: true,
+          transaction: {
+            data: { transaction, success: true },
+            type: transaction.platform,
+          },
+          collection: {
+            expiryDate: transaction.expiryDate,
+            isExpired: transaction.isExpired,
+            isBillingRetryPeriod: transaction.isBillingRetryPeriod,
+          },
         },
       });
     }
