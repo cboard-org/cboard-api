@@ -11,6 +11,7 @@ const Subscription = require('../api/models/subscriptions');
 
 const Subscriber = require('../api/models/Subscribers');
 const nock = require('nock');
+const moment = require('moment');
 
 /**helper nodemailer-mock
  *
@@ -248,26 +249,32 @@ const subscriber = {
       .post('/oauth2/v4/token')
       .reply(200);
     if (isValidToken) {
+      const getExpiryTimeMillis = () => {
+        return moment()
+          .add(1, 'y')
+          .valueOf();
+      };
+      const verifiedPurchaseReply = {
+        startTimeMillis: moment().valueOf(),
+        expiryTimeMillis: getExpiryTimeMillis(),
+        autoRenewing: false,
+        priceCurrencyCode: 'USD',
+        priceAmountMicros: '3000000',
+        countryCode: 'AR',
+        developerPayload: '',
+        cancelReason: 0,
+        userCancellationTimeMillis: '1668097284403',
+        orderId: 'GPA.0000-0000-0000-0000..0',
+        purchaseType: 0,
+        acknowledgementState: 1,
+        kind: 'androidpublisher#subscriptionPurchase',
+      };
       nock(
         `https://www.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptions/${productId}/tokens/${purchaseToken}`
       )
         .get('')
-        .reply(200, {
-          startTimeMillis: '1668093831727',
-          expiryTimeMillis: '1668097424042',
-          autoRenewing: false,
-          priceCurrencyCode: 'USD',
-          priceAmountMicros: '3000000',
-          countryCode: 'AR',
-          developerPayload: '',
-          cancelReason: 0,
-          userCancellationTimeMillis: '1668097284403',
-          orderId: 'GPA.0000-0000-0000-0000..0',
-          purchaseType: 0,
-          acknowledgementState: 1,
-          kind: 'androidpublisher#subscriptionPurchase',
-        });
-      return;
+        .reply(200, verifiedPurchaseReply);
+      return verifiedPurchaseReply;
     }
     nock(
       `https://www.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptions/${productId}/tokens/${purchaseToken}`
