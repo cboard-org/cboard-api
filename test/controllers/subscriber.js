@@ -549,15 +549,14 @@ describe('Subscriber API calls', function() {
         .expect(403);
     });
 
-    //THIS BREAK API
-    // it('it should not delete a subscriber if user is not admin', async function () {
-    //     const res = await request(server)
-    //       .delete(`/subscriber/${subscriber._id}`)
-    //       .set('Accept', 'application/json')
-    //       .set('Authorization', `Bearer ${user.token}`)
-    //       .expect('Content-Type', /json/)
-    //       .expect(403);
-    // });
+    it('it should not delete a subscriber if user is not admin', async function () {
+        const res = await request(server)
+          .delete(`/subscriber/${subscriber._id}`)
+          .set('Accept', 'application/json')
+          .set('Authorization', `Bearer ${user.token}`)
+          .expect('Content-Type', /json/)
+          .expect(403);
+    });
 
     it('it should delete a subscriber.', async function() {
       const res = await request(server)
