@@ -50,5 +50,6 @@ module.exports = {
       rejectUnauthorized: false
     }
   },
-  appInsightConnectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING
+  appInsightConnectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING,
+  GOOGLE_PLAY_CREDENTIALS: process.env.GOOGLE_PLAY_CREDENTIALS
 };

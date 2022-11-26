@@ -3,7 +3,7 @@ const config = require('../../config');
 
 const { secret: jwtSecret, issuer } = config.jwt;
 
-const getTokenData = token => {
+const getTokenData = (token) => {
   let data = null;
 
   try {
@@ -52,9 +52,26 @@ const issueToken = ({ email, id }) => {
   return jwt.sign({ email, id, issuer }, jwtSecret);
 };
 
+const getAuthDataFromReq = (req) => {
+  const reqToken = req.get('Authorization');
+  const tokenString = reqToken.split(' ')[1];
+  const decodedToken = getTokenData(tokenString);
+  const requestedBy = decodedToken?.id;
+  if (!reqToken || !decodedToken)
+    return {
+      requestedBy: null,
+      isAdmin: false,
+    };
+  return {
+    requestedBy,
+    isAdmin: req.user.id == requestedBy && req.user.isAdmin,
+  };
+};
+
 module.exports = {
   getTokenData,
   authorizeRequest,
   verifyToken,
-  issueToken
+  issueToken,
+  getAuthDataFromReq,
 };

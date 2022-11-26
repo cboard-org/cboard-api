@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6fba04ce-86d5-491b-b3cf-24decde495c8",
+		"_postman_id": "f8bd131f-6f49-404d-afc7-2a1c15d2400b",
 		"name": "cboard-api",
 		"description": "contains tests for all cboard-api calls",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -1634,6 +1634,15 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -1652,6 +1661,714 @@
 					],
 					"path": [
 						"location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber unlogged",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Only registered users can access \", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"United States\",\n    \"status\": \"processing\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const schema = {  ",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"_id\": {\"type\":\"string\"},",
+							"        \"userId\": {\"type\":\"string\"},",
+							"        \"country\": {\"type\":\"string\"},",
+							"        \"status\": {\"type\":\"string\"},",
+							"        \"transaction\": {\"type\":\"object\"},",
+							"        \"product\": {\"type\":\"object\"},",
+							"        \"createdAt\": {\"type\": \"string\"},",
+							"        \"updatedAt\": {\"type\":\"string\"}",
+							"    },",
+							"    \"required\":[\"_id\",\"userId\",\"country\",\"status\",\"product\",\"createdAt\",\"updatedAt\"]",
+							"}        ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"to have required props\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"    pm.globals.set(\"subscriberId\",pm.response.json()._id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"'United States'\",\n    \"status\": \"free-trial\",\n    \"product\": {\n        \"planId\": \"one_year_subscription\",\n        \"subscriptionId\": \"123456\",\n        \"status\": \"requested\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber unahutorized",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
+							"pm.test(\"only admin user can delete\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
+							"pm.test(\"only admin user can delete\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/{id}/transaction unlogged",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Only registered users can access \", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/invalidId/transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const schema = {  ",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"ok\": {\"type\":\"boolean\"},",
+							"        \"data\":{\"code\": {\"type\":\"number\"}},",
+							"    },",
+							"    \"required\":[\"ok\",\"data\"]",
+							"}        ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"to ok prop be false\", function () {",
+							"   pm.expect(pm.response.json().ok).to.be.false;",
+							"});",
+							"",
+							"pm.test(\"to have required props\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/invalid/transaction",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"invalid",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/{id}/transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const schema = {  ",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"ok\": {\"type\":\"boolean\"},",
+							"        \"data\":{ ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"transaction\": {\"type\":\"object\"}",
+							"            },",
+							"            \"required\":[\"transaction\"]",
+							"        }    ",
+							"    },",
+							"    \"required\":[\"ok\",\"data\"]",
+							"}        ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"to have required props\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/{{userid}}",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/subscriber/{{userid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{userid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} product requested to other plan Id",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} to owned with diferent plan Id",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} to owned",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"premium_full\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} transaction to null",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    },\n    \"transaction\": null\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/{id} createSubscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"mock subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature\",\n    \"feature2\",\n    \"feature3\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Argentina\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/{id} get Subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/{id} update Subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"mock updated subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature3\",\n    \"feature4\",\n    \"feature5\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Perú\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/{id} delete Subscription",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/subscription/mock-subscription-id",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"mock-subscription-id"
 					]
 				}
 			},
