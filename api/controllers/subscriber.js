@@ -231,11 +231,13 @@ async function createTransaction(req, res) {
             data: { transaction, success: true },
             type: transaction.platform,
           },
-          collection: {
-            expiryDate: transaction.expiryDate,
-            isExpired: transaction.isExpired,
-            isBillingRetryPeriod: transaction.isBillingRetryPeriod,
-          },
+          collection: [
+            {
+              expiryDate: transaction.expiryDate,
+              isExpired: transaction.isExpired,
+              isBillingRetryPeriod: transaction.isBillingRetryPeriod,
+            },
+          ],
         },
       });
     }
