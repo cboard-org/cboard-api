@@ -176,7 +176,8 @@ describe('Subscriber API calls', function() {
       const expectedExpiryDate = new Date(
         Number(verifiedPurchaseReply.expiryTimeMillis)
       ).toISOString();
-
+      const collection = transactionRes.data.collection;
+      const firstCollection = collection[0];
       transactionRes.ok.should.to.equal(true);
       transactionRes.data.id.should.to.deep.equal(
         mockTransactionData.nativePurchase.productId
@@ -192,13 +193,10 @@ describe('Subscriber API calls', function() {
         }
       );
       transactionRes.data.transaction.data.success.should.to.deep.equal(true);
-      transactionRes.data.collection.expiryDate.should.to.deep.equal(
-        expectedExpiryDate
-      );
-      transactionRes.data.collection.isExpired.should.to.deep.equal(false);
-      transactionRes.data.collection.isBillingRetryPeriod.should.to.deep.equal(
-        false
-      );
+
+      firstCollection.expiryDate.should.to.deep.equal(expectedExpiryDate);
+      firstCollection.isExpired.should.to.deep.equal(false);
+      firstCollection.isBillingRetryPeriod.should.to.deep.equal(false);
     });
 
     it('it should should response that transaction is expired.', async function() {
@@ -221,6 +219,9 @@ describe('Subscriber API calls', function() {
         Number(verifiedPurchaseReply.expiryTimeMillis)
       ).toISOString();
 
+      const collection = transactionRes.data.collection;
+      const firstCollection = collection[0];
+
       transactionRes.ok.should.to.equal(true);
       transactionRes.data.id.should.to.deep.equal(
         mockTransactionData.nativePurchase.productId
@@ -236,13 +237,9 @@ describe('Subscriber API calls', function() {
         }
       );
       transactionRes.data.transaction.data.success.should.to.deep.equal(true);
-      transactionRes.data.collection.expiryDate.should.to.deep.equal(
-        expectedExpiryDate
-      );
-      transactionRes.data.collection.isExpired.should.to.deep.equal(true);
-      transactionRes.data.collection.isBillingRetryPeriod.should.to.deep.equal(
-        false
-      );
+      firstCollection.expiryDate.should.to.deep.equal(expectedExpiryDate);
+      firstCollection.isExpired.should.to.deep.equal(true);
+      firstCollection.isBillingRetryPeriod.should.to.deep.equal(false);
     });
 
     it('it should should response that transaction is expired and is on billing retry period.', async function() {
@@ -265,6 +262,9 @@ describe('Subscriber API calls', function() {
         Number(verifiedPurchaseReply.expiryTimeMillis)
       ).toISOString();
 
+      const collection = transactionRes.data.collection;
+      const firstCollection = collection[0];
+
       transactionRes.ok.should.to.equal(true);
       transactionRes.data.id.should.to.deep.equal(
         mockTransactionData.nativePurchase.productId
@@ -280,13 +280,9 @@ describe('Subscriber API calls', function() {
         }
       );
       transactionRes.data.transaction.data.success.should.to.deep.equal(true);
-      transactionRes.data.collection.expiryDate.should.to.deep.equal(
-        expectedExpiryDate
-      );
-      transactionRes.data.collection.isExpired.should.to.deep.equal(true);
-      transactionRes.data.collection.isBillingRetryPeriod.should.to.deep.equal(
-        true
-      );
+      firstCollection.expiryDate.should.to.deep.equal(expectedExpiryDate);
+      firstCollection.isExpired.should.to.deep.equal(true);
+      firstCollection.isBillingRetryPeriod.should.to.deep.equal(true);
     });
   });
 
