@@ -80,7 +80,8 @@ const verifyCommunicatorProperties = (body) => {
     'email',
     'author',
     'rootBoard',
-    'boards'
+    'boards',
+    'defaultBoardsIncluded'
   );
 };
 
