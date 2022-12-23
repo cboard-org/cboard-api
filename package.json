@@ -35,7 +35,7 @@
     "express-session": "^1.17.3",
     "googleapis": "^49.0.0",
     "https": "^1.0.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mockery": "^2.1.0",
     "moment": "2.29.4",
     "mongoose": "^5.13.9",
