@@ -264,7 +264,8 @@ const UPDATEABLE_FIELDS = [
   'name',
   'birthdate',
   'locale',
-  'location'
+  'location',
+  'isFirstLogin'
 ]
 
 function updateUser(req, res) {
