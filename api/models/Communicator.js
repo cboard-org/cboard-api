@@ -36,7 +36,12 @@ const COMMUNICATOR_SCHEMA_DEFINITION = {
     required: true,
     trim: true
   },
-  boards: [{ type: String }]
+  boards: [{ type: String }],
+  defaultBoardsIncluded: [{
+    type: Object,
+    unique: false,
+    required: false,
+  }],
 };
 
 const COMMUNICATOR_SCHEMA_OPTIONS = {
