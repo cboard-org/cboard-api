@@ -78,7 +78,11 @@ const USER_SCHEMA_DEFINITION = {
     country: String,
     countryCode: String,
     region: String,
-    city: String,
+    city: String
+  },
+  isFirstLogin: {
+    type: Boolean,
+    required: false
   }
 };
 
@@ -289,6 +293,7 @@ userSchema.statics = {
   // Returns a promise
   createUserFromFacebook: async function(profile) {
     const user = getUserFromProfile(profile, 'facebook', User);
+    user.isFirstLogin = true;
     const dbUser = await user.save();
     return dbUser;
   },
@@ -297,6 +302,7 @@ userSchema.statics = {
   // Returns a promise
   createUserFromGoogle: async function(profile) {
     const user = getUserFromProfile(profile, 'google', User);
+    user.isFirstLogin = true;
     const dbUser = await user.save();
     return dbUser;
   },

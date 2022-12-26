@@ -50,6 +50,7 @@ async function createUser(req, res) {
   } catch (error) {
     console.error(error.message);
   }
+  req.body.isFirstLogin = true;
   const user = new User(req.body);
   nev.createTempUser(user, function (err, existingPersistentUser, newTempUser) {
     if (err) {
