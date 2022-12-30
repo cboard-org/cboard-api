@@ -95,6 +95,11 @@ describe('User API calls', function () {
       const authToken = res.body.authToken;
       authToken.should.be.a('string');
       authToken.should.not.have.string(' ');
+      describe('POST /user/login', function () {
+        it('it should contain a field indicating that is first login', function () {
+          res.body.isFirstLogin.should.be.true;
+        });
+      });
     });
   });
 
