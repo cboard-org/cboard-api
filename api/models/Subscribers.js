@@ -110,35 +110,20 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
     google.options({ auth: authClient });
     if (productId) {
       try {
-        const setExpireDatesOptions = (expiryTimeMillis) => {
-          const expiryTimeMillisNumber = Number(expiryTimeMillis);
-          const nowInMillis = Date.now();
-          const isExpired = nowInMillis > expiryTimeMillisNumber;
-          const getRetryBillingRetryPeriodFinish = () => {
-            const addBillingRetryPeriod = (expiryTimeMillisNumber, days) => {
-              const expiryDate = new Date(expiryTimeMillisNumber);
-              expiryDate.setDate(expiryDate.getDate() + days);
-              return expiryDate;
-            };
-
-            return addBillingRetryPeriod(expiryTimeMillisNumber, 14);
-          };
-
-          transaction.expiryDate = new Date(expiryTimeMillisNumber);
-          transaction.isExpired = isExpired;
-
-          if (!isExpired) {
-            transaction.isBillingRetryPeriod = false;
-            return;
+        const setExpireDatesOptions = (expiryTimeMillis, subscriptionState) => {
+          const expiryDate = new Date(expiryTimeMillis);
+          console.log(expiryTimeMillis)
+          transaction.expiryDate = expiryDate;
+          if(subscriptionState === "SUBSCRIPTION_STATE_IN_GRACE_PERIOD"){
+            transaction.isBillingRetryPeriod = true;
           }
-
-          transaction.isBillingRetryPeriod =
-            nowInMillis > getRetryBillingRetryPeriodFinish() ? false : true;
+          if(subscriptionState === "SUBSCRIPTION_STATE_ON_HOLD"){
+            transaction.isExpired = true;
+          }
         };
 
-        const res = await androidpublisher.purchases.subscriptions.get({
+        const res = await androidpublisher.purchases.subscriptionsv2.get({
           packageName: 'com.unicef.cboard',
-          subscriptionId: productId,
           token: purchaseToken,
         });
 
@@ -149,7 +134,9 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
           console.error(res.data.errors);
           throw { code: 6778001, message: res.data.errors };
         }
-        setExpireDatesOptions(res.data.expiryTimeMillis);
+        const subscriptionState = res.data.subscriptionState.replace('SUBSCRIPTION_STATE_', '').toLowerCase();
+        transaction.subscriptionState = subscriptionState;
+        setExpireDatesOptions(res.data.lineItems[0].expiryTime, res.data.subscriptionState);
         return;
       } catch (error) {
         console.log('err', error);
