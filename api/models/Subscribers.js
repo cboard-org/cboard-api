@@ -110,7 +110,8 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
     google.options({ auth: authClient });
     if (productId) {
       try {
-        const setExpireDate = (expiryTimeMillis) => {
+        const setExpireDate = (expiryTimeMillisString) => {
+          const expiryTimeMillis = Number(expiryTimeMillisString);
           const expiryDate = new Date(expiryTimeMillis);
           transaction.expiryDate = expiryDate;
         };
@@ -118,8 +119,12 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
         const setStateOptions = (subscriptionState) => {
           const GRACE_PERIOD_STRING = 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD';
           const ON_HOLD_STRING = 'SUBSCRIPTION_STATE_ON_HOLD';
+          const EXPIRED = 'SUBSCRIPTION_STATE_EXPIRED';
 
+          transaction.isExpired = false;
+          transaction.isBillingRetryPeriod = false;
           if (subscriptionState === GRACE_PERIOD_STRING) {
+            transaction.isExpired = true;
             transaction.isBillingRetryPeriod = true;
             return;
           }
@@ -127,14 +132,17 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
             transaction.isExpired = true;
             return;
           }
-        }
-
+          if (subscriptionState === EXPIRED) {
+            transaction.isExpired = true;
+            return;
+          }
+        };
         const res = await androidpublisher.purchases.subscriptionsv2.get({
           packageName: 'com.unicef.cboard',
           token: purchaseToken,
         });
 
-        const getSubscritionStateKey = subscriptionStateConst => {
+        const getSubscritionStateKey = (subscriptionStateConst) => {
           const STATE_BEGIN = 'SUBSCRIPTION_STATE_';
           return subscriptionStateConst.replace(STATE_BEGIN, '').toLowerCase();
         };
