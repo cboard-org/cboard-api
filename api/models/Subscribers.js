@@ -110,12 +110,15 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
     google.options({ auth: authClient });
     if (productId) {
       try {
-        const setExpireDatesOptions = (expiryTimeMillis, subscriptionState) => {
+        const setExpireDate = (expiryTimeMillis) => {
           const expiryDate = new Date(expiryTimeMillis);
+          transaction.expiryDate = expiryDate;
+        };
+
+        const setStateOptions = (subscriptionState) => {
           const GRACE_PERIOD_STRING = 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD';
           const ON_HOLD_STRING = 'SUBSCRIPTION_STATE_ON_HOLD';
 
-          transaction.expiryDate = expiryDate;
           if (subscriptionState === GRACE_PERIOD_STRING) {
             transaction.isBillingRetryPeriod = true;
             return;
@@ -124,7 +127,7 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
             transaction.isExpired = true;
             return;
           }
-        };
+        }
 
         const res = await androidpublisher.purchases.subscriptionsv2.get({
           packageName: 'com.unicef.cboard',
@@ -150,7 +153,8 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
         transaction.subscriptionState = getSubscritionStateKey(
           subscriptionStateConst
         );
-        setExpireDatesOptions(firstLineItemExpiryTime, subscriptionStateConst);
+        setExpireDate(firstLineItemExpiryTime);
+        setStateOptions(subscriptionStateConst);
         return;
       } catch (error) {
         console.log('err', error);
