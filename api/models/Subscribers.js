@@ -112,13 +112,17 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
       try {
         const setExpireDatesOptions = (expiryTimeMillis, subscriptionState) => {
           const expiryDate = new Date(expiryTimeMillis);
-          console.log(expiryTimeMillis)
+          const GRACE_PERIOD_STRING = 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD';
+          const ON_HOLD_STRING = 'SUBSCRIPTION_STATE_ON_HOLD';
+
           transaction.expiryDate = expiryDate;
-          if(subscriptionState === "SUBSCRIPTION_STATE_IN_GRACE_PERIOD"){
+          if (subscriptionState === GRACE_PERIOD_STRING) {
             transaction.isBillingRetryPeriod = true;
+            return;
           }
-          if(subscriptionState === "SUBSCRIPTION_STATE_ON_HOLD"){
+          if (subscriptionState === ON_HOLD_STRING) {
             transaction.isExpired = true;
+            return;
           }
         };
 
@@ -127,6 +131,14 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
           token: purchaseToken,
         });
 
+        const getSubscritionStateKey = subscriptionStateConst => {
+          const STATE_BEGIN = 'SUBSCRIPTION_STATE_';
+          return subscriptionStateConst.replace(STATE_BEGIN, '').toLowerCase();
+        };
+
+        const subscriptionStateConst = res.data.subscriptionState;
+        const firstLineItemExpiryTime = res.data.lineItems[0].expiryTime;
+
         if (!res.data) {
           throw { code: 6778001, message: 'error verifying purchase' };
         }
@@ -134,9 +146,11 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
           console.error(res.data.errors);
           throw { code: 6778001, message: res.data.errors };
         }
-        const subscriptionState = res.data.subscriptionState.replace('SUBSCRIPTION_STATE_', '').toLowerCase();
-        transaction.subscriptionState = subscriptionState;
-        setExpireDatesOptions(res.data.lineItems[0].expiryTime, res.data.subscriptionState);
+
+        transaction.subscriptionState = getSubscritionStateKey(
+          subscriptionStateConst
+        );
+        setExpireDatesOptions(firstLineItemExpiryTime, subscriptionStateConst);
         return;
       } catch (error) {
         console.log('err', error);
