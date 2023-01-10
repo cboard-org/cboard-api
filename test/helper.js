@@ -251,22 +251,22 @@ const subscriber = {
       .post('/oauth2/v4/token')
       .reply(200);
     if (isValidToken) {
-      const getExpiryTimeMillis = () => {
-        if (!isExpired && !isBillingRetryPeriod)
-          return moment()
-            .add(1, 'y')
-            .valueOf()
-            .toString();
-        if (isBillingRetryPeriod)
-          return moment()
-            .subtract(7, 'days')
-            .valueOf()
-            .toString();
+      const getExpiryDateTimeStamp = () => {
+        const getExpiryTimeMillis = () => {
+          if (!isExpired && !isBillingRetryPeriod)
+            return moment()
+              .add(1, 'y')
+              .valueOf();
+          if (isBillingRetryPeriod)
+            return moment()
+              .subtract(7, 'days')
+              .valueOf();
 
-        return moment()
-          .subtract(28, 'days')
-          .valueOf()
-          .toString();
+          return moment()
+            .subtract(28, 'days')
+            .valueOf();
+        };
+        return new Date(getExpiryTimeMillis()).toISOString();
       };
       const getSubscriptionState = () => {
         const ACTIVE = 'SUBSCRIPTION_STATE_ACTIVE';
@@ -280,12 +280,13 @@ const subscriber = {
         kind: 'androidpublisher#subscriptionPurchase',
         regionCode: 'AR',
         latestOrderId: '',
-        lineItems: [{ expiryTime: getExpiryTimeMillis() }],
+        lineItems: [{ expiryTime: getExpiryDateTimeStamp() }],
         startTimeMillis: moment().valueOf(),
         subscriptionState: getSubscriptionState(),
         linkedPurchaseToken: 'mockPurchaseToken',
         acknowledgementState: 1,
       };
+      console.log(verifiedPurchaseReply.lineItems[0].expiryTime);
       nock(
         `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptionsv2/tokens/${purchaseToken}`
       )
