@@ -110,9 +110,8 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
     google.options({ auth: authClient });
     if (productId) {
       try {
-        const setExpireDate = (expiryTimeMillisString) => {
-          const expiryTimeMillis = Number(expiryTimeMillisString);
-          const expiryDate = new Date(expiryTimeMillis);
+        const setExpireDate = (expiryTime) => {
+          const expiryDate = new Date(expiryTime);
           transaction.expiryDate = expiryDate;
         };
 
