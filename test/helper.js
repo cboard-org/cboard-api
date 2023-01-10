@@ -286,7 +286,6 @@ const subscriber = {
         linkedPurchaseToken: 'mockPurchaseToken',
         acknowledgementState: 1,
       };
-      console.log(verifiedPurchaseReply.lineItems[0].expiryTime);
       nock(
         `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptionsv2/tokens/${purchaseToken}`
       )
