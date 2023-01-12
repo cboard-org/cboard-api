@@ -173,9 +173,7 @@ describe('Subscriber API calls', function() {
         .expect(200);
 
       const transactionRes = res.body;
-      const expectedExpiryDate = new Date(
-        Number(verifiedPurchaseReply.expiryTimeMillis)
-      ).toISOString();
+      const expectedExpiryDate = verifiedPurchaseReply.lineItems[0]?.expiryTime;
       const collection = transactionRes.data.collection;
       const firstCollection = collection[0];
       transactionRes.ok.should.to.equal(true);
@@ -215,9 +213,7 @@ describe('Subscriber API calls', function() {
         .expect(200);
 
       const transactionRes = res.body;
-      const expectedExpiryDate = new Date(
-        Number(verifiedPurchaseReply.expiryTimeMillis)
-      ).toISOString();
+      const expectedExpiryDate = verifiedPurchaseReply.lineItems[0]?.expiryTime;
 
       const collection = transactionRes.data.collection;
       const firstCollection = collection[0];
@@ -258,9 +254,7 @@ describe('Subscriber API calls', function() {
         .expect(200);
 
       const transactionRes = res.body;
-      const expectedExpiryDate = new Date(
-        Number(verifiedPurchaseReply.expiryTimeMillis)
-      ).toISOString();
+      const expectedExpiryDate = verifiedPurchaseReply.lineItems[0]?.expiryTime;
 
       const collection = transactionRes.data.collection;
       const firstCollection = collection[0];

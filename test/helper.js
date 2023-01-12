@@ -246,56 +246,55 @@ const subscriber = {
     isExpired = false,
     isBillingRetryPeriod = false,
   }) => {
-    const {
-      productId,
-      purchaseToken,
-    } = subscriber.transactionData.nativePurchase;
+    const { purchaseToken } = subscriber.transactionData.nativePurchase;
     nock('https://www.googleapis.com')
       .post('/oauth2/v4/token')
       .reply(200);
     if (isValidToken) {
-      const getExpiryTimeMillis = () => {
-        if (!isExpired && !isBillingRetryPeriod)
-          return moment()
-            .add(1, 'y')
-            .valueOf()
-            .toString();
-        console.log(isBillingRetryPeriod);
-        if (isBillingRetryPeriod)
-          return moment()
-            .subtract(7, 'days')
-            .valueOf()
-            .toString();
+      const getExpiryDateTimeStamp = () => {
+        const getExpiryTimeMillis = () => {
+          if (!isExpired && !isBillingRetryPeriod)
+            return moment()
+              .add(1, 'y')
+              .valueOf();
+          if (isBillingRetryPeriod)
+            return moment()
+              .subtract(7, 'days')
+              .valueOf();
 
-        return moment()
-          .subtract(28, 'days')
-          .valueOf()
-          .toString();
+          return moment()
+            .subtract(28, 'days')
+            .valueOf();
+        };
+        return new Date(getExpiryTimeMillis()).toISOString();
+      };
+      const getSubscriptionState = () => {
+        const ACTIVE = 'SUBSCRIPTION_STATE_ACTIVE';
+        const GRACE_PERIOD = 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD';
+        const EXPIRED = 'SUBSCRIPTION_STATE_EXPIRED';
+        if (!isExpired && !isBillingRetryPeriod) return ACTIVE;
+        if (isBillingRetryPeriod) return GRACE_PERIOD;
+        return EXPIRED;
       };
       const verifiedPurchaseReply = {
-        startTimeMillis: moment().valueOf(),
-        expiryTimeMillis: getExpiryTimeMillis(),
-        autoRenewing: false,
-        priceCurrencyCode: 'USD',
-        priceAmountMicros: '3000000',
-        countryCode: 'AR',
-        developerPayload: '',
-        cancelReason: 0,
-        userCancellationTimeMillis: '1668097284403',
-        orderId: 'GPA.0000-0000-0000-0000..0',
-        purchaseType: 0,
-        acknowledgementState: 1,
         kind: 'androidpublisher#subscriptionPurchase',
+        regionCode: 'AR',
+        latestOrderId: '',
+        lineItems: [{ expiryTime: getExpiryDateTimeStamp() }],
+        startTimeMillis: moment().valueOf(),
+        subscriptionState: getSubscriptionState(),
+        linkedPurchaseToken: 'mockPurchaseToken',
+        acknowledgementState: 1,
       };
       nock(
-        `https://www.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptions/${productId}/tokens/${purchaseToken}`
+        `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptionsv2/tokens/${purchaseToken}`
       )
         .get('')
         .reply(200, verifiedPurchaseReply);
       return verifiedPurchaseReply;
     }
     nock(
-      `https://www.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptions/${productId}/tokens/${purchaseToken}`
+      `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.unicef.cboard/purchases/subscriptionsv2/tokens/${purchaseToken}`
     )
       .get('')
       .reply(400, {

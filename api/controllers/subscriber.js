@@ -236,6 +236,7 @@ async function createTransaction(req, res) {
               expiryDate: transaction.expiryDate,
               isExpired: transaction.isExpired,
               isBillingRetryPeriod: transaction.isBillingRetryPeriod,
+              subscriptionState: transaction.subscriptionState
             },
           ],
         },
