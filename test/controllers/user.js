@@ -99,6 +99,10 @@ describe('User API calls', function () {
         it('it should contain a field indicating that is first login', function () {
           res.body.isFirstLogin.should.be.true;
         });
+
+        it('it should contain a field indicating the user created date', function() {
+          res.body.should.to.have.property('createdAt');
+        })
       });
     });
   });
