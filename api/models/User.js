@@ -104,7 +104,8 @@ const USER_SCHEMA_OPTIONS = {
         delete ret.location.ip;
       }
     }
-  }
+  },
+  timestamps: true,
 };
 
 const userSchema = new Schema(USER_SCHEMA_DEFINITION, USER_SCHEMA_OPTIONS);
