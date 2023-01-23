@@ -343,6 +343,8 @@ function loginUser(req, res) {
         id: userId
       });
 
+      const isOnTryPeriod = isUserOnTryPeriod(user.createdAt);
+      
       if (!user.location || !user.location.country)
         try {
           await updateUserLocation(req.ip, user);
@@ -356,7 +358,8 @@ function loginUser(req, res) {
         ...user.toJSON(),
         settings,
         birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
-        authToken: tokenString
+        authToken: tokenString,
+        isOnTryPeriod
       };
       return res.status(200).json(response);
     }
