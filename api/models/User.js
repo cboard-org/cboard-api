@@ -83,7 +83,12 @@ const USER_SCHEMA_DEFINITION = {
   isFirstLogin: {
     type: Boolean,
     required: false
-  }
+  },
+  isOnTryPeriod: {
+    type: Boolean,
+    required: false,
+    default: true
+  },
 };
 
 const USER_SCHEMA_OPTIONS = {
