@@ -103,6 +103,11 @@ describe('User API calls', function () {
         it('it should contain a field indicating the user created date', function() {
           res.body.should.to.have.property('createdAt');
         })
+
+        it('it should contain a field indicating if user is on try period', function() {
+          res.body.should.to.have.property('isOnTryPeriod');
+          res.body.isOnTryPeriod.should.be.true;
+        })
       });
     });
   });
