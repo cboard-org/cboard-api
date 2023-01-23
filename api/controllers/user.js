@@ -248,9 +248,11 @@ async function getUser(req, res) {
     }
 
     const settings = await getSettings(user);
+    const isOnTryPeriod = isUserOnTryPeriod(user.createdAt);
     const response = {
       ...user.toJSON(),
-      settings
+      settings,
+      isOnTryPeriod
     };
 
     return res.status(200).json(response);
