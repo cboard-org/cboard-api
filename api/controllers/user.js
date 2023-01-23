@@ -114,7 +114,9 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
       user = await createOrUpdateUser(accessToken, profile, type);
     }
 
-    if (!user.location || !user.location.country)
+    const isOnTryPeriod = (user.createdAt);
+
+    if (!user.location || !user.location.countryisUserOnTryPeriod)
       try {
         await updateUserLocation(ip, user);
       } catch (error) {
@@ -132,7 +134,8 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
     const response = {
       ...user.toJSON(),
       settings,
-      authToken: tokenString
+      authToken: tokenString,
+      isOnTryPeriod
     };
 
     done(null, response);
