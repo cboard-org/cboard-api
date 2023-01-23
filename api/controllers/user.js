@@ -363,6 +363,16 @@ function loginUser(req, res) {
   });
 }
 
+function isUserOnTryPeriod(createdAt){
+  const createdAtDate = new Date(createdAt);
+  const actualTime = new Date();
+  const DAYS_TO_TRY = 30;
+  const tryLimit = createdAtDate.setDate(createdAtDate.getDate() + DAYS_TO_TRY);
+  if(createdAt === null) return false;
+  if(actualTime >= tryLimit ) return false;
+  return true;
+}
+
 async function updateUserLocation(ip, user) {
   if ((!user.location || !user.location.country) && !isLocalIp(ip)) {
     try {
