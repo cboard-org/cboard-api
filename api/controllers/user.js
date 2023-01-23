@@ -371,11 +371,11 @@ function loginUser(req, res) {
 
 function isUserOnTryPeriod(createdAt){
   const createdAtDate = new Date(createdAt);
-  const actualTime = new Date();
+  const actualDate = new Date();
   const DAYS_TO_TRY = 30;
-  const tryLimit = createdAtDate.setDate(createdAtDate.getDate() + DAYS_TO_TRY);
+  const tryLimitDate = createdAtDate.setDate(createdAtDate.getDate() + DAYS_TO_TRY);
   if(createdAt === null) return false;
-  if(actualTime >= tryLimit ) return false;
+  if(actualDate >= tryLimitDate ) return false;
   return true;
 }
 
