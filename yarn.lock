@@ -121,10 +121,10 @@
   dependencies:
     any-observable "^0.3.0"
 
-"@snyk/protect@1.1056.0":
-  version "1.1056.0"
-  resolved "https://registry.yarnpkg.com/@snyk/protect/-/protect-1.1056.0.tgz#13d3a210a1f02d514da1b4d0fa3ed7d51ebbe269"
-  integrity sha512-ULjPAsTRkSFxDqauwUZ9P6wMA8Zu3bKqWwoht0elDGttl9dzDcMYrcWbEq3HdXaij0CjnQ21zRNHzfzNQvz8nA==
+"@snyk/protect@1.1081.0":
+  version "1.1081.0"
+  resolved "https://registry.yarnpkg.com/@snyk/protect/-/protect-1.1081.0.tgz#df5f4ae499019bff30045880db8cfa8ec0348bcf"
+  integrity sha512-V+4DJPLorQph9j78PB3qpxOEREzXHJN/txg2Cxn2EGw+7IWOPPeLgUb4jO+tjVVmqMYmrvohMDQKErcjIxVqVg==
 
 "@types/bson@*":
   version "4.0.3"
@@ -2639,6 +2639,8 @@ is-plain-object@^2.0.1, is-plain-object@^2.0.3, is-plain-object@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-2.0.4.tgz#2c163b3fafb1b606d9d17928f05c2a1c38e07677"
   integrity sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og==
+  dependencies:
+    isobject "^3.0.1"
 
 is-promise@^2.1.0:
   version "2.1.0"
