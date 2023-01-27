@@ -114,9 +114,9 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
       user = await createOrUpdateUser(accessToken, profile, type);
     }
 
-    const isOnTryPeriod = isUserOnTryPeriod(user.createdAt);
+    const isOnTrialPeriod = isUserOnTrialPeriod(user.createdAt);
 
-    if (!user.location || !user.location.countryisUserOnTryPeriod)
+    if (!user.location || !user.location.countryisUserOnTrialPeriod)
       try {
         await updateUserLocation(ip, user);
       } catch (error) {
@@ -135,7 +135,7 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
       ...user.toJSON(),
       settings,
       authToken: tokenString,
-      isOnTryPeriod
+      isOnTrialPeriod
     };
 
     done(null, response);
@@ -248,11 +248,11 @@ async function getUser(req, res) {
     }
 
     const settings = await getSettings(user);
-    const isOnTryPeriod = isUserOnTryPeriod(user.createdAt);
+    const isOnTrialPeriod = isUserOnTrialPeriod(user.createdAt);
     const response = {
       ...user.toJSON(),
       settings,
-      isOnTryPeriod
+      isOnTrialPeriod
     };
 
     return res.status(200).json(response);
@@ -348,7 +348,7 @@ function loginUser(req, res) {
         id: userId
       });
 
-      const isOnTryPeriod = isUserOnTryPeriod(user.createdAt);
+      const isOnTrialPeriod = isUserOnTrialPeriod(user.createdAt);
       
       if (!user.location || !user.location.country)
         try {
@@ -364,14 +364,14 @@ function loginUser(req, res) {
         settings,
         birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
         authToken: tokenString,
-        isOnTryPeriod
+        isOnTrialPeriod
       };
       return res.status(200).json(response);
     }
   });
 }
 
-function isUserOnTryPeriod(createdAt){
+function isUserOnTrialPeriod(createdAt){
   const createdAtDate = new Date(createdAt);
   const actualDate = new Date();
   const DAYS_TO_TRY = 30;

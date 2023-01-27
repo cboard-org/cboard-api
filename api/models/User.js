@@ -84,7 +84,7 @@ const USER_SCHEMA_DEFINITION = {
     type: Boolean,
     required: false
   },
-  isOnTryPeriod: {
+  isOnTrialPeriod: {
     type: Boolean,
     required: false,
     default: true

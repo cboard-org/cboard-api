@@ -104,9 +104,9 @@ describe('User API calls', function () {
           res.body.should.to.have.property('createdAt');
         })
 
-        it('it should contain a field indicating if user is on try period', function() {
-          res.body.should.to.have.property('isOnTryPeriod');
-          res.body.isOnTryPeriod.should.be.true;
+        it('it should contain a field indicating if user is on trial period', function() {
+          res.body.should.to.have.property('isOnTrialPeriod');
+          res.body.isOnTrialPeriod.should.be.true;
         })
       });
     });
