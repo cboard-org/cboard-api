@@ -1,8 +1,8 @@
-# Cboard API - REST API for CBoard application
+# Cboard API - REST API for Cboard application
 
 [![cboard-org](https://circleci.com/gh/cboard-org/cboard-api.svg?style=shield)](https://app.circleci.com/pipelines/github/cboard-org/cboard-api)
 
-[Cboard](https://app.cboard.io/) is an augmentative and alternative communication (AAC) web application, allowing users with speech and language impairments (autism, cerebral palsy) to communicate by symbols and text-to-speech. This repo supports the CBoard front-end, providing backend functionality and persistence.
+[Cboard](https://app.cboard.io/) is an augmentative and alternative communication (AAC) web application, allowing users with speech and language impairments (autism, cerebral palsy) to communicate by symbols and text-to-speech. This repo supports the Cboard front-end, providing backend functionality and persistence.
 
 Learn more about the [Cboard project](https://github.com/cboard-org/cboard).
 
