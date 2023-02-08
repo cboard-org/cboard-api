@@ -43,7 +43,6 @@ const SUBSCRIBERS_SCHEMA_DEFINITION = {
   country: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
   },
   status: {
