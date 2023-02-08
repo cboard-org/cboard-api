@@ -179,6 +179,16 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
   return true;
 }, 'transaction puchase token error');
 
+subscribersSchema.statics = {
+  getByUserId: async function (userId){
+    let subscriber = null;
+    try {
+      subscriber = await Subscribers.findOne({ userId : userId.id }).exec();
+    } catch (e) {}
+    return subscriber;
+  }
+}
+
 const Subscribers = mongoose.model('Subscribers', subscribersSchema);
 
 module.exports = Subscribers;
