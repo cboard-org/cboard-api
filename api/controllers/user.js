@@ -145,10 +145,12 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
     });
 
     const settings = await getSettings(user);
+    const subscriber = await getSubscriber(user);
 
     const response = {
       ...user.toJSON(),
       settings,
+      subscriber,
       authToken: tokenString
     };
 
