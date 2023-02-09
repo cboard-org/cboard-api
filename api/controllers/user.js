@@ -9,7 +9,8 @@ const ResetPassword = require('../models/ResetPassword');
 const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
-const { findIpLocation, isLocalIp } = require('../helpers/localize')
+const { findIpLocation, isLocalIp } = require('../helpers/localize');
+const Subscribers = require('../models/Subscribers');
 
 module.exports = {
   createUser: createUser,
@@ -41,6 +42,22 @@ async function getSettings(user) {
   } catch (e) { }
 
   return settings;
+}
+
+async function getSubscriber(user) {
+  let subscriber = null;
+  try {
+    subscriber = await Subscribers.getByUserId({id: user.id || user._id })
+  } catch(e){}
+
+  if(subscriber)
+    return {
+      id: subscriber._id,
+      status: subscriber.status,
+      expiryDate: subscriber.transaction?.expiryDate || null,
+    }
+
+  return {};
 }
 
 async function createUser(req, res) {
@@ -128,10 +145,12 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
     });
 
     const settings = await getSettings(user);
+    const subscriber = await getSubscriber(user);
 
     const response = {
       ...user.toJSON(),
       settings,
+      subscriber,
       authToken: tokenString
     };
 
@@ -351,10 +370,12 @@ function loginUser(req, res) {
         }
 
       const settings = await getSettings(user);
+      const subscriber = await getSubscriber(user);
 
       const response = {
         ...user.toJSON(),
         settings,
+        subscriber,
         birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
         authToken: tokenString
       };
