@@ -178,6 +178,16 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
   return true;
 }, 'transaction puchase token error');
 
+subscribersSchema.post('findOneAndUpdate', async function(subscriber) {
+  const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
+  try {
+    const doc = await subscriber.model("Subscribers",subscribersSchema).findById(subscriber._id)
+    await doc.update({status});
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 subscribersSchema.statics = {
   getByUserId: async function (userId){
     let subscriber = null;
