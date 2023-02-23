@@ -208,7 +208,7 @@ async function createTransaction(req, res) {
     {
       transaction,
     },
-    { new: true, runValidators: true, useFindAndModify: true },
+    { new: true, runValidators: true, useFindAndModify: false },
     function(err, subscriber) {
       if (err) {
         return res.status(200).json({
