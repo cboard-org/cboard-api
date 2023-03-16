@@ -8,23 +8,30 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const PRODUCT_SCHEMA_DEFINITION = {
-  planId: {
-    type: String,
-    unique: true,
-    required: true,
-    trim: true,
-  },
   subscriptionId: {
     type: String,
-    unique: true,
     required: true,
     trim: true,
   },
-  status: {
+  planId: {
+    type: String,
+    trim: true,
+  },
+  title: {
     type: String,
     required: true,
-    trim: true,
+    trim: true
   },
+  billingPeriod:{
+    type: String,
+    required: true,
+    trim: true
+  },
+  price: {
+    type: String,
+    required: true,
+    trim: true
+  }
 };
 
 const productSchema = new Schema(PRODUCT_SCHEMA_DEFINITION, {
