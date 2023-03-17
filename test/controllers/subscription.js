@@ -53,7 +53,7 @@ describe('Subscription API calls', function() {
     });
 
     it('it should not create a subscription object in database if user is not admin.', async function() {
-      const mockSubscriberData = helper.subscriptionData;
+      const mockSubscriberData = helper.subscription.subscriptionData;
       const res = await request(server)
         .post(`/subscription/${subscriptionId}`)
         .send(mockSubscriberData)
