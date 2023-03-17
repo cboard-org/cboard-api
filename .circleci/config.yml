@@ -42,6 +42,14 @@ jobs:
             -in  google-play-auth.json.cipher \
             -out google-play-auth.json \
             -k $KEY
+      - run:
+          name: Decrypt the Google play publisher auth file 
+          command: |
+            openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in  google-auth-androidpublisher.json.cipher \
+            -out google-auth-androidpublisher.json \
+            -k $KEY2
       # run tests
       - run: 
           name: Run Unitests
@@ -88,6 +96,14 @@ jobs:
             -in  google-play-auth.json.cipher \
             -out google-play-auth.json \
             -k $KEY
+      - run:
+          name: Decrypt the Google play publisher auth file 
+          command: |
+            openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in  google-auth-androidpublisher.json.cipher \
+            -out google-auth-androidpublisher.json \
+            -k $KEY2
       # build and push Docker image
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
