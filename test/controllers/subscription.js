@@ -336,4 +336,20 @@ describe('Subscription API calls', function() {
       subscriptionRes.plans[0].should.to.have.property('createdAt');
     });
   });
+  describe('GET /subscription/synchronize', function() {
+    before(async function() {
+      await createSubscription();
+    });
+
+    after(async function() {
+      await deleteSubscription();
+    });
+    it('it should not synchronize subscriptions if user is not loged.', async function() {
+      const res = await request(server)
+        .get(`/subscription/synchronize`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+  });
 });
