@@ -887,7 +887,7 @@ paths:
       security:
         - Bearer: []
       x-security-scopes:
-        - user
+        - admin
       parameters:
         - name: subscriptionId
           type: string
