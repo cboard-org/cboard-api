@@ -324,7 +324,7 @@ describe('Subscription API calls', function() {
         .expect(200);
 
       const subscriptions = res.body;
-      const subscriptionRes = subscriptions[0];
+      const subscriptionRes = subscriptions.data[0];
       subscriptionRes.should.to.have.property('createdAt');
       subscriptionRes.should.to.have.property('updatedAt');
       subscriptionRes.should.to.have.property('_id');
