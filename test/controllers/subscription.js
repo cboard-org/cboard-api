@@ -299,4 +299,41 @@ describe('Subscription API calls', function() {
       subscriptionRes.plans[0].should.to.have.property('createdAt');
     });
   });
+  describe('GET /subscription/list', function() {
+    before(async function() {
+      await createSubscription();
+    });
+
+    after(async function() {
+      await deleteSubscription();
+    });
+    it('it should not list subscriptions if user is not loged.', async function() {
+      const res = await request(server)
+        .get(`/subscription/list`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+
+    it('it should list subscription objects.', async function() {
+      const res = await request(server)
+        .get(`/subscription/list`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const subscriptions = res.body;
+      const subscriptionRes = subscriptions[0];
+      subscriptionRes.should.to.have.property('createdAt');
+      subscriptionRes.should.to.have.property('updatedAt');
+      subscriptionRes.should.to.have.property('_id');
+      subscriptionRes.subscriptionId.should.to.equal(subscriptionId);
+      subscriptionRes.name.should.to.deep.equal(subscriptionData.name);
+      subscriptionRes.status.should.to.deep.equal(subscriptionData.status);
+      subscriptionRes.platform.should.to.deep.equal(subscriptionData.platform);
+      subscriptionRes.benefits.should.to.deep.equal(subscriptionData.benefits);
+      subscriptionRes.plans[0].should.to.have.property('createdAt');
+    });
+  });
 });
