@@ -887,7 +887,7 @@ paths:
       security:
         - Bearer: []
       x-security-scopes:
-        - admin
+        - user
       parameters:
         - name: subscriptionId
           type: string
@@ -957,7 +957,37 @@ paths:
         default:
           description: Error
           schema:
-            $ref: "#/definitions/ErrorResponse"  
+            $ref: "#/definitions/ErrorResponse"     
+  /subscription/list:
+    x-swagger-router-controller: subscription
+    get:
+      operationId: listSubscriptions
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - user
+      responses:
+        "200":
+          description: Success  
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"   
+  /subscription/synchronize:
+    x-swagger-router-controller: subscription
+    get:
+      operationId: syncSubscriptions
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - user
+      responses:
+        "200":
+          description: Success  
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /subscriber:
     x-swagger-router-controller: subscriber
     post:
