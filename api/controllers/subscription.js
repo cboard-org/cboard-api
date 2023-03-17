@@ -143,11 +143,12 @@ async function syncSubscriptions(req, res) {
           });
         }
         let newSubscription = undefined;
-        if (!subscr) {
-          newSubscription = new Subscription(mapRemoteSubscr(subscription));
+        if (subscr) {
+          newSubscription = Object.assign(subscr, mapRemoteSubscr(subscription));
         } else {
-          newSubscription = subscr;
+          newSubscription = new Subscription(mapRemoteSubscr(subscription));
         }
+
         newSubscription.save(function (err, result) {
           if (err) {
             console.error('error', err);
