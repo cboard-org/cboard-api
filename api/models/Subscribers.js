@@ -69,28 +69,12 @@ const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
   timestamps: true,
 });
 
-subscribersSchema.pre('save', function() {
-  if (
-    this.product?.status === 'owned' &&
-    this.transaction?.state !== 'approved'
-  ) {
-    throw {
-      product: {
-        code: 6778001,
-        message:
-          'product status can t be owned if an approved transaction is not present',
-      },
-    };
-  }
-  return true;
-});
 
 subscribersSchema.pre('save', async function() {
   if (
-    this.transaction?.state === 'approved' &&
-    this.product?.status === 'owned'
+    this.transaction?.state === 'approved'
   ) {
-    if (this.transaction.nativePurchase?.productId === this.product.planId) {
+    if (this.transaction.nativePurchase?.productId === this.product.subscriptionId) {
       return true;
     }
     throw {
@@ -98,7 +82,7 @@ subscribersSchema.pre('save', async function() {
         transaction: {
           code: 6778001,
           message:
-            'subscriber product plan Id is different than transaction plan Id',
+            'subscriber product subscription Id is different than transaction subscription Id',
         },
       },
     };
