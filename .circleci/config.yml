@@ -45,7 +45,7 @@ jobs:
       - run:
           name: Decrypt the Google play publisher auth file 
           command: |
-            openssl aes-256-cbc -d -md sha256 \
+            openssl aes-256-cbc -d -a -pbkdf2 \
             -pbkdf2 \
             -in  google-auth-androidpublisher.json.cipher \
             -out google-auth-androidpublisher.json \
@@ -99,7 +99,7 @@ jobs:
       - run:
           name: Decrypt the Google play publisher auth file 
           command: |
-            openssl aes-256-cbc -d -md sha256 \
+            openssl aes-256-cbc -d -a -pbkdf2 \
             -pbkdf2 \
             -in  google-auth-androidpublisher.json.cipher \
             -out google-auth-androidpublisher.json \
