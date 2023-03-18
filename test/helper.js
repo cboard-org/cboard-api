@@ -188,9 +188,11 @@ const subscriber = {
     country: 'United States',
     status: 'free-trial',
     product: {
-      planId: 'premium_full',
-      subscriptionId: '123456',
-      status: 'requested',
+      subscriptionId: 'premium_full',
+      planId: 'premium-full-features-yearly',
+      title: 'Premium All Features',
+      billingPeriod: '1PY',
+      price: 'USD 60'
     },
   },
 
