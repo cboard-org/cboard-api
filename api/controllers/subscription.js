@@ -8,13 +8,17 @@ const { GOOGLE_PLAY_CREDENTIALS } = require('../../config');
 const constants = require('../constants');
 
 async function gapiAuth() {
-  const scopes = ['https://www.googleapis.com/auth/androidpublisher'];
-  const auth = new google.auth.GoogleAuth({
-    keyFile: GOOGLE_PLAY_CREDENTIALS,
-    scopes: scopes
-  });
-  const authClient = await auth.getClient();
-  google.options({ auth: authClient });
+  try {
+    const scopes = ['https://www.googleapis.com/auth/androidpublisher'];
+    const auth = new google.auth.GoogleAuth({
+      keyFile: GOOGLE_PLAY_CREDENTIALS,
+      scopes: scopes
+    });
+    const authClient = await auth.getClient();
+    google.options({ auth: authClient });
+  } catch(error){
+    console.error('error during Google API auth', error)
+  }
 }
 
 
