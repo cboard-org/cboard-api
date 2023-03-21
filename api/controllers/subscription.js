@@ -4,12 +4,13 @@ const { getORQuery } = require('../helpers/query');
 
 const { google } = require('googleapis');
 const playConsole = google.androidpublisher('v3');
+const { GOOGLE_PLAY_CREDENTIALS } = require('../../config');
 const constants = require('../constants');
 
 async function gapiAuth() {
   const scopes = ['https://www.googleapis.com/auth/androidpublisher'];
   const auth = new google.auth.GoogleAuth({
-    keyFile: 'google-auth-androidpublisher.json',
+    keyFile: GOOGLE_PLAY_CREDENTIALS,
     scopes: scopes
   });
   const authClient = await auth.getClient();
