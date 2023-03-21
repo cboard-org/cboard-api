@@ -125,7 +125,7 @@ function deleteSubscription(req, res) {
 
 async function syncSubscriptions(req, res) {
   console.log('Synchcronizing subscriptions...');
-  gapiAuth();
+  await gapiAuth();
   const params = { packageName: 'com.unicef.cboard' };
   try {
     // get subscriptions from Google API
