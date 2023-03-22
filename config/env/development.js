@@ -39,7 +39,7 @@ module.exports = {
     from: 'cboard@cboard.io',
     host: 'smtp.sendgrid.net',
     port: 465,
-    secure: true,
+    secure: false,
     service: 'Sendgrid',
     auth: {
       user: 'apikey',
