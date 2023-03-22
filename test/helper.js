@@ -7,7 +7,7 @@ var request = require('supertest');
 const User = require('../api/models/User');
 const should = chai.should();
 const uuid = require('uuid');
-const Subscription = require('../api/models/subscriptions');
+const Subscription = require('../api/models/Subscription');
 
 const Subscriber = require('../api/models/Subscribers');
 const nock = require('nock');

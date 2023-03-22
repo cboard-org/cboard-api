@@ -23,7 +23,7 @@ const PLANS_SCHEMA_DEFINITION = {
   },
   countries: [
     {
-      type: String,
+      type: Schema.Types.Mixed,
       required: true,
       trim: true,
     },
