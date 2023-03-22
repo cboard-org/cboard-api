@@ -39,15 +39,15 @@ module.exports = {
     from: 'cboard@cboard.io',
     host: 'smtp.sendgrid.net',
     port: 465,
-    secure: false,
+    secure: true,
     service: 'Sendgrid',
     auth: {
       user: 'apikey',
       pass: process.env.SENDGRID_API_KEY
     },
     tls: {
-      ciphers: 'SSLv3',
-      rejectUnauthorized: false
+      rejectUnauthorized: false,
+      minVersion: "TLSv1.2"
     }
   },
   appInsightConnectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING,
