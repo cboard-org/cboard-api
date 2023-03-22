@@ -50,12 +50,21 @@ async function getSubscriber(user) {
     subscriber = await Subscribers.getByUserId({id: user.id || user._id })
   } catch(e){}
 
-  if(subscriber)
+
+
+  if(subscriber){
+    const product = {
+      title: subscriber.product?.title,
+      billingPeriod: subscriber.product?.billingPeriod,
+      price: subscriber.product?.price
+    }
     return {
       id: subscriber._id,
       status: subscriber.status,
       expiryDate: subscriber.transaction?.expiryDate || null,
+      product
     }
+  }
 
   return {};
 }

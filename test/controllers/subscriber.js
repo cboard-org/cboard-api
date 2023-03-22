@@ -77,8 +77,14 @@ describe('Subscriber API calls', function() {
       subscriberRes.product.subscriptionId.should.to.deep.equal(
         subscriberData.product.subscriptionId
       );
-      subscriberRes.product.status.should.to.deep.equal(
-        subscriberData.product.status
+      subscriberRes.product.billingPeriod.should.to.deep.equal(
+        subscriberData.product.billingPeriod
+      );
+      subscriberRes.product.price.should.to.deep.equal(
+        subscriberData.product.price
+      );
+      subscriberRes.product.title.should.to.deep.equal(
+        subscriberData.product.title
       );
       subscriberRes.product.should.to.have.property('createdAt');
       subscriberRes.product.should.to.have.property('updatedAt');
@@ -365,8 +371,14 @@ describe('Subscriber API calls', function() {
       subscriberRes.product.subscriptionId.should.to.deep.equal(
         subscriberData.product.subscriptionId
       );
-      subscriberRes.product.status.should.to.deep.equal(
-        subscriberData.product.status
+      subscriberRes.product.billingPeriod.should.to.deep.equal(
+        subscriberData.product.billingPeriod
+      );
+      subscriberRes.product.price.should.to.deep.equal(
+        subscriberData.product.price
+      );
+      subscriberRes.product.title.should.to.deep.equal(
+        subscriberData.product.title
       );
       subscriberRes.product.should.to.have.property('createdAt');
       subscriberRes.product.should.to.have.property('updatedAt');
@@ -397,8 +409,14 @@ describe('Subscriber API calls', function() {
       subscriberRes.product.subscriptionId.should.to.deep.equal(
         subscriberData.product.subscriptionId
       );
-      subscriberRes.product.status.should.to.deep.equal(
-        subscriberData.product.status
+      subscriberRes.product.billingPeriod.should.to.deep.equal(
+        subscriberData.product.billingPeriod
+      );
+      subscriberRes.product.price.should.to.deep.equal(
+        subscriberData.product.price
+      );
+      subscriberRes.product.title.should.to.deep.equal(
+        subscriberData.product.title
       );
       subscriberRes.product.should.to.have.property('createdAt');
       subscriberRes.product.should.to.have.property('updatedAt');
@@ -476,106 +494,6 @@ describe('Subscriber API calls', function() {
       subscriberRes.should.to.not.have.property('updatedAt');
     });
 
-    it('it should not update a subscriber object in database if new product status is "owned" and a aproved transaction is not present.', async function() {
-      const subscriberData = {
-        product: {
-          ...newSubscriberData.product,
-          status: 'owned',
-        },
-      };
-      const res = await request(server)
-        .patch(`/subscriber/${subscriber._id}`)
-        .send(subscriberData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(401);
-
-      const subscriberRes = res.body;
-      subscriberRes.should.to.not.have.property('createdAt');
-      subscriberRes.should.to.not.have.property('updatedAt');
-      subscriberRes.error.should.to.deep.equal(
-        'product status can t be owned if an approved transaction is not present'
-      );
-    });
-
-    it('it should update a subscriber object in database if new product status is "owned" and a aproved transaction is present before', async function() {
-      const subscriberData = {
-        transaction: transactionData,
-      };
-      mockPurchaseTokenVerification({ isValidToken: true });
-      const res = await request(server)
-        .patch(`/subscriber/${subscriber._id}`)
-        .send(subscriberData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json');
-
-      const subscriberDatatoOwned = {
-        product: {
-          ...newSubscriberData.product,
-          status: 'owned',
-        },
-      };
-      mockPurchaseTokenVerification({ isValidToken: true });
-      const resToOwned = await request(server)
-        .patch(`/subscriber/${subscriber._id}`)
-        .send(subscriberDatatoOwned)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      const subscriberRes = resToOwned.body;
-      subscriberRes.product.status.should.to.deep.equal(
-        subscriberDatatoOwned.product.status
-      );
-    });
-
-    it('it should update a subscriber object in database if new product status is "owned" and a aproved transaction is present on the same request.', async function() {
-      const subscriberData = {
-        product: {
-          ...newSubscriberData.product,
-          status: 'owned',
-        },
-        transaction: transactionData,
-      };
-      mockPurchaseTokenVerification({ isValidToken: true });
-      const res = await request(server)
-        .patch(`/subscriber/${subscriber._id}`)
-        .send(subscriberData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      const subscriberRes = res.body;
-      subscriberRes.product.status.should.to.deep.equal(
-        subscriberData.product.status
-      );
-    });
-
-    it('it should not update a subscriber object in database if product status is "owned" and the planId not match with the productId of the transaction.', async function() {
-      const subscriberData = {
-        product: {
-          ...newSubscriberData.product,
-          planId: 'wrong-plan-id',
-          status: 'owned',
-        },
-        transaction: transactionData,
-      };
-      mockPurchaseTokenVerification({ isValidToken: true });
-      const res = await request(server)
-        .patch(`/subscriber/${subscriber._id}`)
-        .send(subscriberData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(403);
-
-      const subscriberRes = res.body;
-      subscriberRes.message.should.to.deep.equal('Error saving subscriber.');
-    });
-
     it('it should update transaction to null.', async function() {
       const subscriberData = {
         product: {
@@ -619,8 +537,14 @@ describe('Subscriber API calls', function() {
       subscriberRes.product.subscriptionId.should.to.deep.equal(
         subscriberData.product.subscriptionId
       );
-      subscriberRes.product.status.should.to.deep.equal(
-        subscriberData.product.status
+      subscriberRes.product.billingPeriod.should.to.deep.equal(
+        subscriberData.product.billingPeriod
+      );
+      subscriberRes.product.price.should.to.deep.equal(
+        subscriberData.product.price
+      );
+      subscriberRes.product.title.should.to.deep.equal(
+        subscriberData.product.title
       );
       subscriberRes.product.should.to.have.property('createdAt');
       subscriberRes.product.should.to.have.property('updatedAt');
