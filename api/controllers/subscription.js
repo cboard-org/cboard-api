@@ -206,7 +206,7 @@ async function syncSubscriptions(req, res) {
       }
     });
 
-    return res.status(200).json(localSubscrs);
+    return res.status(200).json();
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({
