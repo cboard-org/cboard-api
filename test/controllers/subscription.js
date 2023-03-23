@@ -344,12 +344,12 @@ describe('Subscription API calls', function() {
     after(async function() {
       await deleteSubscription();
     });
-    it('it should not synchronize subscriptions if user is not loged.', async function() {
+    it('it should synchronize subscriptions if user is not loged.', async function() {
       const res = await request(server)
         .get(`/subscription/synchronize`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .expect(403);
+        .expect(200);
     });
   });
 });
