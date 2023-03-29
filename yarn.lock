@@ -124,10 +124,10 @@
   dependencies:
     any-observable "^0.3.0"
 
-"@snyk/protect@1.1056.0":
-  version "1.1056.0"
-  resolved "https://registry.yarnpkg.com/@snyk/protect/-/protect-1.1056.0.tgz#13d3a210a1f02d514da1b4d0fa3ed7d51ebbe269"
-  integrity sha512-ULjPAsTRkSFxDqauwUZ9P6wMA8Zu3bKqWwoht0elDGttl9dzDcMYrcWbEq3HdXaij0CjnQ21zRNHzfzNQvz8nA==
+"@snyk/protect@1.1115.0":
+  version "1.1115.0"
+  resolved "https://registry.yarnpkg.com/@snyk/protect/-/protect-1.1115.0.tgz#24f275be49aff2c3f0d45ab9b846c79da128f717"
+  integrity sha512-vx3wT+xRqz3m9MdGwzJLOraDQeKyeyELnr3VPp9qZzDNjLtVLh3SQuhrH7zDcSnBdRU1G1/tkVpTX8ojIwiiYQ==
 
 "@tootallnate/once@2":
   version "2.0.0"
