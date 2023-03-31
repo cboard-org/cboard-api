@@ -220,7 +220,7 @@ function mapRemoteSubscr(subscription) {
     subscriptionId: subscription.productId,
     name: subscription.listings[0].title,
     status: 'active',
-    platform: 'google play',
+    platform: 'android-playstore',
     benefits: subscription.listings[0].benefits,
     plans: getPlans(subscription.basePlans)
   };

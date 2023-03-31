@@ -962,10 +962,6 @@ paths:
     x-swagger-router-controller: subscription
     get:
       operationId: listSubscriptions
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - user
       responses:
         "200":
           description: Success  
