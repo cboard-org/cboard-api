@@ -16,7 +16,7 @@ async function gapiAuth() {
     });
     const authClient = await auth.getClient();
     google.options({ auth: authClient });
-  } catch(error){
+  } catch (error) {
     console.error('error during Google API auth', error)
   }
 }
@@ -236,6 +236,7 @@ function getPlans(basePlans) {
       status: basePlan.state,
       countries: basePlan.regionalConfigs,
       period: basePlan.autoRenewingBasePlanType.billingPeriodDuration,
+      tags: basePlan.offerTags ? basePlan.offerTags.map(objectTag => objectTag.tag) : [],
       renovation: basePlan.autoRenewingBasePlanType.resubscribeState === 'RESUBSCRIBE_STATE_ACTIVE'
         ? 'Active'
         : 'Inactive'

@@ -38,6 +38,13 @@ const PLANS_SCHEMA_DEFINITION = {
     required: true,
     trim: true,
   },
+  tags: [
+    {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  ],
 };
 
 const plansSchema = new Schema(PLANS_SCHEMA_DEFINITION, {
