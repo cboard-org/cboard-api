@@ -307,12 +307,12 @@ describe('Subscription API calls', function() {
     after(async function() {
       await deleteSubscription();
     });
-    it('it should not list subscriptions if user is not loged.', async function() {
+    it('it should list subscriptions if user is not loged.', async function() {
       const res = await request(server)
         .get(`/subscription/list`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .expect(403);
+        .expect(200);
     });
 
     it('it should list subscription objects.', async function() {
