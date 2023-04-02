@@ -58,6 +58,7 @@ function getSubscriber(req, res) {
 }
 
 function updateSubscriber(req, res) {
+  console.log(req);
   const subscriberId = req.swagger.params.id.value;
 
   const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
