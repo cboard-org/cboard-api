@@ -58,7 +58,6 @@ function getSubscriber(req, res) {
 }
 
 function updateSubscriber(req, res) {
-  console.log(req);
   const subscriberId = req.swagger.params.id.value;
 
   const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
@@ -76,6 +75,7 @@ function updateSubscriber(req, res) {
         message: 'Subscriber does not exist. Subscriber Id: ' + subscriberId,
       });
     }
+    console.log(subscriber);
 
     if (
       !isRequestedByAdmin &&
@@ -87,6 +87,7 @@ function updateSubscriber(req, res) {
           'unhautorized request, subscriber object is only accesible with subscribered user authToken',
       });
     }
+    console.log(subscriber);
 
     for (let key in req.body) {
       const keyCreatedAt = subscriber[key]?.createdAt;
@@ -94,11 +95,13 @@ function updateSubscriber(req, res) {
         ? { ...req.body[key], createdAt: keyCreatedAt }
         : req.body[key];
     }
+    console.log(subscriber);
     subscriber.save(function(err, subscriber) {
       if (err) {
         const errorValidatingTransaction = err.errors?.transaction;
         const errorValidatingProduct = err.product;
         if (errorValidatingTransaction) {
+          console.log(err);
           return res.status(403).json({
             message: 'Error saving subscriber.',
             error:
