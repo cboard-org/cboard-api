@@ -88,7 +88,8 @@ function updateSubscriber(req, res) {
         ? { ...req.body[key], createdAt: keyCreatedAt }
         : req.body[key];
     }
-    if (subscriber.transaction?.nativePurchase?.productId !== subscriber.product.subscriptionId) {
+    if (subscriber.transaction?.nativePurchase?.productId && 
+      subscriber.transaction.nativePurchase.productId !== subscriber.product.subscriptionId) {
       // this means that user chooses to buy a different subscription than he bought in the past 
       subscriber.transaction.nativePurchase.productId = subscriber.product.subscriptionId;
     }
