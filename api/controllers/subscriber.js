@@ -1,3 +1,7 @@
+
+const { gapiAuth } = require('../helpers/auth');
+const { google } = require('googleapis');
+const playConsole = google.androidpublisher('v3');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const Subscriber = require('../models/Subscribers');
@@ -26,7 +30,8 @@ function createSubscriber(req, res) {
   });
 }
 
-function getSubscriber(req, res) {
+async function getSubscriber(req, res) {
+  await gapiAuth();
   const userId = req.swagger.params.id.value;
 
   //this would be implemented like a middleware
@@ -40,7 +45,7 @@ function getSubscriber(req, res) {
     });
   }
 
-  Subscriber.findOne({ userId: userId }, function (err, subscriber) {
+  Subscriber.findOne({ userId: userId }, async function (err, subscriber) {
     if (err) {
       return res.status(409).json({
         message: 'Error getting subscriber',
@@ -53,6 +58,54 @@ function getSubscriber(req, res) {
         error: 'subscriber not found',
       });
     }
+
+    // update subscriber status 
+    if (subscriber.transaction?.nativePurchase?.purchaseToken) {
+      const token = subscriber.transaction.nativePurchase.purchaseToken;
+      const params = { packageName: 'com.unicef.cboard', token: token };
+      let state = '';
+      try {
+        // get purchase from Google API
+        const remoteData = await playConsole.purchases.subscriptionsv2.get(params);
+        state = remoteData.data.subscriptionState;
+      } catch (err) {
+        console.log(err.message);
+      }
+      if (state) {
+        subscriber.state = state;
+        subscriber.save(function (err, subscr) {
+          if (err) {
+            const errorValidatingTransaction = err.errors?.transaction;
+            const errorValidatingProduct = err.product;
+            if (errorValidatingTransaction) {
+              console.log(err);
+              return res.status(409).json({
+                message: 'Error saving subscriber.',
+                error:
+                  errorValidatingTransaction.message ??
+                  errorValidatingTransaction.properties?.message,
+              });
+            }
+            if (errorValidatingProduct) {
+              return res.status(401).json({
+                message: 'Error saving subscriber.',
+                error: errorValidatingProduct.message,
+              });
+            }
+            return res.status(500).json({
+              message: 'Error saving subscriber.',
+              error: err.message,
+            });
+          }
+          if (!subscr) {
+            return res.status(404).json({
+              message: 'Unable to find subscriber.'
+            });
+          }
+        });
+      }
+    }
+
     return res.status(200).json(subscriber.toJSON());
   });
 }
@@ -88,12 +141,11 @@ function updateSubscriber(req, res) {
         ? { ...req.body[key], createdAt: keyCreatedAt }
         : req.body[key];
     }
-    if (subscriber.transaction?.nativePurchase?.productId && 
+    if (subscriber.transaction?.nativePurchase?.productId &&
       subscriber.transaction.nativePurchase.productId !== subscriber.product.subscriptionId) {
       // this means that user chooses to buy a different subscription than he bought in the past 
       subscriber.transaction.nativePurchase.productId = subscriber.product.subscriptionId;
     }
-
     subscriber.save(function (err, subscriber) {
       if (err) {
         const errorValidatingTransaction = err.errors?.transaction;
