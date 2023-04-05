@@ -72,7 +72,7 @@ async function getSubscriber(req, res) {
         console.log(err.message);
       }
       if (status) {
-        const regexpStatus = '/SUBSCRIPTION_STATE_([A-Z_]+)/';
+        const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
         const match = status.match(regexpStatus);
         subscriber.status = match ? match[1] : status;
         subscriber.save(function (err, subscr) {
