@@ -61,8 +61,6 @@ async function getSubscriber(req, res) {
 
     // update subscriber status 
     if (subscriber.transaction?.nativePurchase?.purchaseToken) {
-      
-      console.log(subscriber.transaction.nativePurchase.purchaseToken);
       const token = subscriber.transaction.nativePurchase.purchaseToken;
       const params = { packageName: 'com.unicef.cboard', token: token };
       let status = '';
@@ -70,12 +68,13 @@ async function getSubscriber(req, res) {
         // get purchase from Google API
         const remoteData = await playConsole.purchases.subscriptionsv2.get(params);
         status = remoteData.data.subscriptionState;
-        
-      console.log(status);
       } catch (err) {
         console.log(err.message);
       }
       if (status) {
+        const regexpStatus = '/SUBSCRIPTION_STATE_([A-Z_]+)/';
+        const match = status.match(regexpStatus);
+        status = match[1];
         subscriber.status = status;
         subscriber.save(function (err, subscr) {
           if (err) {
