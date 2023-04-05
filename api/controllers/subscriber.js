@@ -74,8 +74,7 @@ async function getSubscriber(req, res) {
       if (status) {
         const regexpStatus = '/SUBSCRIPTION_STATE_([A-Z_]+)/';
         const match = status.match(regexpStatus);
-        status = match[1];
-        subscriber.status = status;
+        subscriber.status = match ? match[1] : status;
         subscriber.save(function (err, subscr) {
           if (err) {
             const errorValidatingTransaction = err.errors?.transaction;
