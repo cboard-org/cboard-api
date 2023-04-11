@@ -213,6 +213,7 @@ function mapRemoteSubscr(subscription) {
 
 function getPlans(basePlans) {
   let plans = [];
+  if (!basePlans || basePlans.length === 0) return plans;
   basePlans.forEach(basePlan => {
     const plan = {
       name: basePlan.basePlanId,
