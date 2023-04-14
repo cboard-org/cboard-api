@@ -128,6 +128,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/Subscriber" 
+  phraseToEdit:
+    name: phraseToEdit
+    in: body
+    description: phraseToEdit data 
+    required: true
+    schema:
+      $ref: "#/definitions/Translate"     
 paths:
   /swagger:
     x-swagger-pipe: swagger_raw
@@ -1100,6 +1107,23 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"            
+
+  /gpt/edit:
+    x-swagger-router-controller: gpt
+    get:
+      operationId: editPhrase
+      description: Returns the provided phrase improoved.
+      parameters:
+        - $ref: "#/definitions/PhraseToEdit"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EditedPhrase"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1754,4 +1778,17 @@ definitions:
             type: number  
       error:
         $ref: "#/definitions/ErrorResponse"
-          
+  PhraseToEdit:
+      type: object
+      required:
+      - phrase
+      properties:
+        phrase:
+          type: string
+  EditedPhrase:
+      type: object
+      required:
+      - phrase
+      properties:
+        phrase:
+          type: string        
