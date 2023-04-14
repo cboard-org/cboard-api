@@ -2,6 +2,7 @@ process.env.NODE_ENV = 'test';
 
 const request = require('supertest');
 const helper = require('../helper');
+const nock = require('nock');
 
 //Parent block
 describe('GPT API calls', function () {
@@ -46,14 +47,19 @@ describe('GPT API calls', function () {
       });
 
     it('it should improve provided phrase and return it.', async function () {
+      nock('https://api.openai.com/v1/completions')
+      .post()
+      .reply(200, { message: 'Internal request executed successfully' });
+
       const res = await request(server)
         .get('/gpt/edit')
         .send(toEditData)
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .expect(200);
-
+        .expect(200)
+        nock.isDone().should.to.deep.equal(true);  
+      
       res.body.should.be.a('object');
     });
   });
