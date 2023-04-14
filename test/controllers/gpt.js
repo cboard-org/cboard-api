@@ -24,6 +24,17 @@ describe('GPT API calls', function () {
   });
 
   describe('GET /gpt/edit', function () {
+    const toEditData = helper.gpt.toEditData;
+
+    it('it should return error if user is not logged.', async function () {
+        const res = await request(server)
+          .get('/gpt/edit')
+          .send(toEditData)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(403);
+      });
+
     it('it should return error if phrase is not completed.', async function () {
         const res = await request(server)
           .get('/gpt/edit')
@@ -37,7 +48,7 @@ describe('GPT API calls', function () {
     it('it should improve provided phrase and return it.', async function () {
       const res = await request(server)
         .get('/gpt/edit')
-        .send(helper.gpt.toEditData)
+        .send(toEditData)
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
