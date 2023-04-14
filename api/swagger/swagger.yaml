@@ -1113,6 +1113,11 @@ paths:
     get:
       operationId: editPhrase
       description: Returns the provided phrase improoved.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - user
+        - admin
       parameters:
         - $ref: "#/definitions/PhraseToEdit"
       responses:
