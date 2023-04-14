@@ -359,6 +359,10 @@ const subscription = {
   },
 };
 
+const gpt = {
+  toEditData: {phrase: 'where I to rest'} 
+}
+
 function prepareDb() {
   mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
     useNewUrlParser: true,
@@ -503,4 +507,5 @@ module.exports = {
   subscription,
   subscriber,
   generateEmail: generateEmail,
+  gpt
 };
