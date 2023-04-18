@@ -22,13 +22,13 @@ const PRODUCT_SCHEMA_DEFINITION = {
     required: true,
     trim: true
   },
-  billingPeriod:{
+  billingPeriod: {
     type: String,
     required: true,
     trim: true
   },
   price: {
-    type: String,
+    type: Schema.Types.Mixed,
     required: true,
     trim: true
   }
@@ -70,7 +70,7 @@ const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
 });
 
 
-subscribersSchema.pre('save', async function() {
+subscribersSchema.pre('save', async function () {
   if (
     this.transaction?.state === 'approved'
   ) {
@@ -89,7 +89,7 @@ subscribersSchema.pre('save', async function() {
   }
 });
 
-subscribersSchema.path('transaction').validate(async function(transaction) {
+subscribersSchema.path('transaction').validate(async function (transaction) {
   const verifyAndroidPurchase = async ({ productId, purchaseToken }) => {
     const auth = new google.auth.GoogleAuth({
       keyFile: GOOGLE_PLAY_CREDENTIALS,
@@ -169,22 +169,22 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
   return true;
 }, 'transaction puchase token error');
 
-subscribersSchema.post('findOneAndUpdate', async function(subscriber) {
+subscribersSchema.post('findOneAndUpdate', async function (subscriber) {
   const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
   try {
-    const doc = await subscriber.model("Subscribers",subscribersSchema).findById(subscriber._id)
-    await doc.updateOne({status});
+    const doc = await subscriber.model("Subscribers", subscribersSchema).findById(subscriber._id)
+    await doc.updateOne({ status });
   } catch (error) {
     console.error(error);
   }
 });
 
 subscribersSchema.statics = {
-  getByUserId: async function (userId){
+  getByUserId: async function (userId) {
     let subscriber = null;
     try {
-      subscriber = await Subscribers.findOne({ userId : userId.id }).exec();
-    } catch (e) {}
+      subscriber = await Subscribers.findOne({ userId: userId.id }).exec();
+    } catch (e) { }
     return subscriber;
   }
 }

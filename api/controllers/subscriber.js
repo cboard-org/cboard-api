@@ -1,3 +1,7 @@
+
+const { gapiAuth } = require('../helpers/auth');
+const { google } = require('googleapis');
+const playConsole = google.androidpublisher('v3');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 const Subscriber = require('../models/Subscribers');
@@ -14,7 +18,7 @@ module.exports = {
 function createSubscriber(req, res) {
   const newSubscriber = req.body;
   const subscriber = new Subscriber(newSubscriber);
-  subscriber.save(function(err, subscriber) {
+  subscriber.save(function (err, subscriber) {
     if (err) {
       console.error('error', err);
       return res.status(409).json({
@@ -26,7 +30,8 @@ function createSubscriber(req, res) {
   });
 }
 
-function getSubscriber(req, res) {
+async function getSubscriber(req, res) {
+  await gapiAuth();
   const userId = req.swagger.params.id.value;
 
   //this would be implemented like a middleware
@@ -40,7 +45,7 @@ function getSubscriber(req, res) {
     });
   }
 
-  Subscriber.findOne({ userId: userId }, function(err, subscriber) {
+  Subscriber.findOne({ userId: userId }, async function (err, subscriber) {
     if (err) {
       return res.status(409).json({
         message: 'Error getting subscriber',
@@ -53,6 +58,56 @@ function getSubscriber(req, res) {
         error: 'subscriber not found',
       });
     }
+
+    // update subscriber status 
+    if (subscriber.transaction?.nativePurchase?.purchaseToken) {
+      const token = subscriber.transaction.nativePurchase.purchaseToken;
+      const params = { packageName: 'com.unicef.cboard', token: token };
+      let status = '';
+      try {
+        // get purchase from Google API
+        const remoteData = await playConsole.purchases.subscriptionsv2.get(params);
+        status = remoteData.data.subscriptionState;
+      } catch (err) {
+        console.log(err.message);
+      }
+      if (status) {
+        const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
+        const match = status.match(regexpStatus);
+        subscriber.status = match ? match[1] : status;
+        subscriber.save(function (err, subscr) {
+          if (err) {
+            const errorValidatingTransaction = err.errors?.transaction;
+            const errorValidatingProduct = err.product;
+            if (errorValidatingTransaction) {
+              console.log(err);
+              return res.status(409).json({
+                message: 'Error saving subscriber.',
+                error:
+                  errorValidatingTransaction.message ??
+                  errorValidatingTransaction.properties?.message,
+              });
+            }
+            if (errorValidatingProduct) {
+              return res.status(401).json({
+                message: 'Error saving subscriber.',
+                error: errorValidatingProduct.message,
+              });
+            }
+            return res.status(500).json({
+              message: 'Error saving subscriber.',
+              error: err.message,
+            });
+          }
+          if (!subscr) {
+            return res.status(404).json({
+              message: 'Unable to find subscriber.'
+            });
+          }
+        });
+      }
+    }
+
     return res.status(200).json(subscriber.toJSON());
   });
 }
@@ -62,9 +117,8 @@ function updateSubscriber(req, res) {
 
   const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
 
-  Subscriber.findOne({ _id: subscriberId }, function(err, subscriber) {
+  Subscriber.findOne({ _id: subscriberId }, function (err, subscriber) {
     if (err) {
-      console.error(err);
       return res.status(500).json({
         message: 'Error updating subscriber. ',
         error: err.message,
@@ -75,30 +129,32 @@ function updateSubscriber(req, res) {
         message: 'Subscriber does not exist. Subscriber Id: ' + subscriberId,
       });
     }
-
-    if (
-      !isRequestedByAdmin &&
-      (!requestedBy || subscriber.userId != requestedBy)
-    ) {
+    if (!isRequestedByAdmin &&
+      (!requestedBy || subscriber.userId != requestedBy)) {
       return res.status(401).json({
         message: 'Error updating subscriber',
         error:
           'unhautorized request, subscriber object is only accesible with subscribered user authToken',
       });
     }
-
     for (let key in req.body) {
       const keyCreatedAt = subscriber[key]?.createdAt;
       subscriber[key] = keyCreatedAt
         ? { ...req.body[key], createdAt: keyCreatedAt }
         : req.body[key];
     }
-    subscriber.save(function(err, subscriber) {
+    if (subscriber.transaction?.nativePurchase?.productId &&
+      subscriber.transaction.nativePurchase.productId !== subscriber.product.subscriptionId) {
+      // this means that user chooses to buy a different subscription than he bought in the past 
+      subscriber.transaction.nativePurchase.productId = subscriber.product.subscriptionId;
+    }
+    subscriber.save(function (err, subscriber) {
       if (err) {
         const errorValidatingTransaction = err.errors?.transaction;
         const errorValidatingProduct = err.product;
         if (errorValidatingTransaction) {
-          return res.status(403).json({
+          console.log(err);
+          return res.status(409).json({
             message: 'Error saving subscriber.',
             error:
               errorValidatingTransaction.message ??
@@ -137,7 +193,7 @@ function deleteSubscriber(req, res) {
     });
   }
 
-  Subscriber.findByIdAndRemove(subscriberId, function(err, subscriber) {
+  Subscriber.findByIdAndRemove(subscriberId, function (err, subscriber) {
     if (err) {
       console.log(err);
       return res.status(200).json({
@@ -209,7 +265,7 @@ async function createTransaction(req, res) {
       transaction,
     },
     { new: true, runValidators: true, useFindAndModify: false },
-    function(err, subscriber) {
+    function (err, subscriber) {
       if (err) {
         return res.status(200).json({
           ok: false,
