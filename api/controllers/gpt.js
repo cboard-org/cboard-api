@@ -12,12 +12,24 @@ module.exports = {
 async function editPhrase(req, res) {
   const phraseToEdit = req.body.phrase;
   if (!phraseToEdit) {
-    res.body = res.status(400).json();
-    return;
+    return res.status(400).json();
   }
 
-  //request to GPT
-  const response = { phrase: 'phrase' };
+  try {
+    const completionRequestParams = {
+      model: 'text-davinci-003',
+      prompt:
+        "join this sequence of words in a coherent sentence, completing with connectors and articles when necessary:: 'what you to think'",
+      max_tokens: 7,
+      temperature: 0
+    };
+    const response = await openai.createCompletion(completionRequestParams);
 
-  res.body = res.status(200).json(response);
+    const editedPhrase = response.data?.choices[0]?.text;
+    if (editedPhrase) return res.status(200).json({ phrase: editedPhrase });
+  } catch (e) {
+    console.log(e);
+  }
+
+  return res.status(400).json();
 }
