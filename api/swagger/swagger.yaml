@@ -1110,7 +1110,7 @@ paths:
 
   /gpt/edit:
     x-swagger-router-controller: gpt
-    get:
+    post:
       operationId: editPhrase
       description: Returns the provided phrase improoved.
       security:

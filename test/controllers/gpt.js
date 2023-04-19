@@ -29,7 +29,7 @@ describe('GPT API calls', function() {
 
     it('it should return error if user is not logged.', async function() {
       const res = await request(server)
-        .get('/gpt/edit')
+        .post('/gpt/edit')
         .send(toEditData)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -38,7 +38,7 @@ describe('GPT API calls', function() {
 
     it('it should return error if phrase is not completed.', async function() {
       const res = await request(server)
-        .get('/gpt/edit')
+        .post('/gpt/edit')
         .send({})
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
@@ -68,7 +68,7 @@ describe('GPT API calls', function() {
         .reply(200, mockedOpenAPIResponse);
 
       const res = await request(server)
-        .get('/gpt/edit')
+        .post('/gpt/edit')
         .send(toEditData)
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
