@@ -360,7 +360,7 @@ const subscription = {
 };
 
 const gpt = {
-  toEditData: {phrase: 'where I to rest'} 
+  toEditData: { phrase: 'what you to think' } 
 }
 
 function prepareDb() {

@@ -19,7 +19,7 @@ async function editPhrase(req, res) {
     const completionRequestParams = {
       model: 'text-davinci-003',
       prompt:
-        "join this sequence of words in a coherent sentence, completing with connectors and articles when necessary:: 'what you to think'",
+        `join this sequence of words in a coherent sentence, completing with connectors and articles when necessary:: '${phraseToEdit}'`,
       max_tokens: 7,
       temperature: 0
     };
