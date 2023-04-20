@@ -18,9 +18,8 @@ async function editPhrase(req, res) {
   try {
     const completionRequestParams = {
       model: 'text-davinci-003',
-      prompt:
-        `join this sequence of words in a coherent sentence, completing with connectors and articles when necessary:: '${phraseToEdit}'`,
-      max_tokens: 7,
+      prompt: `join this sequence of words in a coherent sentence, completing with connectors and articles when necessary: '${phraseToEdit}'`,
+      max_tokens: 20,
       temperature: 0
     };
     const response = await openai.createCompletion(completionRequestParams);
