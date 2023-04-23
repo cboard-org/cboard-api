@@ -6,6 +6,8 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 const Subscriber = require('../models/Subscribers');
 const { getAuthDataFromReq } = require('../helpers/auth');
+const PayPal = require('../helpers/paypal');
+const paypal = new PayPal({});
 
 module.exports = {
   createSubscriber,
@@ -60,7 +62,8 @@ async function getSubscriber(req, res) {
     }
 
     // update subscriber status 
-    if (subscriber.transaction?.nativePurchase?.purchaseToken) {
+    if (subscriber.transaction?.platform === 'android-playstore' &&
+      subscriber.transaction?.nativePurchase?.purchaseToken) {
       const token = subscriber.transaction.nativePurchase.purchaseToken;
       const params = { packageName: 'com.unicef.cboard', token: token };
       let status = '';
@@ -105,6 +108,59 @@ async function getSubscriber(req, res) {
             });
           }
         });
+      }
+    }
+
+    if (subscriber.transaction?.platform === 'paypal' &&
+      subscriber.transaction?.subscriptionId) {
+      let status = '';
+      let expiryDate = '';
+      let remoteData = '';
+      let nativePurchase = '';
+      try {
+        // get subscription from paypal API
+        remoteData = await paypal.getSubscriptionDetails(subscriber.transaction.subscriptionId);
+        status = remoteData.status;
+        expiryDate = remoteData.billing_info?.next_billing_time;
+        nativePurchase = remoteData;
+      } catch (err) {
+        console.log(err.message);
+      }
+      if (status) {
+        subscriber.status = status;
+        subscriber.transaction.expiryDate = expiryDate;
+        subscriber.transaction.nativePurchase = nativePurchase;
+        if (remoteData)
+          subscriber.save(function (err, subscr) {
+            if (err) {
+              const errorValidatingTransaction = err.errors?.transaction;
+              const errorValidatingProduct = err.product;
+              if (errorValidatingTransaction) {
+                console.log(err);
+                return res.status(409).json({
+                  message: 'Error saving subscriber.',
+                  error:
+                    errorValidatingTransaction.message ??
+                    errorValidatingTransaction.properties?.message,
+                });
+              }
+              if (errorValidatingProduct) {
+                return res.status(401).json({
+                  message: 'Error saving subscriber.',
+                  error: errorValidatingProduct.message,
+                });
+              }
+              return res.status(500).json({
+                message: 'Error saving subscriber.',
+                error: err.message,
+              });
+            }
+            if (!subscr) {
+              return res.status(404).json({
+                message: 'Unable to find subscriber.'
+              });
+            }
+          });
       }
     }
 
@@ -248,14 +304,15 @@ async function createTransaction(req, res) {
       },
     });
 
-  if (transaction.platform !== 'android-playstore')
+  if (transaction.platform !== 'android-playstore' &&
+    transaction.platform !== 'paypal')
     return res.status(200).json({
       ok: false,
       data: {
         code: 6778001, //INVALID_PAYLOAD
       },
       error: {
-        message: 'only android-playstore purchases are allowed',
+        message: 'only android-playstore or PayPal purchases are allowed',
       },
     });
 
