@@ -121,6 +121,7 @@ async function getSubscriber(req, res) {
         // get subscription from paypal API
         remoteData = await paypal.getSubscriptionDetails(subscriber.transaction.subscriptionId);
         status = remoteData.status;
+        if (status === 'cancelled') status = 'canceled';
         expiryDate = remoteData.billing_info?.next_billing_time;
         nativePurchase = remoteData;
       } catch (err) {
@@ -264,6 +265,7 @@ function deleteSubscriber(req, res) {
 
 async function createTransaction(req, res) {
   const subscriberId = req.swagger.params.id.value;
+  const platform = req.body.platform;
   const parseTransactionReceipt = (transaction) => {
     const receipt = transaction?.nativePurchase?.receipt;
 
@@ -278,8 +280,35 @@ async function createTransaction(req, res) {
     }
     return transaction;
   };
+  const parseSubscriptionDetails = (transaction, subscriptionDetails) => {
+    return {
+      ...transaction,
+      nativePurchase: subscriptionDetails,
+      expiryDate: subscriptionDetails.billing_info.next_billing_time,
+      purchaseDate: subscriptionDetails.start_time
+    };
+  };
 
-  const transaction = parseTransactionReceipt(req.body);
+  let transaction = req.body;
+  if (platform === 'android-playstore') {
+    transaction = parseTransactionReceipt(transaction);
+  } else if (platform === 'paypal') {
+    try {
+      // get subscription from paypal API
+      const remoteData = await paypal.getSubscriptionDetails(req.body.subscriptionId);
+      transaction = parseSubscriptionDetails(transaction, remoteData);
+    } catch (err) {
+      return res.status(200).json({
+        ok: false,
+        data: {
+          code: 6778001, //INVALID_PAYLOAD
+        },
+        error: {
+          message: 'PayPal subscription details could not be get',
+        },
+      });
+    }
+  }
 
   if (!ObjectId.isValid(subscriberId)) {
     return res.status(200).json({
