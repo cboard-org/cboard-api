@@ -2,6 +2,8 @@ const Subscription = require('../models/Subscription');
 const { paginatedResponse } = require('../helpers/response');
 const { gapiAuth } = require('../helpers/auth');
 const { getORQuery } = require('../helpers/query');
+const PayPal = require('../helpers/paypal');
+const paypal = new PayPal({});
 
 const { google } = require('googleapis');
 const playConsole = google.androidpublisher('v3');
@@ -116,6 +118,13 @@ async function syncSubscriptions(req, res) {
   console.log('Synchcronizing subscriptions...');
   await gapiAuth();
   const params = { packageName: 'com.unicef.cboard' };
+  let paypalPlans = [];
+  // get PayPal plans 
+  try {
+    paypalPlans = await paypal.listPlans();
+  } catch (err) {
+    console.log(err.message);
+  }
   try {
     // get subscriptions from Google API
     const remoteData = await playConsole.monetization.subscriptions.list(params);
@@ -133,9 +142,9 @@ async function syncSubscriptions(req, res) {
         }
         let newSubscription = undefined;
         if (subscr) {
-          newSubscription = Object.assign(subscr, mapRemoteSubscr(subscription));
+          newSubscription = Object.assign(subscr, mapRemoteSubscr(subscription, paypalPlans.plans));
         } else {
-          newSubscription = new Subscription(mapRemoteSubscr(subscription));
+          newSubscription = new Subscription(mapRemoteSubscr(subscription, paypalPlans.plans));
         }
 
         newSubscription.save(function (err, result) {
@@ -165,7 +174,7 @@ async function syncSubscriptions(req, res) {
       const id = localSubscr.subscriptionId;
       let found = false;
       remoteSubscrs.forEach(remoteSubscr => {
-        remoteSubscr = mapRemoteSubscr(remoteSubscr);
+        remoteSubscr = mapRemoteSubscr(remoteSubscr, paypalPlans.plans);
         if (id == remoteSubscr.subscriptionId) found = true;
       });
       if (!found) {
@@ -199,27 +208,32 @@ async function syncSubscriptions(req, res) {
   }
 }
 
-function mapRemoteSubscr(subscription) {
+function mapRemoteSubscr(subscription, paypalPlans) {
   const subscr = {
     subscriptionId: subscription.productId,
     name: subscription.listings[0].title,
     status: 'active',
     platform: 'android-playstore',
     benefits: subscription.listings[0].benefits,
-    plans: getPlans(subscription.basePlans)
+    plans: getPlans(subscription.basePlans, paypalPlans)
   };
   return subscr;
 }
 
-function getPlans(basePlans) {
+function getPlans(basePlans, paypalPlans) {
   let plans = [];
   if (!basePlans || basePlans.length === 0) return plans;
   basePlans.forEach(basePlan => {
+    let paypalPlan = '';
+    if (paypalPlans) paypalPlan = paypalPlans.find(plan => plan.name === basePlan.basePlanId);
     const plan = {
       name: basePlan.basePlanId,
       planId: basePlan.basePlanId,
       status: basePlan.state,
       countries: basePlan.regionalConfigs,
+      paypalId: paypalPlan
+        ? paypalPlan.id
+        : '',
       period: basePlan.autoRenewingBasePlanType.billingPeriodDuration,
       tags: basePlan.offerTags ? basePlan.offerTags.map(objectTag => objectTag.tag) : [],
       renovation: basePlan.autoRenewingBasePlanType.resubscribeState === 'RESUBSCRIBE_STATE_ACTIVE'
