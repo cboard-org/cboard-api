@@ -59,4 +59,17 @@ module.exports = class Paypal {
             { params });
         return data;
     }
+
+    async cancelPlan(subscriptionId) {
+        const authToken = await getAccessToken();
+        const headers = {
+            Authorization: `Bearer ${authToken}`
+        };
+        const data = {
+            "reason": "User cancelled"
+        };
+        const res = await this.axiosInstance.post(`/billing/subscriptions/${subscriptionId}/cancel`,
+        { data },{ headers });
+        return res.data;
+    }
 }

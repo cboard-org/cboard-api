@@ -15,7 +15,23 @@ module.exports = {
   updateSubscriber,
   deleteSubscriber,
   createTransaction,
+  cancelPlan
 };
+
+async function cancelPlan(req, res) {
+  const subscriptionId = req.swagger.params.id.value;
+  try {
+    await paypal.cancelPlan(subscriptionId);
+    return res.status(204).json();
+  } catch (err) {
+    console.error('error', err);
+    return res.status(409).json({
+      message: 'Error canceling PayPal subscription plan.',
+      error: err.message,
+    });
+  }
+
+}
 
 function createSubscriber(req, res) {
   const newSubscriber = req.body;
@@ -121,7 +137,7 @@ async function getSubscriber(req, res) {
         // get subscription from paypal API
         remoteData = await paypal.getSubscriptionDetails(subscriber.transaction.subscriptionId);
         status = remoteData.status;
-        if (status === 'cancelled') status = 'canceled';
+        if (status.toLowerCase() === 'cancelled') status = 'canceled';
         expiryDate = remoteData.billing_info?.next_billing_time;
         nativePurchase = remoteData;
       } catch (err) {

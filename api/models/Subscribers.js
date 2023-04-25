@@ -168,7 +168,6 @@ subscribersSchema.path('transaction').validate(async function (transaction) {
 
   };
   if (!transaction) return true;
-  console.log(transaction);
   if (transaction.platform === 'android-playstore') {
     await verifyAndroidPurchase(transaction.nativePurchase);
   } else if (transaction.platform === 'paypal') {
