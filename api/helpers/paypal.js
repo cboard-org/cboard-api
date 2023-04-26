@@ -7,8 +7,8 @@ const getAccessToken = async () => {
         'Content-Type': 'application/x-www-form-urlencoded'
     };
     const auth = {
-        username: 'AZ2vK0luRWMX9zzwLs-Ko_B_TJxeHYvIFCgXWcNBt50wmj7oZcUw8n4cf11GgdClTVnYMuEs5vRnxVEk',
-        password: 'ENsTK3mMS1OEHi-HP-Lzwu4QYuiiv5no4f6jUFElHAhk3TwLDc1NJXBPrMwVs0K2jyyXpx3cCWbGrUni'
+        username: process.env.PAYPAL_API_CLIENT_ID || '',
+        password: process.env.PAYPAL_API_CLIENT_SECRET || '',
     };
     let res = '';
     try {
@@ -17,7 +17,6 @@ const getAccessToken = async () => {
                 'grant_type': 'client_credentials'
             }), { auth }
         );
-        // data = await axios.post(BASE_URL + 'oauth2/token', { auth }, { headers } );
     } catch (err) {
         console.log('Error getting PayPal access token: ', err.message);
         return res;
@@ -69,7 +68,7 @@ module.exports = class Paypal {
             "reason": "User cancelled"
         };
         const res = await this.axiosInstance.post(`/billing/subscriptions/${subscriptionId}/cancel`,
-        { data },{ headers });
+            { data }, { headers });
         return res.data;
     }
 }
