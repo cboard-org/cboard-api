@@ -234,6 +234,32 @@ const subscriber = {
     isAcknowledged: false,
     renewalIntent: 'Renew',
   },
+  payPalTransactionData: {
+    className: 'Transaction',
+    subscriptionId: 'subscriptionID',
+    transactionId: 'subscriptionID',
+    state: 'approved',
+    products: [{
+      "id": "test-monthly",
+      "subscriptionId": "test",
+      "billingPeriod": "P1M",
+      "price": {
+        "currencyCode": "USD",
+        "units": "6"
+      },
+      "title": "Test Subscription",
+      "tag": "test-monthly",
+      "paypalId": "P-7CR38290D5111153BMRDNDLA"
+    }],
+    platform: 'paypal',
+    nativePurchase: '',
+    purchaseId: 'orderID',
+    purchaseDate: '',
+    isPending: false,
+    subscriptionState: 'active',
+    expiryDate: '',
+    facilitatorAccessToken:'facilitatorAccessToken'
+  },
   createSubscriber: async (userId) => {
     const newSubscriber = subscriber.subscriberData;
     newSubscriber.userId = userId;
@@ -307,6 +333,91 @@ const subscriber = {
         },
       });
   },
+  mockPayPalVerification: ({ isValid }) => {
+    nock('https://api-m.sandbox.paypal.com')
+      .post(`/v1/oauth2/token`)
+      .reply(200,{data:{access_token:'ttttoken'}});
+
+    if (isValid) {
+      const subscriptionDetails = {
+        status: 'ACTIVE',
+        status_update_time: '2023-04-27T20:30:29Z',
+        id: 'I-9UN3TA1TXMC7',
+        plan_id: 'P-7CR38290D5111153BMRDNDLA',
+        start_time: '2023-04-27T20:29:47Z',
+        quantity: '1',
+        shipping_amount: { currency_code: 'USD', value: '0.0' },
+        subscriber: {
+          email_address: 'cboard@mock.com',
+          payer_id: '587FW7S4CZNEG',
+          name: { given_name: 'SANTIAGO', surname: 'EL QUESO' },
+          shipping_address: { address: {} }
+        },
+        billing_info: {
+          outstanding_balance: { currency_code: 'USD', value: '0.0' },
+          cycle_executions: [ {} ],
+          last_payment: { amount: {}, time: '2023-04-27T20:30:28Z' },
+          next_billing_time: '2023-05-27T10:00:00Z',
+          final_payment_time: '2027-03-27T10:00:00Z',
+          failed_payments_count: 0
+        },
+        create_time: '2023-04-27T20:30:28Z',
+        update_time: '2023-04-27T20:30:29Z',
+        plan_overridden: false,
+        links: [
+          {
+            href: 'https://api.sandbox.paypal.com/v1/billing/subscriptions/I-9UN3FA1TXHC7/cancel',
+            rel: 'cancel',
+            method: 'POST'
+          },
+          {
+            href: 'https://api.sandbox.paypal.com/v1/billing/subscriptions/I-9UN3FA1TXHC7',
+            rel: 'edit',
+            method: 'PATCH'
+          },
+          {
+            href: 'https://api.sandbox.paypal.com/v1/billing/subscriptions/I-9UN3FA1TXHC7',
+            rel: 'self',
+            method: 'GET'
+          },
+          {
+            href: 'https://api.sandbox.paypal.com/v1/billing/subscriptions/I-9UN3FA1TXHC7/suspend',
+            rel: 'suspend',
+            method: 'POST'
+          },
+          {
+            href: 'https://api.sandbox.paypal.com/v1/billing/subscriptions/I-9UN3FA1TXHC7/capture',
+            rel: 'capture',
+            method: 'POST'
+          }
+        ]
+      }
+
+      const { subscriptionId } = subscriber.payPalTransactionData;
+      nock(
+        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscriptionId}`
+      )
+      .get('')
+      .reply(200, subscriptionDetails);
+      return subscriptionDetails;
+    }    
+
+    const invalidResponse = {
+      name: 'RESOURCE_NOT_FOUND',
+      message: 'The specified resource does not exist.',
+      debug_id: 'e662698658963',
+      details: [],
+      links: []
+    }
+
+    const { subscriptionId } = subscriber.payPalTransactionData;
+      nock(
+        `https://api-m.sandbox.paypal.com/v1/billing/subscriptions/${subscriptionId}`
+      )
+      .get('')
+      .reply(404, invalidResponse);
+    return invalidResponse;
+  }
 };
 
 const subscription = {
