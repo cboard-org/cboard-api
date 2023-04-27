@@ -82,7 +82,7 @@ subscribersSchema.pre('save', async function () {
         transaction: {
           code: 6778001,
           message:
-            'subscriber product subscription Id is different than transaction subscription Id',
+            'Subscription Id was not provided for the transaction.',
         },
       },
     };

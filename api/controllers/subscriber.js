@@ -33,10 +33,10 @@ async function cancelPlan(req, res) {
 
 }
 
-function createSubscriber(req, res) {
+async function createSubscriber(req, res) {
   const newSubscriber = req.body;
   const subscriber = new Subscriber(newSubscriber);
-  subscriber.save(function (err, subscriber) {
+  await subscriber.save(function (err, subscriber) {
     if (err) {
       console.error('error', err);
       return res.status(409).json({
@@ -94,7 +94,7 @@ async function getSubscriber(req, res) {
         const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
         const match = status.match(regexpStatus);
         subscriber.status = match ? match[1] : status;
-        subscriber.save(function (err, subscr) {
+        await subscriber.save(function (err, subscr) {
           if (err) {
             const errorValidatingTransaction = err.errors?.transaction;
             const errorValidatingProduct = err.product;
@@ -148,7 +148,7 @@ async function getSubscriber(req, res) {
         subscriber.transaction.expiryDate = expiryDate;
         subscriber.transaction.nativePurchase = nativePurchase;
         if (remoteData)
-          subscriber.save(function (err, subscr) {
+          await subscriber.save(function (err, subscr) {
             if (err) {
               const errorValidatingTransaction = err.errors?.transaction;
               const errorValidatingProduct = err.product;
@@ -190,7 +190,7 @@ function updateSubscriber(req, res) {
 
   const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
 
-  Subscriber.findOne({ _id: subscriberId }, function (err, subscriber) {
+  Subscriber.findOne({ _id: subscriberId }, async function (err, subscriber) {
     if (err) {
       return res.status(500).json({
         message: 'Error updating subscriber. ',
@@ -221,7 +221,7 @@ function updateSubscriber(req, res) {
       // this means that user chooses to buy a different subscription than he bought in the past 
       subscriber.transaction.nativePurchase.productId = subscriber.product.subscriptionId;
     }
-    subscriber.save(function (err, subscriber) {
+    await subscriber.save(function (err, subscriber) {
       if (err) {
         const errorValidatingTransaction = err.errors?.transaction;
         const errorValidatingProduct = err.product;

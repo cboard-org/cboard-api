@@ -17,12 +17,12 @@ module.exports = {
   listSubscriptions
 };
 
-function createSubscription(req, res) {
+async function createSubscription(req, res) {
   const subscriptionId = req.swagger.params.subscriptionId.value;
   const newSubscription = req.body;
   newSubscription.subscriptionId = subscriptionId;
   const subscription = new Subscription(newSubscription);
-  subscription.save(function (err, subscription) {
+  await subscription.save(function (err, subscription) {
     if (err) {
       console.error('error', err);
       return res.status(409).json({
@@ -57,7 +57,7 @@ function getSubscription(req, res) {
 function updateSubscription(req, res) {
   const subscriptionId = req.swagger.params.subscriptionId.value;
 
-  Subscription.findOne({ subscriptionId }, function (err, subscription) {
+  Subscription.findOne({ subscriptionId }, async function (err, subscription) {
     if (err) {
       return res.status(500).json({
         message: 'Error updating subscription. ',
@@ -73,7 +73,7 @@ function updateSubscription(req, res) {
     for (let key in req.body) {
       subscription[key] = req.body[key];
     }
-    subscription.save(function (err, subscription) {
+    await subscription.save(function (err, subscription) {
       if (err) {
         return res.status(500).json({
           message: 'Error saving subscription. ',
@@ -133,7 +133,7 @@ async function syncSubscriptions(req, res) {
     remoteSubscrs.forEach(subscription => {
       //console.log(subscription);
       const subscriptionId = subscription.productId;
-      Subscription.findOne({ subscriptionId: subscriptionId }, function (err, subscr) {
+      Subscription.findOne({ subscriptionId: subscriptionId }, async function (err, subscr) {
         if (err) {
           return res.status(500).json({
             message: 'Error getting subscription.',
@@ -147,7 +147,7 @@ async function syncSubscriptions(req, res) {
           newSubscription = new Subscription(mapRemoteSubscr(subscription, paypalPlans.plans));
         }
 
-        newSubscription.save(function (err, result) {
+        await newSubscription.save(function (err, result) {
           if (err) {
             console.error('error', err);
             return res.status(409).json({
