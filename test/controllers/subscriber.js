@@ -204,58 +204,6 @@ describe('Subscriber API calls', function() {
       firstCollection.isBillingRetryPeriod.should.to.deep.equal(false);
     });
 
-    it('it should creates a transaction field in subscriber using paypal.', async function() {
-      const mockTransactionData = payPalTransactionData;
-      const verifiedPurchaseReply = mockPayPalVerification({ isValid: true })
-      const res = await request(server)
-        .post(`/subscriber/${subscriber._id}/transaction`)
-        .send(mockTransactionData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      const transactionRes = res.body;
-      const collection = transactionRes.data.collection;
-      const firstCollection = collection[0];
-      transactionRes.ok.should.to.equal(true);
-      console.log('transactionRes',transactionRes);
-      transactionRes.data.id.should.to.deep.equal(
-        mockTransactionData.products[0].id
-      );
-      transactionRes.data.latest_receipt.should.to.deep.equal(true);
-      transactionRes.data.transaction.type.should.to.deep.equal(
-        mockTransactionData.platform
-      );
-      transactionRes.data.transaction.data.transaction.nativePurchase.should.to.deep.equal(
-        {
-          ...verifiedPurchaseReply
-        }
-      );
-      transactionRes.data.transaction.data.success.should.to.deep.equal(true);
-
-      firstCollection.expiryDate.should.to.deep.equal(verifiedPurchaseReply.billing_info.next_billing_time);
-    });
-
-    it('it should not creates a PayPal transaction field if subscriptionId is invalid', async function() {
-      mockPayPalVerification({ isValid: false });
-
-      const mockTransactionData = payPalTransactionData;
-      const res = await request(server)
-        .post(`/subscriber/${subscriber._id}/transaction`)
-        .send(mockTransactionData)
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      const transactionRes = res.body;
-      transactionRes.ok.should.to.equal(false);
-      // transactionRes.error.message.should.to.equal(
-      //   'Validation failed: transaction: error verifying purchase. Check if the purchase token is valid'
-      // );
-    });
-
     it('it should should response that transaction is expired.', async function() {
       const receiptObject = JSON.parse(transactionData.nativePurchase.receipt);
       const mockTransactionData = transactionData;
@@ -336,6 +284,57 @@ describe('Subscriber API calls', function() {
       firstCollection.expiryDate.should.to.deep.equal(expectedExpiryDate);
       firstCollection.isExpired.should.to.deep.equal(true);
       firstCollection.isBillingRetryPeriod.should.to.deep.equal(true);
+    });
+
+    it('it should creates a transaction field in subscriber using paypal.', async function() {
+      const mockTransactionData = payPalTransactionData;
+      const verifiedPurchaseReply = mockPayPalVerification({ isValid: true })
+      const res = await request(server)
+        .post(`/subscriber/${subscriber._id}/transaction`)
+        .send(mockTransactionData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const transactionRes = res.body;
+      const collection = transactionRes.data.collection;
+      const firstCollection = collection[0];
+      transactionRes.ok.should.to.equal(true);
+      transactionRes.data.id.should.to.deep.equal(
+        mockTransactionData.products[0].id
+      );
+      transactionRes.data.latest_receipt.should.to.deep.equal(true);
+      transactionRes.data.transaction.type.should.to.deep.equal(
+        mockTransactionData.platform
+      );
+      transactionRes.data.transaction.data.transaction.nativePurchase.should.to.deep.equal(
+        {
+          ...verifiedPurchaseReply
+        }
+      );
+      transactionRes.data.transaction.data.success.should.to.deep.equal(true);
+
+      firstCollection.expiryDate.should.to.deep.equal(verifiedPurchaseReply.billing_info.next_billing_time);
+    });
+
+    it('it should not creates a PayPal transaction field if subscriptionId is invalid', async function() {
+      mockPayPalVerification({ isValid: false });
+
+      const mockTransactionData = payPalTransactionData;
+      const res = await request(server)
+        .post(`/subscriber/${subscriber._id}/transaction`)
+        .send(mockTransactionData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const transactionRes = res.body;
+      transactionRes.ok.should.to.equal(false);
+      // transactionRes.error.message.should.to.equal(
+      //   'Validation failed: transaction: error verifying purchase. Check if the purchase token is valid'
+      // );
     });
   });
 
