@@ -45,6 +45,11 @@ const PLANS_SCHEMA_DEFINITION = {
       trim: true,
     },
   ],
+  paypalId: {
+    type: String,
+    trim: true,
+    unique: true,
+  },
 };
 
 const plansSchema = new Schema(PLANS_SCHEMA_DEFINITION, {

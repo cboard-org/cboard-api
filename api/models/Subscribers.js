@@ -74,7 +74,7 @@ subscribersSchema.pre('save', async function () {
   if (
     this.transaction?.state === 'approved'
   ) {
-    if (this.transaction.nativePurchase?.productId === this.product.subscriptionId) {
+    if (this.product.subscriptionId) {
       return true;
     }
     throw {
@@ -82,7 +82,7 @@ subscribersSchema.pre('save', async function () {
         transaction: {
           code: 6778001,
           message:
-            'subscriber product subscription Id is different than transaction subscription Id',
+            'Subscription Id was not provided for the transaction.',
         },
       },
     };
@@ -164,8 +164,15 @@ subscribersSchema.path('transaction').validate(async function (transaction) {
     }
     throw { code: 6778001, message: 'Subscription Id is not provided' };
   };
+  const verifyPaypalPurchase = async (purchase) => {
+
+  };
   if (!transaction) return true;
-  await verifyAndroidPurchase(transaction.nativePurchase);
+  if (transaction.platform === 'android-playstore') {
+    await verifyAndroidPurchase(transaction.nativePurchase);
+  } else if (transaction.platform === 'paypal') {
+    await verifyPaypalPurchase(transaction.nativePurchase);
+  }
   return true;
 }, 'transaction puchase token error');
 
