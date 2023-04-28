@@ -380,10 +380,11 @@ async function createTransaction(req, res) {
         });
       }
       const transaction = subscriber.transaction;
+      const id = (transaction.platform === 'android-playstore' && transaction.nativePurchase.productId) || (transaction.platform === 'paypal' && transaction.products[0].id);
       return res.status(200).json({
         ok: true,
         data: {
-          id: transaction.nativePurchase.productId,
+          id,
           latest_receipt: true,
           transaction: {
             data: { transaction, success: true },
