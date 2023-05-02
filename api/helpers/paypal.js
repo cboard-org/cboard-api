@@ -1,6 +1,7 @@
 const axios = require('axios');
+const config = require('../../config');
 
-const BASE_URL = 'https://api-m.sandbox.paypal.com/v1/';
+const BASE_URL = config.PAYPAL_API_URL;
 
 const getAccessToken = async () => {
     const headers = {
