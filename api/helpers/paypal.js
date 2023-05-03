@@ -1,7 +1,10 @@
 const axios = require('axios');
-const config = require('../../config');
+const devConfig = require('../../config/env/development');
+const prodConfig = require('../../config/env/production');
 
-const BASE_URL = config.PAYPAL_API_URL;
+const BASE_URL = process.env.SUBDOMAINS === 'app,api.app,wiki'
+    ? prodConfig.PAYPAL_API_URL
+    : devConfig.PAYPAL_API_URL;
 
 const getAccessToken = async () => {
     const headers = {
