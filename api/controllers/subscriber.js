@@ -145,7 +145,7 @@ async function getSubscriber(req, res) {
       }
       if (status) {
         subscriber.status = status;
-        subscriber.transaction.expiryDate = expiryDate;
+        if (expiryDate) subscriber.transaction.expiryDate = expiryDate;
         subscriber.transaction.nativePurchase = nativePurchase;
         if (remoteData)
           await subscriber.save(function (err, subscr) {
@@ -177,6 +177,7 @@ async function getSubscriber(req, res) {
                 message: 'Unable to find subscriber.'
               });
             }
+            subscriber = subscr;
           });
       }
     }
