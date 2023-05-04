@@ -186,7 +186,7 @@ const communicatorData = {
 const subscriber = {
   subscriberData: {
     country: 'United States',
-    status: 'free-trial',
+    status: 'not_subscribed',
     product: {
       subscriptionId: 'premium_full',
       planId: 'premium-full-features-yearly',
