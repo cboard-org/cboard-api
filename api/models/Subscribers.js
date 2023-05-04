@@ -187,6 +187,15 @@ subscribersSchema.post('findOneAndUpdate', async function (subscriber) {
   }
 });
 
+subscribersSchema.post('validate', async function (subscriber) {
+  const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
+  if (status) {
+    const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
+    const match = status.match(regexpStatus);
+    subscriber.status = match ? match[1] : status;
+  }
+});
+
 subscribersSchema.statics = {
   getByUserId: async function (userId) {
     let subscriber = null;
