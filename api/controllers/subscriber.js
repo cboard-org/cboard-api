@@ -79,30 +79,16 @@ async function getSubscriber(req, res) {
       });
     }
 
-    // update subscriber status 
+    // update subscriber status and transaction
     if (subscriber.transaction?.platform === 'android-playstore' &&
       subscriber.transaction?.nativePurchase?.purchaseToken) {
-      const token = subscriber.transaction.nativePurchase.purchaseToken;
-      const params = { packageName: 'com.unicef.cboard', token: token };
-      let status = '';
       try {
-        // get purchase from Google API
-        const remoteData = await playConsole.purchases.subscriptionsv2.get(params);
-        status = remoteData.data.subscriptionState;
-      } catch (err) {
-        console.log(err.message);
+        const newSubscriber = await subscriber.save();
+        return res.status(200).json(newSubscriber.toJSON());
       }
-      if (status) {
-        const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
-        const match = status.match(regexpStatus);
-        subscriber.status = match ? match[1] : status;
-        try {
-          const newSubscriber = await subscriber.save();
-          return res.status(200).json(newSubscriber.toJSON());
-        }
-        catch (err) {
-          handleError(err);
-        }
+      catch (err) {
+        handleError(err);
+        return;
       }
     }
 
