@@ -136,6 +136,7 @@ async function getSubscriber(req, res) {
           }
       }
     }
+    return res.status(200).json(subscriber.toJSON());
 
     function handleError(err) {
       const errorValidatingTransaction = err.errors?.transaction;
