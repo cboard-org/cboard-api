@@ -173,6 +173,7 @@ subscribersSchema.path('transaction').validate(async function (transaction) {
   } else if (transaction.platform === 'paypal') {
     await verifyPaypalPurchase(transaction.nativePurchase);
   }
+  this.markModified('transaction');
   return true;
 }, 'transaction puchase token error');
 
