@@ -18,6 +18,7 @@ async function gapiAuth() {
 
 async function batchGet(req, res) {
   try {
+    await gapiAuth();
     const reportRequests = req.body.map(requestReport => {
       const report = {
         viewId: requestReport.mobileView ? constants.MOBILE_GA_VIEW : constants.DEFAULT_GA_VIEW,
