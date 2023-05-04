@@ -3,6 +3,8 @@ const { gapiAuth } = require('../helpers/auth');
 const { google } = require('googleapis');
 const playConsole = google.androidpublisher('v3');
 const ObjectId = require('mongoose').Types.ObjectId;
+const mongoose = require('mongoose');
+
 
 const Subscriber = require('../models/Subscribers');
 const { getAuthDataFromReq } = require('../helpers/auth');
@@ -33,10 +35,10 @@ async function cancelPlan(req, res) {
 
 }
 
-async function createSubscriber(req, res) {
+function createSubscriber(req, res) {
   const newSubscriber = req.body;
   const subscriber = new Subscriber(newSubscriber);
-  await subscriber.save(function (err, subscriber) {
+  subscriber.save(function (err, subscriber) {
     if (err) {
       console.error('error', err);
       return res.status(409).json({
@@ -94,36 +96,13 @@ async function getSubscriber(req, res) {
         const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
         const match = status.match(regexpStatus);
         subscriber.status = match ? match[1] : status;
-        await subscriber.save(function (err, subscr) {
-          if (err) {
-            const errorValidatingTransaction = err.errors?.transaction;
-            const errorValidatingProduct = err.product;
-            if (errorValidatingTransaction) {
-              console.log(err);
-              return res.status(409).json({
-                message: 'Error saving subscriber.',
-                error:
-                  errorValidatingTransaction.message ??
-                  errorValidatingTransaction.properties?.message,
-              });
-            }
-            if (errorValidatingProduct) {
-              return res.status(401).json({
-                message: 'Error saving subscriber.',
-                error: errorValidatingProduct.message,
-              });
-            }
-            return res.status(500).json({
-              message: 'Error saving subscriber.',
-              error: err.message,
-            });
-          }
-          if (!subscr) {
-            return res.status(404).json({
-              message: 'Unable to find subscriber.'
-            });
-          }
-        });
+        try {
+          const newSubscriber = await subscriber.save();
+          return res.status(200).json(newSubscriber.toJSON());
+        }
+        catch (err) {
+          handleError(err);
+        }
       }
     }
 
@@ -148,41 +127,48 @@ async function getSubscriber(req, res) {
         if (expiryDate) subscriber.transaction.expiryDate = expiryDate;
         subscriber.transaction.nativePurchase = nativePurchase;
         if (remoteData)
-          await subscriber.save(function (err, subscr) {
-            if (err) {
-              const errorValidatingTransaction = err.errors?.transaction;
-              const errorValidatingProduct = err.product;
-              if (errorValidatingTransaction) {
-                console.log(err);
-                return res.status(409).json({
-                  message: 'Error saving subscriber.',
-                  error:
-                    errorValidatingTransaction.message ??
-                    errorValidatingTransaction.properties?.message,
-                });
-              }
-              if (errorValidatingProduct) {
-                return res.status(401).json({
-                  message: 'Error saving subscriber.',
-                  error: errorValidatingProduct.message,
-                });
-              }
-              return res.status(500).json({
-                message: 'Error saving subscriber.',
-                error: err.message,
-              });
-            }
-            if (!subscr) {
-              return res.status(404).json({
-                message: 'Unable to find subscriber.'
-              });
-            }
-            subscriber = subscr;
-          });
+          try {
+            const newSubscriber = await subscriber.save();
+            return res.status(200).json(newSubscriber.toJSON());
+          }
+          catch (err) {
+            handleError(err);
+          }
       }
     }
-
     return res.status(200).json(subscriber.toJSON());
+
+    function handleError(err) {
+      const errorValidatingTransaction = err.errors?.transaction;
+      const errorValidatingProduct = err.product;
+      const errorFindingSubscriber = err instanceof mongoose.Error.DocumentNotFoundError;
+      if (errorValidatingTransaction) {
+        console.log(err);
+        return res.status(409).json({
+          message: 'Error saving subscriber.',
+          error:
+            errorValidatingTransaction.message ??
+            errorValidatingTransaction.properties?.message,
+        });
+      }
+      if (errorValidatingProduct) {
+        return res.status(401).json({
+          message: 'Error saving subscriber.',
+          error: errorValidatingProduct.message,
+        });
+      }
+      if (errorFindingSubscriber) {
+        return res.status(404).json({
+          message: 'Unable to find subscriber.',
+          error: errorFindingSubscriber.message,
+        });
+      }
+      return res.status(500).json({
+        message: 'Error saving subscriber.',
+        error: err.message,
+      });
+    }
+
   });
 }
 
