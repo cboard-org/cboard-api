@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { google } = require('googleapis');
 const config = require('../../config');
 
 const { secret: jwtSecret, issuer } = config.jwt;
@@ -68,10 +69,26 @@ const getAuthDataFromReq = (req) => {
   };
 };
 
+async function gapiAuth() {
+  try {
+    const scopes = ['https://www.googleapis.com/auth/androidpublisher'];
+    const auth = new google.auth.GoogleAuth({
+      keyFile: config.GOOGLE_PLAY_CREDENTIALS,
+      scopes: scopes
+    });
+    const authClient = await auth.getClient();
+    google.options({ auth: authClient });
+  } catch (error) {
+    console.error('error during Google API auth', error)
+  }
+}
+
+
 module.exports = {
   getTokenData,
   authorizeRequest,
   verifyToken,
   issueToken,
   getAuthDataFromReq,
+  gapiAuth
 };

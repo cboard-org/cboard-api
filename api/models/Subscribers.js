@@ -22,13 +22,13 @@ const PRODUCT_SCHEMA_DEFINITION = {
     required: true,
     trim: true
   },
-  billingPeriod:{
+  billingPeriod: {
     type: String,
     required: true,
     trim: true
   },
   price: {
-    type: String,
+    type: Schema.Types.Mixed,
     required: true,
     trim: true
   }
@@ -70,11 +70,11 @@ const subscribersSchema = new Schema(SUBSCRIBERS_SCHEMA_DEFINITION, {
 });
 
 
-subscribersSchema.pre('save', async function() {
+subscribersSchema.pre('save', async function () {
   if (
     this.transaction?.state === 'approved'
   ) {
-    if (this.transaction.nativePurchase?.productId === this.product.subscriptionId) {
+    if (this.product.subscriptionId) {
       return true;
     }
     throw {
@@ -82,14 +82,14 @@ subscribersSchema.pre('save', async function() {
         transaction: {
           code: 6778001,
           message:
-            'subscriber product subscription Id is different than transaction subscription Id',
+            'Subscription Id was not provided for the transaction.',
         },
       },
     };
   }
 });
 
-subscribersSchema.path('transaction').validate(async function(transaction) {
+subscribersSchema.path('transaction').validate(async function (transaction) {
   const verifyAndroidPurchase = async ({ productId, purchaseToken }) => {
     const auth = new google.auth.GoogleAuth({
       keyFile: GOOGLE_PLAY_CREDENTIALS,
@@ -164,27 +164,34 @@ subscribersSchema.path('transaction').validate(async function(transaction) {
     }
     throw { code: 6778001, message: 'Subscription Id is not provided' };
   };
+  const verifyPaypalPurchase = async (purchase) => {
+
+  };
   if (!transaction) return true;
-  await verifyAndroidPurchase(transaction.nativePurchase);
+  if (transaction.platform === 'android-playstore') {
+    await verifyAndroidPurchase(transaction.nativePurchase);
+  } else if (transaction.platform === 'paypal') {
+    await verifyPaypalPurchase(transaction.nativePurchase);
+  }
   return true;
 }, 'transaction puchase token error');
 
-subscribersSchema.post('findOneAndUpdate', async function(subscriber) {
+subscribersSchema.post('findOneAndUpdate', async function (subscriber) {
   const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
   try {
-    const doc = await subscriber.model("Subscribers",subscribersSchema).findById(subscriber._id)
-    await doc.updateOne({status});
+    const doc = await subscriber.model("Subscribers", subscribersSchema).findById(subscriber._id)
+    await doc.updateOne({ status });
   } catch (error) {
     console.error(error);
   }
 });
 
 subscribersSchema.statics = {
-  getByUserId: async function (userId){
+  getByUserId: async function (userId) {
     let subscriber = null;
     try {
-      subscriber = await Subscribers.findOne({ userId : userId.id }).exec();
-    } catch (e) {}
+      subscriber = await Subscribers.findOne({ userId: userId.id }).exec();
+    } catch (e) { }
     return subscriber;
   }
 }

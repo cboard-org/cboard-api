@@ -1107,6 +1107,31 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"            
+  /subscriber/cancel/{id}:
+    x-swagger-router-controller: subscriber
+    post:
+      operationId: cancelPlan
+      description: cancel a PayPal plan for a subscriber
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "204":
+          description: Success
+          schema:
+            $ref: "#/definitions/PostTransactionResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"   
 
   /gpt/edit:
     x-swagger-router-controller: gpt
