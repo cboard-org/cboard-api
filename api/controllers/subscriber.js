@@ -334,6 +334,24 @@ async function createTransaction(req, res) {
       },
     });
 
+  try {
+    const activeSubscriber = await Subscriber.findOne({ 'transaction.transactionId': transaction.transactionId });
+    if (activeSubscriber && activeSubscriber._id.toString() !== subscriberId ) {
+      throw new Error('Transaction ID already exists');
+    }
+  }
+  catch (err) {
+    return res.status(200).json({
+      ok: false,
+      data: {
+        code: 6778001, //INVALID_PAYLOAD
+      },
+      error: {
+        message: 'Transaction ID already exists',
+      },
+    });
+  }
+
   Subscriber.findOneAndUpdate(
     { _id: subscriberId },
     {
