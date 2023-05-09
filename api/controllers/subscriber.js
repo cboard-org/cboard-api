@@ -79,30 +79,16 @@ async function getSubscriber(req, res) {
       });
     }
 
-    // update subscriber status 
+    // update subscriber status and transaction
     if (subscriber.transaction?.platform === 'android-playstore' &&
       subscriber.transaction?.nativePurchase?.purchaseToken) {
-      const token = subscriber.transaction.nativePurchase.purchaseToken;
-      const params = { packageName: 'com.unicef.cboard', token: token };
-      let status = '';
       try {
-        // get purchase from Google API
-        const remoteData = await playConsole.purchases.subscriptionsv2.get(params);
-        status = remoteData.data.subscriptionState;
-      } catch (err) {
-        console.log(err.message);
+        const newSubscriber = await subscriber.save();
+        return res.status(200).json(newSubscriber.toJSON());
       }
-      if (status) {
-        const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
-        const match = status.match(regexpStatus);
-        subscriber.status = match ? match[1] : status;
-        try {
-          const newSubscriber = await subscriber.save();
-          return res.status(200).json(newSubscriber.toJSON());
-        }
-        catch (err) {
-          handleError(err);
-        }
+      catch (err) {
+        handleError(err);
+        return;
       }
     }
 
@@ -347,6 +333,24 @@ async function createTransaction(req, res) {
         message: 'only android-playstore or PayPal purchases are allowed',
       },
     });
+
+  try {
+    const activeSubscriber = await Subscriber.findOne({ 'transaction.transactionId': transaction.transactionId });
+    if (activeSubscriber && activeSubscriber._id.toString() !== subscriberId ) {
+      throw new Error('Transaction ID already exists');
+    }
+  }
+  catch (err) {
+    return res.status(200).json({
+      ok: false,
+      data: {
+        code: 6778001, //INVALID_PAYLOAD
+      },
+      error: {
+        message: 'Transaction ID already exists',
+      },
+    });
+  }
 
   Subscriber.findOneAndUpdate(
     { _id: subscriberId },

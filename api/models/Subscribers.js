@@ -173,16 +173,19 @@ subscribersSchema.path('transaction').validate(async function (transaction) {
   } else if (transaction.platform === 'paypal') {
     await verifyPaypalPurchase(transaction.nativePurchase);
   }
+  this?.markModified('transaction');
   return true;
 }, 'transaction puchase token error');
 
-subscribersSchema.post('findOneAndUpdate', async function (subscriber) {
-  const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
-  try {
-    const doc = await subscriber.model("Subscribers", subscribersSchema).findById(subscriber._id)
-    await doc.updateOne({ status });
-  } catch (error) {
-    console.error(error);
+subscribersSchema.post('validate', async function (subscriber) {
+  //After refactor PayPal validation, change subscriber.status on this stage.
+  if(subscriber?.transaction?.platform === 'android-playstore'){
+    const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
+    if (status) {
+      const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
+      const match = status.match(regexpStatus);
+      subscriber.status = match ? match[1] : status;
+    }
   }
 });
 
