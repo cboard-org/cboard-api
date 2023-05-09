@@ -178,11 +178,14 @@ subscribersSchema.path('transaction').validate(async function (transaction) {
 }, 'transaction puchase token error');
 
 subscribersSchema.post('validate', async function (subscriber) {
-  const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
-  if (status) {
-    const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
-    const match = status.match(regexpStatus);
-    subscriber.status = match ? match[1] : status;
+  //After refactor PayPal validation, change subscriber.status on this stage.
+  if(subscriber?.transaction?.platform === 'android-playstore'){
+    const status = subscriber?.transaction?.subscriptionState || 'not_subscribed';
+    if (status) {
+      const regexpStatus = /SUBSCRIPTION_STATE_([A-Z_]+)/;
+      const match = status.match(regexpStatus);
+      subscriber.status = match ? match[1] : status;
+    }
   }
 });
 
