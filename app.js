@@ -21,6 +21,7 @@ const Facebook = require('./api/passport/facebook');
 const Google = require('./api/passport/google');
 const GoogleToken = require('./api/passport/googleToken');
 const FacebookToken = require('./api/passport/facebookToken');
+const Apple = require('./api/passport/apple');
 const morgan = require('morgan');
 const config = require('./config');
 
@@ -124,6 +125,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   Google.configureGoogleStrategy(app);
   GoogleToken.configureGoogleTokenStrategy(app);
   FacebookToken.configureFacebookTokenStrategy(app);
+  Apple.configureAppleStrategy(app)
   startServer(app);
 });
 
