@@ -45,7 +45,7 @@ jobs:
       - run: 
           name: Decrypt the Apple auth file
           command: |
-          openssl aes-256-cbc -d -md sha256 \
+            openssl aes-256-cbc -d -md sha256 \
             -pbkdf2 \
             -in  Apple-Sign-In-AuthKey.p8.cipher \
             -out Apple-Sign-In-AuthKey.p8 \
