@@ -11,7 +11,6 @@ const appleStrategyConfig = {
   SCOPE: 'email name',
   REDIRECT_URI: config.apple.CALLBACK_URL,
   PRIVATE_KEY_LOCATION: 'Apple-Sign-In-AuthKey.p8',
-  STATE: 'init',
   USE_POP_UP: true
 };
 
@@ -26,7 +25,6 @@ passport.use(
       scope: appleStrategyConfig.SCOPE,
       privateKeyLocation: appleStrategyConfig.PRIVATE_KEY_LOCATION,
       passReqToCallback: true,
-      state: appleStrategyConfig.STATE,
       usePopup: appleStrategyConfig.USE_POP_UP
     },
     UserController.appleLogin
@@ -44,7 +42,6 @@ passport.use(
       scope: appleStrategyConfig.SCOPE,
       privateKeyLocation: appleStrategyConfig.PRIVATE_KEY_LOCATION,
       passReqToCallback: true,
-      state: appleStrategyConfig.STATE,
       usePopup: appleStrategyConfig.USE_POP_UP
     },
     UserController.appleLogin
