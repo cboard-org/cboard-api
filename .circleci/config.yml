@@ -138,6 +138,9 @@ jobs:
             -e GOOGLE_APP_ID \
             -e GOOGLE_APP_SECRET \
             -e GOOGLE_CALLBACK_URL \
+            -e APPLE_APP_CLIENT_ID \
+            -e APPLE_TEAM_ID \
+            -e APPLE_KEY_ID \
             cboard/cboard-bootstrap \
             up -d --no-deps cboard-api" && exit'
 workflows:
