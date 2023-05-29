@@ -10,7 +10,7 @@ const appleStrategyConfig = {
   KEY_ID: process.env.APPLE_KEY_ID,
   SCOPE: 'email name',
   REDIRECT_URI: config.apple.CALLBACK_URL,
-  PRIVATE_KEY_LOCATION: 'config/Apple-Sign-In-AuthKey.p8',
+  PRIVATE_KEY_LOCATION: 'Apple-Sign-In-AuthKey.p8',
   STATE: 'init',
   USE_POP_UP: true
 };
