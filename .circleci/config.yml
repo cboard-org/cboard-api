@@ -42,6 +42,14 @@ jobs:
             -in  google-play-auth.json.cipher \
             -out google-play-auth.json \
             -k $KEY
+      - run: 
+          name: Decrypt the Apple auth file
+          command: |
+          openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in  Apple-Sign-In-AuthKey.p8.cipher \
+            -out Apple-Sign-In-AuthKey.p8 \
+            -k $KEY         
       # run tests
       - run: 
           name: Run Unitests
