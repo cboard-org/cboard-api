@@ -354,7 +354,28 @@ describe('User API calls', function () {
   });
 
   describe('DELETE /user/:userid', function () {
-    it('it should not delete a user with a user Auth token', async function () {
+    it('it should not delete a user with an other user Auth token', async function () {
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      const notOwneruser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      expect(await User.exists({ _id: user.userId })).to.equal(true);
+
+      const res = await request(server)
+        .del(`/user/${user.userId}`)
+        .set('Authorization', `Bearer ${notOwneruser.token}`)
+        .expect(401);
+
+      expect(await User.exists({ _id: user.userId })).to.equal(true);
+    });
+
+    it('it should delete a user with his own Auth token', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
         email: helper.generateEmail(),
@@ -365,9 +386,9 @@ describe('User API calls', function () {
       const res = await request(server)
         .del(`/user/${user.userId}`)
         .set('Authorization', `Bearer ${user.token}`)
-        .expect(403);
+        .expect(200);
 
-      expect(await User.exists({ _id: user.userId })).to.equal(true);
+      expect(await User.exists({ _id: user.userId })).to.equal(false);
     });
 
     it('it should delete a user', async function () {
