@@ -1126,6 +1126,32 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"   
+  /account/{id}:
+    x-swagger-router-controller: account
+    delete:
+      operationId: removeAccount
+      description: Deletes a specific Account using user Id
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: id
+          description: User id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/DeleteAccountResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1475,6 +1501,20 @@ definitions:
           type: string
         locale:
           type: string
+  DeleteAccountResponse:
+    required:
+        - user
+    properties:
+        user:
+          type: object
+        setting:
+          type: object
+        deletedComunicators:
+          type: number
+        deletedBoards:
+          type: number
+        subscriber:
+          type: object      
   LogoutResponse:
     required:
       - message
