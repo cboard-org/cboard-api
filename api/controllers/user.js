@@ -12,6 +12,8 @@ const auth = require('../helpers/auth');
 const { findIpLocation, isLocalIp } = require('../helpers/localize');
 const Subscribers = require('../models/Subscribers');
 
+const { getAuthDataFromReq } = require('../helpers/auth');
+
 module.exports = {
   createUser: createUser,
   activateUser: activateUser,
@@ -247,7 +249,19 @@ async function listUser(req, res) {
 
 function removeUser(req, res) {
   const id = req.swagger.params.id.value;
-  User.findByIdAndRemove(id, function (err, users) {
+
+  //this would be implemented like a middleware
+  const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
+
+  if (!isRequestedByAdmin && (!requestedBy || id != requestedBy)) {
+    return res.status(401).json({
+      message: 'Error getting subscriber',
+      error:
+        'unhautorized request, subscriber object is only accesible with subscribered user authToken'
+    });
+  }
+
+  User.findByIdAndRemove(id, function(err, users) {
     if (err) {
       return res.status(404).json({
         message: 'User not found. User Id: ' + id
