@@ -1,6 +1,7 @@
 const moment = require('moment');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
@@ -24,13 +25,15 @@ module.exports = {
   getMe: getMe,
   facebookLogin: facebookLogin,
   googleLogin: googleLogin,
+  appleLogin,
   forgotPassword: forgotPassword,
   storePassword: storePassword
 };
 
 const USER_MODEL_ID_TYPE = {
   facebook: 'facebook.id',
-  google: 'google.id'
+  google: 'google.id',
+  apple: 'apple.id'
 };
 
 async function getSettings(user) {
@@ -180,6 +183,23 @@ async function googleLogin(req, accessToken, refreshToken, profile, done) {
   return passportLogin(ip, 'google', accessToken, refreshToken, profile, done);
 }
 
+async function appleLogin(req, accessToken, refreshToken, idToken, profile, done) {
+  const decodedUser = jwt.decode(idToken);
+  const appleProfile = {
+    id: decodedUser.sub,
+    accessToken: accessToken,
+    gender: null,
+    displayName: profile?.fullName?.nickName,
+    name: profile?.name?.givenName,
+    lastname: profile?.name?.familyName,
+    email: decodedUser.email,
+    emails: profile?.emails || [{value: decodedUser.email}],
+    photos: profile?.photos?.map(photo => photo.value)
+  };
+  const ip = req.ip;
+  return passportLogin(ip, 'apple', accessToken, refreshToken, appleProfile, done);
+}
+
 async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
   const fnMap = {
     facebook: {
@@ -189,7 +209,11 @@ async function createOrUpdateUser(accessToken, profile, type = 'facebook') {
     google: {
       create: 'createUserFromGoogle',
       update: 'updateUserFromGoogle'
-    }
+    },
+    apple: {
+      create: 'createUserFromApple',
+      update: 'updateUserFromApple'
+    },
   };
 
   const mergedProfile = { ...profile, accessToken };
