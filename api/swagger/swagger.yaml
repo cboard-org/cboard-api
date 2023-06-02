@@ -848,7 +848,6 @@ paths:
         - Bearer: []
       x-security-scopes:
         - admin
-        - user
       parameters:
         - name: id
           description: User id
