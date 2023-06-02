@@ -18,9 +18,9 @@ async function removeAccount(req, res) {
 
   if (!isRequestedByAdmin && (!requestedBy || id != requestedBy)) {
     return res.status(401).json({
-      message: 'Error getting subscriber',
+      message: 'Error deleting the account',
       error:
-        'unhautorized request, subscriber object is only accesible with subscribered user authToken'
+        'Unauthorized request, delete account is only accessible using admin or owner user authToken'
     });
   }
 
