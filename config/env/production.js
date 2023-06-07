@@ -36,7 +36,7 @@ module.exports = {
     ]
   },
   apple: {
-    CALLBACK_URL: 'https://app.cboard.io/login/apple-web/callback'
+    CALLBACK_URL: process.env.APPLE_CALLBACK_URL
   },
   emailTransport: {
     from: 'cboard@cboard.io',
