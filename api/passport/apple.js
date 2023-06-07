@@ -84,6 +84,17 @@ const configureAppleStrategy = app => {
     })(req, res, next);
   });
 
+  app.post('/login/apple-web/decode', function(req, res, next) {
+    const RAW_CBOARD_APP_URL = process.env.CBOARD_APP_URL;
+    const RAW_CBOARD_APP_URL_LAST_CHAR = RAW_CBOARD_APP_URL.length - 1;
+    const CBOARD_APP_URL =
+      RAW_CBOARD_APP_URL[RAW_CBOARD_APP_URL_LAST_CHAR] === '/'
+        ? RAW_CBOARD_APP_URL
+        : `${RAW_CBOARD_APP_URL}/`;
+    const code = req.body.code;
+    res.redirect(`${CBOARD_APP_URL}login/apple-web/callback?${code}`);
+  });
+
   app.post('/login/apple-web/callback', function(req, res, next) {
     passport.authenticate('apple-web', (err, user, info) => {
       passportAuthCallback(err, user, info, req, res, next);
