@@ -15,7 +15,6 @@ const getAccessToken = async () => {
         password: process.env.PAYPAL_API_CLIENT_SECRET || '',
     };
     let res = '';
-    console.log(BASE_URL);
     try {
         res = await axios.post(BASE_URL + 'oauth2/token',
             new URLSearchParams({
