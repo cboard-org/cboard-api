@@ -4,7 +4,7 @@ const config = require('../../config');
 const UserController = require('../controllers/user');
 
 const appleStrategyConfig = {
-  APP_CLIENT_ID: process.env.APPLE_APP_CLIENT_ID,
+  APP_CLIENT_ID: process.env.APPLE_APP_CLIENT_ID || "mock_client_id",
   WEB_CLIENT_ID: `${process.env.APPLE_TEAM_ID}.${process.env.APPLE_APP_CLIENT_ID}`,
   TEAM_ID: process.env.APPLE_TEAM_ID,
   KEY_ID: process.env.APPLE_KEY_ID,
@@ -13,6 +13,8 @@ const appleStrategyConfig = {
   PRIVATE_KEY_LOCATION: 'Apple-Sign-In-AuthKey.p8',
   USE_POP_UP: true
 };
+
+console.log("appleStrategyConfig", appleStrategyConfig);
 
 passport.use(
   'apple-app',
