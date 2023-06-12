@@ -125,7 +125,7 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   Google.configureGoogleStrategy(app);
   GoogleToken.configureGoogleTokenStrategy(app);
   FacebookToken.configureFacebookTokenStrategy(app);
-  Apple.configureAppleStrategy(app)
+  //Apple.configureAppleStrategy(app)
   startServer(app);
 });
 
