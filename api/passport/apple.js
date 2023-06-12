@@ -14,8 +14,6 @@ const appleStrategyConfig = {
   USE_POP_UP: true
 };
 
-console.log("appleStrategyConfig", appleStrategyConfig);
-
 passport.use(
   'apple-app',
   new AppleStrategy(
