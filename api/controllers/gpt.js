@@ -1,8 +1,17 @@
 const { Configuration, OpenAIApi } = require('openai');
+const apiKey = process.env.OPENAI_API_KEY;
+
 const configuration = new Configuration({
-  organization: 'org-sqsTEpBAiD8oLP85mbdsZGsC',
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey,
+  basePath: 'https://cboard-openai.openai.azure.com/openai/deployments/ToEdit',
+  baseOptions: {
+    headers: { 'api-key': apiKey },
+    params: {
+      'api-version': '2022-12-01'
+    }
+  }
 });
+
 const openai = new OpenAIApi(configuration);
 
 module.exports = {
