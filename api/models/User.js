@@ -67,6 +67,17 @@ const USER_SCHEMA_DEFINITION = {
     emails: [{ type: String }],
     photos: [{ type: String }]
   },
+  apple: {
+    id: String,
+    token: String,
+    gender: String,
+    displayName: String,
+    name: String,
+    lastname: String,
+    email: String,
+    emails: [{ type: String }],
+    photos: [{ type: String }]
+  },
   resetPasswordToken: {
     type: String
   },
@@ -164,8 +175,8 @@ userSchema.path('email').validate(async function(email) {
 userSchema.path('password').validate(function(password) {
   if (this.skipValidation()) return true;
 
-  const { facebook, google } = this;
-  if (facebook.token || google.token) return true;
+  const { facebook, google, apple } = this;
+  if (facebook.token || google.token || apple.token) return true;
 
   return password.length;
 }, 'Password cannot be blank');
@@ -176,9 +187,9 @@ userSchema.path('password').validate(function(password) {
 userSchema.pre('save', function(next) {
   if (!this.isNew) return next();
 
-  const { facebook, google, password } = this;
+  const { facebook, google, apple, password } = this;
   const isValidUser =
-    validatePresenceOf(password) || facebook.token || google.token;
+    validatePresenceOf(password) || facebook.token || google.token || apple.token;
 
   if (!isValidUser && !this.skipValidation()) {
     next(new Error('Invalid password'));
@@ -308,6 +319,13 @@ userSchema.statics = {
     return dbUser;
   },
 
+  createUserFromApple: async function(profile) {
+    const user = getUserFromProfile(profile, 'apple', User);
+    user.isFirstLogin = true;
+    const dbUser = await user.save();
+    return dbUser;
+  },
+
   // Updates an user from a Facebook Profile (+ accessToken)
   // Returns a promise
   updateUserFromFacebook: async function(profile, existingUser) {
@@ -322,6 +340,12 @@ userSchema.statics = {
     const user = updateUserFromProfile(profile, existingUser, 'google');
     const dbUser = await user.save();
     return dbUser;
+  },
+
+  updateUserFromApple: async function(profile, existingUser) {
+    const user = updateUserFromProfile(profile, existingUser, 'apple');
+    const dbUser = await user.save();
+    return dbUser;
   }
 };
 
@@ -333,8 +357,8 @@ function getUserType(profile) {
     token: profile.accessToken,
     gender: profile.gender,
     displayName: profile.displayName,
-    name: profile.name.givenName,
-    lastname: profile.name.familyName,
+    name: profile.name?.givenName || 'user name',
+    lastname: profile.name?.familyName || 'Name',
     email: profile.emails[0].value,
     emails: profile.emails.map(email => email.value),
     photos: photos.map(photo => photo.value)

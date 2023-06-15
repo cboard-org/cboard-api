@@ -35,6 +35,9 @@ module.exports = {
       'https://www.googleapis.com/auth/userinfo.email'
     ]
   },
+  apple: {
+    CALLBACK_URL: process.env.APPLE_CALLBACK_URL
+  },
   emailTransport: {
     from: 'cboard@cboard.io',
     host: 'smtp.sendgrid.net',
