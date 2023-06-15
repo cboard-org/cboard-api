@@ -63,8 +63,8 @@ describe('GPT API calls', function() {
         usage: { prompt_tokens: 24, completion_tokens: 7, total_tokens: 31 }
       };
 
-      nock('https://api.openai.com')
-        .post('/v1/completions')
+      nock('https://cboard-openai.openai.azure.com')
+        .post('/openai/deployments/ToEdit/completions?api-version=2022-12-01')
         .reply(200, mockedOpenAPIResponse);
 
       const res = await request(server)
