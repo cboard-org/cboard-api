@@ -16,7 +16,7 @@ const getAccessToken = async () => {
     };
     let res = '';
     try {
-        res = await axios.post(BASE_URL + 'oauth2/token',
+        res = await axios.post(BASE_URL + 'v1/oauth2/token',
             new URLSearchParams({
                 'grant_type': 'client_credentials'
             }), { auth }
