@@ -10,6 +10,9 @@ const Subscriber = require('../models/Subscribers');
 const { getAuthDataFromReq } = require('../helpers/auth');
 const PayPal = require('../helpers/paypal');
 const paypal = new PayPal({});
+const devConfig = require('../../config/env/development');
+const prodConfig = require('../../config/env/production');
+
 
 module.exports = {
   createSubscriber,
@@ -51,9 +54,11 @@ function createSubscriber(req, res) {
 }
 
 async function getSubscriber(req, res) {
-  console.log(process.env.SUBDOMAINS);
-  console.log(process.env.PAYPAL_API_CLIENT_ID);
-  console.log(process.env.PAYPAL_API_CLIENT_SECRET);
+  const BASE_URL = process.env.SUBDOMAINS === 'app,api.app,wiki'
+      ? prodConfig.PAYPAL_API_URL
+      : devConfig.PAYPAL_API_URL;
+  console.log(BASE_URL);
+  
   await gapiAuth();
   const userId = req.swagger.params.id.value;
 
