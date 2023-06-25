@@ -51,6 +51,9 @@ function createSubscriber(req, res) {
 }
 
 async function getSubscriber(req, res) {
+  console.log(process.env.SUBDOMAINS);
+  console.log(process.env.PAYPAL_API_CLIENT_ID);
+  console.log(process.env.PAYPAL_API_CLIENT_SECRET);
   await gapiAuth();
   const userId = req.swagger.params.id.value;
 
