@@ -27,7 +27,7 @@ async function editPhrase(req, res) {
   try {
     const completionRequestParams = {
       model: 'text-davinci-003',
-      prompt: `join this sequence of words in a coherent sentence, completing with connectors and articles when necessary: '${phraseToEdit}'`,
+      prompt: `grammatically improve this phrase: '${phraseToEdit}'`,
       max_tokens: 20,
       temperature: 0
     };
