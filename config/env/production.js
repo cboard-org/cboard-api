@@ -55,6 +55,8 @@ module.exports = {
   },
   appInsightConnectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING,
   GOOGLE_PLAY_CREDENTIALS: process.env.GOOGLE_PLAY_CREDENTIALS,
-  PAYPAL_API_URL: 'https://api-m.paypal.com/'
-
+  PAYPAL_API_URL: 'https://api-m.paypal.com/',
+  CBOARD_PROD_URL: 'https://app.cboard.io',
+  CBOARD_QA_URL: 'https://app.qa.cboard.io',
+  LOCALHOST_PORT_3000_URL: 'http://localhost',
 };
