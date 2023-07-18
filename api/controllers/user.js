@@ -13,6 +13,9 @@ const auth = require('../helpers/auth');
 const { findIpLocation, isLocalIp } = require('../helpers/localize');
 const Subscribers = require('../models/Subscribers');
 
+const config = require('../../config');
+const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL } = config;
+
 module.exports = {
   createUser: createUser,
   activateUser: activateUser,
@@ -99,9 +102,12 @@ async function createUser(req, res) {
       const URL = newTempUser[nev.options.URLFieldName];
 
       let domain = req.headers.origin;
+
+      const isValidDomain = domain =>
+        [CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL].includes(domain);
       //if origin is private insert default hostname
-      if (!domain) {
-        domain = 'https://app.cboard.io'
+      if (!domain || !isValidDomain(domain)) {
+        domain = CBOARD_PROD_URL;
       }
 
       nev.sendVerificationEmail(newTempUser.email, domain, URL, function (err, info) {
@@ -523,9 +529,12 @@ async function forgotPassword(req, res) {
         //User id, the token generated and user domain are sent as params in a link
 
         let domain = req.headers.origin;
+
+        const isValidDomain = domain =>
+        [CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL].includes(domain);
         //if origin is private insert default hostname
-        if (!domain) {
-          domain = 'https://app.cboard.io'
+        if (!domain || !isValidDomain(domain)) {
+          domain = CBOARD_PROD_URL;
         }
 
         nev.sendResetPasswordEmail(user.email, domain, user.id, token, function (err) {
