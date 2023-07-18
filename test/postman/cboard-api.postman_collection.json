@@ -166,46 +166,6 @@
 			"response": []
 		},
 		{
-			"name": "/user/{id} not Authorized",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 403\", function () {",
-							"    pm.response.to.have.status(403);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/user/{{userid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"{{userid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "/user/",
 			"event": [
 				{
@@ -1757,7 +1717,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"'United States'\",\n    \"status\": \"free-trial\",\n    \"product\": {\n        \"planId\": \"one_year_subscription\",\n        \"subscriptionId\": \"123456\",\n        \"status\": \"requested\"\n    }\n}"
+					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"'United States'\",\n    \"status\": \"free-trial\",\n    \"product\": {\n        \"subscriptionId\": \"123456\",\n        \"price\": {\n            \"currencyCode\": \"GBP\",\n            \"units\": \"5\"\n        },\n        \"_id\": \"64492d6de2789a1cb0bf2769\",\n        \"title\": \"test-monthly\",\n        \"planId\": \"test-monthly\",\n        \"status\": \"ACTIVE\",\n        \"paypalId\": \"P-7CR38290D5111153BMRDNDLA\",\n        \"billingPeriod\": \"P1M\",\n        \"renovation\": \"Active\",\n        \"createdAt\": \"2023-04-26T13:55:57.596Z\",\n        \"updatedAt\": \"2023-04-26T13:55:57.596Z\"\n    }\n}"
 				},
 				"url": {
 					"raw": "{{url}}/subscriber/",
@@ -2019,7 +1979,72 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1700925235785,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"gdllkfajlolgdhbpgmdnafom.AO-J1Owzxm7j8Hb9prWYYq0-LvZnqNuMQ3qk3xEcpUJWStQnoSi-Ev2QXtPMkBQpEbidJmfKDwaqT0UFCP9EHfwR-2wRPPZZ7Q\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}",
+						"transaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscriber/{id}/transaction Paypal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const schema = {  ",
+							"    \"type\": \"object\",",
+							"    \"properties\": {",
+							"        \"ok\": {\"type\":\"boolean\"},",
+							"        \"data\":{ ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"transaction\": {\"type\":\"object\"}",
+							"            },",
+							"            \"required\":[\"transaction\"]",
+							"        }    ",
+							"    },",
+							"    \"required\":[\"ok\",\"data\"]",
+							"}        ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"to have required props\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"className\":\"Transaction\",\n  \"subscriptionId\":\"{{payPalSubscriptionId}}\",\n  \"transactionId\":\"{{payPalSubscriptionId}}\",\n  \"state\":\"approved\",\n  \"products\":[\n    {\n    \"id\": \"test-monthly\",\n    \"subscriptionId\": \"test\",\n    \"billingPeriod\": \"P1M\",\n    \"price\": \n        {\n        \"currencyCode\": \"USD\",\n        \"units\": \"6\"\n        },\n    \"title\": \"Test Subscription\",\n    \"tag\": \"test-monthly\",\n    \"paypalId\": \"P-7CR38290D5111153BMRDNDLA\"\n    }],\n  \"platform\":\"paypal\",\n  \"nativePurchase\":\"\",\n  \"purchaseId\":\"3CW11883FK516310D\",\n  \"purchaseDate\":\"\",\n  \"isPending\":false,\n  \"subscriptionState\":\"active\",\n  \"expiryDate\":\"\",\n  \"facilitatorAccessToken\":\"{{facilitatorAccessToken}}\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
@@ -2131,39 +2156,6 @@
 			"response": []
 		},
 		{
-			"name": "{{url}}/subscriber/{{userid}} to owned",
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"product\": {\n      \"planId\": \"premium_full\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "{{url}}/subscriber/{{userid}} transaction to null",
 			"request": {
 				"method": "PATCH",
@@ -2182,6 +2174,39 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    },\n    \"transaction\": null\n}"
+				},
+				"url": {
+					"raw": "{{url}}/subscriber/{{subscriberId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"{{subscriberId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{url}}/subscriber/{{userid}} to owned",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"product\": {\n      \"planId\": \"premium_full\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
 				},
 				"url": {
 					"raw": "{{url}}/subscriber/{{subscriberId}}",
@@ -2369,6 +2394,80 @@
 					"path": [
 						"subscription",
 						"mock-subscription-id"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/synchronize",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/subscription/synchronize",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"synchronize"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/subscription/list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/subscription/list",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscription",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "transaction/cancel paypal",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/subscriber/cancel/{{payPalSubscriptionId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"subscriber",
+						"cancel",
+						"{{payPalSubscriptionId}}"
 					]
 				}
 			},
