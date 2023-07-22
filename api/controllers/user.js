@@ -384,6 +384,35 @@ function updateUser(req, res) {
     });
 }
 
+const populateUserForLogin = async (req, user, email) => {
+  const userId = user._id;
+  req.session.userId = userId;
+
+  const tokenString = auth.issueToken({
+    email,
+    id: userId
+  });
+
+  if (!user.location || !user.location.country)
+    try {
+      await updateUserLocation(req.ip, user);
+    } catch (error) {
+      console.error(error.message);
+    }
+
+  const settings = await getSettings(user);
+  const subscriber = await getSubscriber(user);
+
+  const response = {
+    ...user.toJSON(),
+    settings,
+    subscriber,
+    birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
+    authToken: tokenString
+  };
+  return response;
+};
+
 function loginUser(req, res) {
   const { email, password } = req.body;
 
@@ -393,31 +422,7 @@ function loginUser(req, res) {
         message: 'Wrong email or password.'
       });
     } else {
-      const userId = user._id;
-      req.session.userId = userId;
-
-      const tokenString = auth.issueToken({
-        email,
-        id: userId
-      });
-
-      if (!user.location || !user.location.country)
-        try {
-          await updateUserLocation(req.ip, user);
-        } catch (error) {
-          console.error(error.message);
-        }
-
-      const settings = await getSettings(user);
-      const subscriber = await getSubscriber(user);
-
-      const response = {
-        ...user.toJSON(),
-        settings,
-        subscriber,
-        birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
-        authToken: tokenString
-      };
+      const response = await populateUserForLogin(req, user, email);
       return res.status(200).json(response);
     }
   });
