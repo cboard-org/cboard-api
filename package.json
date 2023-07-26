@@ -50,7 +50,7 @@
     "passport-facebook-token": "^4.0.0",
     "passport-google-oauth": "^2.0.0",
     "passport-google-token": "^0.1.2",
-    "pem": "^1.14.6",
+    "pem": "^1.14.8",
     "rand-token": "0.4.0",
     "sendgrid": "5.2.3",
     "should": "^13.2.3",
