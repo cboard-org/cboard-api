@@ -81,7 +81,7 @@ async function getSubscriber(req, res) {
           success: false,
           userId: userId,
           message: 'Error getting subscriber',
-          error: 'Subscriber was not found.'
+          error: 'subscriber not found'
         });
       } else {
         //if the request is from the old version of the app, we need to conserve the old behavior
