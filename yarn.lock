@@ -3903,10 +3903,10 @@ node-forge@^1.3.1:
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
   integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
 
-node-ipinfo@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/node-ipinfo/-/node-ipinfo-3.4.0.tgz#31df1152b197bc029f3c49f240adc10e27d468c1"
-  integrity sha512-VoFWDrylBKhk5U91n1iWgvIHyckWBWRK1O51+wlUW6taot71Z0BD5j00JHhnGnjvkH5D0Vw0vu/xvxpYhr4XYA==
+node-ipinfo@^3.4.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/node-ipinfo/-/node-ipinfo-3.4.2.tgz#f131e0556df8d6704c14102902135a67d0c68c6f"
+  integrity sha512-C9pqQ4K3BNTCJT/gzIbOFMdWuVaBz415wWg4pmJytUug9jiwBfGiBBE4bXJZGom6X8sr1wKl2943bLDydUW1ww==
   dependencies:
     "@types/lru-cache" "^5.1.1"
     lru-cache "^6.0.0"
