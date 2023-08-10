@@ -3,7 +3,7 @@ const devConfig = require('../../config/env/development');
 const prodConfig = require('../../config/env/production');
 
 const BASE_URL = process.env.SUBDOMAINS === 'app,api.app,wiki'
-    ? prodConfig.PAYPAL_API_URL
+    ? prodConfig.PAYPAL_API_URL + 'v1'
     : devConfig.PAYPAL_API_URL;
 
 const getAccessToken = async () => {
@@ -16,7 +16,7 @@ const getAccessToken = async () => {
     };
     let res = '';
     try {
-        res = await axios.post(BASE_URL + 'oauth2/token',
+        res = await axios.post(BASE_URL + '/oauth2/token',
             new URLSearchParams({
                 'grant_type': 'client_credentials'
             }), { auth }

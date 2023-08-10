@@ -51,6 +51,7 @@ function createSubscriber(req, res) {
 }
 
 async function getSubscriber(req, res) {
+  
   await gapiAuth();
   const userId = req.swagger.params.id.value;
 
