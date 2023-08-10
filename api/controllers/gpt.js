@@ -20,6 +20,7 @@ module.exports = {
 
 async function editPhrase(req, res) {
   const phraseToEdit = req.body.phrase;
+  const phraseLanguage = req.body.language;
   if (!phraseToEdit) {
     return res.status(400).json();
   }
@@ -27,8 +28,8 @@ async function editPhrase(req, res) {
   try {
     const completionRequestParams = {
       model: 'text-davinci-003',
-      prompt: `grammatically improve this phrase: '${phraseToEdit}'`,
-      max_tokens: 20,
+      prompt: `grammatically improve this phrase: '${phraseToEdit}'. The result should be in '${phraseLanguage}'. Don't add aditional information to the phrase.`,
+      max_tokens: 50,
       temperature: 0
     };
     const response = await openai.createCompletion(completionRequestParams);
