@@ -20,6 +20,39 @@ module.exports = {
   cancelPlan
 };
 
+const checkIfAppStoreTransactionIsValid = async (
+  subscriberId,
+  originalTransactionId
+) => {
+  const activeSubscriber = await Subscriber.findOne({
+    'transaction.original_transaction_id': originalTransactionId
+  });
+
+  if (
+    activeSubscriber &&
+    activeSubscriber._id.toString() !== subscriberId.toString()
+  ) {
+    if (activeSubscriber.transaction.platform === 'ios-appstore') {
+      try {
+        const subscriptionOwnerStateUpdated = setSubscriptionState(
+          activeSubscriber.transaction
+        );
+        if (subscriptionOwnerStateUpdated === 'expired') {
+          activeSubscriber.transaction.subscriptionState = subscriptionOwnerStateUpdated;
+          activeSubscriber.transaction.original_transaction_id = '';
+          activeSubscriber.status = subscriptionOwnerStateUpdated;
+          const subscriber = await activeSubscriber.save();
+          console.log(subscriber.transaction);
+          if (subscriber) return;
+        }
+      } catch {
+        throw new Error('Transaction ID already exists');
+      }
+      throw new Error('Transaction ID already exists');
+    }
+  }
+};
+
 async function cancelPlan(req, res) {
   const subscriptionId = req.swagger.params.id.value;
   try {
