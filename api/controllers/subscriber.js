@@ -382,16 +382,47 @@ async function createTransaction(req, res) {
       });
     }
   }
+  if (transaction.type === 'ios-appstore') {
+    transaction.platform = 'ios-appstore';
+    transaction.transactionId = transaction.id;
+
+    try {
+      const decodedtransaction = await verifyAppStorePurchase({
+        appStoreReceipt: transaction.appStoreReceipt,
+        subscriberId
+      });
+
+      await checkIfAppStoreTransactionIsValid(
+        subscriberId,
+        decodedtransaction.original_transaction_id
+      );
+
+      transaction = {
+        ...transaction,
+        ...decodedtransaction
+      };
+    } catch (err) {
+      return res.status(200).json({
+        ok: false,
+        data: {
+          code: 6778001 //INVALID_PAYLOAD
+        },
+        error: {
+          message: err.message
+        }
+      });
+    }
+  }
 
   if (!ObjectId.isValid(subscriberId)) {
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001, //INVALID_PAYLOAD
+        code: 6778001 //INVALID_PAYLOAD
       },
       error: {
-        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId,
-      },
+        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId
+      }
     });
   }
 
@@ -399,62 +430,97 @@ async function createTransaction(req, res) {
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001, //INVALID_PAYLOAD
+        code: 6778001 //INVALID_PAYLOAD
       },
       error: {
-        message: 'transaction object is not provided',
-      },
+        message: 'transaction object is not provided'
+      }
     });
 
-  if (transaction.platform !== 'android-playstore' &&
-    transaction.platform !== 'paypal')
-    return res.status(200).json({
-      ok: false,
-      data: {
-        code: 6778001, //INVALID_PAYLOAD
-      },
-      error: {
-        message: 'only android-playstore or PayPal purchases are allowed',
-      },
-    });
-
-  try {
-    const activeSubscriber = await Subscriber.findOne({ 'transaction.transactionId': transaction.transactionId });
-    if (activeSubscriber && activeSubscriber._id.toString() !== subscriberId ) {
-      throw new Error('Transaction ID already exists');
+  if (transaction.type !== 'ios-appstore')
+    try {
+      const activeSubscriber = await Subscriber.findOne({
+        'transaction.transactionId': transaction.transactionId
+      });
+      if (
+        activeSubscriber &&
+        activeSubscriber._id.toString() !== subscriberId
+      ) {
+        throw new Error('Transaction ID already exists');
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(200).json({
+        ok: false,
+        data: {
+          code: 6778001 //INVALID_PAYLOAD
+        },
+        error: {
+          message: 'Transaction ID already exists'
+        }
+      });
     }
-  }
-  catch (err) {
+
+  if (
+    transaction.platform !== 'android-playstore' &&
+    transaction.platform !== 'paypal' &&
+    transaction.platform !== 'ios-appstore'
+  )
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001, //INVALID_PAYLOAD
+        code: 6778001 //INVALID_PAYLOAD
       },
       error: {
-        message: 'Transaction ID already exists',
-      },
+        message:
+          'only android-playstore, ios-appstore or PayPal purchases are allowed'
+      }
     });
-  }
 
   Subscriber.findOneAndUpdate(
     { _id: subscriberId },
     {
-      transaction,
+      status: transaction.subscriptionState,
+      transaction
     },
-    { new: true, runValidators: true, useFindAndModify: false },
-    function (err, subscriber) {
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false
+    },
+    function(err, subscriber) {
       if (err) {
         return res.status(200).json({
           ok: false,
           data: {
-            code: 6778001, //INVALID_PAYLOAD
+            code: 6778001 //INVALID_PAYLOAD
           },
           error: {
-            message: err.message,
-          },
+            message: err.message
+          }
         });
       }
       const transaction = subscriber.transaction;
+      if (transaction.platform === 'ios-appstore') {
+        return res.status(200).json({
+          ok: true,
+          data: {
+            id: transaction.productId,
+            latest_receipt: true,
+            transaction: {
+              data: { transaction, success: true },
+              type: transaction.platform
+            },
+            collection: [
+              {
+                expiryDate: transaction.expiryDate,
+                isExpired: transaction.isExpired,
+                subscriptionState: transaction.subscriptionState
+              }
+            ]
+          }
+        });
+      }
       return res.status(200).json({
         ok: true,
         data: {
