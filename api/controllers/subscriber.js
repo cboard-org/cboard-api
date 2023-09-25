@@ -162,6 +162,50 @@ async function getSubscriber(req, res) {
           }
       }
     }
+
+    if (subscriber.transaction?.type === 'ios-appstore') {
+      subscriber.transaction.platform = 'ios-appstore';
+      subscriber.transaction.transactionId = subscriber.transaction.id;
+
+      try {
+        const decodedTransaction = await verifyAppStorePurchase({
+          appStoreReceipt: subscriber.transaction.appStoreReceipt
+        });
+        subscriber.transaction = {
+          ...subscriber.transaction,
+          ...decodedTransaction
+        };
+        subscriber.status = subscriber.transaction.subscriptionState;
+      } catch (err) {
+        return res.status(200).json({
+          ok: false,
+          data: {
+            code: 6778001 //INVALID_PAYLOAD
+          },
+          error: {
+            message: 'ios-appstore subscription details could not be get'
+          }
+        });
+      }
+
+      try {
+        await checkIfAppStoreTransactionIsValid(
+          subscriber._id,
+          subscriber.transaction.original_transaction_id
+        );
+      } catch (err) {
+        console.log(err);
+        const NOT_SUBSCRIBED = 'not_subscribed';
+        subscriber.status = NOT_SUBSCRIBED;
+        subscriber.transaction = null;
+      }
+      try {
+        const newSubscriber = await subscriber.save();
+        return res.status(200).json(newSubscriber.toJSON());
+      } catch (err) {
+        handleError(err);
+      }
+    }
     return res.status(200).json(subscriber.toJSON());
 
     function handleError(err) {
