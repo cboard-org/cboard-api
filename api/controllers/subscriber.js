@@ -477,12 +477,18 @@ async function createTransaction(req, res) {
       }
     });
 
-  Subscriber.findOneAndUpdate(
-    { _id: subscriberId },
-    {
+  let updatedObject = {
+    transaction
+  };
+  if (transaction.platform === 'ios-appstore')
+    updatedObject = {
       status: transaction.subscriptionState,
       transaction
-    },
+    };
+
+  Subscriber.findOneAndUpdate(
+    { _id: subscriberId },
+    updatedObject,
     {
       new: true,
       runValidators: true,
