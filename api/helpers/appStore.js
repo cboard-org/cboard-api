@@ -1,97 +1,26 @@
 const axios = require('axios');
 const moment = require('moment');
 
-const verifyReceipt = async (encodedAppStoreReceipt, isSandbox = false) => {
-  const AUTH_TOKEN = process.env.APP_STORE_VERIFIER_AUTH_TOKEN;
-  const PASSWORD = process.env.APP_STORE_VERIFIER_PASSWORD;
+const fs = require('fs');
+const jwt = require('jsonwebtoken');
 
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${AUTH_TOKEN}`
-  };
-  const verifyReceiptUrl = isSandbox
-    ? 'https://sandbox.itunes.apple.com/verifyReceipt'
-    : 'https://buy.itunes.apple.com/verifyReceipt';
-
-  const body = {
-    'receipt-data': encodedAppStoreReceipt,
-    password: PASSWORD,
-    'exclude-old-transactions': 'true'
-  };
-
-  try {
-    const res = await axios.post(verifyReceiptUrl, body, {
-      headers
-    });
-    if (res?.data?.latest_receipt_info && res?.data?.latest_receipt_info['0']) {
-      const isInGracePeriod =
-        res?.data?.pending_renewal_info[0]?.is_in_billing_retry_period === '1';
-
-      if (isInGracePeriod) {
-        const pending_renewal_info = res.data.pending_renewal_info[0];
-        const grace_period_info = {
-          is_in_billing_retry_period: 1,
-          grace_period_expires_date_ms:
-            pending_renewal_info.grace_period_expires_date_ms
-        };
-        return { ...res.data.latest_receipt_info['0'], ...grace_period_info };
-      }
-      return {
-        ...res.data.latest_receipt_info['0'],
-        is_in_billing_retry_period: 0
-      };
-    }
-    const SANDBOX_RESPONSE_STATUS = 21007;
-    isSandboxReceipt = res?.data?.status === SANDBOX_RESPONSE_STATUS;
-    if (isSandboxReceipt) {
-      return await verifyReceipt(encodedAppStoreReceipt, isSandboxReceipt);
-    }
-    throw new Error('Invalid response from app Store Validator');
-  } catch (err) {
-    console.log('Error verifying App Store receipt:', err.message);
-    throw err;
-  }
-};
-
-const setSubscriptionState = transaction => {
+const setSubscriptionState = (status, autoRenewStatus) => {
   const ACTIVE = 'active';
-  const CANCELLED = 'cancelled';
+  const CANCELLED = 'canceled';
   const IN_GRACE_PERIOD = 'in_grace_period';
   const EXPIRED = 'expired';
   const NOT_SUBSCRIBED = 'not_subscribed';
 
-  const nowMs = moment().valueOf();
-  const expires_date_ms = parseInt(transaction.expires_date_ms);
-  const gracePeriodExpiresDateMs = parseInt(
-    transaction.grace_period_expires_date_ms
-  );
-  if (
-    transaction.is_in_billing_retry_period &&
-    nowMs <= gracePeriodExpiresDateMs
-  ) {
-    return IN_GRACE_PERIOD;
-  }
-  if (
-    transaction.cancellation_date_ms &&
-    transaction.is_in_billing_retry_period
-  ) {
-    const cancellationDateMs = parseInt(transaction.cancellation_date_ms);
-    if (nowMs >= cancellationDateMs) return EXPIRED;
-    //setExpireDate(cancellationDateMs);
-    return CANCELLED;
-  }
-  if (nowMs <= expires_date_ms) return ACTIVE;
-  //const GRACE_PERIOD_MILIS = 60000;
-  //if (nowMs <= expires_date_ms + GRACE_PERIOD_MILIS) return IN_GRACE_PERIOD;
-  if (nowMs >= expires_date_ms) {
-    transaction.isExpired = true;
-    return EXPIRED;
-  }
-
+  if (status === 1 && autoRenewStatus) return ACTIVE;
+  if (status === 1) return CANCELLED;
+  if (status === 2) return EXPIRED;
+  if (status === 3) return EXPIRED;
+  if (status === 4) return IN_GRACE_PERIOD;
+  if (status === 5) return NOT_SUBSCRIBED;
   return NOT_SUBSCRIBED;
 };
 
-const verifyAppStorePurchase = async ({ appStoreReceipt }) => {
+const verifyAppStorePurchase = async ({ transactionId }) => {
   let transaction = {};
 
   const setExpireDate = expiryTime => {
@@ -101,16 +30,18 @@ const verifyAppStorePurchase = async ({ appStoreReceipt }) => {
   };
 
   try {
-    const decodedReceipt = await verifyReceipt(appStoreReceipt);
-    transaction = { ...transaction, ...decodedReceipt };
+    const transactionRemoteData = await getTransactionData(transactionId);
+    transaction = { ...transaction, ...transactionRemoteData };
+    setExpireDate(transactionRemoteData.expiresDate);
 
-    setExpireDate(parseInt(decodedReceipt.expires_date_ms));
+    transaction.subscriptionState = setSubscriptionState(
+      transaction.status,
+      transaction.autoRenewStatus
+    );
 
-    if (decodedReceipt.is_in_billing_retry_period === 1) {
-      const gracePeriodExpiresDateMs = parseInt(
-        transaction.grace_period_expires_date_ms
-      );
-      setExpireDate(gracePeriodExpiresDateMs);
+    const IN_GRACE_PERIOD_STATE = 'in_grace_period';
+    if (transaction.subscriptionState === IN_GRACE_PERIOD_STATE) {
+      setExpireDate(transactionRemoteData.gracePeriodExpiresDate);
     }
 
     transaction.subscriptionState = setSubscriptionState(transaction);
@@ -124,6 +55,85 @@ const verifyAppStorePurchase = async ({ appStoreReceipt }) => {
         : 'error verifying purchase. Check if the appStoreReceipt is valid'
     };
   }
+};
+
+const getTransactionData = async (transactionId, isSandbox = false) => {
+  const AUTH_TOKEN = generateAppleAppStoreJWT();
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${AUTH_TOKEN}`
+  };
+
+  const getTransactionURl = isSandbox
+    ? `https://api.storekit-sandbox.itunes.apple.com/inApps/v1/subscriptions/${transactionId}`
+    : `https://api.storekit.itunes.apple.com/inApps/v1/subscriptions/${transactionId}`;
+  try {
+    const res = await axios.get(getTransactionURl, {
+      headers
+    });
+    const lastTransaction = res.data?.data[0]?.lastTransactions[0];
+    if (lastTransaction) {
+      const signedTransactionInfo = lastTransaction.signedTransactionInfo;
+      const signedRenewalInfo = lastTransaction.signedRenewalInfo;
+
+      const transactionInfo = jwt.decode(signedTransactionInfo);
+      const renewalInfo = jwt.decode(signedRenewalInfo);
+
+      return {
+        ...lastTransaction,
+        ...transactionInfo,
+        ...renewalInfo,
+        signedTransactionInfo: null,
+        signedRenewalInfo: null
+      };
+    }
+    throw new Error('Invalid response from app Store Validator');
+  } catch (err) {
+    const SANDBOX_RESPONSE_ERROR_CODE = 4040010;
+    isSandboxReceipt =
+      err.response?.data?.errorCode === SANDBOX_RESPONSE_ERROR_CODE;
+
+    if (isSandboxReceipt) {
+      try {
+        return await getTransactionData(transactionId, isSandboxReceipt);
+      } catch (err) {
+        console.log('Error verifying App Store receipt:', err);
+        throw err;
+      }
+    }
+    console.log('Error verifying App Store receipt:', err);
+    throw err;
+  }
+};
+
+const generateAppleAppStoreJWT = () => {
+  const privateKey = fs.readFileSync('./App-Store-Connect-API-Key.p8');
+  const API_KEY_ID = process.env.APP_STORE_CONNECT_API_KEY_ID;
+  const ISSUER_ID = process.env.APP_STORE_CONNECT_API_ISSUER_ID;
+  const BUNDLE_ID = process.env.APPLE_APP_CLIENT_ID;
+
+  const now = Math.round(new Date().getTime() / 1000);
+  let nowPlus20 = now + 1199;
+  let payload = {
+    iss: ISSUER_ID,
+    iat: now,
+    exp: nowPlus20,
+    aud: 'appstoreconnect-v1',
+    bid: BUNDLE_ID
+  };
+
+  let signOptions = {
+    algorithm: 'ES256', // you must use this algorythm, not jsonwebtoken's default
+    header: {
+      alg: 'ES256',
+      kid: API_KEY_ID,
+      typ: 'JWT'
+    }
+  };
+
+  const token = jwt.sign(payload, privateKey, signOptions);
+  return token;
 };
 
 module.exports = {
