@@ -44,7 +44,10 @@ const verifyAppStorePurchase = async ({ transactionId }) => {
       setExpireDate(transactionRemoteData.gracePeriodExpiresDate);
     }
 
-    transaction.subscriptionState = setSubscriptionState(transaction);
+    transaction.subscriptionState = setSubscriptionState(
+      transaction.status,
+      transaction.autoRenewStatus
+    );
     return transaction;
   } catch (error) {
     console.error(error);
