@@ -15,7 +15,6 @@ const {
   verifyAppStorePurchase,
   setSubscriptionState
 } = require('../helpers/appStore');
-const moment = require('moment');
 
 module.exports = {
   createSubscriber,
@@ -31,7 +30,7 @@ const checkIfAppStoreTransactionIsValid = async (
   originalTransactionId
 ) => {
   const activeSubscriber = await Subscriber.findOne({
-    'transaction.original_transaction_id': originalTransactionId
+    'transaction.originalTransactionId': originalTransactionId
   });
 
   if (
@@ -45,10 +44,9 @@ const checkIfAppStoreTransactionIsValid = async (
         );
         if (subscriptionOwnerStateUpdated === 'expired') {
           activeSubscriber.transaction.subscriptionState = subscriptionOwnerStateUpdated;
-          activeSubscriber.transaction.original_transaction_id = '';
+          activeSubscriber.transaction.originalTransactionId = '';
           activeSubscriber.status = subscriptionOwnerStateUpdated;
           const subscriber = await activeSubscriber.save();
-          console.log(subscriber.transaction);
           if (subscriber) return;
         }
       } catch {
@@ -191,7 +189,7 @@ async function getSubscriber(req, res) {
       try {
         await checkIfAppStoreTransactionIsValid(
           subscriber._id,
-          subscriber.transaction.original_transaction_id
+          subscriber.transaction.originalTransactionId
         );
       } catch (err) {
         console.log(err);
@@ -204,6 +202,7 @@ async function getSubscriber(req, res) {
         return res.status(200).json(newSubscriber.toJSON());
       } catch (err) {
         handleError(err);
+        return;
       }
     }
     return res.status(200).json(subscriber.toJSON());
@@ -388,13 +387,13 @@ async function createTransaction(req, res) {
 
     try {
       const decodedtransaction = await verifyAppStorePurchase({
-        appStoreReceipt: transaction.appStoreReceipt,
+        transactionId: transaction.transactionId,
         subscriberId
       });
 
       await checkIfAppStoreTransactionIsValid(
         subscriberId,
-        decodedtransaction.original_transaction_id
+        decodedtransaction.originalTransactionId
       );
 
       transaction = {
@@ -437,7 +436,7 @@ async function createTransaction(req, res) {
       }
     });
 
-  if (transaction.type !== 'ios-appstore')
+  if (transaction.platform !== 'ios-appstore')
     try {
       const activeSubscriber = await Subscriber.findOne({
         'transaction.transactionId': transaction.transactionId
@@ -520,7 +519,7 @@ async function createTransaction(req, res) {
             collection: [
               {
                 expiryDate: transaction.expiryDate,
-                isExpired: transaction.isExpired,
+                isExpired: transaction.subscriptionState === 'expired',
                 subscriptionState: transaction.subscriptionState
               }
             ]
