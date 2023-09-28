@@ -161,7 +161,7 @@ async function getSubscriber(req, res) {
       }
     }
 
-    if (subscriber.transaction?.type === 'ios-appstore') {
+    if (subscriber.transaction?.platform === 'ios-appstore') {
       subscriber.transaction.platform = 'ios-appstore';
       subscriber.transaction.transactionId = subscriber.transaction.id;
 
@@ -381,7 +381,10 @@ async function createTransaction(req, res) {
       });
     }
   }
-  if (transaction.type === 'ios-appstore') {
+  if (
+    transaction.type === 'ios-appstore' ||
+    transaction.platform === 'ios-appstore'
+  ) {
     transaction.platform = 'ios-appstore';
     transaction.transactionId = transaction.id;
 
