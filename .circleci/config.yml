@@ -50,6 +50,14 @@ jobs:
             -in  Apple-Sign-In-AuthKey.p8.cipher \
             -out Apple-Sign-In-AuthKey.p8 \
             -k $KEY         
+      - run:
+          name: Decrypt the Apple App Store Connect API key
+          command: |
+            openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in  App-Store-Connect-API-Key.p8.cipher \
+            -out App-Store-Connect-API-Key.p8 \       
+            -k $KEY
       # run tests
       - run: 
           name: Run Unitests
@@ -101,7 +109,13 @@ jobs:
             -pbkdf2 \
             -in  Apple-Sign-In-AuthKey.p8.cipher \
             -out Apple-Sign-In-AuthKey.p8 \
-            -k $KEY      
+            -k $KEY
+      - run: |
+          openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in  App-Store-Connect-API-Key.p8.cipher \
+            -out App-Store-Connect-API-Key.p8 \       
+            -k $KEY
       # build and push Docker image
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
