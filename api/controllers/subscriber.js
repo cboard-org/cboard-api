@@ -167,7 +167,7 @@ async function getSubscriber(req, res) {
 
       try {
         const decodedTransaction = await verifyAppStorePurchase({
-          appStoreReceipt: subscriber.transaction.appStoreReceipt
+          transactionId: subscriber.transaction.transactionId
         });
         subscriber.transaction = {
           ...subscriber.transaction,
