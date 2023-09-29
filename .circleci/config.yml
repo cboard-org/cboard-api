@@ -56,7 +56,7 @@ jobs:
             openssl aes-256-cbc -d -md sha256 \
             -pbkdf2 \
             -in  App-Store-Connect-API-Key.p8.cipher \
-            -out App-Store-Connect-API-Key.p8 \       
+            -out App-Store-Connect-API-Key.p8 \
             -k $KEY
       # run tests
       - run: 
@@ -114,7 +114,7 @@ jobs:
           openssl aes-256-cbc -d -md sha256 \
             -pbkdf2 \
             -in  App-Store-Connect-API-Key.p8.cipher \
-            -out App-Store-Connect-API-Key.p8 \       
+            -out App-Store-Connect-API-Key.p8 \
             -k $KEY
       # build and push Docker image
       - run: |
