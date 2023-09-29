@@ -11,6 +11,11 @@ const { getAuthDataFromReq } = require('../helpers/auth');
 const PayPal = require('../helpers/paypal');
 const paypal = new PayPal({});
 
+const {
+  verifyAppStorePurchase,
+  setSubscriptionState
+} = require('../helpers/appStore');
+
 module.exports = {
   createSubscriber,
   getSubscriber,
@@ -18,6 +23,38 @@ module.exports = {
   deleteSubscriber,
   createTransaction,
   cancelPlan
+};
+
+const checkIfAppStoreTransactionIsValid = async (
+  subscriberId,
+  originalTransactionId
+) => {
+  const activeSubscriber = await Subscriber.findOne({
+    'transaction.originalTransactionId': originalTransactionId
+  });
+
+  if (
+    activeSubscriber &&
+    activeSubscriber._id.toString() !== subscriberId.toString()
+  ) {
+    if (activeSubscriber.transaction.platform === 'ios-appstore') {
+      try {
+        const subscriptionOwnerStateUpdated = setSubscriptionState(
+          activeSubscriber.transaction
+        );
+        if (subscriptionOwnerStateUpdated === 'expired') {
+          activeSubscriber.transaction.subscriptionState = subscriptionOwnerStateUpdated;
+          activeSubscriber.transaction.originalTransactionId = '';
+          activeSubscriber.status = subscriptionOwnerStateUpdated;
+          const subscriber = await activeSubscriber.save();
+          if (subscriber) return;
+        }
+      } catch {
+        throw new Error('Transaction ID already exists');
+      }
+      throw new Error('Transaction ID already exists');
+    }
+  }
 };
 
 async function cancelPlan(req, res) {
@@ -121,6 +158,51 @@ async function getSubscriber(req, res) {
           catch (err) {
             handleError(err);
           }
+      }
+    }
+
+    if (subscriber.transaction?.platform === 'ios-appstore') {
+      subscriber.transaction.platform = 'ios-appstore';
+      subscriber.transaction.transactionId = subscriber.transaction.id;
+
+      try {
+        const decodedTransaction = await verifyAppStorePurchase({
+          transactionId: subscriber.transaction.transactionId
+        });
+        subscriber.transaction = {
+          ...subscriber.transaction,
+          ...decodedTransaction
+        };
+        subscriber.status = subscriber.transaction.subscriptionState;
+      } catch (err) {
+        return res.status(200).json({
+          ok: false,
+          data: {
+            code: 6778001 //INVALID_PAYLOAD
+          },
+          error: {
+            message: 'ios-appstore subscription details could not be get'
+          }
+        });
+      }
+
+      try {
+        await checkIfAppStoreTransactionIsValid(
+          subscriber._id,
+          subscriber.transaction.originalTransactionId
+        );
+      } catch (err) {
+        console.log(err);
+        const NOT_SUBSCRIBED = 'not_subscribed';
+        subscriber.status = NOT_SUBSCRIBED;
+        subscriber.transaction = null;
+      }
+      try {
+        const newSubscriber = await subscriber.save();
+        return res.status(200).json(newSubscriber.toJSON());
+      } catch (err) {
+        handleError(err);
+        return;
       }
     }
     return res.status(200).json(subscriber.toJSON());
@@ -299,16 +381,50 @@ async function createTransaction(req, res) {
       });
     }
   }
+  if (
+    transaction.type === 'ios-appstore' ||
+    transaction.platform === 'ios-appstore'
+  ) {
+    transaction.platform = 'ios-appstore';
+    transaction.transactionId = transaction.id;
+
+    try {
+      const decodedtransaction = await verifyAppStorePurchase({
+        transactionId: transaction.transactionId,
+        subscriberId
+      });
+
+      await checkIfAppStoreTransactionIsValid(
+        subscriberId,
+        decodedtransaction.originalTransactionId
+      );
+
+      transaction = {
+        ...transaction,
+        ...decodedtransaction
+      };
+    } catch (err) {
+      return res.status(200).json({
+        ok: false,
+        data: {
+          code: 6778001 //INVALID_PAYLOAD
+        },
+        error: {
+          message: err.message
+        }
+      });
+    }
+  }
 
   if (!ObjectId.isValid(subscriberId)) {
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001, //INVALID_PAYLOAD
+        code: 6778001 //INVALID_PAYLOAD
       },
       error: {
-        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId,
-      },
+        message: 'Invalid ID for subscriber. Subscriber Id: ' + subscriberId
+      }
     });
   }
 
@@ -316,62 +432,103 @@ async function createTransaction(req, res) {
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001, //INVALID_PAYLOAD
+        code: 6778001 //INVALID_PAYLOAD
       },
       error: {
-        message: 'transaction object is not provided',
-      },
+        message: 'transaction object is not provided'
+      }
     });
 
-  if (transaction.platform !== 'android-playstore' &&
-    transaction.platform !== 'paypal')
-    return res.status(200).json({
-      ok: false,
-      data: {
-        code: 6778001, //INVALID_PAYLOAD
-      },
-      error: {
-        message: 'only android-playstore or PayPal purchases are allowed',
-      },
-    });
-
-  try {
-    const activeSubscriber = await Subscriber.findOne({ 'transaction.transactionId': transaction.transactionId });
-    if (activeSubscriber && activeSubscriber._id.toString() !== subscriberId ) {
-      throw new Error('Transaction ID already exists');
+  if (transaction.platform !== 'ios-appstore')
+    try {
+      const activeSubscriber = await Subscriber.findOne({
+        'transaction.transactionId': transaction.transactionId
+      });
+      if (
+        activeSubscriber &&
+        activeSubscriber._id.toString() !== subscriberId
+      ) {
+        throw new Error('Transaction ID already exists');
+      }
+    } catch (err) {
+      console.log(err);
+      return res.status(200).json({
+        ok: false,
+        data: {
+          code: 6778001 //INVALID_PAYLOAD
+        },
+        error: {
+          message: 'Transaction ID already exists'
+        }
+      });
     }
-  }
-  catch (err) {
+
+  if (
+    transaction.platform !== 'android-playstore' &&
+    transaction.platform !== 'paypal' &&
+    transaction.platform !== 'ios-appstore'
+  )
     return res.status(200).json({
       ok: false,
       data: {
-        code: 6778001, //INVALID_PAYLOAD
+        code: 6778001 //INVALID_PAYLOAD
       },
       error: {
-        message: 'Transaction ID already exists',
-      },
+        message:
+          'only android-playstore, ios-appstore or PayPal purchases are allowed'
+      }
     });
-  }
+
+  let updatedObject = {
+    transaction
+  };
+  if (transaction.platform === 'ios-appstore')
+    updatedObject = {
+      status: transaction.subscriptionState,
+      transaction
+    };
 
   Subscriber.findOneAndUpdate(
     { _id: subscriberId },
+    updatedObject,
     {
-      transaction,
+      new: true,
+      runValidators: true,
+      useFindAndModify: false
     },
-    { new: true, runValidators: true, useFindAndModify: false },
-    function (err, subscriber) {
+    function(err, subscriber) {
       if (err) {
         return res.status(200).json({
           ok: false,
           data: {
-            code: 6778001, //INVALID_PAYLOAD
+            code: 6778001 //INVALID_PAYLOAD
           },
           error: {
-            message: err.message,
-          },
+            message: err.message
+          }
         });
       }
       const transaction = subscriber.transaction;
+      if (transaction.platform === 'ios-appstore') {
+        return res.status(200).json({
+          ok: true,
+          data: {
+            id: transaction.productId,
+            latest_receipt: true,
+            transaction: {
+              data: { transaction, success: true },
+              type: transaction.platform
+            },
+            collection: [
+              {
+                expiryDate: transaction.expiryDate,
+                isExpired: transaction.subscriptionState === 'expired',
+                subscriptionState: transaction.subscriptionState
+              }
+            ]
+          }
+        });
+      }
       return res.status(200).json({
         ok: true,
         data: {
