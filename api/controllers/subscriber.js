@@ -40,7 +40,8 @@ const checkIfAppStoreTransactionIsValid = async (
     if (activeSubscriber.transaction.platform === 'ios-appstore') {
       try {
         const subscriptionOwnerStateUpdated = setSubscriptionState(
-          activeSubscriber.transaction
+          activeSubscriber.transaction.status,
+          activeSubscriber.transaction.autoRenewStatus
         );
         if (subscriptionOwnerStateUpdated === 'expired') {
           activeSubscriber.transaction.subscriptionState = subscriptionOwnerStateUpdated;
