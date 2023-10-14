@@ -4,7 +4,7 @@ jobs:
   build:
     docker:
       # The Node version should always match what's in .nvmrc.
-      - image: cimg/node:18.18.2
+      - image: cimg/node:18.18.1
         auth:
           username: cboardci
           password: $DOCKERHUB_PASSWORD
@@ -70,7 +70,7 @@ jobs:
   image:
     docker:
       # The Node version should always match what's in .nvmrc.
-      - image: cimg/node:18.18.2
+      - image: cimg/node:18.18.1
         auth:
           username: cboardci
           password: $DOCKERHUB_PASSWORD 

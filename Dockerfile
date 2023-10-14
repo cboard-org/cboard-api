@@ -1,5 +1,5 @@
 # The Node version should always match what's in .nvmrc.
-FROM node:18.18.2
+FROM node:18.18.1
 WORKDIR /opt/cboard-api/
 COPY . /opt/cboard-api/
 
