@@ -5,7 +5,8 @@ COPY . /opt/cboard-api/
 
 RUN npm install -g node-gyp 
 RUN npm install -g swagger
-RUN npm install
+RUN npm install -g yarn
+RUN yarn install
 
 EXPOSE 80 10010
-CMD [ "npm", "start"]
+CMD [ "yarn", "start"]
