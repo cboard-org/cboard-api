@@ -2,6 +2,7 @@ const moment = require('moment');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
@@ -29,6 +30,7 @@ module.exports = {
   facebookLogin: facebookLogin,
   googleLogin: googleLogin,
   appleLogin,
+  googleIdTokenLogin,
   forgotPassword: forgotPassword,
   storePassword: storePassword
 };
@@ -204,6 +206,46 @@ async function appleLogin(req, accessToken, refreshToken, idToken, profile, done
   };
   const ip = req.ip;
   return passportLogin(ip, 'apple', accessToken, refreshToken, appleProfile, done);
+}
+
+async function googleIdTokenLogin(req, res) {
+  const client = new OAuth2Client();
+  const id_token = req.query.id_token;
+  async function verify() {
+    const ticket = await client.verifyIdToken({
+      idToken: id_token,
+      audience: process.env.GOOGLE_FIREBASE_IOS_APP_ID
+      // Or, if multiple clients access the backend:
+      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+    });
+    return ticket.getPayload();
+  }
+  try {
+    const profile = await verify();
+    const googleProfile = {
+      id: profile.sub,
+      accessToken: id_token,
+      gender: null,
+      displayName: profile.name,
+      name: profile?.given_name,
+      lastname: profile?.family_name,
+      email: profile.email,
+      emails: [{ value: profile.email }],
+      photos: [{ value: profile.picture }]
+    };
+    await googleLogin(req, id_token, null, googleProfile, (error, response) => {
+      if (error) {
+        console.error(err);
+        res.redirect('/');
+        return;
+      }
+      if (response.authToken) res.json(response);
+    });
+  } catch (err) {
+    console.error(err);
+    res.redirect('/');
+    return;
+  }
 }
 
 async function createOrUpdateUser(accessToken, profile, type = 'facebook') {

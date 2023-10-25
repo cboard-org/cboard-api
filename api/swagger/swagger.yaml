@@ -871,6 +871,27 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /login/googleidtoken/callback:
+    x-swagger-router-controller: user
+    get:
+      operationId: googleIdTokenLogin
+      description: Returns a valid token for a user that can be used for api authentication.
+      parameters:
+        - name: info
+          description: User properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/UserLogin"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetUserResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /location:
     x-swagger-router-controller: location
     get:
