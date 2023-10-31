@@ -4,7 +4,7 @@ const constants = require('../constants');
 
 module.exports = {
   env: 'production',
-  databaseUrl: process.env.MONGO_URL || 'mongodb://localhost/cboard-api',
+  databaseUrl: process.env.MONGO_URL || 'mongodb://10.0.1.6:27017,10.0.1.4:27017/admin?replicaSet=repset',
   session: {
     secret: process.env.API_SESSION_SECRET || 's3Cur3'
   },
