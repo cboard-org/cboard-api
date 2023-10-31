@@ -214,7 +214,7 @@ async function googleIdTokenLogin(req, res) {
   async function verify() {
     const ticket = await client.verifyIdToken({
       idToken: id_token,
-      audience: process.env.GOOGLE_FIREBASE_IOS_APP_ID
+      audience: [process.env.GOOGLE_FIREBASE_SIGN_IN_APP_ID, process.env.GOOGLE_FIREBASE_WEB_CLIENT_SIGN_IN]
       // Or, if multiple clients access the backend:
       //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
     });
