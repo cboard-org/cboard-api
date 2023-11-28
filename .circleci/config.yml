@@ -169,4 +169,4 @@ workflows:
             - build
           filters:
             branches:
-              only: feature/connect-to-replica-set
+              only: master
