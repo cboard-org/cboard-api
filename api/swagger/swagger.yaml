@@ -36,6 +36,13 @@ parameters:
     required: true
     schema:
       $ref: "#/definitions/AnalyticsReport"
+  Updates:
+    name: updates
+    in: body
+    description: updates data
+    required: true
+    schema:
+      $ref: '#/definitions/Updates'
   Board:
     name: board
     in: body
@@ -175,6 +182,24 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/GeneralResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /updates:
+    x-swagger-router-controller: updates
+    get:
+      operationId: getUpdates
+      description: Returns a list of updates.
+      parameters:
+        - $ref: '#/parameters/LimitParameter'
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Updates"
         default:
           description: Error
           schema:
@@ -1216,6 +1241,33 @@ definitions:
               type: object
             data:
               type: object
+  Updates:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      content:
+        type: string
+      time:
+        type: string
+  UpdatesResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier for the created update.
+      title:
+        type: string
+        description: The title of the created update.
+      content:
+        type: string
+        description: The content of the created update.
+      time:
+        type: string
+        format: date-time
+        description: The timestamp indicating when the update was created.
   GetLanguageResponse:
     required:
         - locale
