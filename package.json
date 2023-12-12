@@ -22,7 +22,7 @@
   ],
   "main": "app.js",
   "dependencies": {
-    "@snyk/protect": "1.1056.0",
+    "@snyk/protect": "1.1227.0",
     "applicationinsights": "^2.7.3",
     "axios": "^1.6.0",
     "azure-storage": "^2.10.6",
