@@ -233,7 +233,7 @@ async function googleIdTokenLogin(req, res) {
       emails: [{ value: profile.email }],
       photos: [{ value: profile.picture }]
     };
-    await googleLogin(req, id_token, null, googleProfile, (error, response) => {
+    await googleLogin(req, id_token, null, googleProfile, (err, response) => {
       if (err) {
         console.error(err);
         res.status(500).json({message: "Something went wrong on Google Id Token login"});
