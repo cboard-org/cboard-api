@@ -234,16 +234,16 @@ async function googleIdTokenLogin(req, res) {
       photos: [{ value: profile.picture }]
     };
     await googleLogin(req, id_token, null, googleProfile, (error, response) => {
-      if (error) {
+      if (err) {
         console.error(err);
-        res.redirect('/');
+        res.status(500).json({message: "Something went wrong on Google Id Token login"});
         return;
       }
       if (response.authToken) res.json(response);
     });
   } catch (err) {
     console.error(err);
-    res.redirect('/');
+    res.status(500).json({message: "Something went wrong on Google Id Token login"});
     return;
   }
 }
