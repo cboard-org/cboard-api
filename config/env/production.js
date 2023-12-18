@@ -2,9 +2,10 @@
 
 const constants = require('../constants');
 
+
 module.exports = {
   env: 'production',
-  databaseUrl: process.env.MONGO_URL || 'mongodb://localhost/cboard-api',
+  databaseUrl: 'mongodb://10.0.0.4:27017,10.0.0.5:27017,10.0.0.6:27017/cboard-api?replicaSet=repset',
   session: {
     secret: process.env.API_SESSION_SECRET || 's3Cur3'
   },

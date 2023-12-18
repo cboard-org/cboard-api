@@ -8,21 +8,26 @@ Learn more about the [Cboard project](https://github.com/cboard-org/cboard).
 
 ## Pre-requisites
 Before installing and running the Cboard API, be sure you have **locally** installed the following tools:
-* Node.js > 12.0.0 (download [here](https://nodejs.org/en/download/))
+* Node.js: see the `.nvmrc` file for the exact version.
 * MongoDB > 4.0.0 (download [here](https://docs.mongodb.com/manual/installation/))
 
+To make sure that the Node version you use for local development is the same the deployed server uses, we recommend using the [nvm](https://github.com/nvm-sh/nvm) tool, which simplifies version management.
+It automatically installs the version listed in the `.nvmrc` file when you do `nvm install`.
 
 Use the following commands to check that you have them successfully installed, and/or to double-check your versions:
 * `node -v`
 * `mongo --version`
 
 ## Install
-Clone the repository and install npm dependencies:
+Clone the repository and install dependencies:
 ```bash
 $ git clone https://github.com/cboard-org/cboard-api.git
 $ cd cboard-api
-$ npm install
+$ nvm install
+$ npm install -g yarn
+$ yarn install
 ```
+
 ## Start the database
 
 Start MongoDB. ([See MongoDB docs, if needed](https://docs.mongodb.com/manual/tutorial/manage-mongodb-processes/)).

@@ -154,7 +154,12 @@ subscribersSchema.path('transaction').validate(async function (transaction) {
         setStateOptions(subscriptionStateConst);
         return;
       } catch (error) {
-        console.log('err', error);
+        console.error('Error: ', error.message);
+        if(error.code === 410){
+          transaction.isExpired = true;
+          transaction.subscriptionState = 'expired';
+          return;
+        }
         throw {
           code: 6778001,
           message:
