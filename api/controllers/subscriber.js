@@ -98,6 +98,7 @@ async function getSubscriber(req, res) {
 
   if (!isRequestedByAdmin && (!requestedBy || userId != requestedBy)) {
     return res.status(401).json({
+      success: false,
       message: 'Error getting subscriber',
       error:
         'unhautorized request, subscriber object is only accesible with subscribered user authToken',
@@ -107,15 +108,27 @@ async function getSubscriber(req, res) {
   Subscriber.findOne({ userId: userId }, async function (err, subscriber) {
     if (err) {
       return res.status(409).json({
+        success: false,
         message: 'Error getting subscriber',
         error: err.message,
       });
     }
+
     if (!subscriber) {
-      return res.status(404).json({
-        message: 'Error getting subscriber',
-        error: 'subscriber not found',
-      });
+      if (req.headers.newversion) {
+        return res.status(200).json({
+          success: false,
+          userId: userId,
+          message: 'Error getting subscriber',
+          error: 'subscriber not found'
+        });
+      } else {
+        //if the request is from the old version of the app, we need to conserve the old behavior
+        return res.status(404).json({
+          message: 'Error getting subscriber',
+          error: 'subscriber not found'
+        });
+      }
     }
 
     // update subscriber status and transaction
@@ -123,7 +136,7 @@ async function getSubscriber(req, res) {
       subscriber.transaction?.nativePurchase?.purchaseToken) {
       try {
         const newSubscriber = await subscriber.save();
-        return res.status(200).json(newSubscriber.toJSON());
+        return res.status(200).json({success: true, ...newSubscriber.toJSON()});
       }
       catch (err) {
         handleError(err);
@@ -154,7 +167,7 @@ async function getSubscriber(req, res) {
         if (remoteData)
           try {
             const newSubscriber = await subscriber.save();
-            return res.status(200).json(newSubscriber.toJSON());
+            return res.status(200).json({success: true, ...newSubscriber.toJSON()});
           }
           catch (err) {
             handleError(err);
@@ -200,13 +213,14 @@ async function getSubscriber(req, res) {
       }
       try {
         const newSubscriber = await subscriber.save();
-        return res.status(200).json(newSubscriber.toJSON());
+        return res.status(200).json({success: true, ...newSubscriber.toJSON()});
       } catch (err) {
         handleError(err);
         return;
       }
     }
-    return res.status(200).json(subscriber.toJSON());
+
+    return res.status(200).json({success: true, ...subscriber.toJSON()});
 
     function handleError(err) {
       const errorValidatingTransaction = err.errors?.transaction;
@@ -215,6 +229,7 @@ async function getSubscriber(req, res) {
       if (errorValidatingTransaction) {
         console.log(err);
         return res.status(409).json({
+          success: false,
           message: 'Error saving subscriber.',
           error:
             errorValidatingTransaction.message ??
@@ -223,17 +238,20 @@ async function getSubscriber(req, res) {
       }
       if (errorValidatingProduct) {
         return res.status(401).json({
+          success: false,
           message: 'Error saving subscriber.',
           error: errorValidatingProduct.message,
         });
       }
       if (errorFindingSubscriber) {
         return res.status(404).json({
+          success: false,
           message: 'Unable to find subscriber.',
           error: errorFindingSubscriber.message,
         });
       }
       return res.status(500).json({
+        success: false,
         message: 'Error saving subscriber.',
         error: err.message,
       });
