@@ -113,6 +113,7 @@ async function getSubscriber(req, res) {
         error: err.message,
       });
     }
+
     if (!subscriber) {
       if (req.headers.newversion) {
         return res.status(200).json({
@@ -212,13 +213,14 @@ async function getSubscriber(req, res) {
       }
       try {
         const newSubscriber = await subscriber.save();
-        return res.status(200).json(newSubscriber.toJSON());
+        return res.status(200).json({success: true, ...newSubscriber.toJSON()});
       } catch (err) {
         handleError(err);
         return;
       }
     }
-    return res.status(200).json(subscriber.toJSON());
+
+    return res.status(200).json({success: true, ...subscriber.toJSON()});
 
     function handleError(err) {
       const errorValidatingTransaction = err.errors?.transaction;
