@@ -115,7 +115,7 @@ async function getSubscriber(req, res) {
     }
 
     if (!subscriber) {
-      if (req.headers.newversion) {
+      if (req.headers.purchaseversion === '1.0.0') {
         return res.status(200).json({
           success: false,
           userId: userId,
@@ -123,7 +123,7 @@ async function getSubscriber(req, res) {
           error: 'subscriber not found'
         });
       } else {
-        //if the request is from the old version of the app, we need to conserve the old behavior
+        //if the request is from old purchase version (<1.0.0), we need to conserve the behavior
         return res.status(404).json({
           message: 'Error getting subscriber',
           error: 'subscriber not found'
