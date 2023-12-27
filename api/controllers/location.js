@@ -6,7 +6,8 @@ module.exports = {
 
 async function location(req, res) {
     try {
-        const location = await findIpLocation(req.ip)
+        const ip = req.ip.split(':')[0];
+        const location = await findIpLocation(ip)
         delete location.ip;
         res.status(200).json(location);
     } catch (error) {
