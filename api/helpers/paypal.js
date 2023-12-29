@@ -2,7 +2,7 @@ const axios = require('axios');
 const devConfig = require('../../config/env/development');
 const prodConfig = require('../../config/env/production');
 
-const BASE_URL = process.env.SUBDOMAINS === 'app,api.app,wiki'
+const BASE_URL = process.env.SUBDOMAINS === 'app,api.app,wiki' && process.env === 'cboard.io'
     ? prodConfig.PAYPAL_API_URL + 'v1'
     : devConfig.PAYPAL_API_URL;
 
