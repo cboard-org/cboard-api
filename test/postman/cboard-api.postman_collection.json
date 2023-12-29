@@ -1566,6 +1566,62 @@
 			"response": []
 		},
 		{
+			"name": "/updates/",
+			"event": [
+			  {
+				"listen": "test",
+				"script": {
+				  "exec": [
+					"pm.test(\"Status code is 200\", function () {",
+					"    pm.response.to.have.status(200);",
+					"});"
+				  ],
+				  "type": "text/javascript"
+				}
+			  },
+			  {
+				"listen": "prerequest",
+				"script": {
+				  "exec": [
+					
+				  ],
+				  "type": "text/javascript"
+				}
+			  }
+			],
+			"protocolProfileBehavior": {
+			  "disableBodyPruning": true
+			},
+			"request": {
+			  "method": "GET",
+			  "header": [
+				{
+				  "key": "Authorization",
+				  "value": "Bearer {{token}}"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": ""
+			  },
+			  "url": {
+				"raw": "{{url}}/updates/",
+				"host": [
+				  "{{url}}"
+				],
+				"path": [
+				  "updates",
+				  ""
+				]
+			  }
+			},
+			"response": []
+		},
+		{
 			"name": "/user/logout/",
 			"event": [
 				{
