@@ -6,14 +6,16 @@ module.exports = {
     isLocalIp
 };
 
-function isLocalIp(ip){
+function isLocalIp(reqIp){
+    const ip = reqIp.split(':')[0];
     const LOCAL_IP = ['127.0.0.1','::1','::ffff:127.0.0.1'];
     return LOCAL_IP.includes(ip);
 }
 
-async function findIpLocation(ip) {
+async function findIpLocation(reqIp) {
     return new Promise((resolve, reject) => {
-        
+        const ip = reqIp.split(':')[0];
+
         if(isLocalIp(ip))
            return reject({ message: "Local Ip supplied" });
 
