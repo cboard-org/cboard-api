@@ -147,7 +147,6 @@ async function proxyOauth(req, res) {
 }
 // Login from Facebook or Google
 async function passportLogin(ip, type, accessToken, refreshToken, profile, done) {
-  console.log("profile",profile);
   try {
     const propertyId = USER_MODEL_ID_TYPE[type];
     let user = await User.findOne({ [propertyId]: profile.id })
