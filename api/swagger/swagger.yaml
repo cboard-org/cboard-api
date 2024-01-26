@@ -704,6 +704,39 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /login/passport/{provider}:
+    x-swagger-router-controller: user
+    post:
+      operationId: proxyOauth
+      description: "Allows other applications to trigger oauth database changes without triggering the callback processes (Currently used in CBoard AI Builder)"
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          type: string
+        - in: body
+          name: 'data'
+          required: true
+          schema:
+            properties: 
+              accessToken:
+                type: string
+              refreshToken:
+                type: string
+              profile:
+                type: object
+              
+      responses:
+          "200":
+            description: Success
+            schema:
+              $ref: "#/definitions/GetUserResponse"
+          default:
+            description: Error
+            schema:
+              $ref: "#/definitions/ErrorResponse"
+
+
   /user/login:
     x-swagger-router-controller: user
     post:
