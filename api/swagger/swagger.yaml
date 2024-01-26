@@ -704,7 +704,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /login/passport/{provider}:
+  /login/oauth/{provider}:
     x-swagger-router-controller: user
     post:
       operationId: proxyOauth
@@ -714,6 +714,10 @@ paths:
           name: provider
           required: true
           type: string
+          enum:
+            - google
+            - facebook
+            - apple
         - in: body
           name: 'data'
           required: true
@@ -725,7 +729,6 @@ paths:
                 type: string
               profile:
                 type: object
-              
       responses:
           "200":
             description: Success
@@ -735,8 +738,6 @@ paths:
             description: Error
             schema:
               $ref: "#/definitions/ErrorResponse"
-
-
   /user/login:
     x-swagger-router-controller: user
     post:
