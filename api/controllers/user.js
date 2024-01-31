@@ -32,7 +32,8 @@ module.exports = {
   appleLogin,
   googleIdTokenLogin,
   forgotPassword: forgotPassword,
-  storePassword: storePassword
+  storePassword: storePassword,
+  proxyOauth: proxyOauth,
 };
 
 const USER_MODEL_ID_TYPE = {
@@ -137,6 +138,13 @@ async function createUser(req, res) {
   });
 }
 
+async function proxyOauth(req, res) {
+  const {accessToken, refreshToken, profile} = req.body;
+  const provider = req.swagger.params.provider.value;
+  return passportLogin('', provider, accessToken, refreshToken, profile, (req, authRes) => {
+    res.json(authRes);
+  })
+}
 // Login from Facebook or Google
 async function passportLogin(ip, type, accessToken, refreshToken, profile, done) {
   try {
