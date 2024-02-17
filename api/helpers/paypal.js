@@ -11,7 +11,7 @@ const getAccessToken = async () => {
     console.log('PAYPAL_API_CLIENT_SECRET: ' + process.env.PAYPAL_API_CLIENT_SECRET);
     console.log('SUBDOMAINS: ' + process.env.SUBDOMAINS);
     console.log('URL: ' + process.env.URL);
-    console.log('BASE_URL: ' + process.env.BASE_URL);
+    console.log('BASE_URL: ' + BASE_URL);
     const headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     };
