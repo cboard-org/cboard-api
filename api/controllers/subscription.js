@@ -246,12 +246,6 @@ function getPlans(basePlans, paypalPlans) {
 }
 
 async function listSubscriptions(req, res) {
-  
-  console.log('PAYPAL_API_CLIENT_ID: ' + process.env.PAYPAL_API_CLIENT_ID);
-  console.log('PAYPAL_API_CLIENT_SECRET: ' + process.env.PAYPAL_API_CLIENT_SECRET);
-  console.log('SUBDOMAINS: ' + process.env.SUBDOMAINS);
-  console.log('URL: ' + process.env.URL);
-
   const { search = '' } = req.query;
   const searchFields = ['name'];
   const query = search && search.length ? getORQuery(searchFields, search, true) : {};

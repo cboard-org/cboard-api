@@ -7,11 +7,6 @@ const BASE_URL = process.env.SUBDOMAINS === 'app,api.app,wiki' && process.env.UR
     : devConfig.PAYPAL_API_URL;
 
 const getAccessToken = async () => {
-    console.log('PAYPAL_API_CLIENT_ID: ' + process.env.PAYPAL_API_CLIENT_ID);
-    console.log('PAYPAL_API_CLIENT_SECRET: ' + process.env.PAYPAL_API_CLIENT_SECRET);
-    console.log('SUBDOMAINS: ' + process.env.SUBDOMAINS);
-    console.log('URL: ' + process.env.URL);
-    console.log('BASE_URL: ' + BASE_URL);
     const headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     };
