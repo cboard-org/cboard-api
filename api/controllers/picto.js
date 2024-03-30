@@ -22,54 +22,62 @@ async function createPicto(req, res) {
   const basePrompt = " colored as a pictogram in arasaac style with white background --style 56xABarnXQy --version 5.2 --fast";
 
   //Generate the Midjourney image 
-  const Imagine = await client.Imagine(
-    req.body.prompt + basePrompt,
-    (uri, progress) => {
-      //console.log("loading", uri, "progress", progress);
+  try {
+    const Imagine = await client.Imagine(
+      req.body.prompt + basePrompt,
+      (uri, progress) => {
+        //console.log("loading", uri, "progress", progress);
+      }
+    );
+    if (!Imagine) {
+      console.error('Error generating AI image');
+      return res.status(409).json({
+        message: 'Error generating AI image',
+        error: 'Midjourney api error'
+      });
     }
-  );
-  if (!Imagine) {
-    console.error('Error generating AI image');
-    return res.status(409).json({
-      message: 'Error generating AI image',
-      error: 'Midjourney api error'
-    });
-  }
 
-  // Get id for the first image 
-  const U1CustomID = Imagine.options?.find((o) => o.label === "U1")?.custom;
-  if (!U1CustomID) {
-    return res.status(409).json({
-      message: 'Error getting the id of the first generated AI image',
-      error: 'Midjourney api error'
-    });
-  }
+    // Get id for the first image 
+    const U1CustomID = Imagine.options?.find((o) => o.label === "U1")?.custom;
+    if (!U1CustomID) {
+      return res.status(409).json({
+        message: 'Error getting the id of the first generated AI image',
+        error: 'Midjourney api error'
+      });
+    }
 
-  // Upscale the first generated image 
-  const Upscale = await client.Custom({
-    msgId: Imagine.id,
-    flags: Imagine.flags,
-    customId: U1CustomID,
-    loading: (uri, progress) => {
-      //console.log("loading", uri, "progress", progress);
-    },
-  });
-  if (!Upscale) {
-    console.error('Error upscaling the first generated image');
+    // Upscale the first generated image 
+    const Upscale = await client.Custom({
+      msgId: Imagine.id,
+      flags: Imagine.flags,
+      customId: U1CustomID,
+      loading: (uri, progress) => {
+        //console.log("loading", uri, "progress", progress);
+      },
+    });
+    if (!Upscale) {
+      console.error('Error upscaling the first generated image');
+      return res.status(409).json({
+        message: 'Error upscaling the first generated image',
+        error: 'Midjourney api error'
+      });
+    }
+    const changeImageIds = Imagine.options.splice(0, 4).map(option => option.custom);
+    return res.status(200).json({
+      url: Upscale.uri,
+      id: Imagine.id,
+      content: Upscale.content,
+      progress: Upscale.progress,
+      proxy_url: Upscale.proxy_url,
+      changeImageIds: changeImageIds
+    });
+  } catch (err) {
+    console.error('Error generating or upscaling the image');
     return res.status(409).json({
-      message: 'Error upscaling the first generated image',
-      error: 'Midjourney api error'
+      message: 'Error generating or upscaling the image',
+      error: err.message
     });
   }
-  const changeImageIds=Imagine.options.splice(0,4).map(option => option.custom);
-  return res.status(200).json({
-    url: Upscale.uri,
-    id: Imagine.id,
-    content: Upscale.content,
-    progress: Upscale.progress,
-    proxy_url: Upscale.proxy_url,
-    changeImageIds: changeImageIds
-  });
 }
 
 async function changePicto(req, res) {
@@ -81,29 +89,37 @@ async function changePicto(req, res) {
   }
 
   // Upscale the first generated image 
-  const Upscale = await client.Custom({
-    msgId: req.body.imageId,
-    flags: 0,
-    customId: req.body.changeImageId,
-    loading: (uri, progress) => {
-      //console.log("loading", uri, "progress", progress);
-    },
-  });
-  if (!Upscale) {
+  try {
+    const Upscale = await client.Custom({
+      msgId: req.body.imageId,
+      flags: 0,
+      customId: req.body.changeImageId,
+      loading: (uri, progress) => {
+        //console.log("loading", uri, "progress", progress);
+      },
+    });
+    if (!Upscale) {
+      console.error('Error upscaling the generated image');
+      return res.status(409).json({
+        message: 'Error upscaling the generated image',
+        error: 'Midjourney api error'
+      });
+    }
+    return res.status(200).json({
+      url: Upscale.uri,
+      id: Upscale.id,
+      content: Upscale.content,
+      progress: Upscale.progress,
+      proxy_url: Upscale.proxy_url,
+      options: Upscale.options,
+      flags: Upscale.flags
+    });
+  } catch (err) {
     console.error('Error upscaling the generated image');
     return res.status(409).json({
       message: 'Error upscaling the generated image',
-      error: 'Midjourney api error'
+      error: err.message
     });
   }
-  return res.status(200).json({
-    url: Upscale.uri,
-    id: Upscale.id,
-    content: Upscale.content,
-    progress: Upscale.progress,
-    proxy_url: Upscale.proxy_url,
-    options: Upscale.options,
-    flags: Upscale.flags
-  });
 }
 initClient();
