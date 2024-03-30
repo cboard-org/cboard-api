@@ -6,9 +6,9 @@ module.exports = {
 };
 
 const client = new Midjourney({
-  ServerId: process.env.SERVER_ID,
-  ChannelId: process.env.CHANNEL_ID,
-  SalaiToken: process.env.SALAI_TOKEN,
+  ServerId: process.env.PICTO_SERVER_ID,
+  ChannelId: process.env.PICTO_CHANNEL_ID,
+  SalaiToken: process.env.PICTO_SALAI_TOKEN,
   Debug: false,
   Ws: true, //enable ws is required for remix mode (and custom zoom)
 });
