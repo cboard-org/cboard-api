@@ -64,7 +64,7 @@ describe('GPT API calls', function() {
       };
 
       nock('https://cboard-openai.openai.azure.com')
-        .post('/openai/deployments/ToEdit/completions?api-version=2022-12-01')
+        .post('/openai/deployments/ToEdit-01/completions?api-version=2022-12-01')
         .reply(200, mockedOpenAPIResponse);
 
       const res = await request(server)
