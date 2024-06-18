@@ -3,7 +3,8 @@ const apiKey = process.env.AZURE_OPENAI_API_KEY;
 
 const configuration = new Configuration({
   apiKey,
-  basePath: 'https://cboard-openai.openai.azure.com/openai/deployments/ToEdit',
+  basePath:
+    'https://cboard-openai.openai.azure.com/openai/deployments/ToEdit-01',
   baseOptions: {
     headers: { 'api-key': apiKey },
     params: {
