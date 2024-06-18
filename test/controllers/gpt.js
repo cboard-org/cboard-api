@@ -51,7 +51,7 @@ describe('GPT API calls', function() {
         id: 'cmpl-75m1j4HRnQklZItaVxiLz5Zc4Ig9X',
         object: 'text_completion',
         created: 1681610611,
-        model: 'text-davinci-003',
+        model: 'gpt-3.5-turbo-instruct',
         choices: [
           {
             text: '\n\nWhat do you think?',

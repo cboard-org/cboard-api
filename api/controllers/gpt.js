@@ -28,7 +28,7 @@ async function editPhrase(req, res) {
 
   try {
     const completionRequestParams = {
-      model: 'text-davinci-003',
+      model: 'gpt-3.5-turbo-instruct',
       prompt: `grammatically improve this phrase: '${phraseToEdit}'. The result should be in '${phraseLanguage}'. Don't add aditional information to the phrase.`,
       max_tokens: 50,
       temperature: 0
