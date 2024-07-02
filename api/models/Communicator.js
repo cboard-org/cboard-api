@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const constants = require('../constants');
+const moment = require('moment');
 const Schema = mongoose.Schema;
 
 const COMMUNICATOR_SCHEMA_DEFINITION = {
@@ -55,7 +56,8 @@ const COMMUNICATOR_SCHEMA_OPTIONS = {
       ret.id = ret._id;
       delete ret._id;
     }
-  }
+  },
+  timestamps: {updatedAt: 'lastEdited'},
 };
 
 const communicatorSchema = new Schema(

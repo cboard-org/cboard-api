@@ -30,7 +30,8 @@ function createCommunicator(req, res) {
         email: communicator.email,
         description: communicator.description,
         rootBoard: communicator.rootBoard,
-        boards: communicator.boards
+        boards: communicator.boards,
+        lastEdited: communicator.lastEdited,
       },
       message: 'Communicator saved successfully'
     });
