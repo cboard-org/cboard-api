@@ -128,6 +128,15 @@ communicatorSchema.path('email').validate(async function(email) {
  */
 
 communicatorSchema.pre('save', function(next) {
+
+  const now = moment().format();
+  
+  if (!this.createdAt) {
+    this.createdAt = now;
+  }
+  
+  this.lastEdited = now;
+
   if (!this.isNew) return next();
   next();
 });
