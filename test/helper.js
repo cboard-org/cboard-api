@@ -83,6 +83,8 @@ const verifyCommunicatorProperties = (body) => {
     'boards',
     'defaultBoardsIncluded',
     'defaultBoardBlackList',
+    'createdAt',
+    'lastEdited'
   );
 };
 
