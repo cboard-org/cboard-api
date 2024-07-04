@@ -150,8 +150,6 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
   try {
     const propertyId = USER_MODEL_ID_TYPE[type];
     let user = await User.findOne({ [propertyId]: profile.id })
-      .populate('communicators')
-      .populate('boards')
       .exec();
 
 
@@ -342,8 +340,6 @@ async function getUser(req, res) {
 
   try {
     const user = await User.findById(id)
-      .populate('communicators')
-      .populate('boards')
       .exec();
 
     if (!user) {
@@ -386,8 +382,6 @@ function updateUser(req, res) {
   }
 
   User.findById(id)
-    .populate('communicators')
-    .populate('boards')
     .exec(async function (err, user) {
       if (err) {
         return res.status(500).json({
