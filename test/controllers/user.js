@@ -106,8 +106,8 @@ describe('User API calls', function () {
         it('it should not contain a field with the boards of the user', function() {
           res.body.should.not.have.property('boards');
         })
-        it('it should not contain a field with the communicators of the user', function() {
-          res.body.should.not.have.property('communicators');
+        it('it should contain a field with the communicators of the user', function() {
+          res.body.should.have.property('communicators');
         })
       });
     });
@@ -155,7 +155,7 @@ describe('User API calls', function () {
       const getUser = res.body;
       getUser.should.to.have.any.keys('name', 'role', 'provider', 'email');
       res.body.should.not.have.property('boards');
-      res.body.should.not.have.property('communicators');
+      res.body.should.have.property('communicators');
     });
   });
 

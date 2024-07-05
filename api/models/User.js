@@ -121,6 +121,12 @@ const USER_SCHEMA_OPTIONS = {
 
 const userSchema = new Schema(USER_SCHEMA_DEFINITION, USER_SCHEMA_OPTIONS);
 
+userSchema.virtual('communicators', {
+  ref: 'Communicator',
+  localField: 'email',
+  foreignField: 'email'
+});
+
 userSchema.virtual('isAdmin').get(function() {
   return this.role === 'admin';
 });
@@ -191,6 +197,7 @@ userSchema.pre('save', function(next) {
  */
 userSchema.post('save', function(doc, next) {
   doc
+    .populate('communicators')
     .execPopulate()
     .then(function() {
       next();
@@ -228,6 +235,7 @@ userSchema.statics = {
     options.select = options.select || 'name email';
     return this.findOne(options.criteria)
       .select(options.select)
+      .populate('communicators')
       .exec(cb);
   },
 
@@ -241,6 +249,7 @@ userSchema.statics = {
    */
   authenticate: function(email, password, callback) {
     this.findOne({ email: email })
+      .populate('communicators')
       .exec(function(err, user) {
         if (err) {
           return callback(err);
@@ -275,6 +284,7 @@ userSchema.statics = {
 
     try {
       user = await this.findById(id)
+        .populate('communicators')
         .exec();
     } catch (e) {}
 
