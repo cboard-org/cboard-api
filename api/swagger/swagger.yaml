@@ -1234,53 +1234,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /picto/create:
-    x-swagger-router-controller: picto
-    post:
-      operationId: createPicto
-      description: Create a new AI pictogram and returns image url to notify the user.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - name: prompt
-          description: Image generation pictogram prompt 
-          in: body
-          required: true
-          schema:
-            $ref: "#/definitions/PictoPrompt"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/PictoResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-  /picto/change:
-    x-swagger-router-controller: picto
-    post:
-      operationId: changePicto
-      description: Change for a new AI pictogram based on the create pictogram operation.
-      security:
-        - Bearer: []
-      x-security-scopes:
-        - admin
-        - user
-      parameters:
-        - $ref: "#/definitions/ChangePictoRequest"
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/PictoResponse"
-        default:
-          description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1962,44 +1915,4 @@ definitions:
       - phrase
       properties:
         phrase:
-          type: string
-  PictoPrompt:
-      type: object
-      required:
-      - prompt
-      properties:
-        prompt:
-          type: string
-  PictoResponse:
-      type: object
-      required:
-      - url
-      - id
-      - content
-      - progress
-      - changeImageIds
-      properties:
-        url:
-          type: string
-        id:
-          type: string
-        content:
-          type: string
-        progress:
-          type: string
-        changeImageIds:
-          type: array
-          items:
-            type: string
-  ChangePictoRequest:
-    type: object
-    required:
-      - changeImageId
-      - imageId
-    properties:
-      changeImageId:
-        type: string
-        description: Image id to change the pictogram (from 1 to 4)
-      imageId: 
-        type: string
-        description: Image id of the created image.
+          type: string        

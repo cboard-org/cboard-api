@@ -37,7 +37,6 @@
     "googleapis": "^110.0.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
-    "midjourney": "4.3.17",
     "mockery": "^2.1.0",
     "moment": "2.29.4",
     "mongoose": "^5.13.20",
