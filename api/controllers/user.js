@@ -316,7 +316,7 @@ async function listUser(req, res) {
     User,
     {
       query,
-      populate: ['communicators', 'boards']
+      populate: ['communicators']
     },
     req.query
   );
