@@ -31,6 +31,8 @@ function createCommunicator(req, res) {
         description: communicator.description,
         rootBoard: communicator.rootBoard,
         boards: communicator.boards,
+        defaultBoardsIncluded: communicator.defaultBoardsIncluded,
+        defaultBoardBlackList: communicator.defaultBoardBlackList,
         lastEdited: communicator.lastEdited,
       },
       message: 'Communicator saved successfully'
