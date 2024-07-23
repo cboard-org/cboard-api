@@ -43,7 +43,6 @@ const COMMUNICATOR_SCHEMA_DEFINITION = {
     unique: false,
     required: false,
   }],
-  defaultBoardBlackList:[{type: String}]
 };
 
 const COMMUNICATOR_SCHEMA_OPTIONS = {
