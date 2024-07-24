@@ -82,7 +82,6 @@ const verifyCommunicatorProperties = (body) => {
     'rootBoard',
     'boards',
     'defaultBoardsIncluded',
-    'defaultBoardBlackList',
     'createdAt',
     'lastEdited'
   );
