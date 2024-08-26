@@ -360,6 +360,27 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /board/temporary:
+    x-swagger-router-controller: board
+    post:
+      operationId: createTemporaryBoard
+      description: Create a new temporary board in database.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - $ref: '#/parameters/Board'
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/BoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /communicator:
     x-swagger-router-controller: communicator
     post:

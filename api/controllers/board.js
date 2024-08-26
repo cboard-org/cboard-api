@@ -4,6 +4,7 @@ const moment = require('moment');
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const {default: Board} = require('../models/Board');
+const TempBoard = require('../models/TempBoard');
 
 const {nev} = require('../mail');
 
@@ -16,7 +17,8 @@ module.exports = {
   updateBoard: updateBoard,
   getBoardsEmail: getBoardsEmail,
   getPublicBoards: getPublicBoards,
-  reportPublicBoard: reportPublicBoard
+  reportPublicBoard: reportPublicBoard,
+  createTemporaryBoard: createTemporaryBoard,
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
@@ -171,3 +173,19 @@ function reportPublicBoard(req,res){
     return res.status(200).json({message: 'Email sent successfuly'});
   });
 }
+
+async function createTemporaryBoard(req, res) {
+  try {
+    const board = new TempBoard(req.body);
+    board.lastEdited = new Date();
+
+    const savedBoard = await board.save();
+    return res.status(200).json(savedBoard.toJSON());
+  } catch (err) {
+    return res.status(409).json({
+      message: 'Error saving board',
+      error: err.message
+    });
+  }
+};
+
