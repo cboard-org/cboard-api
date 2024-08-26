@@ -19,6 +19,7 @@ module.exports = {
   getPublicBoards: getPublicBoards,
   reportPublicBoard: reportPublicBoard,
   createTemporaryBoard: createTemporaryBoard,
+  getTemporaryBoard: getTemporaryBoard
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
@@ -189,3 +190,26 @@ async function createTemporaryBoard(req, res) {
   }
 };
 
+async function getTemporaryBoard(req, res) {
+  const id = req.swagger.params.id.value;
+  //  Validate id
+  if (!ObjectId.isValid(id)) {
+    return res.status(404).json({
+      message: 'Invalid ID for a Board. Board Id: ' + id
+    });
+  }
+  TempBoard.findOne({ _id: id }, function (err, board) {
+    if (err) {
+      return res.status(500).json({
+        message: 'Error getting board. ',
+        error: err.message
+      });
+    }
+    if (!board) {
+      return res.status(404).json({
+        message: 'Board does not exist. Board Id: ' + id
+      });
+    }
+    return res.status(200).json(board.toJSON());
+  })
+}

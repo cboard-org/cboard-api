@@ -381,6 +381,26 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /board/temporary/{id}:
+    x-swagger-router-controller: board
+    get:
+      operationId: getTemporaryBoard
+      description: Returns a specific temporary board
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /communicator:
     x-swagger-router-controller: communicator
     post:
