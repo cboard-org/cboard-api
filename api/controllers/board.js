@@ -3,7 +3,7 @@ const moment = require('moment');
 
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
-const Board = require('../models/Board');
+const {default: Board} = require('../models/Board');
 
 const {nev} = require('../mail');
 

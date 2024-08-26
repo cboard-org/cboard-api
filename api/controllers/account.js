@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const Settings = require('../models/Settings');
 const Communicator = require('../models/Communicator');
-const Board = require('../models/Board');
+const {default: Board} = require('../models/Board');
 const Subscribers = require('../models/Subscribers');
 
 const { getAuthDataFromReq } = require('../helpers/auth');

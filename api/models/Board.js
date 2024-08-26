@@ -162,4 +162,8 @@ boardSchema.statics = {
 
 const Board = mongoose.model('Board', boardSchema);
 
-module.exports = Board;
+module.exports = {
+  schema: BOARD_SCHEMA_DEFINITION,
+  options: BOARD_SCHEMA_OPTIONS,
+  default: Board
+};

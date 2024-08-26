@@ -8,7 +8,7 @@ var expect = require('chai').expect;
 const should = chai.should();
 const helper = require('../helper');
 
-const Board = require('../../api/models/Board');
+const {default: Board} = require('../../api/models/Board');
 
 //Parent block
 describe('Board API calls', function () {
