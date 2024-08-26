@@ -3,7 +3,8 @@ const moment = require('moment');
 
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
-const Board = require('../models/Board');
+const {default: Board} = require('../models/Board');
+const TempBoard = require('../models/TempBoard');
 
 const {nev} = require('../mail');
 
@@ -16,7 +17,9 @@ module.exports = {
   updateBoard: updateBoard,
   getBoardsEmail: getBoardsEmail,
   getPublicBoards: getPublicBoards,
-  reportPublicBoard: reportPublicBoard
+  reportPublicBoard: reportPublicBoard,
+  createTemporaryBoard: createTemporaryBoard,
+  getTemporaryBoard: getTemporaryBoard
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
@@ -170,4 +173,43 @@ function reportPublicBoard(req,res){
     }
     return res.status(200).json({message: 'Email sent successfuly'});
   });
+}
+
+async function createTemporaryBoard(req, res) {
+  try {
+    const board = new TempBoard(req.body);
+    board.lastEdited = new Date();
+
+    const savedBoard = await board.save();
+    return res.status(200).json(savedBoard.toJSON());
+  } catch (err) {
+    return res.status(409).json({
+      message: 'Error saving board',
+      error: err.message
+    });
+  }
+};
+  
+async function getTemporaryBoard(req, res) {
+  const id = req.swagger.params.id.value;
+  //  Validate id
+  if (!ObjectId.isValid(id)) {
+    return res.status(404).json({
+      message: 'Invalid ID for a Board. Board Id: ' + id
+    });
+  }
+  TempBoard.findOne({ _id: id }, function (err, board) {
+    if (err) {
+      return res.status(500).json({
+        message: 'Error getting board. ',
+        error: err.message
+      });
+    }
+    if (!board) {
+      return res.status(404).json({
+        message: 'Board does not exist. Board Id: ' + id
+      });
+    }
+    return res.status(200).json(board.toJSON());
+  })
 }
