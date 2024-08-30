@@ -4,6 +4,7 @@ const moment = require('moment');
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
+const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
 
 const {nev} = require('../mail');
 
@@ -16,7 +17,8 @@ module.exports = {
   updateBoard: updateBoard,
   getBoardsEmail: getBoardsEmail,
   getPublicBoards: getPublicBoards,
-  reportPublicBoard: reportPublicBoard
+  reportPublicBoard: reportPublicBoard,
+  getCbuilderBoard: getCbuilderBoard
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
@@ -170,4 +172,28 @@ function reportPublicBoard(req,res){
     }
     return res.status(200).json({message: 'Email sent successfuly'});
   });
+}
+
+async function getCbuilderBoard(req, res) {
+  const id = req.swagger.params.id.value;
+  try {
+    const board = await getCbuilderBoardbyId(id);
+    if (!board) {
+      return res.status(404).json({
+        message: 'Cbuilder Board not found. Board Id: ' + id
+      });
+    }
+    if (!req.user.isAdmin && req.auth.email !== board.email) {
+      return res.status(401).json({
+        message: 'You are not authorized to get this board.'
+      });
+    }
+    const newBoard = new Board(board);
+    return res.status(200).json(newBoard.toJSON());
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting Cbuilder Board ',
+      error: err.message
+    });
+  }
 }
