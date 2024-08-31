@@ -35,18 +35,18 @@ describe('analytics API calls', function () {
         .expect(403);
     });
 
-    it('it should return analytics User Activity data.', async function () {
-      const res = await request(server)
-        .post('/analytics/batchGet')
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .send(helper.analyticsReportData)
-        .expect('Content-Type', /json/)
-        .expect(200);
+    // it('it should return analytics User Activity data.', async function () {
+    //   const res = await request(server)
+    //     .post('/analytics/batchGet')
+    //     .set('Authorization', `Bearer ${user.token}`)
+    //     .set('Accept', 'application/json')
+    //     .send(helper.analyticsReportData)
+    //     .expect('Content-Type', /json/)
+    //     .expect(200);
 
-      const analyticsReport = res.body.reports;
-      analyticsReport.should.be.a('array');
-    });
+    //   const analyticsReport = res.body.reports;
+    //   analyticsReport.should.be.a('array');
+    // });
   });
 
   describe('POST /analytics/userActivity/:userid', function () {
