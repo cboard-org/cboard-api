@@ -27,7 +27,7 @@
     "axios": "^1.6.4",
     "azure-storage": "^2.10.6",
     "bcryptjs": "^2.4.3",
-    "body-parser": "1.20.2",
+    "body-parser": "1.20.3",
     "connect-mongo": "^3.2.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
