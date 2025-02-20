@@ -3,6 +3,7 @@
 const { google } = require('googleapis');
 const analyticsreporting = google.analyticsreporting('v4');
 const constants = require('../constants');
+const config = require('../../config');
 
 module.exports = {
   batchGet: batchGet,
@@ -11,7 +12,10 @@ module.exports = {
 
 async function gapiAuth() {
   const scopes = ['https://www.googleapis.com/auth/analytics'];
-  const auth = new google.auth.GoogleAuth({ scopes: scopes });
+  const auth = new google.auth.GoogleAuth({
+    keyFile: config.GOOGLE_APPLICATION_CREDENTIALS,
+    scopes: scopes
+  });
   const authClient = await auth.getClient();
   google.options({ auth: authClient });
 }

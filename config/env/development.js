@@ -55,6 +55,7 @@ module.exports = {
   },
   appInsightConnectionString: process.env.APPLICATIONINSIGHTS_CONNECTION_STRING,
   GOOGLE_PLAY_CREDENTIALS: process.env.GOOGLE_PLAY_CREDENTIALS,
+  GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   PAYPAL_API_URL: 'https://api-m.sandbox.paypal.com/v1',
   CBOARD_PROD_URL: 'https://app.cboard.io',
   CBOARD_QA_URL: 'https://app.qa.cboard.io',
