@@ -50,3 +50,5 @@ test-results.xml
 
 # Environment variables
 .env.development
+
+.google-auth.json
