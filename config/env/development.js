@@ -62,5 +62,5 @@ module.exports = {
   LOCALHOST_PORT_3000_URL: 'http://localhost:3000',
   INTERNAL_API_KEY: process.env.INTERNAL_API_KEY,
   CBUILDER_API_URL: process.env.CBUILDER_APP_URL || 'http://localhost:3000',
-  CORS_ORIGINS:['https://app.cboard.io','http://localhost:3000','app://localhost']
+  CORS_ORIGINS:['*']
 };

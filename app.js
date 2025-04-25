@@ -53,9 +53,6 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   //Serves the Swagger UI on /docs
   app.use(cors({
     origin: config.CORS_ORIGINS,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization','request-id','traceparent'],
-    credentials: true,
   }));
 
   // Log HTTP requests. The `dev` format looks like this:
