@@ -51,10 +51,10 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   app.use(
     cors({
       origin: [
-        process.env.CBOARD_WEB_APP_ORIGIN,
-        process.env.CBOARD_IOS_APP_ORIGIN,
-        process.env.CBUILDER_WEB_APP_ORIGIN
-      ],
+        process.env.CBOARD_APP_URL,
+        process.env.CBOARD_IOS_APP_URL,
+        process.env.CBUILDER_APP_URL
+      ]
     })
   );
 
