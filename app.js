@@ -48,9 +48,15 @@ if (config.appInsightConnectionString && config.env === 'production') {
 
 swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   //Serves the Swagger UI on /docs
-  app.use(cors({
-    origin: ['https://app.cboard.io', 'app://localhost']
-  }));
+  app.use(
+    cors({
+      origin: [
+        process.env.CBOARD_WEB_APP_ORIGIN,
+        process.env.CBOARD_IOS_APP_ORIGIN,
+        process.env.CBUILDER_WEB_APP_ORIGIN
+      ],
+    })
+  );
 
   // Log HTTP requests. The `dev` format looks like this:
   // :method :url :status :response-time ms - :res[content-length]
