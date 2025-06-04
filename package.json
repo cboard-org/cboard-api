@@ -22,7 +22,7 @@
   ],
   "main": "app.js",
   "dependencies": {
-    "applicationinsights": "^2.7.3",
+    "applicationinsights": "^2.9.7",
     "axios": "^1.6.4",
     "azure-storage": "^2.10.6",
     "bcryptjs": "^2.4.3",
