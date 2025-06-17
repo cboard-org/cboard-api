@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const path = require('path');
+const moment = require('moment');
 const { createBlockBlobFromText } = require('../api/helpers/blob');
 const Board = require('../api/models/Board');
 require('../db'); // Initialize MongoDB connection
@@ -139,7 +140,12 @@ async function migrateBase64Images() {
           appendLog(`Updating MongoDB with Azure URL for tile: ${tile.id}`);
           await Board.updateOne(
             { '_id': board._id, 'tiles.id': tile.id },
-            { $set: { 'tiles.$.image': fileUrl } }
+            { 
+              $set: { 
+                'tiles.$.image': fileUrl,
+                lastEdited: moment().format()
+              } 
+            }
           );
 
           // Update summary
@@ -164,11 +170,12 @@ async function migrateBase64Images() {
     // Print and log summary
     const summaryText = [
       '\n=== Migration Summary ===',
+      `Target email: ${TARGET_EMAIL}`,
       `Boards Processed: ${summary.boardsProcessed}`,
       `Total Tiles: ${summary.totalTiles}`,
       `Successful Uploads: ${summary.successfulUploads}`,
       `Failed Uploads: ${summary.failedUploads}`,
-      `Storage Space Saved: ${(summary.storageSpaceSaved / 1024 / 1024).toFixed(2)} MB`
+      `Storage Space Saved: ${(summary.storageSpaceSaved / 1024 / 1024).toFixed(2)} MB`,
     ];
 
     if (summary.failures.length > 0) {
@@ -194,9 +201,16 @@ async function migrateBase64Images() {
   }
 }
 
-// Run the migration
-migrateBase64Images()
-  .catch(error => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
+// Export for testing
+module.exports = {
+  migrateBase64Images
+};
+
+// Run the migration if this script is run directly (not required as a module)
+if (require.main === module) {
+  migrateBase64Images()
+    .catch(error => {
+      console.error('Fatal error:', error);
+      process.exit(1);
+    });
+}
