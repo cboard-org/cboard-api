@@ -128,39 +128,44 @@ function getBoard(req, res) {
   });
 }
 
-function updateBoard(req, res) {
+async function updateBoard(req, res) {
   const id = req.swagger.params.id.value;
-  Board.findOne({ _id: id }, function (err, board) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error updating board. ',
-        error: err.message
-      });
-    }
+
+  try {
+    const board = await Board.findOne({ _id: id });
+    
     if (!board) {
       return res.status(404).json({
         message: 'Unable to find board. board Id: ' + id
       });
     }
+    
     for (let key in req.body) {
       board[key] = req.body[key];
     }
     board.lastEdited = moment().format();
-    board.save(function (err, board) {
-      if (err) {
-        return res.status(500).json({
-          message: 'Error saving board. ',
-          error: err.message
-        });
-      }
-      if (!board) {
+    
+    try {
+      const savedBoard = await board.save();
+      if (!savedBoard) {
         return res.status(404).json({
           message: 'Unable to find board. board id: ' + id
         });
       }
+      return res.status(200).json(savedBoard.toJSON());
+    } catch (err) {
+      return res.status(500).json({
+        message: 'Error saving board. ',
+        error: err.message
+      });
+    }
+    
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error updating board. ',
+      error: err.message
     });
-    return res.status(200).json(board.toJSON());
-  });
+  }
 }
 
 function reportPublicBoard(req,res){
