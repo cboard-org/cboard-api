@@ -425,7 +425,7 @@ function updateUser(req, res) {
       catch (e) {
         return res.status(500).json({
           message: 'Error saving user. ',
-          error: err.message
+          error: e.message
         });
       }
     });
