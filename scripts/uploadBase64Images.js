@@ -29,9 +29,53 @@ const summary = {
   failures: []
 };
 
+/**
+ * How to run this script:
+ * 1. Make sure you have the required environment variables set (e.g., MongoDB connection, Azure Blob storage)
+ * 2. Set the TARGET_EMAIL constant below to the email of the user whose boards you want to process
+ * 3. Run the script using Node.js:
+ *    ```
+ *    node scripts/uploadBase64Images.js
+ *    ```
+ * 4. The script will:
+ *    - Find all boards belonging to the target email that contain base64 images
+ *    - Upload those images to Azure Blob storage
+ *    - Convert the URLs to use the CDN domain
+ *    - Update the board tiles with the new CDN URLs
+ *    - Generate a detailed log file with the results
+ *    - The aggregation pipeline used to find the relevant boards is as follows:
+          [
+            { 
+              $match: {
+                email: "target@email.com"
+              }
+            },
+            { 
+              $unwind: "$tiles" 
+            },
+            { 
+              $match: {
+                "tiles.image": { 
+                  $regex: /^data:image\/[a-z]+;base64,/ 
+                }
+              }
+            },
+            { 
+              $group: { 
+                _id: "$_id" 
+              } 
+            }
+          ] 
+ */
+
+
 // Configuration
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
-const TARGET_EMAIL = 'jrbrozas@enfuego.edu.ph';
+const TARGET_EMAIL = 'example@cboard.io';
+
+// URL Configuration
+const OLD_URL_PREFIX = 'https://cboardgroupdiag483.blob.core.windows.net';
+const NEW_URL_PREFIX = 'https://cdncboard.azureedge.net';
 
 async function migrateBase64Images() {
   try {
@@ -136,13 +180,16 @@ async function migrateBase64Images() {
             file
           );
 
+          // Replace blob URL with CDN URL
+          const cdnUrl = OLD_URL_PREFIX && NEW_URL_PREFIX ? fileUrl.replace(OLD_URL_PREFIX, NEW_URL_PREFIX) : fileUrl;
+
           // Update MongoDB
           appendLog(`Updating MongoDB with Azure URL for tile: ${tile.id}`);
           await Board.updateOne(
             { '_id': board._id, 'tiles.id': tile.id },
             { 
               $set: { 
-                'tiles.$.image': fileUrl,
+                'tiles.$.image': cdnUrl,
                 lastEdited: moment().format()
               } 
             }
