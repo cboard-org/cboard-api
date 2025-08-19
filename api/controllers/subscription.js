@@ -119,14 +119,12 @@ async function syncSubscriptions(req, res) {
   await gapiAuth();
   const params = { packageName: 'com.unicef.cboard' };
   let paypalPlans = [];
-  
   // get PayPal plans 
   try {
     paypalPlans = await paypal.listPlans();
   } catch (err) {
     console.log(err.message);
   }
-  
   try {
     // get subscriptions from Google API
     const remoteData = await playConsole.monetization.subscriptions.list(params);
@@ -136,11 +134,11 @@ async function syncSubscriptions(req, res) {
     for (const subscription of remoteSubscrs) {
       try {
         const subscriptionId = subscription.productId;
-        const subscr = await Subscription.findOne({ subscriptionId: subscriptionId });
+        const userSubscription = await Subscription.findOne({ subscriptionId: subscriptionId });
         
         let newSubscription = undefined;
-        if (subscr) {
-          newSubscription = Object.assign(subscr, mapRemoteSubscr(subscription, paypalPlans.plans));
+        if (userSubscription) {
+          newSubscription = Object.assign(userSubscription, mapRemoteSubscr(subscription, paypalPlans.plans));
         } else {
           newSubscription = new Subscription(mapRemoteSubscr(subscription, paypalPlans.plans));
         }
@@ -161,7 +159,6 @@ async function syncSubscriptions(req, res) {
     const searchFields = ['name'];
     const query = search && search.length ? getORQuery(searchFields, search, true) : {};
     const localSubscrs = await paginatedResponse(Subscription, { query }, req.query);
-    
     // check the local subscription against remote 
     for (const localSubscr of localSubscrs.data) {
       try {
