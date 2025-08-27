@@ -347,6 +347,11 @@ paths:
     post:
       operationId: reportPublicBoard
       description: Send an email to report that a public board contains inappropriate content.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
       parameters:
           - name: report
             in: body
