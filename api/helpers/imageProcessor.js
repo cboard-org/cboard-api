@@ -178,34 +178,23 @@ async function convertBase64ToBlob(base64String, containerName = BLOB_CONTAINER_
     return fileUrl;
   };
 
-  if (enableRetries) {
-    let lastError;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const blobUrl = await performConversion();
-        
-        return blobUrl;
-      } catch (error) {
-        lastError = error;
-        
-        if (!shouldRetry(error)) {
-          throw error;
-        }
-        
-        if (attempt < maxRetries) {
-          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
-          console.log(`Retry ${attempt}/${maxRetries} for tile ${tileId} in ${delay}ms:`, error.message);
-          await sleep(delay);
-        }
+  const maxAttempts = enableRetries ? maxRetries : 1;
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await performConversion();
+    } catch (error) {
+      lastError = error;
+      
+      if (!enableRetries || !shouldRetry(error) || attempt === maxAttempts) {
+        throw error;
       }
+      
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+      console.log(`Retry ${attempt}/${maxRetries} for tile ${tileId} in ${delay}ms:`, error.message);
+      await sleep(delay);
     }
-    
-    throw new Error(`Failed after ${maxRetries} attempts: ${lastError.message}`);
-  } else {
-    const blobUrl = await performConversion();
-    
-    return blobUrl;
   }
 }
 
