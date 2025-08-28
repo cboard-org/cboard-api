@@ -41,74 +41,57 @@ async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
  */
 async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
   const tileMap = new Map();
-  const resultMap = new Map();
+  const toProcessIds = [];
   const errorMap = new Map();
   let successCount = 0;
   let failureCount = 0;
 
   tiles.forEach((tile, index) => {
-    tileMap.set(tile.id || `tile_${index}`, {
-      tile,
-      originalIndex: index,
-      status: 'pending'
-    });
+    const tileId = tile.id || `tile_${index}`;
+    tileMap.set(tileId, { ...tile });
+
+    if (tile.image && isBase64Image(tile.image)) {
+      toProcessIds.push(tileId);
+    }
   });
-
-  const tileIds = Array.from(tileMap.keys());
-
-  for (let i = 0; i < tileIds.length; i += CONFIG.BATCH_SIZE) {
-    const batchIds = tileIds.slice(i, i + CONFIG.BATCH_SIZE);
+  
+  for (let i = 0; i < toProcessIds.length; i += CONFIG.BATCH_SIZE) {
+    const batchIds = toProcessIds.slice(i, i + CONFIG.BATCH_SIZE);
     
     const batchPromises = batchIds.map(async (tileId) => {
-      const tileData = tileMap.get(tileId);
-      const { tile, originalIndex } = tileData;
-      
-      if (tile.image && isBase64Image(tile.image)) {
-        try {
-          const blobUrl = await convertBase64ToBlob(tile.image, containerName, {
-            enableRetries: true,
-            maxRetries: CONFIG.MAX_RETRIES,
-            tileId,
-            tile: tile
-          });
-          
-          resultMap.set(tileId, {
-            ...tile,
-            image: blobUrl,
-            status: 'success',
-            originalIndex
-          });
-          
-          tileMap.set(tileId, { ...tileData, status: 'success' });
-          successCount++;
-          
-          return { success: true, tileId };
-        } catch (error) {
-          failureCount++;
-          const errorInfo = createErrorInfo(tile, error, originalIndex);
-          errorMap.set(tileId, errorInfo);
-          
-          const errorHandledTile = handleImageError(tile, error);
-          resultMap.set(tileId, {
-            ...errorHandledTile,
-            status: 'error',
-            originalIndex,
-            error: errorInfo
-          });
-          
-          tileMap.set(tileId, { ...tileData, status: 'error' });
-          
-          return { success: false, tileId, error: errorInfo };
-        }
-      } else {
-        resultMap.set(tileId, {
-          ...tile,
-          status: 'skipped',
-          originalIndex
+      const tile = tileMap.get(tileId);
+      try {
+        const blobUrl = await convertBase64ToBlob(tile.image, containerName, {
+          enableRetries: true,
+          maxRetries: CONFIG.MAX_RETRIES,
+          tileId,
+          tile: tile
         });
         
-        tileMap.set(tileId, { ...tileData, status: 'skipped' });
-        return { success: true, tileId, skipped: true };
+        const tileData = tileMap.get(tileId);
+        tileMap.set(tileId, {
+          ...tileData,
+          image: blobUrl
+        });
+        
+        successCount++;
+        return { success: true, tileId };
+        
+      } catch (error) {
+        failureCount++;
+        const errorInfo = createErrorInfo(tile, error);
+        errorMap.set(tileId, errorInfo);
+      
+        const errorHandledTile = handleImageError(tile, error);
+        if (errorHandledTile.image !== tile.image) {
+          const tileData = tileMap.get(tileId);
+          tileMap.set(tileId, {
+            ...tileData,
+            image: errorHandledTile.image
+          });
+        }
+        
+        return { success: false, tileId, error: errorInfo };
       }
     });
     
@@ -118,7 +101,7 @@ async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
 
   const processedTiles = tiles.map((tile, index) => {
     const tileId = tile.id || `tile_${index}`;
-    const result = resultMap.get(tileId);
+    const result = tileMap.get(tileId);
     return result || tile;
   });
 
@@ -238,20 +221,20 @@ function handleImageError(tile, error) {
   switch (errorType) {
     case ErrorTypes.INVALID_BASE64:
     case ErrorTypes.INVALID_IMAGE_FORMAT:
-      return { ...tile, image: null, hasImageError: true, errorType };
+      return { ...tile, image: null };
       
     case ErrorTypes.AZURE_RATE_LIMIT:
     case ErrorTypes.NETWORK_TIMEOUT:
     case ErrorTypes.AZURE_UPLOAD_FAILED:
       console.warn(`Keeping base64 for tile ${tile.id} due to: ${errorType}`);
-      return { ...tile, hasImageError: true, errorType };
+      return { ...tile };
       
     case ErrorTypes.INSUFFICIENT_STORAGE:
       console.error(`Storage quota exceeded for tile ${tile.id}`);
-      return { ...tile, image: null, hasImageError: true, errorType };
+      return { ...tile, image: null };
       
     default:
-      return { ...tile, hasImageError: true, errorType: 'UNKNOWN_ERROR' };
+      return { ...tile };
   }
 }
 
