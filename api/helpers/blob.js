@@ -36,6 +36,9 @@ async function createBlockBlobFromText(
     const cacheMaxAgeInSeconds = 31536000;
     options.contentSettings = {
       contentType: mimetype,
+      contentEncoding: null,
+      contentLanguage: null,
+      contentMD5: null,
       cacheControl: `max-age=${cacheMaxAgeInSeconds}`
     };
   }
