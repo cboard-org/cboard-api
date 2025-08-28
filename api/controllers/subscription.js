@@ -129,81 +129,67 @@ async function syncSubscriptions(req, res) {
     // get subscriptions from Google API
     const remoteData = await playConsole.monetization.subscriptions.list(params);
     const remoteSubscrs = remoteData.data.subscriptions;
-    //loop remote subscriptions
-    remoteSubscrs.forEach(subscription => {
-      //console.log(subscription);
-      const subscriptionId = subscription.productId;
-      Subscription.findOne({ subscriptionId: subscriptionId }, async function (err, subscr) {
-        if (err) {
-          return res.status(500).json({
-            message: 'Error getting subscription.',
-            error: err.message
-          });
-        }
+    
+    // loop remote subscriptions
+    for (const subscription of remoteSubscrs) {
+      try {
+        const subscriptionId = subscription.productId;
+        const userSubscription = await Subscription.findOne({ subscriptionId: subscriptionId });
+        
         let newSubscription = undefined;
-        if (subscr) {
-          newSubscription = Object.assign(subscr, mapRemoteSubscr(subscription, paypalPlans.plans));
+        if (userSubscription) {
+          newSubscription = Object.assign(userSubscription, mapRemoteSubscr(subscription, paypalPlans.plans));
         } else {
           newSubscription = new Subscription(mapRemoteSubscr(subscription, paypalPlans.plans));
         }
 
-        await newSubscription.save(function (err, result) {
-          if (err) {
-            console.error('error', err);
-            return res.status(409).json({
-              message: 'Error saving subscription',
-              error: err.message,
-            });
-          } else {
-            if (!subscr) {
-              console.log("New subscription added: " + result.name);
-            } else {
-              console.log("Subscription updated: " + result.name);
-            }
-          }
-        });
-      });
-    });
+        const result = await newSubscription.save();
+        if (!subscr) {
+          console.log("New subscription added: " + result.name);
+        } else {
+          console.log("Subscription updated: " + result.name);
+        }
+      } catch (err) {
+        console.error('Error processing subscription:', err);
+      }
+    }
+    
     // get subscriptions from database 
     const { search = '' } = req.query;
     const searchFields = ['name'];
     const query = search && search.length ? getORQuery(searchFields, search, true) : {};
     const localSubscrs = await paginatedResponse(Subscription, { query }, req.query);
     // check the local subscription against remote 
-    localSubscrs.data.forEach(localSubscr => {
-      const id = localSubscr.subscriptionId;
-      let found = false;
-      remoteSubscrs.forEach(remoteSubscr => {
-        remoteSubscr = mapRemoteSubscr(remoteSubscr, paypalPlans.plans);
-        if (id == remoteSubscr.subscriptionId) found = true;
-      });
-      if (!found) {
-        Subscription.findOneAndDelete({ id }, function (
-          err,
-          deletedSubscr
-        ) {
-          if (err) {
-            return res.status(500).json({
-              message: 'Error deleting subscription. ',
-              error: err.message,
-            });
+    for (const localSubscr of localSubscrs.data) {
+      try {
+        const id = localSubscr.subscriptionId;
+        let found = false;
+        
+        for (const remoteSubscr of remoteSubscrs) {
+          const mappedRemoteSubscr = mapRemoteSubscr(remoteSubscr, paypalPlans.plans);
+          if (id == mappedRemoteSubscr.subscriptionId) {
+            found = true;
+            break;
           }
-          if (!deletedSubscr) {
-            return res.status(404).json({
-              message:
-                'Subscription does not exist. Subscription Id: ' + id,
-            });
+        }
+        
+        if (!found) {
+          const deletedSubscr = await Subscription.findOneAndDelete({ subscriptionId: id });
+          if (deletedSubscr) {
+            console.log("Subscription deleted: " + deletedSubscr.name);
           }
-          console.log("Subscription deleted: " + deletedSubscr.name);
-        });
+        }
+      } catch (err) {
+        console.error('Error processing local subscription:', err);
       }
-    });
+    }
 
     return res.status(200).json(localSubscrs);
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({
-      message: err.message
+      message: 'Error synchronizing subscriptions',
+      error: err.message
     });
   }
 }
