@@ -27,6 +27,22 @@ async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
   return processWithMap(tiles, containerName);
 }
 
+/**
+ * Process tiles with base64 images using Map-based approach for better performance and tracking
+ * @param {Array} tiles - Array of tile objects to process
+ * @param {string} containerName - Azure container name for blob storage
+ * @returns {Promise<Object>} Processing result with processed tiles and statistics
+ * @returns {Array} return.tiles - Processed tiles array with blob URLs
+ * @returns {Object} return.processing - Processing statistics
+ * @returns {number} return.processing.totalTiles - Total number of tiles processed
+ * @returns {number} return.processing.successCount - Number of successful conversions
+ * @returns {number} return.processing.failureCount - Number of failed conversions
+ * @returns {Array} return.processing.errors - Array of error details
+ * @returns {boolean} return.processing.hasErrors - Whether any errors occurred
+ * @returns {string} return.processing.processingMethod - Processing method used ('map')
+ * @returns {number} return.processing.cacheHits - Number of cache hits
+ * @returns {number} return.processing.cacheMisses - Number of cache misses
+ */
 async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
   const tileMap = new Map();
   const resultMap = new Map();
