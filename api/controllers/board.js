@@ -132,6 +132,7 @@ function getBoard(req, res) {
 
 async function updateBoard(req, res) {
   const id = req.swagger.params.id.value;
+  let imageProcessingErrors = null;
 
   try {
     const board = await Board.findOne({ _id: id });
@@ -170,9 +171,9 @@ async function updateBoard(req, res) {
           });
         }
         
-        // Add processing info to response if there were errors
+        // Store processing info if there were errors
         if (imageProcessResult.processing.hasErrors) {
-          updateData._imageProcessingErrors = {
+          imageProcessingErrors = {
             hasErrors: true,
             successCount: imageProcessResult.processing.successCount,
             failureCount: imageProcessResult.processing.failureCount
@@ -186,7 +187,7 @@ async function updateBoard(req, res) {
           tilesCount: updateData.tiles.length
         });
         
-        updateData._imageProcessingErrors = {
+        imageProcessingErrors = {
           hasErrors: true,
           errorMessage: 'Image processing failed - tiles kept as base64'
         };
@@ -195,9 +196,7 @@ async function updateBoard(req, res) {
     
     // Update board fields
     for (let key in updateData) {
-      if (key !== '_imageProcessingErrors') {
-        board[key] = updateData[key];
-      }
+      board[key] = updateData[key];
     }
     board.lastEdited = moment().format();
     
@@ -211,12 +210,12 @@ async function updateBoard(req, res) {
       
       const response = savedBoard.toJSON();
       
-      if (updateData._imageProcessingErrors) {
+      if (imageProcessingErrors) {
         response.imageProcessing = {
           hasErrors: true,
-          message: updateData._imageProcessingErrors.failureCount > 0 
+          message: imageProcessingErrors.failureCount > 0 
             ? 'Some images failed to upload and were kept as base64'
-            : updateData._imageProcessingErrors.errorMessage
+            : imageProcessingErrors.errorMessage
         };
       }
       
