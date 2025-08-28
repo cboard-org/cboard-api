@@ -5,8 +5,7 @@ const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
 const CONFIG = {
   BATCH_SIZE: 5,
-  MAX_RETRIES: 3,
-  ENABLE_CACHE: true
+  MAX_RETRIES: 3
 };
 
 const ErrorTypes = {
@@ -18,7 +17,6 @@ const ErrorTypes = {
   INVALID_IMAGE_FORMAT: 'Unsupported image format'
 };
 
-const imageCache = new Map();
 
 async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
   if (!tiles || !Array.isArray(tiles)) {
@@ -40,8 +38,6 @@ async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
  * @returns {Array} return.processing.errors - Array of error details
  * @returns {boolean} return.processing.hasErrors - Whether any errors occurred
  * @returns {string} return.processing.processingMethod - Processing method used ('map')
- * @returns {number} return.processing.cacheHits - Number of cache hits
- * @returns {number} return.processing.cacheMisses - Number of cache misses
  */
 async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
   const tileMap = new Map();
@@ -72,7 +68,6 @@ async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
           const blobUrl = await convertBase64ToBlob(tile.image, containerName, {
             enableRetries: true,
             maxRetries: CONFIG.MAX_RETRIES,
-            enableCache: CONFIG.ENABLE_CACHE,
             tileId,
             tile: tile
           });
@@ -135,21 +130,18 @@ async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
       failureCount,
       errors: Array.from(errorMap.values()),
       hasErrors: errorMap.size > 0,
-      processingMethod: 'map',
-      cacheHits: getCacheStats().hits,
-      cacheMisses: getCacheStats().misses
+      processingMethod: 'map'
     }
   };
 }
 
 /**
- * Convert base64 to blob URL with optional retries and caching
+ * Convert base64 to blob URL with optional retries
  * @param {string} base64String - The base64 image string
  * @param {string} containerName - Azure container name
  * @param {Object} options - Configuration options
  * @param {boolean} options.enableRetries - Enable retry logic (default: false)
  * @param {number} options.maxRetries - Maximum retry attempts (default: 3)
- * @param {boolean} options.enableCache - Enable image caching (default: false)
  * @param {string} options.tileId - Tile ID for logging (default: 'unknown')
  * @param {Object} options.tile - Tile object containing label and other data (optional)
  * @returns {Promise<string>} The blob CDN URL
@@ -158,19 +150,10 @@ async function convertBase64ToBlob(base64String, containerName = BLOB_CONTAINER_
   const {
     enableRetries = false,
     maxRetries = 3,
-    enableCache = false,
     tileId = 'unknown',
     tile = null
   } = options;
 
-  if (enableCache) {
-    const cacheKey = createImageHash(base64String);
-    if (imageCache.has(cacheKey)) {
-      incrementCacheStats('hits');
-      return imageCache.get(cacheKey);
-    }
-    incrementCacheStats('misses');
-  }
 
   const performConversion = async () => {
     const [header, base64Data] = base64String.split(',');
@@ -202,11 +185,6 @@ async function convertBase64ToBlob(base64String, containerName = BLOB_CONTAINER_
       try {
         const blobUrl = await performConversion();
         
-        if (enableCache) {
-          const cacheKey = createImageHash(base64String);
-          imageCache.set(cacheKey, blobUrl);
-        }
-        
         return blobUrl;
       } catch (error) {
         lastError = error;
@@ -226,11 +204,6 @@ async function convertBase64ToBlob(base64String, containerName = BLOB_CONTAINER_
     throw new Error(`Failed after ${maxRetries} attempts: ${lastError.message}`);
   } else {
     const blobUrl = await performConversion();
-    
-    if (enableCache) {
-      const cacheKey = createImageHash(base64String);
-      imageCache.set(cacheKey, blobUrl);
-    }
     
     return blobUrl;
   }
@@ -322,23 +295,7 @@ function logBatchResults(batchStart, batchResults) {
   console.log(`Batch ${batchNumber} completed: ${successful} successful, ${failed} failed`);
 }
 
-function createImageHash(base64String) {
-  return crypto.createHash('md5').update(base64String).digest('hex');
-}
 
-let cacheStats = { hits: 0, misses: 0 };
-
-function incrementCacheStats(type) {
-  cacheStats[type]++;
-}
-
-function getCacheStats() {
-  return { ...cacheStats };
-}
-
-function resetCacheStats() {
-  cacheStats = { hits: 0, misses: 0 };
-}
 
 /**
  * Create unique filename from tile data
@@ -389,8 +346,6 @@ module.exports = {
   hasBase64Images,
   classifyError,
   handleImageError,
-  getCacheStats,
-  resetCacheStats,
   createUniqueFilename,
   ErrorTypes,
   CONFIG
