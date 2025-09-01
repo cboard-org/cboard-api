@@ -247,17 +247,6 @@ function createErrorInfo(tile, error, tileIndex) {
   };
 }
 
-function createEmptyProcessingResult() {
-  return {
-    totalTiles: 0,
-    successCount: 0,
-    failureCount: 0,
-    errors: [],
-    hasErrors: false,
-    processingMethod: 'map'
-  };
-}
-
 function logBatchResults(batchStart, batchResults) {
   const batchNumber = Math.floor(batchStart / CONFIG.BATCH_SIZE) + 1;
   const successful = batchResults.filter(r => r.status === 'fulfilled').length;
@@ -265,8 +254,6 @@ function logBatchResults(batchStart, batchResults) {
   
   console.log(`Batch ${batchNumber} completed: ${successful} successful, ${failed} failed`);
 }
-
-
 
 /**
  * Get filenamme from tile data
@@ -320,7 +307,6 @@ const logProcessingStats = (boardId, processingStats) => {
 
 module.exports = {
   processBase64Images,
-  processWithMap,
   convertBase64ToBlob,
   isBase64Image,
   hasBase64Images,
