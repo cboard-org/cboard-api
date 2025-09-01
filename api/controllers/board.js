@@ -144,20 +144,11 @@ async function updateBoard(req, res) {
     
     const updateData = { ...req.body };
     
-    if (updateData.tiles && hasBase64Images(updateData.tiles)) {      
+    if (updateData.tiles && Array.isArray(updateData.tiles) & hasBase64Images(updateData.tiles)) {      
       try {
         const imageProcessResult = await processBase64Images(updateData.tiles, BLOB_CONTAINER_NAME);
         updateData.tiles = imageProcessResult.tiles;
         
-        if(imageProcessResult?.processing)
-        console.log('Offline sync image processing completed:', {
-          boardId: id,
-          totalTiles: imageProcessResult.processing?.totalTiles,
-          successCount: imageProcessResult.processing?.successCount,
-          failureCount: imageProcessResult.processing?.failureCount,
-          processingMethod: imageProcessResult.processing?.processingMethod,
-          hasErrors: imageProcessResult.processing?.hasErrors
-        });
       } catch (imageError) {
         console.error('Offline sync image processing failed:', {
           boardId: id,

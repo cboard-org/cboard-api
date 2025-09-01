@@ -17,14 +17,6 @@ const ErrorTypes = {
   INVALID_IMAGE_FORMAT: 'Unsupported image format'
 };
 
-
-async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
-  if (!tiles || !Array.isArray(tiles)) {
-    return { tiles, processing: createEmptyProcessingResult() };
-  }
-  return processWithMap(tiles, containerName);
-}
-
 /**
  * Process tiles with base64 images using Map-based approach for better performance and tracking
  * @param {Array} tiles - Array of tile objects to process
@@ -39,7 +31,11 @@ async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
  * @returns {boolean} return.processing.hasErrors - Whether any errors occurred
  * @returns {string} return.processing.processingMethod - Processing method used ('map')
  */
-async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
+async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
+  if (!tiles || !Array.isArray(tiles) || tiles.length === 0) {
+    throw new Error('No tiles provided for processing.');
+  }
+
   const tileMap = new Map();
   const toProcessIds = [];
   const errorMap = new Map();
@@ -105,16 +101,19 @@ async function processWithMap(tiles, containerName = BLOB_CONTAINER_NAME) {
     return result || tile;
   });
 
+  const processingStats = {
+    totalTiles: tiles.length,
+    successCount,
+    failureCount,
+    errors: Array.from(errorMap.values()),
+    hasErrors: errorMap.size > 0,
+  };
+
+  logProcessingStats(id, processingStats);
+
   return {
     tiles: processedTiles,
-    processing: {
-      totalTiles: tiles.length,
-      successCount,
-      failureCount,
-      errors: Array.from(errorMap.values()),
-      hasErrors: errorMap.size > 0,
-      processingMethod: 'map'
-    }
+    processing: processingStats
   };
 }
 
@@ -307,6 +306,17 @@ function getFilename(tile, extension, fallbackId = 'unknown') {
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+const logProcessingStats = (boardId, processingStats) => {
+  console.log('Base64 images uploading completed:', {
+    boardId: boardId,
+    totalTiles: processingStats.totalTiles,
+    successCount: processingStats.successCount,
+    failureCount: processingStats.failureCount,
+    processingMethod: processingStats.processingMethod,
+    hasErrors: processingStats.hasErrors
+  });
+};
 
 module.exports = {
   processBase64Images,
