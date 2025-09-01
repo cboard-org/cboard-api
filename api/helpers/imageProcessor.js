@@ -92,8 +92,7 @@ async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME, b
       }
     });
     
-    const batchResults = await Promise.allSettled(batchPromises);
-    logBatchResults(i, batchResults);
+    await Promise.allSettled(batchPromises);
   }
 
   const processedTiles = tiles.map((tile, index) => {
