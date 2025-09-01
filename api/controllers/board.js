@@ -152,7 +152,8 @@ async function updateBoard(req, res) {
       try {
         const imageProcessResult = await processBase64Images(
           updateData.tiles,
-          BLOB_CONTAINER_NAME
+          BLOB_CONTAINER_NAME,
+          id
         );
         updateData.tiles = imageProcessResult.tiles;
       } catch (imageError) {
