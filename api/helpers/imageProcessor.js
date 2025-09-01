@@ -150,7 +150,7 @@ async function convertBase64ToBlob(base64String, containerName = BLOB_CONTAINER_
       mimetype: mimeType
     };
     
-    const fileName = createUniqueFilename(tile, extension, tileId);
+    const fileName = getFilename(tile, extension, tileId);
     const [blobResult, fileUrl] = await createBlockBlobFromText(
       containerName,
       fileName,
@@ -270,13 +270,13 @@ function logBatchResults(batchStart, batchResults) {
 
 
 /**
- * Create unique filename from tile data
+ * Get filenamme from tile data
  * @param {Object} tile - Tile object
  * @param {string} extension - File extension
  * @param {string} fallbackId - Fallback ID if no tile data available
  * @returns {string} Sanitized filename
  */
-function createUniqueFilename(tile, extension, fallbackId = 'unknown') {
+function getFilename(tile, extension, fallbackId = 'unknown') {
   let baseName = 'tile-image';
   
   if (tile) {
@@ -301,9 +301,7 @@ function createUniqueFilename(tile, extension, fallbackId = 'unknown') {
 
   const finalName = sanitized || 'tile-image';
   
-  const timestamp = Date.now();
-  
-  return `${finalName}-${timestamp}.${extension}`;
+  return `${finalName}.${extension}`;
 }
 
 function sleep(ms) {
@@ -318,7 +316,7 @@ module.exports = {
   hasBase64Images,
   classifyError,
   handleImageError,
-  createUniqueFilename,
+  getFilename,
   ErrorTypes,
   CONFIG
 };
