@@ -145,7 +145,6 @@ async function updateBoard(req, res) {
     
     const updateData = { ...req.body };
     
-    // Check if this is an offline sync with base64 images
     if (updateData.tiles && hasBase64Images(updateData.tiles)) {
       console.log(`Detected offline sync for board ${id}. Processing ${updateData.tiles.length} tiles for base64 images.`);
       
@@ -153,7 +152,6 @@ async function updateBoard(req, res) {
         const imageProcessResult = await processBase64Images(updateData.tiles, BLOB_CONTAINER_NAME);
         updateData.tiles = imageProcessResult.tiles;
         
-        // Log processing results
         if (imageProcessResult.processing.hasErrors) {
           console.warn('Offline sync image processing completed with errors:', {
             boardId: id,
@@ -171,7 +169,6 @@ async function updateBoard(req, res) {
           });
         }
         
-        // Store processing info if there were errors
         if (imageProcessResult.processing.hasErrors) {
           imageProcessingErrors = {
             hasErrors: true,
