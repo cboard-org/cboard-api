@@ -132,6 +132,7 @@ function getBoard(req, res) {
 
 async function updateBoard(req, res) {
   const id = req.swagger.params.id.value;
+  let isLocalUpdateNeeded = false;
 
   try {
     const board = await Board.findOne({ _id: id });
@@ -156,6 +157,7 @@ async function updateBoard(req, res) {
           id
         );
         updateData.tiles = imageProcessResult.tiles;
+        isLocalUpdateNeeded = true;
       } catch (imageError) {
         console.error('Base64 images uploading failed:', {
           boardId: id,
@@ -179,6 +181,7 @@ async function updateBoard(req, res) {
       }
       
       const response = savedBoard.toJSON();
+      response.isLocalUpdateNeeded = true;
       
       return res.status(200).json(response);
     } catch (err) {
