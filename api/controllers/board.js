@@ -181,7 +181,7 @@ async function updateBoard(req, res) {
       }
       
       const response = savedBoard.toJSON();
-      response.isLocalUpdateNeeded = true;
+      response.isLocalUpdateNeeded = isLocalUpdateNeeded;
       
       return res.status(200).json(response);
     } catch (err) {
