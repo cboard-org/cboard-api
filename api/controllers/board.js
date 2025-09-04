@@ -5,9 +5,11 @@ const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
+const { processBase64Images, hasBase64Images } = require('../helpers/imageProcessor');
 
 const {nev} = require('../mail');
 
+const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
 module.exports = {
   createBoard: createBoard,
@@ -130,6 +132,7 @@ function getBoard(req, res) {
 
 async function updateBoard(req, res) {
   const id = req.swagger.params.id.value;
+  let isLocalUpdateNeeded = false;
 
   try {
     const board = await Board.findOne({ _id: id });
@@ -140,8 +143,32 @@ async function updateBoard(req, res) {
       });
     }
     
-    for (let key in req.body) {
-      board[key] = req.body[key];
+    const updateData = { ...req.body };
+    
+    if (
+      updateData.tiles &&
+      Array.isArray(updateData.tiles) &&
+      hasBase64Images(updateData.tiles)
+    ) {
+      try {
+        const imageProcessResult = await processBase64Images(
+          updateData.tiles,
+          BLOB_CONTAINER_NAME,
+          id
+        );
+        updateData.tiles = imageProcessResult.tiles;
+        isLocalUpdateNeeded = true;
+      } catch (imageError) {
+        console.error('Base64 images uploading failed:', {
+          boardId: id,
+          error: imageError.message,
+          tilesCount: updateData.tiles.length
+        });
+      }
+    }
+    
+    for (let key in updateData) {
+      board[key] = updateData[key];
     }
     board.lastEdited = moment().format();
     
@@ -152,7 +179,11 @@ async function updateBoard(req, res) {
           message: 'Unable to find board. board id: ' + id
         });
       }
-      return res.status(200).json(savedBoard.toJSON());
+      
+      const response = savedBoard.toJSON();
+      response.isLocalUpdateNeeded = isLocalUpdateNeeded;
+      
+      return res.status(200).json(response);
     } catch (err) {
       return res.status(500).json({
         message: 'Error saving board. ',
