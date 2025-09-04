@@ -62,5 +62,6 @@ module.exports = {
   LOCALHOST_PORT_3000_URL: 'http://localhost:3000',
   INTERNAL_API_KEY: process.env.INTERNAL_API_KEY,
   CBUILDER_API_URL: process.env.CBUILDER_APP_URL || 'http://localhost:3000',
-  AZURE_BLOB_URL: 'https://cboardgroupqadiag.blob.core.windows.net',
+  CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME: 'https://cboardgroupdiag483.blob.core.windows.net',
+  AZURE_CDN_URL: 'https://cdncboard.azureedge.net',
 };
