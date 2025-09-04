@@ -158,9 +158,17 @@ async function convertBase64ToBlob(base64String, containerName = BLOB_CONTAINER_
       'boards'
     );
     
-    fileUrl = config.AZURE_BLOB_URL && config.AZURE_CDN_URL ? fileUrl.replace(config.AZURE_BLOB_URL, config.AZURE_CDN_URL) : fileUrl;
+    const cdnUrl =
+      config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME &&
+      config.AZURE_CDN_URL &&
+      fileUrl.startsWith(config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME)
+        ? fileUrl.replace(
+            config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME,
+            config.AZURE_CDN_URL
+          )
+        : fileUrl;
     
-    return fileUrl;
+    return cdnUrl;
   };
 
   const maxAttempts = enableRetries ? maxRetries : 1;
