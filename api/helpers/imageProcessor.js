@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { createBlockBlobFromText } = require('./blob');
+const config = require('../../config');
 
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
 
@@ -157,7 +158,17 @@ async function convertBase64ToBlob(base64String, containerName = BLOB_CONTAINER_
       'boards'
     );
     
-    return fileUrl;
+    const cdnUrl =
+      config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME &&
+      config.AZURE_CDN_URL &&
+      fileUrl.startsWith(config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME)
+        ? fileUrl.replace(
+            config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME,
+            config.AZURE_CDN_URL
+          )
+        : fileUrl;
+    
+    return cdnUrl;
   };
 
   const maxAttempts = enableRetries ? maxRetries : 1;
