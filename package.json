@@ -32,7 +32,7 @@
     "dotenv": "^16.4.7",
     "dotenv-defaults": "2.0.2",
     "express": "^4.20.0",
-    "express-session": "^1.17.3",
+    "express-session": "^1.18.2",
     "googleapis": "^110.0.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
