@@ -29,7 +29,7 @@
     "body-parser": "1.20.3",
     "connect-mongo": "^3.2.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "dotenv-defaults": "2.0.2",
     "express": "^4.20.0",
     "express-session": "^1.17.3",
