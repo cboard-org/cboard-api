@@ -24,8 +24,33 @@ module.exports = {
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
-function createBoard(req, res) {
-  const board = new Board(req.body);
+async function createBoard(req, res) {
+  const boardData = { ...req.body };
+  let isLocalUpdateNeeded = false;
+
+  if (
+    boardData.tiles &&
+    Array.isArray(boardData.tiles) &&
+    hasBase64Images(boardData.tiles)
+  ) {
+    try {
+      const imageProcessResult = await processBase64Images(
+        boardData.tiles,
+        BLOB_CONTAINER_NAME
+      );
+
+      boardData.tiles = imageProcessResult.tiles;
+      isLocalUpdateNeeded = true;
+
+    } catch (imageError) {
+      console.error('Base64 images processing failed during board creation:', {
+        error: imageError.message,
+        tilesCount: boardData.tiles?.length
+      });
+    }
+  }
+
+  const board = new Board(boardData);
   board.lastEdited = moment().format();
   board.save(function (err, board) {
     if (err) {
@@ -34,7 +59,9 @@ function createBoard(req, res) {
         error: err.message
       });
     }
-    return res.status(200).json(board.toJSON());
+    const response = board.toJSON();
+    response.isLocalUpdateNeeded = isLocalUpdateNeeded;
+    return res.status(200).json(response);
   });
 }
 
@@ -153,8 +180,7 @@ async function updateBoard(req, res) {
       try {
         const imageProcessResult = await processBase64Images(
           updateData.tiles,
-          BLOB_CONTAINER_NAME,
-          id
+          BLOB_CONTAINER_NAME
         );
         updateData.tiles = imageProcessResult.tiles;
         isLocalUpdateNeeded = true;

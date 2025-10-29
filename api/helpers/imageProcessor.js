@@ -22,7 +22,6 @@ const ErrorTypes = {
  * Process tiles with base64 images using Map-based approach for better performance and tracking
  * @param {Array} tiles - Array of tile objects to process
  * @param {string} containerName - Azure container name for blob storage
- * @param {string} boardId - ID of the board being processed
  * @returns {Promise<Object>} Processing result with processed tiles and statistics
  * @returns {Array} return.tiles - Processed tiles array with blob URLs
  * @returns {Object} return.processing - Processing statistics
@@ -33,7 +32,7 @@ const ErrorTypes = {
  * @returns {boolean} return.processing.hasErrors - Whether any errors occurred
  * @returns {string} return.processing.processingMethod - Processing method used ('map')
  */
-async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME, boardId) {
+async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME) {
   if (!tiles || !Array.isArray(tiles) || tiles.length === 0) {
     throw new Error('No tiles provided for processing.');
   }
@@ -109,8 +108,6 @@ async function processBase64Images(tiles, containerName = BLOB_CONTAINER_NAME, b
     errors: Array.from(errorMap.values()),
     hasErrors: errorMap.size > 0,
   };
-
-  logProcessingStats(boardId, processingStats);
 
   return {
     tiles: processedTiles,
@@ -304,16 +301,6 @@ function getFilename(tile, extension, fallbackId = 'unknown') {
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-const logProcessingStats = (boardId, processingStats) => {
-  console.log('Base64 images uploading completed:', {
-    boardId: boardId,
-    totalTiles: processingStats.totalTiles,
-    successCount: processingStats.successCount,
-    failureCount: processingStats.failureCount,
-    hasErrors: processingStats.hasErrors
-  });
-};
 
 module.exports = {
   processBase64Images,
