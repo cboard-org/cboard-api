@@ -48,23 +48,27 @@ describe('GPT API calls', function() {
 
     it('it should improve provided phrase and return it.', async function() {
       const mockedOpenAPIResponse = {
-        id: 'cmpl-75m1j4HRnQklZItaVxiLz5Zc4Ig9X',
-        object: 'text_completion',
-        created: 1681610611,
-        model: 'gpt-3.5-turbo-instruct',
+        id: 'chatcmpl-8F8QzJKqVpNQ1',
+        object: 'chat.completion',
+        created: 1699484965,
+        model: 'gpt-4.1',
         choices: [
           {
-            text: '\n\nWhat do you think?',
             index: 0,
-            logprobs: null,
-            finish_reason: 'length'
+            message: {
+              role: 'assistant',
+              content: 'What do you think?'
+            },
+            finish_reason: 'stop'
           }
         ],
         usage: { prompt_tokens: 24, completion_tokens: 7, total_tokens: 31 }
       };
 
-      nock('https://cboard-openai.openai.azure.com')
-        .post('/openai/deployments/ToEdit-01/completions?api-version=2022-12-01')
+      nock('https://cboard-openai.cognitiveservices.azure.com')
+        .post(
+          '/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-02-01'
+        )
         .reply(200, mockedOpenAPIResponse);
 
       const res = await request(server)
@@ -78,7 +82,9 @@ describe('GPT API calls', function() {
 
       res.body.should.be.a('object');
 
-      res.body.phrase.should.be.equal(mockedOpenAPIResponse.choices[0].text);
+      res.body.phrase.should.be.equal(
+        mockedOpenAPIResponse.choices[0].message.content
+      );
     });
   });
 });
