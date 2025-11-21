@@ -66,7 +66,9 @@ describe('GPT API calls', function() {
       };
 
       nock('https://cboard-openai.cognitiveservices.azure.com')
-        .post('/openai/deployments/gpt-4.1/chat/completions?api-version=2024-02-01')
+        .post(
+          '/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-02-01'
+        )
         .reply(200, mockedOpenAPIResponse);
 
       const res = await request(server)
@@ -80,7 +82,9 @@ describe('GPT API calls', function() {
 
       res.body.should.be.a('object');
 
-      res.body.phrase.should.be.equal(mockedOpenAPIResponse.choices[0].message.content);
+      res.body.phrase.should.be.equal(
+        mockedOpenAPIResponse.choices[0].message.content
+      );
     });
   });
 });
