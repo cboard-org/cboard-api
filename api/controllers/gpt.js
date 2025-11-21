@@ -1,19 +1,11 @@
-const { Configuration, OpenAIApi } = require('openai');
-const apiKey = process.env.AZURE_OPENAI_API_KEY;
+const { AzureOpenAI } = require('openai');
 
-const configuration = new Configuration({
-  apiKey,
-  basePath:
-    'https://cboard-openai.openai.azure.com/openai/deployments/ToEdit-01',
-  baseOptions: {
-    headers: { 'api-key': apiKey },
-    params: {
-      'api-version': '2022-12-01'
-    }
-  }
+const client = new AzureOpenAI({
+  endpoint: 'https://cboard-openai.cognitiveservices.azure.com',
+  apiKey: process.env.AZURE_OPENAI_API_KEY,
+  apiVersion: '2024-02-01',
+  deployment: 'gpt-4o-mini'
 });
-
-const openai = new OpenAIApi(configuration);
 
 module.exports = {
   editPhrase
@@ -27,15 +19,18 @@ async function editPhrase(req, res) {
   }
 
   try {
-    const completionRequestParams = {
-      model: 'gpt-3.5-turbo-instruct',
-      prompt: `grammatically improve this phrase: '${phraseToEdit}'. The result should be in '${phraseLanguage}'. Don't add aditional information to the phrase.`,
+    const response = await client.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: `grammatically improve this phrase: '${phraseToEdit}'. The result should be in '${phraseLanguage}'. Don't add additional information to the phrase.`
+        }
+      ],
       max_tokens: 50,
       temperature: 0
-    };
-    const response = await openai.createCompletion(completionRequestParams);
+    });
 
-    const editedPhrase = response.data?.choices[0]?.text;
+    const editedPhrase = response.choices[0]?.message?.content;
     if (editedPhrase) return res.status(200).json({ phrase: editedPhrase });
   } catch (e) {
     console.log(e);
