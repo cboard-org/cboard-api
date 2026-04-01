@@ -252,8 +252,8 @@ describe('Board API calls', function () {
     });
   });
 
-  describe('accessCode field behavior', function() {
-    it('should normalize accessCode to uppercase when creating a board', async function() {
+  describe('accessCode field behavior', function () {
+    it('should normalize accessCode to uppercase when creating a board', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
         accessCode: 'cafe01'
@@ -270,7 +270,7 @@ describe('Board API calls', function () {
       res.body.accessCode.should.equal('CAFE01');
     });
 
-    it('should trim whitespace from accessCode', async function() {
+    it('should trim whitespace from accessCode', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
         accessCode: '  test01  '
@@ -287,7 +287,7 @@ describe('Board API calls', function () {
       res.body.accessCode.should.equal('TEST01');
     });
 
-    it('should not include accessCode when not provided', async function() {
+    it('should not include accessCode when not provided', async function () {
       const boardWithoutAccessCode = { ...helper.boardData };
       delete boardWithoutAccessCode.accessCode;
 
@@ -302,7 +302,7 @@ describe('Board API calls', function () {
       res.body.should.not.have.property('accessCode');
     });
 
-    it('should update accessCode on an existing board', async function() {
+    it('should update accessCode on an existing board', async function () {
       const boardId = await helper.createMochaBoard(server, user.token);
 
       const updateData = {
@@ -321,7 +321,7 @@ describe('Board API calls', function () {
       res.body.accessCode.should.equal('UPDATED01');
     });
 
-    it('should return accessCode in GET response when set', async function() {
+    it('should return accessCode in GET response when set', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
         accessCode: 'gettest01'
@@ -331,6 +331,7 @@ describe('Board API calls', function () {
         .send(boardWithAccessCode)
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
         .expect(200);
 
       const boardId = createRes.body.id;
