@@ -136,7 +136,7 @@ async function getAccessBoard(req, res) {
 // ============================================
 
 /**
- * POST /api/admin/access-clients
+ * POST /admin/access-clients
  * Creates a new Access client.
  * Requires admin authentication (enforced by Swagger middleware).
  * Creates AccessClient and updates boards with accessCode.
@@ -198,7 +198,7 @@ async function createAccessClient(req, res) {
 }
 
 /**
- * GET /api/admin/access-clients
+ * GET /admin/access-clients
  * Lists all Access clients with stats.
  * Returns all clients with board counts, expiry status.
  * Populates rootBoard and createdBy.
@@ -250,7 +250,7 @@ async function listAccessClients(req, res) {
 }
 
 /**
- * PUT /api/admin/access-clients/:code
+ * PUT /admin/access-clients/:code
  * Updates an Access client.
  * Allowed fields: isActive, isListedInApp, subscription dates, branding.
  */
@@ -289,7 +289,7 @@ async function updateAccessClient(req, res) {
 }
 
 /**
- * GET /api/admin/access-clients/:code/stats
+ * GET /admin/access-clients/:code/stats
  * Gets detailed statistics for an Access client.
  * Returns client info, access counts, board list with tile counts.
  */
