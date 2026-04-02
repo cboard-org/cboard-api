@@ -80,8 +80,10 @@ async function getAccessBoard(req, res) {
       });
     }
 
-    // Get ALL boards with this accessCode
-    const boards = await Board.find({ accessCode: code });
+    // Get ALL boards with this accessCode (exclude PII fields for public endpoint)
+    const boards = await Board.find({ accessCode: code }).select(
+      '-email -author'
+    );
 
     if (!boards || boards.length === 0) {
       return res.status(404).json({
@@ -99,10 +101,14 @@ async function getAccessBoard(req, res) {
       });
     }
 
-    // Track access analytics
-    client.accessCount += 1;
-    client.lastAccessAt = new Date();
-    await client.save();
+    // Track access analytics atomically to avoid lost updates under concurrency
+    await AccessClient.updateOne(
+      { _id: client._id },
+      {
+        $inc: { accessCount: 1 },
+        $set: { lastAccessAt: new Date() }
+      }
+    );
 
     return res.status(200).json({
       client: {
