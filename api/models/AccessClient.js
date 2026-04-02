@@ -78,7 +78,6 @@ const accessClientSchema = new Schema(
   ACCESS_CLIENT_SCHEMA_OPTIONS
 );
 
-accessClientSchema.index({ code: 1 }, { unique: true });
 accessClientSchema.index({ isActive: 1, isListedInApp: 1 });
 
 const AccessClient = mongoose.model('AccessClient', accessClientSchema);
