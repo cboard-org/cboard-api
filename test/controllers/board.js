@@ -321,7 +321,7 @@ describe('Board API calls', function () {
       res.body.accessCode.should.equal('UPDATED01');
     });
 
-    it('should return accessCode in GET response when set', async function () {
+    it('should block direct access to boards with accessCode', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
         accessCode: 'gettest01'
@@ -336,15 +336,60 @@ describe('Board API calls', function () {
 
       const boardId = createRes.body.id;
 
+      // Direct access should be blocked with 403
       const getRes = await request(server)
         .get('/board/' + boardId)
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .expect(200);
+        .expect(403);
 
+      getRes.body.should.have.property('message');
+      getRes.body.message.should.equal('This board requires an access code');
+      getRes.body.should.have.property('requiresAccessCode');
+      getRes.body.requiresAccessCode.should.equal(true);
       getRes.body.should.have.property('accessCode');
       getRes.body.accessCode.should.equal('GETTEST01');
+    });
+
+    it('should exclude boards with accessCode from public boards listing', async function () {
+      // Create a public board without accessCode
+      const publicBoard = {
+        ...helper.boardData,
+        name: 'Public Board Without Code',
+        isPublic: true
+      };
+      await request(server)
+        .post('/board')
+        .send(publicBoard)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      // Create a public board with accessCode
+      const publicBoardWithCode = {
+        ...helper.boardData,
+        name: 'Public Board With Code',
+        isPublic: true,
+        accessCode: 'public01'
+      };
+      await request(server)
+        .post('/board')
+        .send(publicBoardWithCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      // Get public boards
+      const res = await request(server)
+        .get('/board/public')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      // Verify that boards with accessCode are not in the results
+      const boardsWithAccessCode = res.body.data.filter(b => b.accessCode !== null && b.accessCode !== undefined);
+      boardsWithAccessCode.should.have.lengthOf(0);
     });
   });
 
