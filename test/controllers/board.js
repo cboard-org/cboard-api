@@ -252,6 +252,102 @@ describe('Board API calls', function () {
     });
   });
 
+  describe('accessCode field behavior', function () {
+    it('should normalize accessCode to uppercase when creating a board', async function () {
+      const boardWithAccessCode = {
+        ...helper.boardData,
+        accessCode: 'cafe01'
+      };
+      const res = await request(server)
+        .post('/board')
+        .send(boardWithAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('accessCode');
+      res.body.accessCode.should.equal('CAFE01');
+    });
+
+    it('should trim whitespace from accessCode', async function () {
+      const boardWithAccessCode = {
+        ...helper.boardData,
+        accessCode: '  test01  '
+      };
+      const res = await request(server)
+        .post('/board')
+        .send(boardWithAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('accessCode');
+      res.body.accessCode.should.equal('TEST01');
+    });
+
+    it('should not include accessCode when not provided', async function () {
+      const boardWithoutAccessCode = { ...helper.boardData };
+      delete boardWithoutAccessCode.accessCode;
+
+      const res = await request(server)
+        .post('/board')
+        .send(boardWithoutAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.not.have.property('accessCode');
+    });
+
+    it('should update accessCode on an existing board', async function () {
+      const boardId = await helper.createMochaBoard(server, user.token);
+
+      const updateData = {
+        ...helper.boardData,
+        accessCode: 'updated01'
+      };
+      const res = await request(server)
+        .put('/board/' + boardId)
+        .send(updateData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('accessCode');
+      res.body.accessCode.should.equal('UPDATED01');
+    });
+
+    it('should return accessCode in GET response when set', async function () {
+      const boardWithAccessCode = {
+        ...helper.boardData,
+        accessCode: 'gettest01'
+      };
+      const createRes = await request(server)
+        .post('/board')
+        .send(boardWithAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const boardId = createRes.body.id;
+
+      const getRes = await request(server)
+        .get('/board/' + boardId)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      getRes.body.should.have.property('accessCode');
+      getRes.body.accessCode.should.equal('GETTEST01');
+    });
+  });
+
   describe('GET /board/byemail/:email', function() {
     it("only allows an admin to get another user's boards", async function() {
       const adminEmail = helper.generateEmail();
