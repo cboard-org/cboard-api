@@ -1264,6 +1264,183 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /access/clients:
+    x-swagger-router-controller: access
+    get:
+      operationId: getClients
+      description: Lists active companies for Cboard Access listing in the app. Returns clients where isActive=true, isListedInApp=true, and subscription is valid.
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessClientsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /access/{code}:
+    x-swagger-router-controller: access
+    get:
+      operationId: getAccessBoard
+      description: Gets ALL boards for an access code in a single request. Validates code exists and subscription is active. Returns client info, all boards array, and rootBoardId.
+      parameters:
+        - name: code
+          type: string
+          in: path
+          required: true
+          description: Access code for the client
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessBoardResponse"
+        "404":
+          description: Invalid or expired access code
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /admin/access-clients:
+    x-swagger-router-controller: access
+    post:
+      operationId: createAccessClient
+      description: Creates a new Access client. Requires admin authentication. Creates AccessClient and updates boards with accessCode.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: client
+          in: body
+          description: Access client data for creating a new client
+          required: true
+          schema:
+            $ref: "#/definitions/AccessClientCreate"
+      responses:
+        "201":
+          description: Success - client created
+          schema:
+            $ref: "#/definitions/AccessClientResponse"
+        "404":
+          description: Root board not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "409":
+          description: Code already exists
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: listAccessClients
+      description: Lists all Access clients with stats. Returns all clients with board counts and expiry status. Requires admin authentication.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessClientsAdminListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /admin/access-clients/{code}:
+    x-swagger-router-controller: access
+    put:
+      operationId: updateAccessClient
+      description: Updates an Access client. Requires admin authentication. Allowed fields include isActive, isListedInApp, subscription dates, and branding.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: code
+          type: string
+          in: path
+          required: true
+          description: Access code for the client
+        - name: updates
+          in: body
+          description: Fields to update
+          required: true
+          schema:
+            $ref: "#/definitions/AccessClientUpdate"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessClientResponse"
+        "404":
+          description: Client not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /admin/access-clients/{code}/stats:
+    x-swagger-router-controller: access
+    get:
+      operationId: getAccessClientStats
+      description: Gets detailed statistics for an Access client. Returns client info, access counts, and board list with tile counts. Requires admin authentication.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: code
+          type: string
+          in: path
+          required: true
+          description: Access code for the client
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              client:
+                $ref: "#/definitions/AccessClientResponse"
+              stats:
+                type: object
+                properties:
+                  totalAccesses:
+                    type: integer
+                  lastAccessAt:
+                    type: string
+                    format: date-time
+                  boardCount:
+                    type: integer
+                  boards:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        tilesCount:
+                          type: integer
+                  daysUntilExpiry:
+                    type: integer
+                  isExpired:
+                    type: boolean
+        "404":
+          description: Client not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -1945,4 +2122,242 @@ definitions:
       - phrase
       properties:
         phrase:
-          type: string        
+          type: string
+  AccessClientCreate:
+    type: object
+    required:
+      - code
+      - clientName
+      - rootBoardId
+      - subscriptionStart
+      - subscriptionEnd
+    properties:
+      code:
+        type: string
+        description: Unique code for the access client (uppercase)
+        example: ABC123
+      clientName:
+        type: string
+        description: Name of the client organization
+        example: Company Name
+      clientContact:
+        type: string
+        description: Contact information for the client
+      brandColor:
+        type: string
+        description: Brand color for the client (hex color)
+        example: "#FF5733"
+      rootBoardId:
+        type: string
+        description: ID of the root board
+      subscriptionStart:
+        type: string
+        format: date-time
+        description: Subscription start date
+      subscriptionEnd:
+        type: string
+        format: date-time
+        description: Subscription end date
+      boardIds:
+        type: array
+        items:
+          type: string
+        description: Array of board IDs to associate with this access code
+  AccessClientUpdate:
+    type: object
+    properties:
+      isActive:
+        type: boolean
+        description: Whether the client is active
+      isListedInApp:
+        type: boolean
+        description: Whether the client is listed in the app
+      subscriptionStart:
+        type: string
+        format: date-time
+        description: Subscription start date
+      subscriptionEnd:
+        type: string
+        format: date-time
+        description: Subscription end date
+      clientName:
+        type: string
+        description: Name of the client organization
+      clientContact:
+        type: string
+        description: Contact information for the client
+      brandColor:
+        type: string
+        description: Brand color for the client (hex color)
+  AccessClientResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Client ID
+      code:
+        type: string
+        description: Access code
+      clientName:
+        type: string
+        description: Client name
+      clientContact:
+        type: string
+        description: Client contact information
+      brandColor:
+        type: string
+        description: Brand color (hex)
+      rootBoardId:
+        type: string
+        description: Root board ID
+      isActive:
+        type: boolean
+        description: Whether client is active
+      isListedInApp:
+        type: boolean
+        description: Whether client is listed in app
+      subscriptionStart:
+        type: string
+        format: date-time
+        description: Subscription start date
+      subscriptionEnd:
+        type: string
+        format: date-time
+        description: Subscription end date
+      accessCount:
+        type: integer
+        description: Number of times accessed
+      lastAccessAt:
+        type: string
+        format: date-time
+        description: Last access timestamp
+      createdBy:
+        type: string
+        description: ID of user who created the client
+      createdAt:
+        type: string
+        format: date-time
+        description: Creation timestamp
+      updatedAt:
+        type: string
+        format: date-time
+        description: Last update timestamp
+  AccessClientsListResponse:
+    type: object
+    required:
+      - total
+      - data
+    properties:
+      total:
+        type: integer
+        description: Total number of clients
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Access code
+            clientName:
+              type: string
+              description: Client name
+            brandColor:
+              type: string
+              description: Brand color (hex)
+            rootBoard:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                caption:
+                  type: string
+                tilesCount:
+                  type: integer
+  AccessClientsAdminListResponse:
+    type: object
+    required:
+      - total
+      - data
+    properties:
+      total:
+        type: integer
+        description: Total number of clients
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            code:
+              type: string
+            clientName:
+              type: string
+            clientContact:
+              type: string
+            brandColor:
+              type: string
+            rootBoardId:
+              type: string
+            isActive:
+              type: boolean
+            isListedInApp:
+              type: boolean
+            subscriptionStart:
+              type: string
+              format: date-time
+            subscriptionEnd:
+              type: string
+              format: date-time
+            accessCount:
+              type: integer
+            lastAccessAt:
+              type: string
+              format: date-time
+            createdBy:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+            boardCount:
+              type: integer
+              description: Number of boards associated with this client
+            isExpired:
+              type: boolean
+              description: Whether the subscription has expired
+            daysUntilExpiry:
+              type: integer
+              description: Days until subscription expires (0 if expired)
+  AccessBoardResponse:
+    type: object
+    required:
+      - client
+      - boards
+      - rootBoardId
+    properties:
+      client:
+        type: object
+        properties:
+          code:
+            type: string
+            description: Access code
+          name:
+            type: string
+            description: Client name
+          color:
+            type: string
+            description: Brand color (hex)
+      boards:
+        type: array
+        items:
+          $ref: "#/definitions/Board"
+        description: All boards associated with this access code
+      rootBoardId:
+        type: string
+        description: ID of the root board        
