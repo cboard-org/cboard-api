@@ -80,7 +80,7 @@ async function getPublicBoards(req, res) {
     search && search.length ? getORQuery(searchFields, search, true) : {};
   const response = await paginatedResponse(
     Board,
-    { query: { ...query, isPublic: true } },
+    { query: { ...query, isPublic: true, accessCode: null } },
     req.query
   );
 
@@ -126,6 +126,16 @@ function getBoard(req, res) {
         message: 'Board does not exist. Board Id: ' + id
       });
     }
+
+    // If the board has accessCode, block direct access
+    if (boards.accessCode) {
+      return res.status(403).json({
+        message: 'This board requires an access code',
+        requiresAccessCode: true,
+        accessCode: boards.accessCode
+      });
+    }
+
     return res.status(200).json(boards.toJSON());
   });
 }
