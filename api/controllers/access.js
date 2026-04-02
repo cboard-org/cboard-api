@@ -176,7 +176,10 @@ async function createAccessClient(req, res) {
     await client.save();
 
     // Mark the boards with the accessCode
-    const allBoardIds = boardIds || [rootBoardId];
+    // Ensure rootBoardId is always included even if boardIds is empty array
+    const allBoardIds = boardIds && boardIds.length > 0 
+      ? [...new Set([rootBoardId.toString(), ...boardIds.map(id => id.toString())])]
+      : [rootBoardId];
     await Board.updateMany(
       { _id: { $in: allBoardIds } },
       { $set: { accessCode: code.toUpperCase() } }
@@ -207,23 +210,32 @@ async function listAccessClients(req, res) {
       .populate('createdBy', 'name email')
       .sort({ createdAt: -1 });
 
-    // For each client, count associated boards
-    const result = await Promise.all(
-      clients.map(async client => {
-        const boardCount = await Board.countDocuments({
-          accessCode: client.code
-        });
+    // Precompute board counts for all clients in a single query to avoid N+1
+    const accessCodes = clients.map(client => client.code);
+    const boardCounts = await Board.aggregate([
+      { $match: { accessCode: { $in: accessCodes } } },
+      { $group: { _id: '$accessCode', count: { $sum: 1 } } }
+    ]);
 
-        return {
-          ...client.toJSON(),
-          boardCount,
-          isExpired: client.subscriptionEnd < new Date(),
-          daysUntilExpiry: Math.ceil(
-            (client.subscriptionEnd - new Date()) / (1000 * 60 * 60 * 24)
-          )
-        };
-      })
-    );
+    const boardCountMap = boardCounts.reduce((map, entry) => {
+      map[entry._id] = entry.count;
+      return map;
+    }, {});
+
+    const now = new Date();
+    const result = clients.map(client => {
+      const boardCount = boardCountMap[client.code] || 0;
+      const daysUntilExpiry = Math.ceil(
+        (client.subscriptionEnd - now) / (1000 * 60 * 60 * 24)
+      );
+
+      return {
+        ...client.toJSON(),
+        boardCount,
+        isExpired: client.subscriptionEnd < now,
+        daysUntilExpiry: Math.max(0, daysUntilExpiry)
+      };
+    });
 
     return res.status(200).json({
       total: result.length,
@@ -295,6 +307,11 @@ async function getAccessClientStats(req, res) {
 
     const boards = await Board.find({ accessCode: code }, { name: 1, tiles: 1 });
 
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil(
+      (client.subscriptionEnd - now) / (1000 * 60 * 60 * 24)
+    );
+
     return res.status(200).json({
       client: client.toJSON(),
       stats: {
@@ -306,10 +323,8 @@ async function getAccessClientStats(req, res) {
           name: b.name,
           tilesCount: b.tiles?.length || 0
         })),
-        daysUntilExpiry: Math.ceil(
-          (client.subscriptionEnd - new Date()) / (1000 * 60 * 60 * 24)
-        ),
-        isExpired: client.subscriptionEnd < new Date()
+        daysUntilExpiry: Math.max(0, daysUntilExpiry),
+        isExpired: client.subscriptionEnd < now
       }
     });
   } catch (err) {
