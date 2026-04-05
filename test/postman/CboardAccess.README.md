@@ -24,6 +24,19 @@ Cboard Access allows businesses to offer AAC boards in their locations via QR co
 
 ## Setup Instructions
 
+### Prerequisites
+
+**IMPORTANT: You need an admin user to test admin endpoints.**
+
+To create an admin user, update your user's role in MongoDB:
+```javascript
+// In MongoDB shell or Compass
+db.users.updateOne(
+  { email: "your-email@example.com" },
+  { $set: { role: "admin" } }
+)
+```
+
 ### 1. Import the Collection
 
 1. Open Postman
@@ -182,6 +195,23 @@ Each request includes automated tests:
 
 ## Troubleshooting
 
+### AUTH_TOKEN Not Being Set After Login
+- Check the Postman Console (View → Show Postman Console) for error messages
+- Verify your email and password are correct in the login request body
+- Make sure the API server is running (`npm run dev` in cboard-api)
+- Check that the response contains `authToken` field
+
+### 403 Forbidden on Admin Endpoints
+- **You need an admin user!** By default, all users have `role: "user"`
+- Update your user to admin role in MongoDB:
+  ```javascript
+  db.users.updateOne(
+    { email: "your-email@example.com" },
+    { $set: { role: "admin" } }
+  )
+  ```
+- After updating, log in again to get a new token with admin privileges
+
 ### "Invalid access code" Error
 - Ensure the client is active (`isActive: true`)
 - Check subscription dates are valid
@@ -190,7 +220,7 @@ Each request includes automated tests:
 ### Authentication Errors
 - Ensure `AUTH_TOKEN` is set (run login request)
 - Check token hasn't expired
-- Verify user has admin privileges
+- Verify user has admin privileges (role: "admin")
 
 ### Board Not Found
 - Ensure `root_board_id` exists in the database
