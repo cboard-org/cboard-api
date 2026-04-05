@@ -28,9 +28,18 @@
 									"    pm.expect(jsonData).to.have.property('rootBoardId');",
 									"});",
 									"",
+									"pm.test(\"Response contains auto-discovered boards\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('linkedBoardsCount');",
+									"    pm.expect(jsonData).to.have.property('linkedBoardIds');",
+									"    pm.expect(jsonData.linkedBoardsCount).to.be.at.least(1);",
+									"    console.log(\"Auto-discovered \" + jsonData.linkedBoardsCount + \" boards\");",
+									"});",
+									"",
 									"// Save the code for later requests",
 									"if (pm.response.code === 201) {",
-									"    pm.environment.set(\"access_code\", pm.response.json().code);",
+									"    pm.collectionVariables.set(\"access_code\", pm.response.json().code);",
+									"    console.log(\"Access code saved: \" + pm.response.json().code);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -46,18 +55,18 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{AUTH_TOKEN}}",
+								"value": "Bearer {{token}}",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"code\": \"TEST01\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientContact\": \"contact@testcoffee.com\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\",\n    \"boardIds\": [\"{{root_board_id}}\"]\n}"
+							"raw": "{\n    \"code\": \"TEST01\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientContact\": \"contact@testcoffee.com\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
 						},
 						"url": {
-							"raw": "{{API_URL}}/admin/access-clients",
+							"raw": "{{url}}/admin/access-clients",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"admin",
@@ -106,14 +115,14 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{AUTH_TOKEN}}",
+								"value": "Bearer {{token}}",
 								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{API_URL}}/admin/access-clients",
+							"raw": "{{url}}/admin/access-clients",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"admin",
@@ -153,7 +162,7 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{AUTH_TOKEN}}",
+								"value": "Bearer {{token}}",
 								"type": "text"
 							}
 						],
@@ -162,9 +171,9 @@
 							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"clientContact\": \"newemail@testcoffee.com\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true,\n    \"isListedInApp\": true\n}"
 						},
 						"url": {
-							"raw": "{{API_URL}}/admin/access-clients/{{access_code}}",
+							"raw": "{{url}}/admin/access-clients/{{access_code}}",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"admin",
@@ -205,7 +214,7 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{AUTH_TOKEN}}",
+								"value": "Bearer {{token}}",
 								"type": "text"
 							}
 						],
@@ -214,9 +223,9 @@
 							"raw": "{\n    \"isActive\": false\n}"
 						},
 						"url": {
-							"raw": "{{API_URL}}/admin/access-clients/{{access_code}}",
+							"raw": "{{url}}/admin/access-clients/{{access_code}}",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"admin",
@@ -263,14 +272,14 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer {{AUTH_TOKEN}}",
+								"value": "Bearer {{token}}",
 								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{API_URL}}/admin/access-clients/{{access_code}}/stats",
+							"raw": "{{url}}/admin/access-clients/{{access_code}}/stats",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"admin",
@@ -319,7 +328,8 @@
 									"",
 									"// Save first code for testing board access",
 									"if (pm.response.json().data.length > 0) {",
-									"    pm.environment.set(\"test_access_code\", pm.response.json().data[0].code);",
+								"    pm.collectionVariables.set(\"test_access_code\", pm.response.json().data[0].code);",
+								"    console.log(\"Test access code saved: \" + pm.response.json().data[0].code);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -330,9 +340,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_URL}}/access/clients",
+							"raw": "{{url}}/access/clients",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"access",
@@ -382,9 +392,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_URL}}/access/{{access_code}}",
+							"raw": "{{url}}/access/{{access_code}}",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"access",
@@ -412,16 +422,8 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test(\"Response contains token\", function () {",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('token');",
-									"});",
-									"",
-									"// Save the token",
-									"if (pm.response.code === 200) {",
-									"    pm.environment.set(\"AUTH_TOKEN\", pm.response.json().token);",
-									"    console.log(\"Auth token saved!\");",
-									"}"
+									"pm.globals.set(\"token\", pm.response.json().authToken);",
+									"console.log(\"Token saved: \" + pm.globals.get(\"token\").substring(0, 30) + \"...\");"
 								],
 								"type": "text/javascript"
 							}
@@ -440,13 +442,14 @@
 							"raw": "{\n    \"email\": \"admin@cboard.io\",\n    \"password\": \"your-password\"\n}"
 						},
 						"url": {
-							"raw": "{{API_URL}}/user/login",
+							"raw": "{{url}}/user/login/",
 							"host": [
-								"{{API_URL}}"
+								"{{url}}"
 							],
 							"path": [
 								"user",
-								"login"
+								"login",
+								""
 							]
 						},
 						"description": "Login to obtain an authentication token. Update the email and password with valid admin credentials."
@@ -458,13 +461,8 @@
 	],
 	"variable": [
 		{
-			"key": "API_URL",
+			"key": "url",
 			"value": "http://localhost:10010",
-			"type": "string"
-		},
-		{
-			"key": "AUTH_TOKEN",
-			"value": "",
 			"type": "string"
 		},
 		{
