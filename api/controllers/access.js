@@ -13,6 +13,58 @@ module.exports = {
 };
 
 /**
+ * Recursively discovers all boards linked from a root board.
+ * Traverses tile.loadBoard references to find the complete board structure.
+ * @param {string} rootBoardId - The starting board ID
+ * @param {Set} visited - Set of already visited board IDs (prevents cycles)
+ * @returns {Promise<string[]>} - Array of all discovered board IDs
+ */
+async function discoverLinkedBoards(rootBoardId, visited = new Set()) {
+  // Prevent infinite loops from circular references
+  if (visited.has(rootBoardId.toString())) {
+    return [];
+  }
+  visited.add(rootBoardId.toString());
+
+  const board = await Board.findById(rootBoardId);
+  if (!board) {
+    return [];
+  }
+
+  const linkedBoardIds = [];
+
+  // Find all tiles that link to other boards
+  if (board.tiles && Array.isArray(board.tiles)) {
+    for (const tile of board.tiles) {
+      if (tile.loadBoard) {
+        const linkedId = tile.loadBoard.toString();
+        if (!visited.has(linkedId)) {
+          linkedBoardIds.push(linkedId);
+          // Recursively discover boards linked from this board
+          const nestedIds = await discoverLinkedBoards(linkedId, visited);
+          linkedBoardIds.push(...nestedIds);
+        }
+      }
+    }
+  }
+
+  return linkedBoardIds;
+}
+
+/**
+ * Gets all board IDs for an access client, starting from root.
+ * Returns rootBoardId + all recursively linked boards.
+ * @param {string} rootBoardId - The root board ID
+ * @returns {Promise<string[]>} - Array of all board IDs
+ */
+async function getAllLinkedBoardIds(rootBoardId) {
+  const visited = new Set();
+  const linkedIds = await discoverLinkedBoards(rootBoardId, visited);
+  // Return unique IDs including root
+  return [...new Set([rootBoardId.toString(), ...linkedIds])];
+}
+
+/**
  * GET /access/clients
  * Lists active companies for Cboard Access listing in the app.
  * Returns clients where isActive=true, isListedInApp=true, and subscription is valid.
@@ -151,7 +203,7 @@ async function createAccessClient(req, res) {
     rootBoardId,
     subscriptionStart,
     subscriptionEnd,
-    boardIds // Array of board IDs to associate
+    boardIds // Optional: Array of board IDs to associate. If not provided, auto-discovers linked boards.
   } = req.body;
 
   try {
@@ -175,17 +227,27 @@ async function createAccessClient(req, res) {
 
     await client.save();
 
-    // Mark the boards with the accessCode
-    // Ensure rootBoardId is always included even if boardIds is empty array
-    const allBoardIds = boardIds && boardIds.length > 0 
-      ? [...new Set([rootBoardId.toString(), ...boardIds.map(id => id.toString())])]
-      : [rootBoardId];
+    // Determine which boards to associate with the access code
+    // If boardIds provided, use them; otherwise auto-discover all linked boards
+    let allBoardIds;
+    if (boardIds && boardIds.length > 0) {
+      allBoardIds = [...new Set([rootBoardId.toString(), ...boardIds.map(id => id.toString())])];
+    } else {
+      // Auto-discover all boards linked from the root board
+      allBoardIds = await getAllLinkedBoardIds(rootBoardId);
+    }
+
     await Board.updateMany(
       { _id: { $in: allBoardIds } },
       { $set: { accessCode: code.toUpperCase() } }
     );
 
-    return res.status(201).json(client.toJSON());
+    // Return response with discovered board count
+    const response = client.toJSON();
+    response.linkedBoardsCount = allBoardIds.length;
+    response.linkedBoardIds = allBoardIds;
+
+    return res.status(201).json(response);
   } catch (err) {
     if (err.code === 11000) {
       return res.status(409).json({ message: 'Code already exists' });
