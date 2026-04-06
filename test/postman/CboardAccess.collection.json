@@ -328,8 +328,8 @@
 									"",
 									"// Save first code for testing board access",
 									"if (pm.response.json().data.length > 0) {",
-								"    pm.collectionVariables.set(\"test_access_code\", pm.response.json().data[0].code);",
-								"    console.log(\"Test access code saved: \" + pm.response.json().data[0].code);",
+								"    pm.collectionVariables.set(\"access_code\", pm.response.json().data[0].code);",
+								"    console.log(\"Access code saved: \" + pm.response.json().data[0].code);",
 									"}"
 								],
 								"type": "text/javascript"
