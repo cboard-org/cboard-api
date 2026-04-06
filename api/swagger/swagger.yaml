@@ -2301,7 +2301,13 @@ definitions:
             brandColor:
               type: string
             rootBoardId:
-              type: string
+              type: object
+              description: Populated root board object
+              properties:
+                _id:
+                  type: string
+                name:
+                  type: string
             isActive:
               type: boolean
             isListedInApp:
@@ -2318,7 +2324,15 @@ definitions:
               type: string
               format: date-time
             createdBy:
-              type: string
+              type: object
+              description: Populated user object who created the client
+              properties:
+                _id:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
             createdAt:
               type: string
               format: date-time
@@ -2356,8 +2370,42 @@ definitions:
       boards:
         type: array
         items:
-          $ref: "#/definitions/Board"
+          $ref: "#/definitions/AccessBoard"
         description: All boards associated with this access code
       rootBoardId:
         type: string
-        description: ID of the root board        
+        description: ID of the root board
+  AccessBoard:
+    type: object
+    description: Board data returned for access endpoints (excludes PII fields like author and email)
+    required:
+      - id
+      - name
+      - tiles
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      tiles:
+        type: array
+        items:
+          type: object
+      caption:
+        type: string
+      isPublic:
+        type: boolean
+      lastEdited:
+        type: string
+        format: date-time
+      description:
+        type: string
+      locale:
+        type: string
+      isFixed:
+        type: boolean
+      grid:
+        type: object
+      accessCode:
+        type: string
+        description: The access code associated with this board
