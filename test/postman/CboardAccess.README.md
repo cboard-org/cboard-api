@@ -50,8 +50,8 @@ The collection includes these variables (can be edited in collection variables o
 
 | Variable | Default Value | Description |
 |----------|---------------|-------------|
-| `API_URL` | `http://localhost:10010` | Base API URL |
-| `AUTH_TOKEN` | (empty) | Authentication token for admin endpoints |
+| `url` | `http://localhost:10010` | Base API URL |
+| `token` | (set automatically) | Authentication token for admin endpoints (saved to globals on login) |
 | `access_code` | `TEST01` | Access code for testing |
 | `root_board_id` | (empty) | Board ID to use as root board |
 
@@ -141,8 +141,8 @@ You can create a custom environment for different deployment targets:
 
 **Optional Fields:**
 - `clientContact`: Contact information
-- `brandColor`: Hex color code (default: `#1976d2`)
-- `boardIds`: Array of board IDs to associate
+- `brandColor`: Hex color code
+- `boardIds`: Array of board IDs to associate (if omitted, linked boards are auto-discovered from root board)
 
 ### Update Client
 
