@@ -16,7 +16,8 @@ const QR_WIDTH = 500;
  *
  * @param {string} code - The access code (e.g., "CAFE01")
  * @param {string} baseUrl - Base URL for the access link (default: CBOARD_APP_URL or https://app.cboard.io)
- * @returns {Promise<void>}
+ * @returns {Promise<{url: string, outputPath: string}>} - The encoded URL and output file path
+ * @throws {Error} If code is not provided or QR generation fails
  *
  * @example
  * // CLI usage:
@@ -25,15 +26,12 @@ const QR_WIDTH = 500;
  * // node scripts/generate-qr.js TEST01 http://localhost:3000
  *
  * // Programmatic usage:
- * await generateQRCode('CAFE01', 'https://app.cboard.io');
+ * const { url, outputPath } = await generateQRCode('CAFE01', 'https://app.cboard.io');
  * // Creates: CAFE01-qr.png in current directory
  */
-async function generateQRCode(code, baseUrl) {
+async function generateQRCode(code, baseUrl = DEFAULT_BASE_URL) {
   if (!code) {
-    console.error('Error: Access code is required');
-    console.error('\nUsage: node scripts/generate-qr.js <CODE> [BASE_URL]');
-    console.error('Example: node scripts/generate-qr.js CAFE01 https://app.cboard.io');
-    process.exit(1);
+    throw new Error('Access code is required');
   }
 
   const normalizedCode = code.toUpperCase();
@@ -41,28 +39,41 @@ async function generateQRCode(code, baseUrl) {
   const filename = `${normalizedCode}-qr.png`;
   const outputPath = path.join(process.cwd(), filename);
 
-  try {
-    await QRCode.toFile(outputPath, url, {
-      width: QR_WIDTH,
-      margin: 2,
-      errorCorrectionLevel: 'M',
-      color: {
-        dark: '#000000',
-        light: '#ffffff'
-      }
-    });
-  } catch (error) {
-    console.error('Error generating QR code:', error.message);
-    process.exit(1);
-  }
+  await QRCode.toFile(outputPath, url, {
+    width: QR_WIDTH,
+    margin: 2,
+    errorCorrectionLevel: 'M',
+    color: {
+      dark: '#000000',
+      light: '#ffffff'
+    }
+  });
+
+  return { url, outputPath };
 }
 
-const args = process.argv.slice(2);
-const code = args[0];
-const baseUrl = args[1] || DEFAULT_BASE_URL;
-
 if (require.main === module) {
-  generateQRCode(code, baseUrl);
+  const args = process.argv.slice(2);
+  const code = args[0];
+  const baseUrl = args[1] || DEFAULT_BASE_URL;
+
+  if (!code) {
+    console.error('Error: Access code is required');
+    console.error('\nUsage: node scripts/generate-qr.js <CODE> [BASE_URL]');
+    console.error('Example: node scripts/generate-qr.js CAFE01 https://app.cboard.io');
+    process.exit(1);
+  }
+
+  generateQRCode(code, baseUrl)
+    .then(({ url, outputPath }) => {
+      console.log('QR code generated successfully!');
+      console.log('  URL encoded:', url);
+      console.log('  Output file:', outputPath);
+    })
+    .catch(error => {
+      console.error('Error generating QR code:', error.message);
+      process.exit(1);
+    });
 }
 
 module.exports = { generateQRCode };
