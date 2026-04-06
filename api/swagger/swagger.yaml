@@ -2242,6 +2242,14 @@ definitions:
         type: string
         format: date-time
         description: Last update timestamp
+      linkedBoardsCount:
+        type: integer
+        description: Number of boards auto-discovered and linked to this client (only in create response)
+      linkedBoardIds:
+        type: array
+        items:
+          type: string
+        description: Array of board IDs that were auto-discovered and linked (only in create response)
   AccessClientsListResponse:
     type: object
     required:
