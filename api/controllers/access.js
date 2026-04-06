@@ -39,10 +39,14 @@ async function discoverLinkedBoards(rootBoardId, visited = new Set()) {
       if (tile.loadBoard) {
         const linkedId = tile.loadBoard.toString();
         if (!visited.has(linkedId)) {
-          linkedBoardIds.push(linkedId);
-          // Recursively discover boards linked from this board
-          const nestedIds = await discoverLinkedBoards(linkedId, visited);
-          linkedBoardIds.push(...nestedIds);
+          // Verify the linked board exists before adding to avoid phantom entries
+          const linkedBoard = await Board.findById(linkedId);
+          if (linkedBoard) {
+            linkedBoardIds.push(linkedId);
+            // Recursively discover boards linked from this board
+            const nestedIds = await discoverLinkedBoards(linkedId, visited);
+            linkedBoardIds.push(...nestedIds);
+          }
         }
       }
     }
