@@ -4,6 +4,7 @@ const moment = require('moment');
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
+const AccessPoint = require('../models/AccessPoint');
 const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
 const { processBase64Images, hasBase64Images } = require('../helpers/imageProcessor');
 
@@ -89,7 +90,7 @@ async function getPublicBoards(req, res) {
 
 async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
-  Board.findByIdAndRemove(id, function (err, boards) {
+  Board.findByIdAndRemove(id, async function (err, boards) {
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
@@ -102,6 +103,14 @@ async function deleteBoard(req, res) {
         error: 'Board not found.'
       });
     }
+    await AccessPoint.updateMany(
+      { linkedBoardsIds: id },
+      { $pull: { linkedBoardsIds: id } }
+    );
+    await AccessPoint.updateMany(
+      { rootBoardId: id },
+      { $set: { rootBoardId: null } }
+    );
     return res.status(200).json(boards);
   });
 }
