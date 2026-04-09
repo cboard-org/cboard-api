@@ -3,35 +3,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const accessPointSchema = new Schema(
-  {
-    code: {
-      type: String,
-      required: true,
-      trim: true,
-      uppercase: true
-    },
-    rootBoardId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Board',
-      required: true
-    },
-    isListedInApp: {
-      type: Boolean,
-      default: true
-    },
-    accessCount: {
-      type: Number,
-      default: 0
-    },
-    lastAccessAt: {
-      type: Date,
-      default: null
-    }
-  },
-  { _id: true }
-);
-
 const ACCESS_CLIENT_SCHEMA_DEFINITION = {
   slug: {
     type: String,
@@ -71,8 +42,7 @@ const ACCESS_CLIENT_SCHEMA_DEFINITION = {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  },
-  accessPoints: [accessPointSchema]
+  }
 };
 
 const ACCESS_CLIENT_SCHEMA_OPTIONS = {
