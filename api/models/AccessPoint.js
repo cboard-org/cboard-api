@@ -29,6 +29,11 @@ const ACCESS_POINT_SCHEMA_DEFINITION = {
   lastAccessAt: {
     type: Date,
     default: null
+  },
+  linkedBoardsIds: {
+    type: [Schema.Types.ObjectId],
+    ref: 'Board',
+    default: []
   }
 };
 
