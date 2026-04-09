@@ -299,7 +299,7 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.accessPointCode.should.equal(null);
+      expect(res.body.accessPointCode).to.be.null;
     });
 
     it('should update accessPointCode on an existing board', async function () {
