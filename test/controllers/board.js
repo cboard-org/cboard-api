@@ -336,7 +336,7 @@ describe('Board API calls', function () {
 
       const boardId = createRes.body.id;
 
-      // Direct access should be blocked with 403
+      // Direct access should be blocked with 403 for regular users
       const getRes = await request(server)
         .get('/board/' + boardId)
         .set('Authorization', `Bearer ${user.token}`)
@@ -350,6 +350,19 @@ describe('Board API calls', function () {
       getRes.body.requiresAccessCode.should.equal(true);
       getRes.body.should.have.property('accessPointCode');
       getRes.body.accessPointCode.should.equal('GETTEST01');
+
+      // Admins should be able to access the board directly
+      const adminEmail = helper.generateEmail();
+      const admin = await helper.prepareUser(server, { role: 'admin', email: adminEmail });
+      const adminRes = await request(server)
+        .get('/board/' + boardId)
+        .set('Authorization', `Bearer ${admin.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      adminRes.body.should.have.property('accessPointCode');
+      adminRes.body.accessPointCode.should.equal('GETTEST01');
     });
 
     it('should exclude boards with accessCode from public boards listing', async function () {
