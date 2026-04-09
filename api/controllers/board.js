@@ -136,8 +136,8 @@ function getBoard(req, res) {
       });
     }
 
-    // If the board has accessPointCode, block direct access
-    if (boards.accessPointCode) {
+    // If the board has accessPointCode, block direct access (admins bypass this)
+    if (boards.accessPointCode && !(req.user && req.user.isAdmin)) {
       return res.status(403).json({
         message: 'This board requires an access code',
         requiresAccessCode: true,
