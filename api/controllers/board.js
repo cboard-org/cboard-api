@@ -5,6 +5,8 @@ const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 const AccessPoint = require('../models/AccessPoint');
+const User = require('../models/User');
+const { getTokenData } = require('../helpers/auth');
 const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
 const { processBase64Images, hasBase64Images } = require('../helpers/imageProcessor');
 
@@ -136,16 +138,32 @@ function getBoard(req, res) {
       });
     }
 
-    // If the board has accessPointCode, block direct access (admins bypass this)
-    if (boards.accessPointCode && !(req.user && req.user.isAdmin)) {
-      return res.status(403).json({
-        message: 'This board requires an access code',
-        requiresAccessCode: true,
-        accessPointCode: boards.accessPointCode
-      });
+    // If no accessPointCode, serve normally
+    if (!boards.accessPointCode) {
+      return res.status(200).json(boards.toJSON());
     }
 
-    return res.status(200).json(boards.toJSON());
+    // Board is access-protected. Check if caller is admin by decoding the token manually —
+    // req.user is not populated for this public route.
+    let adminCheckPromise = Promise.resolve(false);
+    const authHeader = req.get('Authorization');
+    if (authHeader) {
+      const tokenData = getTokenData(authHeader.split(' ')[1]);
+      if (tokenData?.id) {
+        adminCheckPromise = User.getById(tokenData.id).then(user => !!(user && user.isAdmin));
+      }
+    }
+
+    adminCheckPromise.then(isAdmin => {
+      if (!isAdmin) {
+        return res.status(403).json({
+          message: 'This board requires an access code',
+          requiresAccessCode: true,
+          accessPointCode: boards.accessPointCode
+        });
+      }
+      return res.status(200).json(boards.toJSON());
+    });
   });
 }
 
