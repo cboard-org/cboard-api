@@ -63,10 +63,11 @@ const BOARD_SCHEMA_DEFINITION = {
     default: false
   },
   grid: {},
-  accessCode: {
+  accessPointCode: {
     type: String,
     trim: true,
-    uppercase: true
+    uppercase: true,
+    default: null
   }
 };
 
@@ -86,8 +87,8 @@ const BOARD_SCHEMA_OPTIONS = {
 
 const boardSchema = new Schema(BOARD_SCHEMA_DEFINITION, BOARD_SCHEMA_OPTIONS);
 
-// Sparse index skips documents where accessCode is missing, optimizing queries for Access boards
-boardSchema.index({ accessCode: 1 }, { sparse: true });
+// Sparse index skips documents where accessPointCode is null/missing, optimizing queries for Access boards
+boardSchema.index({ accessPointCode: 1 }, { sparse: true });
 
 const validatePresenceOf = value => value && value.length;
 
