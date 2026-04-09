@@ -9,6 +9,7 @@ const should = chai.should();
 const helper = require('../helper');
 
 const AccessClient = require('../../api/models/AccessClient');
+const AccessPoint = require('../../api/models/AccessPoint');
 const Board = require('../../api/models/Board');
 
 //Parent block
@@ -46,19 +47,23 @@ describe('Access API calls', function () {
     helper.prepareNodemailerMock(true); //disable mockery
     await helper.deleteMochaUsers();
     await Board.deleteMany({ author: 'cboard mocha test' });
-    await AccessClient.deleteMany({ clientName: /mocha test/i });
+    const clients = await AccessClient.find({ 'client.name': /mocha test/i });
+    const clientIds = clients.map(c => c._id);
+    await AccessPoint.deleteMany({ accessClient: { $in: clientIds } });
+    await AccessClient.deleteMany({ 'client.name': /mocha test/i });
   });
 
   describe('POST /admin/access-clients', function () {
-    it('it should CREATE an access client with rootBoard only', async function () {
+    it('it should CREATE an access client and auto-discover linked boards', async function () {
       const clientData = {
-        code: 'TEST01',
+        slug: 'test-01',
         clientName: 'Test Client mocha test',
         clientContact: 'test@example.com',
         brandColor: '#FF5733',
         rootBoardId: testBoardId,
+        accessPointCode: 'TEST01',
         subscriptionStart: new Date(),
-        subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+        subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
 
       const res = await request(server)
@@ -70,71 +75,26 @@ describe('Access API calls', function () {
         .expect(201);
 
       res.body.should.be.a('object');
-      res.body.should.have.property('code').eql('TEST01');
-      res.body.should.have.property('clientName').eql('Test Client mocha test');
+      res.body.should.have.property('slug').eql('test-01');
+      res.body.client.should.have.property('name').eql('Test Client mocha test');
       res.body.should.have.property('brandColor').eql('#FF5733');
       res.body.should.have.property('createdBy');
+      res.body.should.have.property('accessPoint');
+      res.body.accessPoint.should.have.property('code').eql('TEST01');
+      // rootBoard has no tile links, so discovery returns just the root
+      res.body.accessPoint.linkedBoardsIds.length.should.eql(1);
 
-      // Verify board was updated with accessCode
+      // Verify board was marked with accessPointCode
       const board = await Board.findById(testBoardId);
-      board.accessCode.should.eql('TEST01');
+      board.accessPointCode.should.eql('TEST01');
     });
 
-    it('it should CREATE an access client with multiple boards', async function () {
+    it('it should NOT CREATE with duplicate slug', async function () {
       const clientData = {
-        code: 'TEST02',
-        clientName: 'Test Client 2 mocha test',
-        rootBoardId: testBoardId,
-        subscriptionStart: new Date(),
-        subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        boardIds: [testBoardId, testBoardId2],
-      };
-
-      const res = await request(server)
-        .post('/admin/access-clients')
-        .send(clientData)
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(201);
-
-      res.body.should.have.property('code').eql('TEST02');
-
-      // Verify both boards were updated
-      const board1 = await Board.findById(testBoardId);
-      const board2 = await Board.findById(testBoardId2);
-      board1.accessCode.should.eql('TEST02');
-      board2.accessCode.should.eql('TEST02');
-    });
-
-    it('it should include rootBoard even when boardIds is empty array', async function () {
-      const clientData = {
-        code: 'TEST03',
-        clientName: 'Test Client 3 mocha test',
-        rootBoardId: testBoardId,
-        subscriptionStart: new Date(),
-        subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        boardIds: [], // Empty array
-      };
-
-      const res = await request(server)
-        .post('/admin/access-clients')
-        .send(clientData)
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(201);
-
-      // Verify rootBoard was updated despite empty boardIds
-      const board = await Board.findById(testBoardId);
-      board.accessCode.should.eql('TEST03');
-    });
-
-    it('it should NOT CREATE with duplicate code', async function () {
-      const clientData = {
-        code: 'DUPLICATE',
+        slug: 'duplicate',
         clientName: 'Test Client mocha test',
         rootBoardId: testBoardId,
+        accessPointCode: 'DUPL01',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -146,10 +106,39 @@ describe('Access API calls', function () {
         .set('Authorization', `Bearer ${adminUser.token}`)
         .expect(201);
 
-      // Try to create duplicate
+      // Try to create with same slug
       const res = await request(server)
         .post('/admin/access-clients')
+        .send({ ...clientData, accessPointCode: 'DUPL02' })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(409);
+
+      res.body.should.have.property('message').eql('Slug already exists');
+    });
+
+    it('it should NOT CREATE with duplicate access point code', async function () {
+      const clientData = {
+        slug: 'duplicate-code-a',
+        clientName: 'Test Client mocha test',
+        rootBoardId: testBoardId,
+        accessPointCode: 'DUPCODE',
+        subscriptionStart: new Date(),
+        subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      };
+
+      // Create first client
+      await request(server)
+        .post('/admin/access-clients')
         .send(clientData)
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      // Try to create with same accessPointCode but different slug
+      const res = await request(server)
+        .post('/admin/access-clients')
+        .send({ ...clientData, slug: 'duplicate-code-b' })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -160,9 +149,10 @@ describe('Access API calls', function () {
 
     it('it should NOT CREATE with non-existent rootBoardId', async function () {
       const clientData = {
-        code: 'TEST04',
+        slug: 'test-04',
         clientName: 'Test Client mocha test',
         rootBoardId: '507f1f77bcf86cd799439011', // Non-existent ID
+        accessPointCode: 'TEST04',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -180,9 +170,10 @@ describe('Access API calls', function () {
 
     it('it should NOT CREATE without authorization', async function () {
       const clientData = {
-        code: 'TEST05',
+        slug: 'test-05',
         clientName: 'Test Client mocha test',
         rootBoardId: testBoardId,
+        accessPointCode: 'TEST05',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -202,21 +193,22 @@ describe('Access API calls', function () {
       await request(server)
         .post('/admin/access-clients')
         .send({
-          code: 'LIST01',
+          slug: 'list-01',
           clientName: 'List Test 1 mocha test',
           rootBoardId: testBoardId,
+          accessPointCode: 'LIST01',
           subscriptionStart: new Date(),
           subscriptionEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          boardIds: [testBoardId, testBoardId2],
         })
         .set('Authorization', `Bearer ${adminUser.token}`);
 
       await request(server)
         .post('/admin/access-clients')
         .send({
-          code: 'LIST02',
+          slug: 'list-02',
           clientName: 'List Test 2 mocha test',
           rootBoardId: testBoardId,
+          accessPointCode: 'LIST02',
           subscriptionStart: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
           subscriptionEnd: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // Expired
         })
@@ -236,15 +228,15 @@ describe('Access API calls', function () {
       res.body.should.have.property('data').that.is.an('array');
       res.body.data.length.should.be.at.least(2);
 
-      // Check first client
-      const client1 = res.body.data.find((c) => c.code === 'LIST01');
-      client1.should.have.property('boardCount').eql(2);
+      // Test boards have no tile links, so auto-discovery returns just root = 1 board
+      const client1 = res.body.data.find((c) => c.slug === 'list-01');
+      client1.should.have.property('boardCount').eql(1);
       client1.should.have.property('isExpired').eql(false);
       client1.should.have.property('daysUntilExpiry');
       client1.daysUntilExpiry.should.be.at.least(0);
 
       // Check expired client
-      const client2 = res.body.data.find((c) => c.code === 'LIST02');
+      const client2 = res.body.data.find((c) => c.slug === 'list-02');
       client2.should.have.property('isExpired').eql(true);
       client2.should.have.property('daysUntilExpiry').eql(0); // Should be clamped at 0
     });
@@ -258,14 +250,15 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('PUT /admin/access-clients/:code', function () {
+  describe('PUT /admin/access-clients/:slug', function () {
     beforeEach(async function () {
       await request(server)
         .post('/admin/access-clients')
         .send({
-          code: 'UPDATE01',
+          slug: 'update-01',
           clientName: 'Update Test mocha test',
           rootBoardId: testBoardId,
+          accessPointCode: 'UPDATE01',
           subscriptionStart: new Date(),
           subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
           brandColor: '#000000',
@@ -281,14 +274,14 @@ describe('Access API calls', function () {
       };
 
       const res = await request(server)
-        .put('/admin/access-clients/UPDATE01')
+        .put('/admin/access-clients/update-01')
         .send(updates)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('clientName').eql('Updated Name mocha test');
+      res.body.client.should.have.property('name').eql('Updated Name mocha test');
       res.body.should.have.property('brandColor').eql('#FFFFFF');
       res.body.should.have.property('isActive').eql(false);
     });
@@ -300,7 +293,7 @@ describe('Access API calls', function () {
       };
 
       const res = await request(server)
-        .put('/admin/access-clients/UPDATE01')
+        .put('/admin/access-clients/update-01')
         .send(updates)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -311,9 +304,9 @@ describe('Access API calls', function () {
       actualDate.getTime().should.be.closeTo(newEndDate.getTime(), 1000);
     });
 
-    it('it should return 404 for non-existent code', async function () {
+    it('it should return 404 for non-existent slug', async function () {
       const res = await request(server)
-        .put('/admin/access-clients/NONEXISTENT')
+        .put('/admin/access-clients/nonexistent')
         .send({ clientName: 'Test' })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -325,7 +318,7 @@ describe('Access API calls', function () {
 
     it('it should NOT UPDATE without authorization', async function () {
       await request(server)
-        .put('/admin/access-clients/UPDATE01')
+        .put('/admin/access-clients/update-01')
         .send({ clientName: 'Test' })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -333,24 +326,92 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('GET /admin/access-clients/:code/stats', function () {
+  describe('PUT /admin/access-points/:code', function () {
     beforeEach(async function () {
       await request(server)
         .post('/admin/access-clients')
         .send({
-          code: 'STATS01',
-          clientName: 'Stats Test mocha test',
+          slug: 'ap-update-01',
+          clientName: 'Access Point Update Test mocha test',
           rootBoardId: testBoardId,
+          accessPointCode: 'APUPDATE01',
           subscriptionStart: new Date(),
           subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-          boardIds: [testBoardId, testBoardId2],
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`);
+    });
+
+    it('it should re-discover boards when updating access point root', async function () {
+      const res = await request(server)
+        .put('/admin/access-points/APUPDATE01')
+        .send({ rootBoardId: testBoardId2 })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('code').eql('APUPDATE01');
+      res.body.should.have.property('linkedBoardsIds').that.is.an('array');
+      res.body.linkedBoardsIds.should.include(testBoardId2.toString());
+
+      // Verify new root board was marked with accessPointCode
+      const board = await Board.findById(testBoardId2);
+      board.accessPointCode.should.eql('APUPDATE01');
+    });
+
+    it('it should re-discover without changing root when no rootBoardId provided', async function () {
+      const res = await request(server)
+        .put('/admin/access-points/APUPDATE01')
+        .send({})
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('code').eql('APUPDATE01');
+      res.body.linkedBoardsIds.should.include(testBoardId.toString());
+    });
+
+    it('it should return 404 for non-existent access point code', async function () {
+      const res = await request(server)
+        .put('/admin/access-points/NONEXISTENT')
+        .send({})
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Access point not found');
+    });
+
+    it('it should NOT UPDATE without authorization', async function () {
+      await request(server)
+        .put('/admin/access-points/APUPDATE01')
+        .send({})
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+  });
+
+  describe('GET /admin/access-clients/:slug/stats', function () {
+    beforeEach(async function () {
+      await request(server)
+        .post('/admin/access-clients')
+        .send({
+          slug: 'stats-01',
+          clientName: 'Stats Test mocha test',
+          rootBoardId: testBoardId,
+          accessPointCode: 'STATS01',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         })
         .set('Authorization', `Bearer ${adminUser.token}`);
     });
 
     it('it should GET client statistics', async function () {
       const res = await request(server)
-        .get('/admin/access-clients/STATS01/stats')
+        .get('/admin/access-clients/stats-01/stats')
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -361,14 +422,14 @@ describe('Access API calls', function () {
       res.body.should.have.property('stats');
 
       // Verify client data
-      res.body.client.should.have.property('code').eql('STATS01');
-      res.body.client.should.have.property('clientName').eql('Stats Test mocha test');
+      res.body.client.should.have.property('slug').eql('stats-01');
+      res.body.client.client.should.have.property('name').eql('Stats Test mocha test');
 
-      // Verify stats
+      // Verify stats — test board has no tile links, so auto-discovery returns 1 board
       res.body.stats.should.have.property('totalAccesses').eql(0);
-      res.body.stats.should.have.property('boardCount').eql(2);
+      res.body.stats.should.have.property('boardCount').eql(1);
       res.body.stats.should.have.property('boards').that.is.an('array');
-      res.body.stats.boards.length.should.eql(2);
+      res.body.stats.boards.length.should.eql(1);
       res.body.stats.should.have.property('daysUntilExpiry');
       res.body.stats.daysUntilExpiry.should.be.at.least(0);
       res.body.stats.should.have.property('isExpired').eql(false);
@@ -384,16 +445,17 @@ describe('Access API calls', function () {
       await request(server)
         .post('/admin/access-clients')
         .send({
-          code: 'EXPIRED01',
+          slug: 'expired-01',
           clientName: 'Expired Test mocha test',
           rootBoardId: testBoardId,
+          accessPointCode: 'EXPIRED01',
           subscriptionStart: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
           subscriptionEnd: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
         })
         .set('Authorization', `Bearer ${adminUser.token}`);
 
       const res = await request(server)
-        .get('/admin/access-clients/EXPIRED01/stats')
+        .get('/admin/access-clients/expired-01/stats')
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -403,9 +465,9 @@ describe('Access API calls', function () {
       res.body.stats.should.have.property('daysUntilExpiry').eql(0); // Clamped at 0
     });
 
-    it('it should return 404 for non-existent code', async function () {
+    it('it should return 404 for non-existent slug', async function () {
       const res = await request(server)
-        .get('/admin/access-clients/NONEXISTENT/stats')
+        .get('/admin/access-clients/nonexistent/stats')
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -416,7 +478,7 @@ describe('Access API calls', function () {
 
     it('it should NOT GET stats without authorization', async function () {
       await request(server)
-        .get('/admin/access-clients/STATS01/stats')
+        .get('/admin/access-clients/stats-01/stats')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(403);
