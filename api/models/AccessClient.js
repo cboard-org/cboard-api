@@ -4,35 +4,29 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const ACCESS_CLIENT_SCHEMA_DEFINITION = {
-  code: {
+  slug: {
     type: String,
     unique: true,
     required: true,
     trim: true,
-    uppercase: true
+    lowercase: true
   },
-  clientName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  clientContact: {
-    type: String,
-    trim: true
+  client: {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    contact: {
+      type: String,
+      trim: true
+    }
   },
   brandColor: {
-    type: String
-  },
-  rootBoardId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Board',
-    required: true
+    type: String,
+    default: '#1976d2'
   },
   isActive: {
-    type: Boolean,
-    default: true
-  },
-  isListedInApp: {
     type: Boolean,
     default: true
   },
@@ -43,13 +37,6 @@ const ACCESS_CLIENT_SCHEMA_DEFINITION = {
   subscriptionEnd: {
     type: Date,
     required: true
-  },
-  accessCount: {
-    type: Number,
-    default: 0
-  },
-  lastAccessAt: {
-    type: Date
   },
   createdBy: {
     type: Schema.Types.ObjectId,
@@ -66,7 +53,7 @@ const ACCESS_CLIENT_SCHEMA_OPTIONS = {
   toJSON: {
     virtuals: true,
     versionKey: false,
-    transform: function (doc, ret) {
+    transform: function(doc, ret) {
       ret.id = ret._id;
       delete ret._id;
     }
@@ -77,8 +64,6 @@ const accessClientSchema = new Schema(
   ACCESS_CLIENT_SCHEMA_DEFINITION,
   ACCESS_CLIENT_SCHEMA_OPTIONS
 );
-
-accessClientSchema.index({ isActive: 1, isListedInApp: 1 });
 
 const AccessClient = mongoose.model('AccessClient', accessClientSchema);
 
