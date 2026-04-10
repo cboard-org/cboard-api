@@ -1268,7 +1268,7 @@ paths:
     x-swagger-router-controller: access
     get:
       operationId: getClients
-      description: Lists active companies for Cboard Access listing in the app. Returns clients where isActive=true, isListedInApp=true, and subscription is valid.
+      description: Lists active companies for Cboard Access. Returns clients where isActive=true and subscription is valid. Sorted by client name.
       responses:
         "200":
           description: Success
@@ -1306,7 +1306,7 @@ paths:
     x-swagger-router-controller: access
     post:
       operationId: createAccessClient
-      description: Creates a new Access client. Requires admin authentication. Creates AccessClient and updates boards with accessCode.
+      description: Creates a new Access client and its first AccessPoint. Requires admin authentication. Auto-discovers linked boards from rootBoardId and marks them with accessPointCode.
       security:
         - Bearer: []
       x-security-scopes:
@@ -1351,21 +1351,21 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients/{code}:
+  /admin/access-clients/{slug}:
     x-swagger-router-controller: access
     put:
       operationId: updateAccessClient
-      description: Updates an Access client. Requires admin authentication. Allowed fields include isActive, isListedInApp, subscription dates, and branding.
+      description: Updates an Access client. Requires admin authentication. Allowed fields include isActive, subscription dates, and branding.
       security:
         - Bearer: []
       x-security-scopes:
         - admin
       parameters:
-        - name: code
+        - name: slug
           type: string
           in: path
           required: true
-          description: Access code for the client
+          description: Slug identifier for the client
         - name: updates
           in: body
           description: Fields to update
@@ -1385,7 +1385,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients/{code}/stats:
+  /admin/access-clients/{slug}/stats:
     x-swagger-router-controller: access
     get:
       operationId: getAccessClientStats
@@ -1395,11 +1395,11 @@ paths:
       x-security-scopes:
         - admin
       parameters:
-        - name: code
+        - name: slug
           type: string
           in: path
           required: true
-          description: Access code for the client
+          description: Slug identifier for the client
       responses:
         "200":
           description: Success
@@ -1435,6 +1435,43 @@ paths:
                     type: boolean
         "404":
           description: Client not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /admin/access-points/{code}:
+    x-swagger-router-controller: access
+    put:
+      operationId: updateAccessPoint
+      description: Re-runs board discovery for an access point, updating its linkedBoardsIds. Optionally accepts a new rootBoardId. Requires admin authentication.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: code
+          type: string
+          in: path
+          required: true
+          description: Access point code (uppercase)
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              rootBoardId:
+                type: string
+                description: New root board ID (optional, keeps existing if not provided)
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessPointResponse"
+        "404":
+          description: Access point or root board not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         default:
@@ -2126,15 +2163,20 @@ definitions:
   AccessClientCreate:
     type: object
     required:
-      - code
+      - slug
       - clientName
       - rootBoardId
       - subscriptionStart
       - subscriptionEnd
+      - accessPointCode
     properties:
-      code:
+      slug:
         type: string
-        description: Unique code for the access client (uppercase)
+        description: Unique slug identifier for the access client (lowercase)
+        example: my-company
+      accessPointCode:
+        type: string
+        description: Unique code for the access point (will be uppercased)
         example: ABC123
       clientName:
         type: string
@@ -2149,7 +2191,7 @@ definitions:
         example: "#FF5733"
       rootBoardId:
         type: string
-        description: ID of the root board
+        description: ID of the root board (boards reachable from it are auto-discovered)
       subscriptionStart:
         type: string
         format: date-time
@@ -2158,20 +2200,12 @@ definitions:
         type: string
         format: date-time
         description: Subscription end date
-      boardIds:
-        type: array
-        items:
-          type: string
-        description: Array of board IDs to associate with this access code
   AccessClientUpdate:
     type: object
     properties:
       isActive:
         type: boolean
         description: Whether the client is active
-      isListedInApp:
-        type: boolean
-        description: Whether the client is listed in the app
       subscriptionStart:
         type: string
         format: date-time
@@ -2195,27 +2229,24 @@ definitions:
       id:
         type: string
         description: Client ID
-      code:
+      slug:
         type: string
-        description: Access code
-      clientName:
-        type: string
-        description: Client name
-      clientContact:
-        type: string
-        description: Client contact information
+        description: Unique slug identifier (lowercase)
+      client:
+        type: object
+        properties:
+          name:
+            type: string
+            description: Client organization name
+          contact:
+            type: string
+            description: Client contact information
       brandColor:
         type: string
         description: Brand color (hex)
-      rootBoardId:
-        type: string
-        description: Root board ID
       isActive:
         type: boolean
         description: Whether client is active
-      isListedInApp:
-        type: boolean
-        description: Whether client is listed in app
       subscriptionStart:
         type: string
         format: date-time
@@ -2224,13 +2255,6 @@ definitions:
         type: string
         format: date-time
         description: Subscription end date
-      accessCount:
-        type: integer
-        description: Number of times accessed
-      lastAccessAt:
-        type: string
-        format: date-time
-        description: Last access timestamp
       createdBy:
         type: string
         description: ID of user who created the client
@@ -2242,14 +2266,9 @@ definitions:
         type: string
         format: date-time
         description: Last update timestamp
-      linkedBoardsCount:
-        type: integer
-        description: Number of boards auto-discovered and linked to this client (only in create response)
-      linkedBoardIds:
-        type: array
-        items:
-          type: string
-        description: Array of board IDs that were auto-discovered and linked (only in create response)
+      accessPoint:
+        description: Present only on create response
+        $ref: "#/definitions/AccessPointResponse"
   AccessClientsListResponse:
     type: object
     required:
@@ -2264,26 +2283,34 @@ definitions:
         items:
           type: object
           properties:
-            code:
+            slug:
               type: string
-              description: Access code
+              description: Client slug identifier
             clientName:
               type: string
               description: Client name
             brandColor:
               type: string
               description: Brand color (hex)
-            rootBoard:
-              type: object
-              properties:
-                id:
-                  type: string
-                name:
-                  type: string
-                caption:
-                  type: string
-                tilesCount:
-                  type: integer
+            accessPoints:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Access point code
+                  rootBoard:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      caption:
+                        type: string
+                      tilesCount:
+                        type: integer
   AccessClientsAdminListResponse:
     type: object
     required:
@@ -2300,25 +2327,18 @@ definitions:
           properties:
             id:
               type: string
-            code:
+            slug:
               type: string
-            clientName:
-              type: string
-            clientContact:
-              type: string
-            brandColor:
-              type: string
-            rootBoardId:
+            client:
               type: object
-              description: Populated root board object
               properties:
-                _id:
-                  type: string
                 name:
                   type: string
+                contact:
+                  type: string
+            brandColor:
+              type: string
             isActive:
-              type: boolean
-            isListedInApp:
               type: boolean
             subscriptionStart:
               type: string
@@ -2326,17 +2346,10 @@ definitions:
             subscriptionEnd:
               type: string
               format: date-time
-            accessCount:
-              type: integer
-            lastAccessAt:
-              type: string
-              format: date-time
             createdBy:
               type: object
               description: Populated user object who created the client
               properties:
-                _id:
-                  type: string
                 name:
                   type: string
                 email:
@@ -2349,7 +2362,7 @@ definitions:
               format: date-time
             boardCount:
               type: integer
-              description: Number of boards associated with this client
+              description: Total boards across all access points for this client
             isExpired:
               type: boolean
               description: Whether the subscription has expired
@@ -2414,6 +2427,38 @@ definitions:
         type: boolean
       grid:
         type: object
-      accessCode:
+      accessPointCode:
         type: string
-        description: The access code associated with this board
+        description: The access point code associated with this board
+  AccessPointResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      code:
+        type: string
+        description: Access point code (uppercase)
+      accessClient:
+        type: string
+        description: AccessClient ID
+      rootBoardId:
+        type: string
+        description: Root board ID
+      linkedBoardsIds:
+        type: array
+        items:
+          type: string
+        description: All board IDs reachable from the root board
+      viewsCount:
+        type: integer
+        description: Number of times this access point has been accessed
+      lastAccessAt:
+        type: string
+        format: date-time
+        description: Last access timestamp
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time

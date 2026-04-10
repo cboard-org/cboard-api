@@ -12,11 +12,12 @@ Cboard Access allows businesses to offer AAC boards in their locations via QR co
 - **Login to Get Auth Token**: Obtain authentication token for admin endpoints
 
 ### 2. Admin Endpoints (Require Authentication)
-- **Create Access Client**: Create a new Cboard Access client
+- **Create Access Client**: Create a new Cboard Access client and its first access point
 - **List All Clients**: View all registered clients with statistics
 - **Update Client**: Modify client information
 - **Deactivate Client**: Disable a client by setting `isActive` to false
 - **View Statistics**: Get detailed stats for a specific client
+- **Update Access Point**: Re-run board discovery for an access point
 
 ### 3. Public Endpoints (No Authentication)
 - **Test Public Client Listing**: List active clients for app display
@@ -52,36 +53,9 @@ The collection includes these variables (can be edited in collection variables o
 |----------|---------------|-------------|
 | `url` | `http://localhost:10010` | Base API URL |
 | `token` | (set automatically) | Authentication token for admin endpoints (saved to globals on login) |
-| `access_code` | `TEST01` | Access code for testing |
+| `client_slug` | `test-coffee-shop` | Client slug for admin endpoints (set automatically on create) |
+| `access_code` | `TEST01` | Access point code for public board access (set automatically on create) |
 | `root_board_id` | (empty) | Board ID to use as root board |
-
-### 3. Optional: Create Environment
-
-You can create a custom environment for different deployment targets:
-
-**Local Development:**
-```json
-{
-  "API_URL": "http://localhost:10010",
-  "root_board_id": "your-board-id-here"
-}
-```
-
-**QA Environment:**
-```json
-{
-  "API_URL": "https://api-qa.cboard.io",
-  "root_board_id": "qa-board-id"
-}
-```
-
-**Production:**
-```json
-{
-  "API_URL": "https://api.cboard.io",
-  "root_board_id": "production-board-id"
-}
-```
 
 ## Usage Workflow
 
@@ -95,54 +69,60 @@ You can create a custom environment for different deployment targets:
 2. **Authenticate**
    - Update credentials in "Login to Get Auth Token" request
    - Run the request
-   - The `AUTH_TOKEN` variable will be automatically set from the response
+   - The `token` variable will be automatically set from the response
 
 ### Creating a Client
 
 1. Run **Create Access Client** with your desired configuration:
    ```json
    {
-     "code": "CAFE01",
+     "slug": "coffee-shop-downtown",
      "clientName": "Coffee Shop Downtown",
      "clientContact": "manager@coffee.com",
      "brandColor": "#8B4513",
      "rootBoardId": "{{root_board_id}}",
+     "accessPointCode": "CAFE01",
      "subscriptionStart": "2026-04-01T00:00:00.000Z",
-     "subscriptionEnd": "2027-04-01T00:00:00.000Z",
-     "boardIds": ["{{root_board_id}}"]
+     "subscriptionEnd": "2027-04-01T00:00:00.000Z"
    }
    ```
 
-2. The response will include the created client
-3. The `access_code` variable will be automatically updated
+2. The response includes the created client (`slug`, `client.name`, etc.) and the `accessPoint` with `code` and `linkedBoardsIds`
+3. `client_slug` and `access_code` variables are automatically saved for subsequent requests
 
 ### Testing the Client
 
-1. **Admin View**: Run "List All Clients" to see the client with statistics
+1. **Admin View**: Run "List All Clients" to see all clients with statistics
 2. **Public View**: Run "Test Public Client Listing" to see how it appears in the app
 3. **Access Boards**: Run "Test Public Board Access" to retrieve the boards
 4. **View Stats**: Run "View Statistics" to see detailed analytics
 
 ### Updating or Deactivating
 
-- Use **Update Client** to modify properties
+- Use **Update Client** to modify properties (uses `{{client_slug}}`)
 - Use **Deactivate Client** to disable access without deleting
+
+### Re-discovering Boards
+
+Use **Update Access Point** to re-run board discovery after the board structure changes. Optionally pass a new `rootBoardId` in the body to change the root.
 
 ## Request Details
 
 ### Create Access Client
 
 **Required Fields:**
-- `code`: Unique identifier (uppercase, alphanumeric)
+- `slug`: Unique client identifier (lowercase, URL-safe)
 - `clientName`: Display name
 - `rootBoardId`: ID of the main board
+- `accessPointCode`: Unique code for the access point (uppercase alphanumeric)
 - `subscriptionStart`: Start date (ISO 8601)
 - `subscriptionEnd`: End date (ISO 8601)
 
 **Optional Fields:**
 - `clientContact`: Contact information
 - `brandColor`: Hex color code
-- `boardIds`: Array of board IDs to associate (if omitted, linked boards are auto-discovered from root board)
+
+Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to the access point.
 
 ### Update Client
 
@@ -151,7 +131,6 @@ You can create a custom environment for different deployment targets:
 - `clientContact`
 - `brandColor`
 - `isActive` (boolean)
-- `isListedInApp` (boolean)
 - `subscriptionStart`
 - `subscriptionEnd`
 
@@ -159,7 +138,7 @@ You can create a custom environment for different deployment targets:
 
 These endpoints don't require authentication and simulate real user access:
 
-- **GET /access/clients**: Returns only active, listed clients with valid subscriptions
+- **GET /access/clients**: Returns only active clients with valid subscriptions
 - **GET /access/:code**: Returns all boards for the access code and increments access counter
 
 ## Test Scripts
@@ -168,16 +147,16 @@ Each request includes automated tests:
 
 - **Status code validation**: Ensures correct HTTP responses
 - **Response structure validation**: Checks for required fields
-- **Variable auto-setting**: Saves tokens and IDs for subsequent requests
+- **Variable auto-setting**: Saves tokens, slugs, and access codes for subsequent requests
 
 ## Common Scenarios
 
 ### Scenario 1: New Client Onboarding
 
 1. Login to get auth token
-2. Create access client
+2. Create access client (saves `client_slug` and `access_code` automatically)
 3. Verify in "List All Clients"
-4. Test public access
+4. Test public access via "Test Public Board Access"
 
 ### Scenario 2: Client Expiration
 
@@ -193,9 +172,15 @@ Each request includes automated tests:
 3. Update to reactivate
 4. Verify it reappears in public listing
 
+### Scenario 4: Board Structure Changed
+
+1. Update boards (add/remove tile navigation)
+2. Run "Update Access Point" to re-discover linked boards
+3. Verify `linkedBoardsIds` count updated
+
 ## Troubleshooting
 
-### AUTH_TOKEN Not Being Set After Login
+### token Not Being Set After Login
 - Check the Postman Console (View → Show Postman Console) for error messages
 - Verify your email and password are correct in the login request body
 - Make sure the API server is running (`npm run dev` in cboard-api)
@@ -214,11 +199,10 @@ Each request includes automated tests:
 
 ### "Invalid access code" Error
 - Ensure the client is active (`isActive: true`)
-- Check subscription dates are valid
-- Verify `isListedInApp` is true for public listing
+- Check subscription dates are valid (start ≤ now ≤ end)
 
 ### Authentication Errors
-- Ensure `AUTH_TOKEN` is set (run login request)
+- Ensure `token` is set (run login request)
 - Check token hasn't expired
 - Verify user has admin privileges (role: "admin")
 
@@ -229,13 +213,12 @@ Each request includes automated tests:
 
 ## Related Documentation
 
-- [Implementation Plan](../../CBOARD_ACCESS_IMPLEMENTATION_PLAN.md)
 - [GitHub Issue #446](https://github.com/cboard-org/cboard-api/issues/446)
 - [Parent Issue #439](https://github.com/cboard-org/cboard-api/issues/439)
 
 ## Notes
 
 - All admin endpoints require authentication via Bearer token
-- Public endpoints are rate-limited (if configured)
 - Access count is automatically incremented on each board access
 - Subscription dates are checked against current server time
+- Board discovery traverses `tile.loadBoard` references recursively from the root board

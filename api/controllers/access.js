@@ -1,6 +1,7 @@
 'use strict';
 
 const AccessClient = require('../models/AccessClient');
+const AccessPoint = require('../models/AccessPoint');
 const Board = require('../models/Board');
 
 module.exports = {
@@ -9,98 +10,85 @@ module.exports = {
   createAccessClient: createAccessClient,
   listAccessClients: listAccessClients,
   updateAccessClient: updateAccessClient,
+  updateAccessPoint: updateAccessPoint,
   getAccessClientStats: getAccessClientStats
 };
 
 /**
- * Recursively discovers all boards linked from a root board.
- * Traverses tile.loadBoard references to find the complete board structure.
- * @param {string} rootBoardId - The starting board ID
- * @param {Set} visited - Set of already visited board IDs (prevents cycles)
- * @returns {Promise<string[]>} - Array of all discovered board IDs
+ * Recursively discovers all boards reachable from a root board via tile.loadBoard references.
+ * The visited Set is shared across all recursive calls (passed by reference), so any board
+ * already discovered is skipped immediately — this prevents infinite loops from tiles that
+ * navigate back to a parent board (e.g. a "home" tile).
+ * @param {string|ObjectId} rootBoardId - Starting board ID
+ * @param {Set<string>} visited - Shared set of already-visited IDs (prevents cycles)
  */
-async function discoverLinkedBoards(rootBoardId, visited = new Set()) {
-  // Prevent infinite loops from circular references
-  if (visited.has(rootBoardId.toString())) {
-    return [];
-  }
-  visited.add(rootBoardId.toString());
+async function discoverLinkedBoards(rootBoardId, visited) {
+  const id = rootBoardId.toString();
+  if (visited.has(id)) return; // Already discovered — skip to prevent cycles
+  visited.add(id);
 
-  const board = await Board.findById(rootBoardId);
-  if (!board) {
-    return [];
-  }
+  const board = await Board.findById(id);
+  if (!board?.tiles) return;
 
-  const linkedBoardIds = [];
-
-  // Find all tiles that link to other boards
-  if (board.tiles && Array.isArray(board.tiles)) {
-    for (const tile of board.tiles) {
-      if (tile.loadBoard) {
-        const linkedId = tile.loadBoard.toString();
-        if (!visited.has(linkedId)) {
-          // Verify the linked board exists before adding to avoid phantom entries
-          const linkedBoard = await Board.findById(linkedId);
-          if (linkedBoard) {
-            linkedBoardIds.push(linkedId);
-            // Recursively discover boards linked from this board
-            const nestedIds = await discoverLinkedBoards(linkedId, visited);
-            linkedBoardIds.push(...nestedIds);
-          }
-        }
-      }
+  for (const tile of board.tiles) {
+    if (tile.loadBoard) {
+      await discoverLinkedBoards(tile.loadBoard, visited);
     }
   }
-
-  return linkedBoardIds;
 }
 
 /**
- * Gets all board IDs for an access client, starting from root.
- * Returns rootBoardId + all recursively linked boards.
- * @param {string} rootBoardId - The root board ID
- * @returns {Promise<string[]>} - Array of all board IDs
+ * Returns all board IDs reachable from rootBoardId, including rootBoardId itself.
+ * @param {string|ObjectId} rootBoardId
+ * @returns {Promise<string[]>}
  */
 async function getAllLinkedBoardIds(rootBoardId) {
   const visited = new Set();
-  const linkedIds = await discoverLinkedBoards(rootBoardId, visited);
-  // Return unique IDs including root
-  return [...new Set([rootBoardId.toString(), ...linkedIds])];
+  await discoverLinkedBoards(rootBoardId, visited);
+  return [...visited];
 }
 
 /**
  * GET /access/clients
- * Lists active companies for Cboard Access listing in the app.
- * Returns clients where isActive=true, isListedInApp=true, and subscription is valid.
- * Populates rootBoard basic info (name, caption, tiles count).
- * Sorted by clientName.
+ * Lists all active clients with valid subscriptions and their access points.
+ * Returns each client with its access points and root board basic info.
+ * Sorted by client name.
  */
 async function getClients(req, res) {
   try {
     const now = new Date();
     const clients = await AccessClient.find({
       isActive: true,
-      isListedInApp: true,
       subscriptionStart: { $lte: now },
       subscriptionEnd: { $gte: now }
+    }).select('slug client brandColor');
+
+    const accessPoints = await AccessPoint.find({
+      accessClient: { $in: clients.map(c => c._id) }
     })
       .populate('rootBoardId', 'name caption tiles')
-      .select('code clientName brandColor rootBoardId')
-      .sort({ clientName: 1 });
+      .select('code rootBoardId accessClient');
 
-    const result = clients.map(client => ({
-      code: client.code,
-      clientName: client.clientName,
-      brandColor: client.brandColor,
-      rootBoard: client.rootBoardId
-        ? {
-            id: client.rootBoardId._id,
-            name: client.rootBoardId.name,
-            caption: client.rootBoardId.caption,
-            tilesCount: client.rootBoardId.tiles?.length || 0
-          }
-        : null
-    }));
+    const result = clients
+      .map(client => ({
+        slug: client.slug,
+        clientName: client.client.name,
+        brandColor: client.brandColor,
+        accessPoints: accessPoints
+          .filter(ap => ap.accessClient.toString() === client._id.toString())
+          .map(ap => ({
+            code: ap.code,
+            rootBoard: ap.rootBoardId
+              ? {
+                  id: ap.rootBoardId._id,
+                  name: ap.rootBoardId.name,
+                  caption: ap.rootBoardId.caption,
+                  tilesCount: ap.rootBoardId.tiles?.length || 0
+                }
+              : null
+          }))
+      }))
+      .sort((a, b) => a.clientName.localeCompare(b.clientName));
 
     return res.status(200).json({
       total: result.length,
@@ -118,32 +106,41 @@ async function getClients(req, res) {
  * GET /access/:code
  * Gets ALL boards for an access code in a single request.
  * This enables instant frontend navigation without additional requests.
- * Validates code exists and subscription is active.
- * Returns client info (code, name, color), all boards array, and rootBoardId.
- * Increments accessCount and updates lastAccessAt.
+ * Validates code exists and client subscription is active.
+ * Returns client info (slug, name, color), all boards array, and rootBoardId.
+ * Increments viewsCount and updates lastAccessAt on the AccessPoint.
  */
 async function getAccessBoard(req, res) {
   const code = req.swagger.params.code.value.toUpperCase();
 
   try {
     const now = new Date();
-    const client = await AccessClient.findOne({
-      code: code,
-      isActive: true,
-      subscriptionStart: { $lte: now },
-      subscriptionEnd: { $gte: now }
-    });
+    const accessPoint = await AccessPoint.findOne({ code }).populate(
+      'accessClient'
+    );
 
-    if (!client) {
+    if (!accessPoint) {
+      return res.status(404).json({
+        message: 'Invalid access code'
+      });
+    }
+
+    const client = accessPoint.accessClient;
+    if (
+      !client ||
+      !client.isActive ||
+      client.subscriptionStart > now ||
+      client.subscriptionEnd < now
+    ) {
       return res.status(404).json({
         message: 'Invalid or expired access code'
       });
     }
 
-    // Get ALL boards with this accessCode (exclude PII fields for public endpoint)
-    const boards = await Board.find({ accessCode: code }).select(
-      '-email -author'
-    );
+    // Fetch all linked boards (exclude PII fields for public endpoint)
+    const boards = await Board.find({
+      _id: { $in: accessPoint.linkedBoardsIds }
+    }).select('-email -author');
 
     if (!boards || boards.length === 0) {
       return res.status(404).json({
@@ -151,9 +148,9 @@ async function getAccessBoard(req, res) {
       });
     }
 
-    // Verify the rootBoard exists
+    // Verify the rootBoard exists among the linked boards
     const rootBoard = boards.find(
-      b => b._id.toString() === client.rootBoardId.toString()
+      b => b._id.toString() === accessPoint.rootBoardId.toString()
     );
     if (!rootBoard) {
       return res.status(404).json({
@@ -162,22 +159,22 @@ async function getAccessBoard(req, res) {
     }
 
     // Track access analytics atomically to avoid lost updates under concurrency
-    await AccessClient.updateOne(
-      { _id: client._id },
+    await AccessPoint.updateOne(
+      { _id: accessPoint._id },
       {
-        $inc: { accessCount: 1 },
+        $inc: { viewsCount: 1 },
         $set: { lastAccessAt: new Date() }
       }
     );
 
     return res.status(200).json({
       client: {
-        code: client.code,
-        name: client.clientName,
+        code: client.slug,
+        name: client.client.name,
         color: client.brandColor
       },
       boards: boards.map(b => b.toJSON()),
-      rootBoardId: client.rootBoardId.toString()
+      rootBoardId: accessPoint.rootBoardId.toString()
     });
   } catch (err) {
     return res.status(500).json({
@@ -193,21 +190,21 @@ async function getAccessBoard(req, res) {
 
 /**
  * POST /admin/access-clients
- * Creates a new Access client.
+ * Creates a new Access client and its first Access point.
  * Requires admin authentication (enforced by Swagger middleware).
- * Creates AccessClient and updates boards with accessCode.
+ * Creates AccessClient, creates AccessPoint, and updates boards with accessPointCode.
  * Validates rootBoardId exists.
  */
 async function createAccessClient(req, res) {
   const {
-    code,
+    slug,
     clientName,
     clientContact,
     brandColor,
     rootBoardId,
     subscriptionStart,
     subscriptionEnd,
-    boardIds // Optional: Array of board IDs to associate. If not provided, auto-discovers linked boards.
+    accessPointCode
   } = req.body;
 
   try {
@@ -219,11 +216,9 @@ async function createAccessClient(req, res) {
 
     // Create the client
     const client = new AccessClient({
-      code: code.toUpperCase(),
-      clientName,
-      clientContact,
+      slug,
+      client: { name: clientName, contact: clientContact },
       brandColor,
-      rootBoardId,
       subscriptionStart: new Date(subscriptionStart),
       subscriptionEnd: new Date(subscriptionEnd),
       createdBy: req.user.id
@@ -231,30 +226,32 @@ async function createAccessClient(req, res) {
 
     await client.save();
 
-    // Determine which boards to associate with the access code
-    // If boardIds provided, use them; otherwise auto-discover all linked boards
-    let allBoardIds;
-    if (boardIds && boardIds.length > 0) {
-      allBoardIds = [...new Set([rootBoardId.toString(), ...boardIds.map(id => id.toString())])];
-    } else {
-      // Auto-discover all boards linked from the root board
-      allBoardIds = await getAllLinkedBoardIds(rootBoardId);
-    }
+    // Auto-discover all boards reachable from root via tile.loadBoard links
+    const linkedBoardIds = await getAllLinkedBoardIds(rootBoardId);
 
+    // Create the access point
+    const accessPoint = new AccessPoint({
+      code: accessPointCode.toUpperCase(),
+      accessClient: client._id,
+      rootBoardId,
+      linkedBoardsIds: linkedBoardIds
+    });
+
+    await accessPoint.save();
+
+    // Mark all discovered boards with the access point code
     await Board.updateMany(
-      { _id: { $in: allBoardIds } },
-      { $set: { accessCode: code.toUpperCase() } }
+      { _id: { $in: linkedBoardIds } },
+      { $set: { accessPointCode: accessPoint.code } }
     );
 
-    // Return response with discovered board count
-    const response = client.toJSON();
-    response.linkedBoardsCount = allBoardIds.length;
-    response.linkedBoardIds = allBoardIds;
-
-    return res.status(201).json(response);
+    return res.status(201).json({ ...client.toJSON(), accessPoint: accessPoint.toJSON() });
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(409).json({ message: 'Code already exists' });
+      const isSlugDuplicate = err.message.includes('slug');
+      return res.status(409).json({
+        message: isSlugDuplicate ? 'Slug already exists' : 'Code already exists'
+      });
     }
     return res.status(500).json({
       message: 'Error creating client',
@@ -267,30 +264,28 @@ async function createAccessClient(req, res) {
  * GET /admin/access-clients
  * Lists all Access clients with stats.
  * Returns all clients with board counts, expiry status.
- * Populates rootBoard and createdBy.
+ * Populates createdBy. Board count derived from AccessPoint.linkedBoardsIds.
  */
 async function listAccessClients(req, res) {
   try {
     const clients = await AccessClient.find()
-      .populate('rootBoardId', 'name')
-      .populate('createdBy', 'name email')
+      .populate('createdBy', 'name email role')
       .sort({ createdAt: -1 });
 
-    // Precompute board counts for all clients in a single query to avoid N+1
-    const accessCodes = clients.map(client => client.code);
-    const boardCounts = await Board.aggregate([
-      { $match: { accessCode: { $in: accessCodes } } },
-      { $group: { _id: '$accessCode', count: { $sum: 1 } } }
-    ]);
+    // Fetch access points and sum linkedBoardsIds per client to avoid N+1
+    const clientIds = clients.map(c => c._id);
+    const accessPoints = await AccessPoint.find({ accessClient: { $in: clientIds } });
 
-    const boardCountMap = boardCounts.reduce((map, entry) => {
-      map[entry._id] = entry.count;
+    const apMap = accessPoints.reduce((map, ap) => {
+      const key = ap.accessClient.toString();
+      if (!map[key]) map[key] = 0;
+      map[key] += ap.linkedBoardsIds?.length || 0;
       return map;
     }, {});
 
     const now = new Date();
     const result = clients.map(client => {
-      const boardCount = boardCountMap[client.code] || 0;
+      const boardCount = apMap[client._id.toString()] || 0;
       const daysUntilExpiry = Math.ceil(
         (client.subscriptionEnd - now) / (1000 * 60 * 60 * 24)
       );
@@ -316,31 +311,28 @@ async function listAccessClients(req, res) {
 }
 
 /**
- * PUT /admin/access-clients/:code
+ * PUT /admin/access-clients/:slug
  * Updates an Access client.
- * Allowed fields: isActive, isListedInApp, subscription dates, branding.
+ * Allowed fields: isActive, subscription dates, branding, client name/contact.
  */
 async function updateAccessClient(req, res) {
-  const code = req.swagger.params.code.value.toUpperCase();
+  const slug = req.swagger.params.slug.value;
   const updates = req.body;
 
   try {
-    const client = await AccessClient.findOne({ code });
+    const client = await AccessClient.findOne({ slug });
 
     if (!client) {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    // Updatable fields
     if (updates.isActive !== undefined) client.isActive = updates.isActive;
-    if (updates.isListedInApp !== undefined)
-      client.isListedInApp = updates.isListedInApp;
     if (updates.subscriptionStart)
       client.subscriptionStart = new Date(updates.subscriptionStart);
     if (updates.subscriptionEnd)
       client.subscriptionEnd = new Date(updates.subscriptionEnd);
-    if (updates.clientName) client.clientName = updates.clientName;
-    if (updates.clientContact) client.clientContact = updates.clientContact;
+    if (updates.clientName) client.client.name = updates.clientName;
+    if (updates.clientContact) client.client.contact = updates.clientContact;
     if (updates.brandColor) client.brandColor = updates.brandColor;
 
     await client.save();
@@ -355,23 +347,35 @@ async function updateAccessClient(req, res) {
 }
 
 /**
- * GET /admin/access-clients/:code/stats
+ * GET /admin/access-clients/:slug/stats
  * Gets detailed statistics for an Access client.
- * Returns client info, access counts, board list with tile counts.
+ * Returns client info, access counts (from AccessPoints), board list with tile counts.
  */
 async function getAccessClientStats(req, res) {
-  const code = req.swagger.params.code.value.toUpperCase();
+  const slug = req.swagger.params.slug.value;
 
   try {
-    const client = await AccessClient.findOne({ code })
-      .populate('rootBoardId', 'name tiles')
-      .populate('createdBy', 'name email');
+    const client = await AccessClient.findOne({ slug })
+      .populate('createdBy', 'name email role');
 
     if (!client) {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    const boards = await Board.find({ accessCode: code }, { name: 1, tiles: 1 });
+    const accessPoints = await AccessPoint.find({ accessClient: client._id });
+
+    // Collect unique board IDs across all access points
+    const allBoardIds = [
+      ...new Set(accessPoints.flatMap(ap => ap.linkedBoardsIds.map(id => id.toString())))
+    ];
+    const boards = await Board.find({ _id: { $in: allBoardIds } }, { name: 1, tiles: 1 });
+
+    const totalAccesses = accessPoints.reduce((sum, ap) => sum + (ap.viewsCount || 0), 0);
+    const lastAccessAt = accessPoints.reduce((latest, ap) => {
+      if (!ap.lastAccessAt) return latest;
+      if (!latest || ap.lastAccessAt > latest) return ap.lastAccessAt;
+      return latest;
+    }, null);
 
     const now = new Date();
     const daysUntilExpiry = Math.ceil(
@@ -381,8 +385,8 @@ async function getAccessClientStats(req, res) {
     return res.status(200).json({
       client: client.toJSON(),
       stats: {
-        totalAccesses: client.accessCount,
-        lastAccessAt: client.lastAccessAt,
+        totalAccesses,
+        lastAccessAt,
         boardCount: boards.length,
         boards: boards.map(b => ({
           id: b._id,
@@ -396,6 +400,52 @@ async function getAccessClientStats(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error getting client statistics',
+      error: err.message
+    });
+  }
+}
+
+/**
+ * PUT /admin/access-points/:code
+ * Re-runs board discovery for an access point, updating its linkedBoardsIds.
+ * Optionally accepts a new rootBoardId to change the root and re-discover from there.
+ * Useful when the board structure has changed since the access point was created.
+ */
+async function updateAccessPoint(req, res) {
+  const code = req.swagger.params.code.value.toUpperCase();
+  const { rootBoardId } = req.body;
+
+  try {
+    const accessPoint = await AccessPoint.findOne({ code });
+    if (!accessPoint) {
+      return res.status(404).json({ message: 'Access point not found' });
+    }
+
+    const newRootBoardId = rootBoardId || accessPoint.rootBoardId;
+
+    // Verify root board exists
+    const rootBoard = await Board.findById(newRootBoardId);
+    if (!rootBoard) {
+      return res.status(404).json({ message: 'Root board not found' });
+    }
+
+    // Re-discover all boards reachable from root
+    const linkedBoardIds = await getAllLinkedBoardIds(newRootBoardId);
+
+    accessPoint.rootBoardId = newRootBoardId;
+    accessPoint.linkedBoardsIds = linkedBoardIds;
+    await accessPoint.save();
+
+    // Mark all discovered boards with this access point code
+    await Board.updateMany(
+      { _id: { $in: linkedBoardIds } },
+      { $set: { accessPointCode: code } }
+    );
+
+    return res.status(200).json(accessPoint.toJSON());
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error updating access point',
       error: err.message
     });
   }
