@@ -269,7 +269,7 @@ async function createAccessClient(req, res) {
 async function listAccessClients(req, res) {
   try {
     const clients = await AccessClient.find()
-      .populate('createdBy', 'name email')
+      .populate('createdBy', 'name email role')
       .sort({ createdAt: -1 });
 
     // Fetch access points and sum linkedBoardsIds per client to avoid N+1
@@ -356,7 +356,7 @@ async function getAccessClientStats(req, res) {
 
   try {
     const client = await AccessClient.findOne({ slug })
-      .populate('createdBy', 'name email');
+      .populate('createdBy', 'name email role');
 
     if (!client) {
       return res.status(404).json({ message: 'Client not found' });
