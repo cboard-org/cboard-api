@@ -78,7 +78,8 @@ The collection includes these variables (can be edited in collection variables o
    {
      "slug": "coffee-shop-downtown",
      "clientName": "Coffee Shop Downtown",
-     "clientContact": "manager@coffee.com",
+     "clientEmail": "manager@coffee.com",
+    "clientPhone": "+1234567890",
      "brandColor": "#8B4513",
      "rootBoardId": "{{root_board_id}}",
      "accessPointCode": "CAFE01",
@@ -119,7 +120,8 @@ Use **Update Access Point** to re-run board discovery after the board structure 
 - `subscriptionEnd`: End date (ISO 8601)
 
 **Optional Fields:**
-- `clientContact`: Contact information
+- `clientEmail`: Email of the client
+- `clientPhone`: Phone number of the client
 - `brandColor`: Hex color code
 
 Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to the access point.
@@ -128,7 +130,8 @@ Board discovery is automatic — all boards reachable from `rootBoardId` via til
 
 **Updatable Fields:**
 - `clientName`
-- `clientContact`
+- `clientEmail`
+- `clientPhone`
 - `brandColor`
 - `isActive` (boolean)
 - `subscriptionStart`
