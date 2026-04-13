@@ -199,7 +199,8 @@ async function createAccessClient(req, res) {
   const {
     slug,
     clientName,
-    clientContact,
+    clientEmail,
+    clientPhone,
     brandColor,
     rootBoardId,
     subscriptionStart,
@@ -217,7 +218,7 @@ async function createAccessClient(req, res) {
     // Create the client
     const client = new AccessClient({
       slug,
-      client: { name: clientName, contact: clientContact },
+      client: { name: clientName, email: clientEmail, phone: clientPhone },
       brandColor,
       subscriptionStart: new Date(subscriptionStart),
       subscriptionEnd: new Date(subscriptionEnd),
@@ -313,7 +314,7 @@ async function listAccessClients(req, res) {
 /**
  * PUT /admin/access-clients/:slug
  * Updates an Access client.
- * Allowed fields: isActive, subscription dates, branding, client name/contact.
+ * Allowed fields: isActive, subscription dates, branding, client name/email/phone.
  */
 async function updateAccessClient(req, res) {
   const slug = req.swagger.params.slug.value;
@@ -332,7 +333,8 @@ async function updateAccessClient(req, res) {
     if (updates.subscriptionEnd)
       client.subscriptionEnd = new Date(updates.subscriptionEnd);
     if (updates.clientName) client.client.name = updates.clientName;
-    if (updates.clientContact) client.client.contact = updates.clientContact;
+    if (updates.clientEmail) client.client.email = updates.clientEmail;
+    if (updates.clientPhone) client.client.phone = updates.clientPhone;
     if (updates.brandColor) client.brandColor = updates.brandColor;
 
     await client.save();

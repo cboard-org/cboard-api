@@ -65,7 +65,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientContact\": \"contact@testcoffee.com\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessPointCode\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
+							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessPointCode\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/admin/access-clients",
@@ -173,7 +173,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"clientContact\": \"newemail@testcoffee.com\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true\n}"
+							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"clientEmail\": \"newemail@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true\n}"
 						},
 						"url": {
 							"raw": "{{url}}/admin/access-clients/{{client_slug}}",

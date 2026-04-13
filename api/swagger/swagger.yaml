@@ -2182,9 +2182,12 @@ definitions:
         type: string
         description: Name of the client organization
         example: Company Name
-      clientContact:
+      clientEmail:
         type: string
-        description: Contact information for the client
+        description: Email of the client organization
+      clientPhone:
+        type: string
+        description: Phone number of the client organization
       brandColor:
         type: string
         description: Brand color for the client (hex color)
@@ -2217,9 +2220,12 @@ definitions:
       clientName:
         type: string
         description: Name of the client organization
-      clientContact:
+      clientEmail:
         type: string
-        description: Contact information for the client
+        description: Email of the client
+      clientPhone:
+        type: string
+        description: Phone number of the client
       brandColor:
         type: string
         description: Brand color for the client (hex color)
@@ -2238,9 +2244,12 @@ definitions:
           name:
             type: string
             description: Client organization name
-          contact:
+          email:
             type: string
-            description: Client contact information
+            description: Email of the client
+          phone:
+            type: string
+            description: Phone number of the client
       brandColor:
         type: string
         description: Brand color (hex)
@@ -2334,7 +2343,9 @@ definitions:
               properties:
                 name:
                   type: string
-                contact:
+                email:
+                  type: string
+                phone:
                   type: string
             brandColor:
               type: string
