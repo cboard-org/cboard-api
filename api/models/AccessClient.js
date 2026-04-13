@@ -17,7 +17,11 @@ const ACCESS_CLIENT_SCHEMA_DEFINITION = {
       required: true,
       trim: true
     },
-    contact: {
+    email: {
+      type: String,
+      trim: true
+    },
+    phone: {
       type: String,
       trim: true
     }
