@@ -67,9 +67,7 @@ const BOARD_SCHEMA_DEFINITION = {
     type: String,
     trim: true,
     uppercase: true,
-    default: null,
-    unique: true,
-    sparse: true
+    default: null
   }
 };
 
