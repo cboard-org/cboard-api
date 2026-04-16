@@ -84,9 +84,9 @@ describe('Access API calls', function () {
       // rootBoard has no tile links, so discovery returns just the root
       res.body.accessPoint.linkedBoardsIds.length.should.eql(1);
 
-      // Verify board was marked with accessPointCode
+      // Verify board was marked with accessGate
       const board = await Board.findById(testBoardId);
-      board.accessPointCode.should.eql('TEST01');
+      board.accessGate.should.eql('TEST01');
     });
 
     it('it should NOT CREATE with duplicate slug', async function () {
@@ -354,9 +354,9 @@ describe('Access API calls', function () {
       res.body.should.have.property('linkedBoardsIds').that.is.an('array');
       res.body.linkedBoardsIds.should.include(testBoardId2.toString());
 
-      // Verify new root board was marked with accessPointCode
+      // Verify new root board was marked with accessGate
       const board = await Board.findById(testBoardId2);
-      board.accessPointCode.should.eql('APUPDATE01');
+      board.accessGate.should.eql('APUPDATE01');
     });
 
     it('it should re-discover without changing root when no rootBoardId provided', async function () {
