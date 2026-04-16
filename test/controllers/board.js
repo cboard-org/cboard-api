@@ -252,11 +252,11 @@ describe('Board API calls', function () {
     });
   });
 
-  describe('accessEntryPoint field behavior', function () {
-    it('should normalize accessEntryPoint to uppercase when creating a board', async function () {
+  describe('accessGate field behavior', function () {
+    it('should normalize accessGate to uppercase when creating a board', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessEntryPoint: 'cafe01'
+        accessGate: 'cafe01'
       };
       const res = await request(server)
         .post('/board')
@@ -266,14 +266,14 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessEntryPoint');
-      res.body.accessEntryPoint.should.equal('CAFE01');
+      res.body.should.have.property('accessGate');
+      res.body.accessGate.should.equal('CAFE01');
     });
 
-    it('should trim whitespace from accessEntryPoint', async function () {
+    it('should trim whitespace from accessGate', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessEntryPoint: '  test01  '
+        accessGate: '  test01  '
       };
       const res = await request(server)
         .post('/board')
@@ -283,13 +283,13 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessEntryPoint');
-      res.body.accessEntryPoint.should.equal('TEST01');
+      res.body.should.have.property('accessGate');
+      res.body.accessGate.should.equal('TEST01');
     });
 
-    it('should default accessEntryPoint to null when not provided', async function () {
+    it('should default accessGate to null when not provided', async function () {
       const boardWithoutAccessCode = { ...helper.boardData };
-      delete boardWithoutAccessCode.accessEntryPoint;
+      delete boardWithoutAccessCode.accessGate;
 
       const res = await request(server)
         .post('/board')
@@ -299,15 +299,15 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.accessEntryPoint.should.equal(null);
+      res.body.accessGate.should.equal(null);
     });
 
-    it('should update accessEntryPoint on an existing board', async function () {
+    it('should update accessGate on an existing board', async function () {
       const boardId = await helper.createMochaBoard(server, user.token);
 
       const updateData = {
         ...helper.boardData,
-        accessEntryPoint: 'updated01'
+        accessGate: 'updated01'
       };
       const res = await request(server)
         .put('/board/' + boardId)
@@ -317,14 +317,14 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessEntryPoint');
-      res.body.accessEntryPoint.should.equal('UPDATED01');
+      res.body.should.have.property('accessGate');
+      res.body.accessGate.should.equal('UPDATED01');
     });
 
-    it('should return accessEntryPoint in GET response when set', async function () {
+    it('should return accessGate in GET response when set', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessEntryPoint: 'gettest01'
+        accessGate: 'gettest01'
       };
       const createRes = await request(server)
         .post('/board')
@@ -343,8 +343,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      getRes.body.should.have.property('accessEntryPoint');
-      getRes.body.accessEntryPoint.should.equal('GETTEST01');
+      getRes.body.should.have.property('accessGate');
+      getRes.body.accessGate.should.equal('GETTEST01');
     });
   });
 
