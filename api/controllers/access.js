@@ -204,7 +204,7 @@ async function createAccessClient(req, res) {
     rootBoardId,
     subscriptionStart,
     subscriptionEnd,
-    accessPointCode
+    accessGate
   } = req.body;
 
   try {
@@ -231,7 +231,7 @@ async function createAccessClient(req, res) {
 
     // Create the access point
     const accessPoint = new AccessPoint({
-      code: accessPointCode.toUpperCase(),
+      code: accessGate.toUpperCase(),
       accessClient: client._id,
       rootBoardId,
       linkedBoardsIds: linkedBoardIds
