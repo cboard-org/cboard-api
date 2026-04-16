@@ -2168,13 +2168,13 @@ definitions:
       - rootBoardId
       - subscriptionStart
       - subscriptionEnd
-      - accessPointCode
+      - accessGate
     properties:
       slug:
         type: string
         description: Unique slug identifier for the access client (lowercase)
         example: my-company
-      accessPointCode:
+      accessGate:
         type: string
         description: Unique code for the access point (will be uppercased)
         example: ABC123
