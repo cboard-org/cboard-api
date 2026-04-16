@@ -1306,7 +1306,7 @@ paths:
     x-swagger-router-controller: access
     post:
       operationId: createAccessClient
-      description: Creates a new Access client and its first AccessPoint. Requires admin authentication. Auto-discovers linked boards from rootBoardId and marks them with accessPointCode.
+      description: Creates a new Access client and its first AccessPoint. Requires admin authentication. Auto-discovers linked boards from rootBoardId and marks them with accessGate.
       security:
         - Bearer: []
       x-security-scopes:
@@ -2438,9 +2438,9 @@ definitions:
         type: boolean
       grid:
         type: object
-      accessPointCode:
+      accessGate:
         type: string
-        description: The access point code associated with this board
+        description: The access gate code associated with this board
   AccessPointResponse:
     type: object
     properties:

@@ -63,7 +63,7 @@ const BOARD_SCHEMA_DEFINITION = {
     default: false
   },
   grid: {},
-  accessPointCode: {
+  accessGate: {
     type: String,
     trim: true,
     uppercase: true,
@@ -87,8 +87,8 @@ const BOARD_SCHEMA_OPTIONS = {
 
 const boardSchema = new Schema(BOARD_SCHEMA_DEFINITION, BOARD_SCHEMA_OPTIONS);
 
-// Sparse unique index skips documents where accessPointCode is null/missing, enforcing uniqueness only for set values
-boardSchema.index({ accessPointCode: 1 }, { sparse: true, unique: true });
+// Sparse unique index skips documents where accessGate is null/missing, enforcing uniqueness only for set values
+boardSchema.index({ accessGate: 1 }, { sparse: true, unique: true });
 
 const validatePresenceOf = value => value && value.length;
 
