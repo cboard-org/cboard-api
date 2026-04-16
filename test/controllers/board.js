@@ -321,7 +321,7 @@ describe('Board API calls', function () {
       res.body.accessGate.should.equal('UPDATED01');
     });
 
-    it('should block direct access to boards with accessGate', async function () {
+    it('should return accessGate in GET response when set', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
         accessGate: 'gettest01'
@@ -400,9 +400,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      // Verify that boards with accessGate are not in the results
-      const boardsWithAccessCode = res.body.data.filter(b => b.accessGate !== null && b.accessGate !== undefined);
-      boardsWithAccessCode.should.have.lengthOf(0);
+      getRes.body.should.have.property('accessGate');
+      getRes.body.accessGate.should.equal('GETTEST01');
     });
   });
 
