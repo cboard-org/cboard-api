@@ -192,7 +192,7 @@ async function getAccessBoard(req, res) {
  * POST /admin/access-clients
  * Creates a new Access client and its first Access point.
  * Requires admin authentication (enforced by Swagger middleware).
- * Creates AccessClient, creates AccessPoint, and updates boards with accessPointCode.
+ * Creates AccessClient, creates AccessPoint, and updates boards with accessGate.
  * Validates rootBoardId exists.
  */
 async function createAccessClient(req, res) {
@@ -243,7 +243,7 @@ async function createAccessClient(req, res) {
     // Mark all discovered boards with the access point code
     await Board.updateMany(
       { _id: { $in: linkedBoardIds } },
-      { $set: { accessPointCode: accessPoint.code } }
+      { $set: { accessGate: accessPoint.code } }
     );
 
     return res.status(201).json({ ...client.toJSON(), accessPoint: accessPoint.toJSON() });
@@ -441,7 +441,7 @@ async function updateAccessPoint(req, res) {
     // Mark all discovered boards with this access point code
     await Board.updateMany(
       { _id: { $in: linkedBoardIds } },
-      { $set: { accessPointCode: code } }
+      { $set: { accessGate: code } }
     );
 
     return res.status(200).json(accessPoint.toJSON());

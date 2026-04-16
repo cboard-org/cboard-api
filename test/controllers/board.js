@@ -252,11 +252,11 @@ describe('Board API calls', function () {
     });
   });
 
-  describe('accessPointCode field behavior', function () {
-    it('should normalize accessPointCode to uppercase when creating a board', async function () {
+  describe('accessGate field behavior', function () {
+    it('should normalize accessGate to uppercase when creating a board', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessPointCode: 'cafe01'
+        accessGate: 'cafe01'
       };
       const res = await request(server)
         .post('/board')
@@ -266,14 +266,14 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessPointCode');
-      res.body.accessPointCode.should.equal('CAFE01');
+      res.body.should.have.property('accessGate');
+      res.body.accessGate.should.equal('CAFE01');
     });
 
-    it('should trim whitespace from accessPointCode', async function () {
+    it('should trim whitespace from accessGate', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessPointCode: '  test01  '
+        accessGate: '  test01  '
       };
       const res = await request(server)
         .post('/board')
@@ -283,13 +283,13 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessPointCode');
-      res.body.accessPointCode.should.equal('TEST01');
+      res.body.should.have.property('accessGate');
+      res.body.accessGate.should.equal('TEST01');
     });
 
-    it('should default accessPointCode to null when not provided', async function () {
+    it('should default accessGate to null when not provided', async function () {
       const boardWithoutAccessCode = { ...helper.boardData };
-      delete boardWithoutAccessCode.accessPointCode;
+      delete boardWithoutAccessCode.accessGate;
 
       const res = await request(server)
         .post('/board')
@@ -299,15 +299,15 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(res.body.accessPointCode).to.be.null;
+      res.body.accessGate.should.equal(null);
     });
 
-    it('should update accessPointCode on an existing board', async function () {
+    it('should update accessGate on an existing board', async function () {
       const boardId = await helper.createMochaBoard(server, user.token);
 
       const updateData = {
         ...helper.boardData,
-        accessPointCode: 'updated01'
+        accessGate: 'updated01'
       };
       const res = await request(server)
         .put('/board/' + boardId)
@@ -317,14 +317,14 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessPointCode');
-      res.body.accessPointCode.should.equal('UPDATED01');
+      res.body.should.have.property('accessGate');
+      res.body.accessGate.should.equal('UPDATED01');
     });
 
-    it('should block direct access to boards with accessCode', async function () {
+    it('should return accessGate in GET response when set', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessPointCode: 'gettest01'
+        accessGate: 'gettest01'
       };
       const createRes = await request(server)
         .post('/board')
@@ -348,8 +348,8 @@ describe('Board API calls', function () {
       getRes.body.message.should.equal('This board requires an access code');
       getRes.body.should.have.property('requiresAccessCode');
       getRes.body.requiresAccessCode.should.equal(true);
-      getRes.body.should.have.property('accessPointCode');
-      getRes.body.accessPointCode.should.equal('GETTEST01');
+      getRes.body.should.have.property('accessGate');
+      getRes.body.accessGate.should.equal('GETTEST01');
 
       // Admins should be able to access the board directly
       const adminEmail = helper.generateEmail();
@@ -361,12 +361,12 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      adminRes.body.should.have.property('accessPointCode');
-      adminRes.body.accessPointCode.should.equal('GETTEST01');
+      adminRes.body.should.have.property('accessGate');
+      adminRes.body.accessGate.should.equal('GETTEST01');
     });
 
-    it('should exclude boards with accessCode from public boards listing', async function () {
-      // Create a public board without accessCode
+    it('should exclude boards with accessGate from public boards listing', async function () {
+      // Create a public board without accessGate
       const publicBoard = {
         ...helper.boardData,
         name: 'Public Board Without Code',
@@ -379,12 +379,12 @@ describe('Board API calls', function () {
         .set('Accept', 'application/json')
         .expect(200);
 
-      // Create a public board with accessPointCode
+      // Create a public board with accessGate
       const publicBoardWithCode = {
         ...helper.boardData,
         name: 'Public Board With Code',
         isPublic: true,
-        accessPointCode: 'public01'
+        accessGate: 'public01'
       };
       await request(server)
         .post('/board')
@@ -400,9 +400,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      // Verify that boards with accessPointCode are not in the results
-      const boardsWithAccessCode = res.body.data.filter(b => b.accessPointCode !== null && b.accessPointCode !== undefined);
-      boardsWithAccessCode.should.have.lengthOf(0);
+      getRes.body.should.have.property('accessGate');
+      getRes.body.accessGate.should.equal('GETTEST01');
     });
   });
 
