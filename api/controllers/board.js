@@ -83,7 +83,7 @@ async function getPublicBoards(req, res) {
     search && search.length ? getORQuery(searchFields, search, true) : {};
   const response = await paginatedResponse(
     Board,
-    { query: { ...query, isPublic: true, accessPointCode: null } },
+    { query: { ...query, isPublic: true, accessGate: null } },
     req.query
   );
 
@@ -138,8 +138,8 @@ function getBoard(req, res) {
       });
     }
 
-    // If no accessPointCode, serve normally
-    if (!boards.accessPointCode) {
+    // If no accessGate, serve normally
+    if (!boards.accessGate) {
       return res.status(200).json(boards.toJSON());
     }
 
@@ -159,7 +159,7 @@ function getBoard(req, res) {
         return res.status(403).json({
           message: 'This board requires an access code',
           requiresAccessCode: true,
-          accessPointCode: boards.accessPointCode
+          accessGate: boards.accessGate
         });
       }
       return res.status(200).json(boards.toJSON());
