@@ -79,10 +79,10 @@ describe('Access API calls', function () {
       res.body.client.should.have.property('name').eql('Test Client mocha test');
       res.body.should.have.property('brandColor').eql('#FF5733');
       res.body.should.have.property('createdBy');
-      res.body.should.have.property('accessPoint');
-      res.body.accessPoint.should.have.property('code').eql('TEST01');
+      res.body.should.have.property('accessGate');
+      res.body.accessGate.should.have.property('code').eql('TEST01');
       // rootBoard has no tile links, so discovery returns just the root
-      res.body.accessPoint.linkedBoardsIds.length.should.eql(1);
+      res.body.accessGate.linkedBoardsIds.length.should.eql(1);
 
       // Verify board was marked with accessGate
       const board = await Board.findById(testBoardId);
@@ -118,7 +118,7 @@ describe('Access API calls', function () {
       res.body.should.have.property('message').eql('Slug already exists');
     });
 
-    it('it should NOT CREATE with duplicate access point code', async function () {
+    it('it should NOT CREATE with duplicate access gate code', async function () {
       const clientData = {
         slug: 'duplicate-code-a',
         clientName: 'Test Client mocha test',
@@ -326,13 +326,13 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('PUT /admin/access-points/:code', function () {
+  describe('PUT /admin/access-gates/:code', function () {
     beforeEach(async function () {
       await request(server)
         .post('/admin/access-clients')
         .send({
           slug: 'ap-update-01',
-          clientName: 'Access Point Update Test mocha test',
+          clientName: 'Access Gate Update Test mocha test',
           rootBoardId: testBoardId,
           accessGate: 'APUPDATE01',
           subscriptionStart: new Date(),
@@ -341,9 +341,9 @@ describe('Access API calls', function () {
         .set('Authorization', `Bearer ${adminUser.token}`);
     });
 
-    it('it should re-discover boards when updating access point root', async function () {
+    it('it should re-discover boards when updating access gate root', async function () {
       const res = await request(server)
-        .put('/admin/access-points/APUPDATE01')
+        .put('/admin/access-gates/APUPDATE01')
         .send({ rootBoardId: testBoardId2 })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -361,7 +361,7 @@ describe('Access API calls', function () {
 
     it('it should re-discover without changing root when no rootBoardId provided', async function () {
       const res = await request(server)
-        .put('/admin/access-points/APUPDATE01')
+        .put('/admin/access-gates/APUPDATE01')
         .send({})
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -372,21 +372,21 @@ describe('Access API calls', function () {
       res.body.linkedBoardsIds.should.include(testBoardId.toString());
     });
 
-    it('it should return 404 for non-existent access point code', async function () {
+    it('it should return 404 for non-existent access gate code', async function () {
       const res = await request(server)
-        .put('/admin/access-points/NONEXISTENT')
+        .put('/admin/access-gates/NONEXISTENT')
         .send({})
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(404);
 
-      res.body.should.have.property('message').eql('Access point not found');
+      res.body.should.have.property('message').eql('Access gate not found');
     });
 
     it('it should NOT UPDATE without authorization', async function () {
       await request(server)
-        .put('/admin/access-points/APUPDATE01')
+        .put('/admin/access-gates/APUPDATE01')
         .send({})
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)

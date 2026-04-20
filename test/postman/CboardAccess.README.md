@@ -12,12 +12,12 @@ Cboard Access allows businesses to offer AAC boards in their locations via QR co
 - **Login to Get Auth Token**: Obtain authentication token for admin endpoints
 
 ### 2. Admin Endpoints (Require Authentication)
-- **Create Access Client**: Create a new Cboard Access client and its first access point
+- **Create Access Client**: Create a new Cboard Access client and its first access gate
 - **List All Clients**: View all registered clients with statistics
 - **Update Client**: Modify client information
 - **Deactivate Client**: Disable a client by setting `isActive` to false
 - **View Statistics**: Get detailed stats for a specific client
-- **Update Access Point**: Re-run board discovery for an access point
+- **Update Access Gate**: Re-run board discovery for an access gate
 
 ### 3. Public Endpoints (No Authentication)
 - **Test Public Client Listing**: List active clients for app display
@@ -54,7 +54,7 @@ The collection includes these variables (can be edited in collection variables o
 | `url` | `http://localhost:10010` | Base API URL |
 | `token` | (set automatically) | Authentication token for admin endpoints (saved to globals on login) |
 | `client_slug` | `test-coffee-shop` | Client slug for admin endpoints (set automatically on create) |
-| `access_code` | `TEST01` | Access point code for public board access (set automatically on create) |
+| `access_code` | `TEST01` | Access gate code for public board access (set automatically on create) |
 | `root_board_id` | (empty) | Board ID to use as root board |
 
 ## Usage Workflow
@@ -82,13 +82,13 @@ The collection includes these variables (can be edited in collection variables o
     "clientPhone": "+1234567890",
      "brandColor": "#8B4513",
      "rootBoardId": "{{root_board_id}}",
-     "accessPointCode": "CAFE01",
+     "accessGate": "CAFE01",
      "subscriptionStart": "2026-04-01T00:00:00.000Z",
      "subscriptionEnd": "2027-04-01T00:00:00.000Z"
    }
    ```
 
-2. The response includes the created client (`slug`, `client.name`, etc.) and the `accessPoint` with `code` and `linkedBoardsIds`
+2. The response includes the created client (`slug`, `client.name`, etc.) and the `accessGate` with `code` and `linkedBoardsIds`
 3. `client_slug` and `access_code` variables are automatically saved for subsequent requests
 
 ### Testing the Client
@@ -105,7 +105,7 @@ The collection includes these variables (can be edited in collection variables o
 
 ### Re-discovering Boards
 
-Use **Update Access Point** to re-run board discovery after the board structure changes. Optionally pass a new `rootBoardId` in the body to change the root.
+Use **Update Access Gate** to re-run board discovery after the board structure changes. Optionally pass a new `rootBoardId` in the body to change the root.
 
 ## Request Details
 
@@ -115,7 +115,7 @@ Use **Update Access Point** to re-run board discovery after the board structure 
 - `slug`: Unique client identifier (lowercase, URL-safe)
 - `clientName`: Display name
 - `rootBoardId`: ID of the main board
-- `accessPointCode`: Unique code for the access point (uppercase alphanumeric)
+- `accessGate`: Unique code for the access gate (uppercase alphanumeric)
 - `subscriptionStart`: Start date (ISO 8601)
 - `subscriptionEnd`: End date (ISO 8601)
 
@@ -124,7 +124,7 @@ Use **Update Access Point** to re-run board discovery after the board structure 
 - `clientPhone`: Phone number of the client
 - `brandColor`: Hex color code
 
-Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to the access point.
+Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to the access gate.
 
 ### Update Client
 
@@ -178,7 +178,7 @@ Each request includes automated tests:
 ### Scenario 4: Board Structure Changed
 
 1. Update boards (add/remove tile navigation)
-2. Run "Update Access Point" to re-discover linked boards
+2. Run "Update Access Gate" to re-discover linked boards
 3. Verify `linkedBoardsIds` count updated
 
 ## Troubleshooting

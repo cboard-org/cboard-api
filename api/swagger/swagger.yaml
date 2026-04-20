@@ -1306,7 +1306,7 @@ paths:
     x-swagger-router-controller: access
     post:
       operationId: createAccessClient
-      description: Creates a new Access client and its first AccessPoint. Requires admin authentication. Auto-discovers linked boards from rootBoardId and marks them with accessGateCode.
+      description: Creates a new Access client and its first AccessGate. Requires admin authentication. Auto-discovers linked boards from rootBoardId and marks them with accessGateCode.
       security:
         - Bearer: []
       x-security-scopes:
@@ -1441,11 +1441,11 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-points/{code}:
+  /admin/access-gates/{code}:
     x-swagger-router-controller: access
     put:
-      operationId: updateAccessPoint
-      description: Re-runs board discovery for an access point, updating its linkedBoardsIds. Optionally accepts a new rootBoardId. Requires admin authentication.
+      operationId: updateAccessGate
+      description: Re-runs board discovery for an access gate, updating its linkedBoardsIds. Optionally accepts a new rootBoardId. Requires admin authentication.
       security:
         - Bearer: []
       x-security-scopes:
@@ -1455,7 +1455,7 @@ paths:
           type: string
           in: path
           required: true
-          description: Access point code (uppercase)
+          description: Access gate code (uppercase)
         - name: body
           in: body
           required: false
@@ -1469,9 +1469,9 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/AccessPointResponse"
+            $ref: "#/definitions/AccessGateResponse"
         "404":
-          description: Access point or root board not found
+          description: Access gate or root board not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         default:
@@ -2176,7 +2176,7 @@ definitions:
         example: my-company
       accessGate:
         type: string
-        description: Unique code for the access point (will be uppercased)
+        description: Unique code for the access gate (will be uppercased)
         example: ABC123
       clientName:
         type: string
@@ -2275,9 +2275,9 @@ definitions:
         type: string
         format: date-time
         description: Last update timestamp
-      accessPoint:
+      accessGate:
         description: Present only on create response
-        $ref: "#/definitions/AccessPointResponse"
+        $ref: "#/definitions/AccessGateResponse"
   AccessClientsListResponse:
     type: object
     required:
@@ -2301,14 +2301,14 @@ definitions:
             brandColor:
               type: string
               description: Brand color (hex)
-            accessPoints:
+            accessGates:
               type: array
               items:
                 type: object
                 properties:
                   code:
                     type: string
-                    description: Access point code
+                    description: Access gate code
                   rootBoard:
                     type: object
                     properties:
@@ -2373,7 +2373,7 @@ definitions:
               format: date-time
             boardCount:
               type: integer
-              description: Total boards across all access points for this client
+              description: Total boards across all access gates for this client
             isExpired:
               type: boolean
               description: Whether the subscription has expired
@@ -2441,14 +2441,14 @@ definitions:
       accessGateCode:
         type: string
         description: The access gate code associated with this board
-  AccessPointResponse:
+  AccessGateResponse:
     type: object
     properties:
       id:
         type: string
       code:
         type: string
-        description: Access point code (uppercase)
+        description: Access gate code (uppercase)
       accessClient:
         type: string
         description: AccessClient ID
@@ -2462,7 +2462,7 @@ definitions:
         description: All board IDs reachable from the root board
       viewsCount:
         type: integer
-        description: Number of times this access point has been accessed
+        description: Number of times this access gate has been accessed
       lastAccessAt:
         type: string
         format: date-time

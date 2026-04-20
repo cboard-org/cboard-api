@@ -28,22 +28,22 @@
 									"    pm.expect(jsonData.client).to.have.property('name');",
 									"});",
 									"",
-									"pm.test(\"Response contains access point with auto-discovered boards\", function () {",
+									"pm.test(\"Response contains access gate with auto-discovered boards\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('accessPoint');",
-									"    pm.expect(jsonData.accessPoint).to.have.property('code');",
-									"    pm.expect(jsonData.accessPoint).to.have.property('linkedBoardsIds');",
-									"    pm.expect(jsonData.accessPoint.linkedBoardsIds.length).to.be.at.least(1);",
-									"    console.log(\"Auto-discovered \" + jsonData.accessPoint.linkedBoardsIds.length + \" boards\");",
+									"    pm.expect(jsonData).to.have.property('accessGate');",
+									"    pm.expect(jsonData.accessGate).to.have.property('code');",
+									"    pm.expect(jsonData.accessGate).to.have.property('linkedBoardsIds');",
+									"    pm.expect(jsonData.accessGate.linkedBoardsIds.length).to.be.at.least(1);",
+									"    console.log(\"Auto-discovered \" + jsonData.accessGate.linkedBoardsIds.length + \" boards\");",
 									"});",
 									"",
-									"// Save the slug and access point code for later requests",
+									"// Save the slug and access gate code for later requests",
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
 									"    pm.collectionVariables.set(\"client_slug\", jsonData.slug);",
-									"    pm.collectionVariables.set(\"access_code\", jsonData.accessPoint.code);",
+									"    pm.collectionVariables.set(\"access_code\", jsonData.accessGate.code);",
 									"    console.log(\"Client slug saved: \" + jsonData.slug);",
-									"    console.log(\"Access code saved: \" + jsonData.accessPoint.code);",
+									"    console.log(\"Access code saved: \" + jsonData.accessGate.code);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -298,7 +298,7 @@
 					"response": []
 				},
 				{
-					"name": "Update Access Point",
+					"name": "Update Access Gate",
 					"event": [
 						{
 							"listen": "test",
@@ -308,7 +308,7 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test(\"Response contains access point data\", function () {",
+									"pm.test(\"Response contains access gate data\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('code');",
 									"    pm.expect(jsonData).to.have.property('linkedBoardsIds');",
@@ -337,17 +337,17 @@
 							"raw": "{}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-points/{{access_code}}",
+							"raw": "{{url}}/admin/access-gates/{{access_code}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-points",
+								"access-gates",
 								"{{access_code}}"
 							]
 						},
-						"description": "Re-runs board discovery for an access point. Optionally pass a new rootBoardId to change the root and re-discover from there. Useful when the board structure has changed."
+						"description": "Re-runs board discovery for an access gate. Optionally pass a new rootBoardId to change the root and re-discover from there. Useful when the board structure has changed."
 					},
 					"response": []
 				}
@@ -381,15 +381,15 @@
 									"        pm.expect(client).to.have.property('slug');",
 									"        pm.expect(client).to.have.property('clientName');",
 									"        pm.expect(client).to.have.property('brandColor');",
-									"        pm.expect(client).to.have.property('accessPoints');",
-									"        pm.expect(client.accessPoints).to.be.an('array');",
+									"        pm.expect(client).to.have.property('accessGates');",
+									"        pm.expect(client.accessGates).to.be.an('array');",
 									"    });",
 									"});",
 									"",
-									"// Save first access point code for testing board access",
+									"// Save first access gate code for testing board access",
 									"var data = pm.response.json().data;",
-									"if (data.length > 0 && data[0].accessPoints.length > 0) {",
-									"    var code = data[0].accessPoints[0].code;",
+									"if (data.length > 0 && data[0].accessGates.length > 0) {",
+									"    var code = data[0].accessGates[0].code;",
 									"    pm.collectionVariables.set(\"access_code\", code);",
 									"    console.log(\"Access code saved: \" + code);",
 									"}"
