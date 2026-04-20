@@ -4,6 +4,9 @@ const moment = require('moment');
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
+const AccessGate = require('../models/AccessGate');
+const User = require('../models/User');
+const { getTokenData } = require('../helpers/auth');
 const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
 const { processBase64Images, hasBase64Images } = require('../helpers/imageProcessor');
 
@@ -80,7 +83,7 @@ async function getPublicBoards(req, res) {
     search && search.length ? getORQuery(searchFields, search, true) : {};
   const response = await paginatedResponse(
     Board,
-    { query: { ...query, isPublic: true } },
+    { query: { ...query, isPublic: true, accessGateCode: null } },
     req.query
   );
 
@@ -89,7 +92,7 @@ async function getPublicBoards(req, res) {
 
 async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
-  Board.findByIdAndRemove(id, function (err, boards) {
+  Board.findByIdAndRemove(id, async function (err, boards) {
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
@@ -102,6 +105,14 @@ async function deleteBoard(req, res) {
         error: 'Board not found.'
       });
     }
+    await AccessGate.updateMany(
+      { linkedBoardsIds: id },
+      { $pull: { linkedBoardsIds: id } }
+    );
+    await AccessGate.updateMany(
+      { rootBoardId: id },
+      { $set: { rootBoardId: null } }
+    );
     return res.status(200).json(boards);
   });
 }
@@ -126,7 +137,33 @@ function getBoard(req, res) {
         message: 'Board does not exist. Board Id: ' + id
       });
     }
-    return res.status(200).json(boards.toJSON());
+
+    // If no accessGateCode, serve normally
+    if (!boards.accessGateCode) {
+      return res.status(200).json(boards.toJSON());
+    }
+
+    // Board is access-protected. Check if caller is admin by decoding the token manually —
+    // req.user is not populated for this public route.
+    let adminCheckPromise = Promise.resolve(false);
+    const authHeader = req.get('Authorization');
+    if (authHeader) {
+      const tokenData = getTokenData(authHeader.split(' ')[1]);
+      if (tokenData?.id) {
+        adminCheckPromise = User.getById(tokenData.id).then(user => !!(user && user.isAdmin));
+      }
+    }
+
+    adminCheckPromise.then(isAdmin => {
+      if (!isAdmin) {
+        return res.status(403).json({
+          message: 'This board requires an access code',
+          requiresAccessCode: true,
+          accessGate: boards.accessGateCode
+        });
+      }
+      return res.status(200).json(boards.toJSON());
+    });
   });
 }
 

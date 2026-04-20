@@ -336,15 +336,72 @@ describe('Board API calls', function () {
 
       const boardId = createRes.body.id;
 
+      // Direct access should be blocked with 403 for regular users
       const getRes = await request(server)
         .get('/board/' + boardId)
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
+        .expect(403);
+
+      getRes.body.should.have.property('message');
+      getRes.body.message.should.equal('This board requires an access code');
+      getRes.body.should.have.property('requiresAccessCode');
+      getRes.body.requiresAccessCode.should.equal(true);
+      getRes.body.should.have.property('accessGate');
+      getRes.body.accessGate.should.equal('GETTEST01');
+
+      // Admins should be able to access the board directly
+      const adminEmail = helper.generateEmail();
+      const admin = await helper.prepareUser(server, { role: 'admin', email: adminEmail });
+      const adminRes = await request(server)
+        .get('/board/' + boardId)
+        .set('Authorization', `Bearer ${admin.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
         .expect(200);
 
-      getRes.body.should.have.property('accessGateCode');
-      getRes.body.accessGateCode.should.equal('GETTEST01');
+      adminRes.body.should.have.property('accessGateCode');
+      adminRes.body.accessGateCode.should.equal('GETTEST01');
+    });
+
+    it('should exclude boards with accessGate from public boards listing', async function () {
+      // Create a public board without accessGate
+      const publicBoard = {
+        ...helper.boardData,
+        name: 'Public Board Without Code',
+        isPublic: true
+      };
+      await request(server)
+        .post('/board')
+        .send(publicBoard)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      // Create a public board with accessGate
+      const publicBoardWithCode = {
+        ...helper.boardData,
+        name: 'Public Board With Code',
+        isPublic: true,
+        accessGateCode: 'public01'
+      };
+      await request(server)
+        .post('/board')
+        .send(publicBoardWithCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      // Get public boards
+      const res = await request(server)
+        .get('/board/public')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const boardsWithCode = res.body.data.filter(b => b.name === 'Public Board With Code');
+      boardsWithCode.length.should.equal(0);
     });
   });
 
