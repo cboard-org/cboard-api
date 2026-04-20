@@ -103,15 +103,16 @@ async function getClients(req, res) {
 }
 
 /**
- * GET /access/:code
- * Gets ALL boards for an access code in a single request.
+ * GET /access/:slug/:code
+ * Gets ALL boards for a slug + access code pair in a single request.
  * This enables instant frontend navigation without additional requests.
- * Validates code exists and client subscription is active.
+ * Validates slug and code exist, belong together, and client subscription is active.
  * Returns client info (slug, name, color), all boards array, and rootBoardId.
  * Increments viewsCount and updates lastAccessAt on the AccessGate.
  */
 async function getAccessBoard(req, res) {
   const code = req.swagger.params.code.value.toUpperCase();
+  const slug = req.swagger.params.slug.value;
 
   try {
     const now = new Date();
@@ -128,6 +129,7 @@ async function getAccessBoard(req, res) {
     const client = accessGate.accessClient;
     if (
       !client ||
+      client.slug !== slug ||
       !client.isActive ||
       client.subscriptionStart > now ||
       client.subscriptionEnd < now

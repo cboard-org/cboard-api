@@ -455,16 +455,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/access/{{access_code}}",
+							"raw": "{{url}}/access/{{client_slug}}/{{access_code}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"access",
+								"{{client_slug}}",
 								"{{access_code}}"
 							]
 						},
-						"description": "Public endpoint that retrieves all boards for a specific access code. Used when scanning QR codes or entering access codes. No authentication required."
+						"description": "Public endpoint that retrieves all boards for a slug + access code pair. Used when scanning QR codes or entering access codes. No authentication required."
 					},
 					"response": []
 				}

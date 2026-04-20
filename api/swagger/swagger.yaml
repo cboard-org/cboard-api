@@ -1278,12 +1278,17 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /access/{code}:
+  /access/{slug}/{code}:
     x-swagger-router-controller: access
     get:
       operationId: getAccessBoard
-      description: Gets ALL boards for an access code in a single request. Validates code exists and subscription is active. Returns client info, all boards array, and rootBoardId.
+      description: Gets ALL boards for an access code in a single request. Validates slug and code exist and subscription is active. Returns client info, all boards array, and rootBoardId.
       parameters:
+        - name: slug
+          type: string
+          in: path
+          required: true
+          description: Client slug (institution identifier)
         - name: code
           type: string
           in: path
