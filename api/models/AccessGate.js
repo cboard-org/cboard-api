@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const ACCESS_POINT_SCHEMA_DEFINITION = {
+const ACCESS_GATE_SCHEMA_DEFINITION = {
   code: {
     type: String,
     required: true,
@@ -37,7 +37,7 @@ const ACCESS_POINT_SCHEMA_DEFINITION = {
   }
 };
 
-const ACCESS_POINT_SCHEMA_OPTIONS = {
+const ACCESS_GATE_SCHEMA_OPTIONS = {
   timestamps: true,
   toObject: {
     virtuals: true
@@ -52,11 +52,11 @@ const ACCESS_POINT_SCHEMA_OPTIONS = {
   }
 };
 
-const accessPointSchema = new Schema(
-  ACCESS_POINT_SCHEMA_DEFINITION,
-  ACCESS_POINT_SCHEMA_OPTIONS
+const accessGateSchema = new Schema(
+  ACCESS_GATE_SCHEMA_DEFINITION,
+  ACCESS_GATE_SCHEMA_OPTIONS
 );
 
-const AccessPoint = mongoose.model('AccessPoint', accessPointSchema);
+const AccessGate = mongoose.model('AccessGate', accessGateSchema);
 
-module.exports = AccessPoint;
+module.exports = AccessGate;

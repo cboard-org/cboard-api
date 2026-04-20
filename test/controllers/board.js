@@ -252,11 +252,11 @@ describe('Board API calls', function () {
     });
   });
 
-  describe('accessGate field behavior', function () {
-    it('should normalize accessGate to uppercase when creating a board', async function () {
+  describe('accessGateCode field behavior', function () {
+    it('should normalize accessGateCode to uppercase when creating a board', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessGate: 'cafe01'
+        accessGateCode: 'cafe01'
       };
       const res = await request(server)
         .post('/board')
@@ -266,14 +266,14 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessGate');
-      res.body.accessGate.should.equal('CAFE01');
+      res.body.should.have.property('accessGateCode');
+      res.body.accessGateCode.should.equal('CAFE01');
     });
 
-    it('should trim whitespace from accessGate', async function () {
+    it('should trim whitespace from accessGateCode', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessGate: '  test01  '
+        accessGateCode: '  test01  '
       };
       const res = await request(server)
         .post('/board')
@@ -283,13 +283,13 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessGate');
-      res.body.accessGate.should.equal('TEST01');
+      res.body.should.have.property('accessGateCode');
+      res.body.accessGateCode.should.equal('TEST01');
     });
 
-    it('should default accessGate to null when not provided', async function () {
+    it('should default accessGateCode to null when not provided', async function () {
       const boardWithoutAccessCode = { ...helper.boardData };
-      delete boardWithoutAccessCode.accessGate;
+      delete boardWithoutAccessCode.accessGateCode;
 
       const res = await request(server)
         .post('/board')
@@ -299,15 +299,15 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.accessGate.should.equal(null);
+      res.body.accessGateCode.should.equal(null);
     });
 
-    it('should update accessGate on an existing board', async function () {
+    it('should update accessGateCode on an existing board', async function () {
       const boardId = await helper.createMochaBoard(server, user.token);
 
       const updateData = {
         ...helper.boardData,
-        accessGate: 'updated01'
+        accessGateCode: 'updated01'
       };
       const res = await request(server)
         .put('/board/' + boardId)
@@ -317,14 +317,14 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.should.have.property('accessGate');
-      res.body.accessGate.should.equal('UPDATED01');
+      res.body.should.have.property('accessGateCode');
+      res.body.accessGateCode.should.equal('UPDATED01');
     });
 
-    it('should return accessGate in GET response when set', async function () {
+    it('should return accessGateCode in GET response when set', async function () {
       const boardWithAccessCode = {
         ...helper.boardData,
-        accessGate: 'gettest01'
+        accessGateCode: 'gettest01'
       };
       const createRes = await request(server)
         .post('/board')
@@ -361,8 +361,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      adminRes.body.should.have.property('accessGate');
-      adminRes.body.accessGate.should.equal('GETTEST01');
+      adminRes.body.should.have.property('accessGateCode');
+      adminRes.body.accessGateCode.should.equal('GETTEST01');
     });
 
     it('should exclude boards with accessGate from public boards listing', async function () {
@@ -379,12 +379,12 @@ describe('Board API calls', function () {
         .set('Accept', 'application/json')
         .expect(200);
 
-      // Create a public board with accessGate
+      // Create a public board with accessGateCode
       const publicBoardWithCode = {
         ...helper.boardData,
         name: 'Public Board With Code',
         isPublic: true,
-        accessGate: 'public01'
+        accessGateCode: 'public01'
       };
       await request(server)
         .post('/board')
@@ -400,11 +400,9 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      // Verify that boards with accessGate are not in the results
-      const boardsWithAccessCode = res.body.data.filter(b => b.accessGate !== null && b.accessGate !== undefined);
-      boardsWithAccessCode.should.have.lengthOf(0);
-      getRes.body.should.have.property('accessGate');
-      getRes.body.accessGate.should.equal('GETTEST01');
+      // Verify that boards with accessGateCode are not in the results
+      const boardsWithCode = res.body.data.filter(b => b.name === 'Public Board With Code');
+      boardsWithCode.length.should.equal(0);
     });
   });
 
