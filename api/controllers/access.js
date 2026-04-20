@@ -1,7 +1,7 @@
 'use strict';
 
 const AccessClient = require('../models/AccessClient');
-const AccessPoint = require('../models/AccessPoint');
+const AccessGate = require('../models/AccessGate');
 const Board = require('../models/Board');
 
 module.exports = {
@@ -63,7 +63,7 @@ async function getClients(req, res) {
       subscriptionEnd: { $gte: now }
     }).select('slug client brandColor');
 
-    const accessPoints = await AccessPoint.find({
+    const accessPoints = await AccessGate.find({
       accessClient: { $in: clients.map(c => c._id) }
     })
       .populate('rootBoardId', 'name caption tiles')
@@ -115,7 +115,7 @@ async function getAccessBoard(req, res) {
 
   try {
     const now = new Date();
-    const accessPoint = await AccessPoint.findOne({ code }).populate(
+    const accessPoint = await AccessGate.findOne({ code }).populate(
       'accessClient'
     );
 
@@ -159,7 +159,7 @@ async function getAccessBoard(req, res) {
     }
 
     // Track access analytics atomically to avoid lost updates under concurrency
-    await AccessPoint.updateOne(
+    await AccessGate.updateOne(
       { _id: accessPoint._id },
       {
         $inc: { viewsCount: 1 },
@@ -230,7 +230,7 @@ async function createAccessClient(req, res) {
     const linkedBoardIds = await getAllLinkedBoardIds(rootBoardId);
 
     // Create the access point
-    const accessPoint = new AccessPoint({
+    const accessPoint = new AccessGate({
       code: accessGate.toUpperCase(),
       accessClient: client._id,
       rootBoardId,
@@ -242,7 +242,7 @@ async function createAccessClient(req, res) {
     // Mark all discovered boards with the access point code
     await Board.updateMany(
       { _id: { $in: linkedBoardIds } },
-      { $set: { accessGate: accessPoint.code } }
+      { $set: { accessGateCode: accessPoint.code } }
     );
 
     return res.status(201).json({ ...client.toJSON(), accessPoint: accessPoint.toJSON() });
@@ -274,7 +274,7 @@ async function listAccessClients(req, res) {
 
     // Fetch access points and sum linkedBoardsIds per client to avoid N+1
     const clientIds = clients.map(c => c._id);
-    const accessPoints = await AccessPoint.find({ accessClient: { $in: clientIds } });
+    const accessPoints = await AccessGate.find({ accessClient: { $in: clientIds } });
 
     const apMap = accessPoints.reduce((map, ap) => {
       const key = ap.accessClient.toString();
@@ -362,7 +362,7 @@ async function getAccessClientStats(req, res) {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    const accessPoints = await AccessPoint.find({ accessClient: client._id });
+    const accessPoints = await AccessGate.find({ accessClient: client._id });
 
     // Collect unique board IDs across all access points
     const allBoardIds = [
@@ -416,7 +416,7 @@ async function updateAccessPoint(req, res) {
   const { rootBoardId } = req.body;
 
   try {
-    const accessPoint = await AccessPoint.findOne({ code });
+    const accessPoint = await AccessGate.findOne({ code });
     if (!accessPoint) {
       return res.status(404).json({ message: 'Access point not found' });
     }
@@ -439,7 +439,7 @@ async function updateAccessPoint(req, res) {
     // Mark all discovered boards with this access point code
     await Board.updateMany(
       { _id: { $in: linkedBoardIds } },
-      { $set: { accessGate: code } }
+      { $set: { accessGateCode: code } }
     );
 
     return res.status(200).json(accessPoint.toJSON());
