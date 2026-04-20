@@ -1264,7 +1264,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /access/clients:
+  /access/clients/all:
     x-swagger-router-controller: access
     get:
       operationId: getClients

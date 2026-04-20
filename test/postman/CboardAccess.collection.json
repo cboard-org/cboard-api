@@ -402,13 +402,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/access/clients",
+							"raw": "{{url}}/access/clients/all",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"access",
-								"clients"
+								"clients",
+								"all"
 							]
 						},
 						"description": "Public endpoint that lists all active Cboard Access clients for display in the app. No authentication required."
