@@ -379,7 +379,7 @@ describe('Board API calls', function () {
         .set('Accept', 'application/json')
         .expect(200);
 
-      // Create a public board with accessGate
+      // Create a public board with accessGateCode
       const publicBoardWithCode = {
         ...helper.boardData,
         name: 'Public Board With Code',
@@ -400,6 +400,7 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
+      // Verify that boards with accessGateCode are not in the results
       const boardsWithCode = res.body.data.filter(b => b.name === 'Public Board With Code');
       boardsWithCode.length.should.equal(0);
     });

@@ -1,0 +1,547 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+		"name": "Cboard Access Admin",
+		"description": "Collection for testing and administering Cboard Access clients. Includes both public endpoints (client listing, board access) and admin endpoints (CRUD operations, statistics).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Admin",
+			"description": "Administrative endpoints for managing Cboard Access clients. Requires authentication.",
+			"item": [
+				{
+					"name": "Create Access Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response contains client data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('slug');",
+									"    pm.expect(jsonData).to.have.property('client');",
+									"    pm.expect(jsonData.client).to.have.property('name');",
+									"});",
+									"",
+									"pm.test(\"Response contains access point with auto-discovered boards\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('accessPoint');",
+									"    pm.expect(jsonData.accessPoint).to.have.property('code');",
+									"    pm.expect(jsonData.accessPoint).to.have.property('linkedBoardsIds');",
+									"    pm.expect(jsonData.accessPoint.linkedBoardsIds.length).to.be.at.least(1);",
+									"    console.log(\"Auto-discovered \" + jsonData.accessPoint.linkedBoardsIds.length + \" boards\");",
+									"});",
+									"",
+									"// Save the slug and access point code for later requests",
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"client_slug\", jsonData.slug);",
+									"    pm.collectionVariables.set(\"access_code\", jsonData.accessPoint.code);",
+									"    console.log(\"Client slug saved: \" + jsonData.slug);",
+									"    console.log(\"Access code saved: \" + jsonData.accessPoint.code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGate\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/admin/access-clients",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access-clients"
+							]
+						},
+						"description": "Creates a new Cboard Access client with the specified configuration. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "List All Clients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains client list\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('total');",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Clients have required fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data.length > 0) {",
+									"        var client = jsonData.data[0];",
+									"        pm.expect(client).to.have.property('slug');",
+									"        pm.expect(client).to.have.property('client');",
+									"        pm.expect(client.client).to.have.property('name');",
+									"        pm.expect(client).to.have.property('boardCount');",
+									"        pm.expect(client).to.have.property('isExpired');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/admin/access-clients",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access-clients"
+							]
+						},
+						"description": "Lists all Cboard Access clients with their statistics. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Client was updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('slug');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"clientEmail\": \"newemail@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{url}}/admin/access-clients/{{client_slug}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access-clients",
+								"{{client_slug}}"
+							]
+						},
+						"description": "Updates an existing Cboard Access client. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Client was deactivated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isActive).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isActive\": false\n}"
+						},
+						"url": {
+							"raw": "{{url}}/admin/access-clients/{{client_slug}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access-clients",
+								"{{client_slug}}"
+							]
+						},
+						"description": "Deactivates a Cboard Access client by setting isActive to false. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "View Statistics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains statistics\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('client');",
+									"    pm.expect(jsonData).to.have.property('stats');",
+									"});",
+									"",
+									"pm.test(\"Stats have required fields\", function () {",
+									"    var stats = pm.response.json().stats;",
+									"    pm.expect(stats).to.have.property('totalAccesses');",
+									"    pm.expect(stats).to.have.property('boardCount');",
+									"    pm.expect(stats).to.have.property('boards');",
+									"    pm.expect(stats).to.have.property('daysUntilExpiry');",
+									"    pm.expect(stats).to.have.property('isExpired');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/admin/access-clients/{{client_slug}}/stats",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access-clients",
+								"{{client_slug}}",
+								"stats"
+							]
+						},
+						"description": "Retrieves detailed statistics for a specific Cboard Access client. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Access Point",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains access point data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('code');",
+									"    pm.expect(jsonData).to.have.property('linkedBoardsIds');",
+									"    pm.expect(jsonData).to.have.property('rootBoardId');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{url}}/admin/access-points/{{access_code}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access-points",
+								"{{access_code}}"
+							]
+						},
+						"description": "Re-runs board discovery for an access point. Optionally pass a new rootBoardId to change the root and re-discover from there. Useful when the board structure has changed."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Public",
+			"description": "Public endpoints accessible without authentication for end-user functionality.",
+			"item": [
+				{
+					"name": "Test Public Client Listing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains active clients\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('total');",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Clients have required fields\", function () {",
+									"    var clients = pm.response.json().data;",
+									"    clients.forEach(function(client) {",
+									"        pm.expect(client).to.have.property('slug');",
+									"        pm.expect(client).to.have.property('clientName');",
+									"        pm.expect(client).to.have.property('brandColor');",
+									"        pm.expect(client).to.have.property('accessPoints');",
+									"        pm.expect(client.accessPoints).to.be.an('array');",
+									"    });",
+									"});",
+									"",
+									"// Save first access point code for testing board access",
+									"var data = pm.response.json().data;",
+									"if (data.length > 0 && data[0].accessPoints.length > 0) {",
+									"    var code = data[0].accessPoints[0].code;",
+									"    pm.collectionVariables.set(\"access_code\", code);",
+									"    console.log(\"Access code saved: \" + code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/access/clients/all",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"access",
+								"clients",
+								"all"
+							]
+						},
+						"description": "Public endpoint that lists all active Cboard Access clients for display in the app. No authentication required."
+					},
+					"response": []
+				},
+				{
+					"name": "Test Public Board Access",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains client and boards data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('client');",
+									"    pm.expect(jsonData).to.have.property('boards');",
+									"    pm.expect(jsonData).to.have.property('rootBoardId');",
+									"});",
+									"",
+									"pm.test(\"Client data is complete\", function () {",
+									"    var client = pm.response.json().client;",
+									"    pm.expect(client).to.have.property('code');",
+									"    pm.expect(client).to.have.property('name');",
+									"    pm.expect(client).to.have.property('color');",
+									"});",
+									"",
+									"pm.test(\"Boards array is present\", function () {",
+									"    var boards = pm.response.json().boards;",
+									"    pm.expect(boards).to.be.an('array');",
+									"    pm.expect(boards.length).to.be.greaterThan(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/access/{{access_code}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"access",
+								"{{access_code}}"
+							]
+						},
+						"description": "Public endpoint that retrieves all boards for a specific access code. Used when scanning QR codes or entering access codes. No authentication required."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Setup",
+			"description": "Helper requests for initial setup and authentication.",
+			"item": [
+				{
+					"name": "Login to Get Auth Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.globals.set(\"token\", pm.response.json().authToken);",
+									"console.log(\"Token saved: \" + pm.globals.get(\"token\").substring(0, 30) + \"...\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@cboard.io\",\n    \"password\": \"your-password\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/user/login/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"login",
+								""
+							]
+						},
+						"description": "Login to obtain an authentication token. Update the email and password with valid admin credentials."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://localhost:10010",
+			"type": "string"
+		},
+		{
+			"key": "client_slug",
+			"value": "test-coffee-shop",
+			"type": "string"
+		},
+		{
+			"key": "access_code",
+			"value": "TEST01",
+			"type": "string"
+		},
+		{
+			"key": "root_board_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
