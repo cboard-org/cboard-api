@@ -9,7 +9,7 @@ const should = chai.should();
 const helper = require('../helper');
 
 const AccessClient = require('../../api/models/AccessClient');
-const AccessPoint = require('../../api/models/AccessPoint');
+const AccessGate = require('../../api/models/AccessGate');
 const Board = require('../../api/models/Board');
 
 //Parent block
@@ -49,7 +49,7 @@ describe('Access API calls', function () {
     await Board.deleteMany({ author: 'cboard mocha test' });
     const clients = await AccessClient.find({ 'client.name': /mocha test/i });
     const clientIds = clients.map(c => c._id);
-    await AccessPoint.deleteMany({ accessClient: { $in: clientIds } });
+    await AccessGate.deleteMany({ accessClient: { $in: clientIds } });
     await AccessClient.deleteMany({ 'client.name': /mocha test/i });
   });
 
@@ -86,7 +86,7 @@ describe('Access API calls', function () {
 
       // Verify board was marked with accessGate
       const board = await Board.findById(testBoardId);
-      board.accessGate.should.eql('TEST01');
+      board.accessGateCode.should.eql('TEST01');
     });
 
     it('it should NOT CREATE with duplicate slug', async function () {
@@ -356,7 +356,7 @@ describe('Access API calls', function () {
 
       // Verify new root board was marked with accessGate
       const board = await Board.findById(testBoardId2);
-      board.accessGate.should.eql('APUPDATE01');
+      board.accessGateCode.should.eql('APUPDATE01');
     });
 
     it('it should re-discover without changing root when no rootBoardId provided', async function () {
