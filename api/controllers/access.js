@@ -49,7 +49,7 @@ async function getAllLinkedBoardIds(rootBoardId) {
 }
 
 /**
- * GET /access/clients
+ * GET /access/clients/all
  * Lists all active clients with valid subscriptions and their access points.
  * Returns each client with its access points and root board basic info.
  * Sorted by client name.
