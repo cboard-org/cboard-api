@@ -4,7 +4,7 @@ const moment = require('moment');
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
-const AccessPoint = require('../models/AccessPoint');
+const AccessGate = require('../models/AccessGate');
 const User = require('../models/User');
 const { getTokenData } = require('../helpers/auth');
 const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
@@ -83,7 +83,7 @@ async function getPublicBoards(req, res) {
     search && search.length ? getORQuery(searchFields, search, true) : {};
   const response = await paginatedResponse(
     Board,
-    { query: { ...query, isPublic: true, accessGate: null } },
+    { query: { ...query, isPublic: true, accessGateCode: null } },
     req.query
   );
 
@@ -105,11 +105,11 @@ async function deleteBoard(req, res) {
         error: 'Board not found.'
       });
     }
-    await AccessPoint.updateMany(
+    await AccessGate.updateMany(
       { linkedBoardsIds: id },
       { $pull: { linkedBoardsIds: id } }
     );
-    await AccessPoint.updateMany(
+    await AccessGate.updateMany(
       { rootBoardId: id },
       { $set: { rootBoardId: null } }
     );
@@ -138,8 +138,8 @@ function getBoard(req, res) {
       });
     }
 
-    // If no accessGate, serve normally
-    if (!boards.accessGate) {
+    // If no accessGateCode, serve normally
+    if (!boards.accessGateCode) {
       return res.status(200).json(boards.toJSON());
     }
 
@@ -159,7 +159,7 @@ function getBoard(req, res) {
         return res.status(403).json({
           message: 'This board requires an access code',
           requiresAccessCode: true,
-          accessGate: boards.accessGate
+          accessGate: boards.accessGateCode
         });
       }
       return res.status(200).json(boards.toJSON());

@@ -361,8 +361,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      adminRes.body.should.have.property('accessGate');
-      adminRes.body.accessGate.should.equal('GETTEST01');
+      adminRes.body.should.have.property('accessGateCode');
+      adminRes.body.accessGateCode.should.equal('GETTEST01');
     });
 
     it('should exclude boards with accessGate from public boards listing', async function () {
@@ -384,7 +384,7 @@ describe('Board API calls', function () {
         ...helper.boardData,
         name: 'Public Board With Code',
         isPublic: true,
-        accessGate: 'public01'
+        accessGateCode: 'public01'
       };
       await request(server)
         .post('/board')
@@ -400,8 +400,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      getRes.body.should.have.property('accessGateCode');
-      getRes.body.accessGateCode.should.equal('GETTEST01');
+      const boardsWithCode = res.body.data.filter(b => b.name === 'Public Board With Code');
+      boardsWithCode.length.should.equal(0);
     });
   });
 
