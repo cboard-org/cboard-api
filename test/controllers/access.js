@@ -40,8 +40,13 @@ describe('Access API calls', function () {
     });
 
     // Create test boards
-    testBoardId = await helper.createMochaBoard(server, adminUser.token);
-    testBoardId2 = await helper.createMochaBoard(server, adminUser.token);
+    testBoardId = await helper.createMochaBoard(server, adminUser.token, adminUser.email);
+    testBoardId2 = await helper.createMochaBoard(server, adminUser.token, adminUser.email);
+  
+    const clients = await AccessClient.find({ 'client.name': /mocha test/i });
+    const clientIds = clients.map(c => c._id);
+    await AccessGate.deleteMany({ accessClient: { $in: clientIds } });
+    await AccessClient.deleteMany({ 'client.name': /mocha test/i });
   });
 
   after(async function () {
