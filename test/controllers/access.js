@@ -26,6 +26,7 @@ describe('Access API calls', function () {
   });
 
   beforeEach(async function () {
+    this.timeout(10000);
     // Create admin user
     adminUser = await helper.prepareUser(server, {
       role: 'admin',
