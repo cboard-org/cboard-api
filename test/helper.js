@@ -434,7 +434,7 @@ async function prepareUser(server, overrides = {}) {
 
   const token = login.body.authToken;
 
-  return { token, userId };
+  return { token, userId, email: data.email };
 }
 
 /**
@@ -479,10 +479,11 @@ async function createCommunicator(server, userToken) {
  * @returns {Promise<createMochaBoard>}
  */
 
-async function createMochaBoard(server, token) {
+async function createMochaBoard(server, token, email) {
+  const payload = email ? { ...boardData, email } : boardData;
   const res = await request(server)
     .post('/board')
-    .send(boardData)
+    .send(payload)
     .set('Authorization', `Bearer ${token}`);
   return res.body.id;
 }
