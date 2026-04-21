@@ -1885,6 +1885,10 @@ definitions:
         type: string
         format: date-time
         description: Last edition time for the board
+      accessGateCode:
+        type: string
+        x-nullable: true
+        description: The access gate code associated with this board
     required:
       - id
       - name
@@ -2021,6 +2025,10 @@ definitions:
         type: string
         format: date-time
         description: Last edition time for the board
+      accessGateCode:
+        type: string
+        x-nullable: true
+        description: The access gate code associated with this board
     required:
       - id
       - name
@@ -2445,6 +2453,7 @@ definitions:
         type: object
       accessGateCode:
         type: string
+        x-nullable: true
         description: The access gate code associated with this board
   AccessGateResponse:
     type: object
