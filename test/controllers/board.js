@@ -299,7 +299,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.accessGateCode.should.equal(null);
+      res.body.should.have.property('accessGateCode');
+      should.equal(res.body.accessGateCode, null);
     });
 
     it('should update accessGateCode on an existing board', async function () {
