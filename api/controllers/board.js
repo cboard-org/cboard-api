@@ -104,8 +104,8 @@ async function deleteBoard(req, res) {
       });
     }
     await AccessGate.updateMany(
-      { linkedBoardsIds: id },
-      { $pull: { linkedBoardsIds: id } }
+      { linkedBoardIds: id },
+      { $pull: { linkedBoardIds: id } }
     );
     await AccessGate.updateMany(
       { rootBoardId: id },

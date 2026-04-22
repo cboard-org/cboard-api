@@ -1450,7 +1450,7 @@ paths:
     x-swagger-router-controller: access
     put:
       operationId: updateAccessGate
-      description: Re-runs board discovery for an access gate, updating its linkedBoardsIds. Optionally accepts a new rootBoardId. Requires admin authentication.
+      description: Re-runs board discovery for an access gate, updating its linkedBoardIds. Optionally accepts a new rootBoardId. Requires admin authentication.
       security:
         - Bearer: []
       x-security-scopes:
@@ -2469,7 +2469,7 @@ definitions:
       rootBoardId:
         type: string
         description: Root board ID
-      linkedBoardsIds:
+      linkedBoardIds:
         type: array
         items:
           type: string

@@ -141,7 +141,7 @@ async function getAccessBoard(req, res) {
 
     // Fetch all linked boards (exclude PII fields for public endpoint)
     const boards = await Board.find({
-      _id: { $in: accessGate.linkedBoardsIds }
+      _id: { $in: accessGate.linkedBoardIds }
     }).select('-email -author');
 
     if (!boards || boards.length === 0) {
@@ -249,7 +249,7 @@ async function createAccessClient(req, res) {
       code: accessGate.toUpperCase(),
       accessClient: client._id,
       rootBoardId,
-      linkedBoardsIds: linkedBoardIds
+      linkedBoardIds: linkedBoardIds
     });
 
     await newAccessGate.save();
@@ -279,7 +279,7 @@ async function createAccessClient(req, res) {
  * GET /admin/access-clients
  * Lists all Access clients with stats.
  * Returns all clients with board counts, expiry status.
- * Populates createdBy. Board count derived from AccessGate.linkedBoardsIds.
+ * Populates createdBy. Board count derived from AccessGate.linkedBoardIds.
  */
 async function listAccessClients(req, res) {
   try {
@@ -287,14 +287,14 @@ async function listAccessClients(req, res) {
       .populate('createdBy', 'name email role')
       .sort({ createdAt: -1 });
 
-    // Fetch access gates and sum linkedBoardsIds per client to avoid N+1
+    // Fetch access gates and sum linkedBoardIds per client to avoid N+1
     const clientIds = clients.map(c => c._id);
     const accessGates = await AccessGate.find({ accessClient: { $in: clientIds } });
 
     const agMap = accessGates.reduce((map, ag) => {
       const key = ag.accessClient.toString();
       if (!map[key]) map[key] = 0;
-      map[key] += ag.linkedBoardsIds?.length || 0;
+      map[key] += ag.linkedBoardIds?.length || 0;
       return map;
     }, {});
 
@@ -382,7 +382,7 @@ async function getAccessClientStats(req, res) {
 
     // Collect unique board IDs across all access gates
     const allBoardIds = [
-      ...new Set(accessGates.flatMap(ag => ag.linkedBoardsIds.map(id => id.toString())))
+      ...new Set(accessGates.flatMap(ag => ag.linkedBoardIds.map(id => id.toString())))
     ];
     const boards = await Board.find({ _id: { $in: allBoardIds } }, { name: 1, tiles: 1 });
 
@@ -423,7 +423,7 @@ async function getAccessClientStats(req, res) {
 
 /**
  * PUT /admin/access-gates/:code
- * Re-runs board discovery for an access gate, updating its linkedBoardsIds.
+ * Re-runs board discovery for an access gate, updating its linkedBoardIds.
  * Optionally accepts a new rootBoardId to change the root and re-discover from there.
  * Useful when the board structure has changed since the access gate was created.
  */
@@ -449,7 +449,7 @@ async function updateAccessGate(req, res) {
     const linkedBoardIds = await getAllLinkedBoardIds(newRootBoardId);
 
     accessGate.rootBoardId = newRootBoardId;
-    accessGate.linkedBoardsIds = linkedBoardIds;
+    accessGate.linkedBoardIds = linkedBoardIds;
     await accessGate.save();
 
     // Mark all discovered boards with this access gate code

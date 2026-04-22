@@ -88,7 +88,7 @@ The collection includes these variables (can be edited in collection variables o
    }
    ```
 
-2. The response includes the created client (`slug`, `client.name`, etc.) and the `accessGate` with `code` and `linkedBoardsIds`
+2. The response includes the created client (`slug`, `client.name`, etc.) and the `accessGate` with `code` and `linkedBoardIds`
 3. `client_slug` and `access_code` variables are automatically saved for subsequent requests
 
 ### Testing the Client
@@ -179,7 +179,7 @@ Each request includes automated tests:
 
 1. Update boards (add/remove tile navigation)
 2. Run "Update Access Gate" to re-discover linked boards
-3. Verify `linkedBoardsIds` count updated
+3. Verify `linkedBoardIds` count updated
 
 ## Troubleshooting
 

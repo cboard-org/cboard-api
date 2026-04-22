@@ -88,7 +88,7 @@ describe('Access API calls', function () {
       res.body.should.have.property('accessGate');
       res.body.accessGate.should.have.property('code').eql('TEST01');
       // rootBoard has no tile links, so discovery returns just the root
-      res.body.accessGate.linkedBoardsIds.length.should.eql(1);
+      res.body.accessGate.linkedBoardIds.length.should.eql(1);
 
       // Verify board was marked with accessGate
       const board = await Board.findById(testBoardId);
@@ -357,8 +357,8 @@ describe('Access API calls', function () {
         .expect(200);
 
       res.body.should.have.property('code').eql('APUPDATE01');
-      res.body.should.have.property('linkedBoardsIds').that.is.an('array');
-      res.body.linkedBoardsIds.should.include(testBoardId2.toString());
+      res.body.should.have.property('linkedBoardIds').that.is.an('array');
+      res.body.linkedBoardIds.should.include(testBoardId2.toString());
 
       // Verify new root board was marked with accessGate
       const board = await Board.findById(testBoardId2);
@@ -375,7 +375,7 @@ describe('Access API calls', function () {
         .expect(200);
 
       res.body.should.have.property('code').eql('APUPDATE01');
-      res.body.linkedBoardsIds.should.include(testBoardId.toString());
+      res.body.linkedBoardIds.should.include(testBoardId.toString());
     });
 
     it('it should return 404 for non-existent access gate code', async function () {

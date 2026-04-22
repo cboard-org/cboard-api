@@ -30,7 +30,7 @@ const ACCESS_GATE_SCHEMA_DEFINITION = {
     type: Date,
     default: null
   },
-  linkedBoardsIds: {
+  linkedBoardIds: {
     type: [Schema.Types.ObjectId],
     ref: 'Board',
     default: []
