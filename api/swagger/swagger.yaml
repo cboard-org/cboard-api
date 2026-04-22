@@ -1278,17 +1278,22 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /access/{code}:
+  /access/{clientSlug}/{gateCode}:
     x-swagger-router-controller: access
     get:
       operationId: getAccessBoard
-      description: Gets ALL boards for an access code in a single request. Validates code exists and subscription is active. Returns client info, all boards array, and rootBoardId.
+      description: Gets ALL boards for an access code in a single request. Validates slug and code exist and subscription is active. Returns client info, all boards array, and rootBoardId.
       parameters:
-        - name: code
+        - name: clientSlug
           type: string
           in: path
           required: true
-          description: Access code for the client
+          description: Client slug (institution identifier)
+        - name: gateCode
+          type: string
+          in: path
+          required: true
+          description: Access gate code for the client
       responses:
         "200":
           description: Success
@@ -1302,11 +1307,11 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients:
+  /admin/access/clients:
     x-swagger-router-controller: access
     post:
       operationId: createAccessClient
-      description: Creates a new Access client and its first AccessPoint. Requires admin authentication. Auto-discovers linked boards from rootBoardId and marks them with accessGateCode.
+      description: Creates a new Access client and its first AccessGate. Requires admin authentication. Auto-discovers linked boards from rootBoardId and marks them with accessGateCode.
       security:
         - Bearer: []
       x-security-scopes:
@@ -1351,7 +1356,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients/{slug}:
+  /admin/access/clients/{clientSlug}:
     x-swagger-router-controller: access
     put:
       operationId: updateAccessClient
@@ -1361,7 +1366,7 @@ paths:
       x-security-scopes:
         - admin
       parameters:
-        - name: slug
+        - name: clientSlug
           type: string
           in: path
           required: true
@@ -1385,7 +1390,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients/{slug}/stats:
+  /admin/access/clients/{clientSlug}/stats:
     x-swagger-router-controller: access
     get:
       operationId: getAccessClientStats
@@ -1395,7 +1400,7 @@ paths:
       x-security-scopes:
         - admin
       parameters:
-        - name: slug
+        - name: clientSlug
           type: string
           in: path
           required: true
@@ -1441,21 +1446,21 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-points/{code}:
+  /admin/access/gates/{gateCode}:
     x-swagger-router-controller: access
     put:
-      operationId: updateAccessPoint
-      description: Re-runs board discovery for an access point, updating its linkedBoardsIds. Optionally accepts a new rootBoardId. Requires admin authentication.
+      operationId: updateAccessGate
+      description: Re-runs board discovery for an access gate, updating its linkedBoardIds. Optionally accepts a new rootBoardId. Requires admin authentication.
       security:
         - Bearer: []
       x-security-scopes:
         - admin
       parameters:
-        - name: code
+        - name: gateCode
           type: string
           in: path
           required: true
-          description: Access point code (uppercase)
+          description: Access gate code (uppercase)
         - name: body
           in: body
           required: false
@@ -1469,9 +1474,9 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: "#/definitions/AccessPointResponse"
+            $ref: "#/definitions/AccessGateResponse"
         "404":
-          description: Access point or root board not found
+          description: Access gate or root board not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         default:
@@ -1880,6 +1885,10 @@ definitions:
         type: string
         format: date-time
         description: Last edition time for the board
+      accessGateCode:
+        type: string
+        x-nullable: true
+        description: The access gate code associated with this board
     required:
       - id
       - name
@@ -2016,6 +2025,10 @@ definitions:
         type: string
         format: date-time
         description: Last edition time for the board
+      accessGateCode:
+        type: string
+        x-nullable: true
+        description: The access gate code associated with this board
     required:
       - id
       - name
@@ -2168,15 +2181,15 @@ definitions:
       - rootBoardId
       - subscriptionStart
       - subscriptionEnd
-      - accessGate
+      - accessGateCode
     properties:
       slug:
         type: string
         description: Unique slug identifier for the access client (lowercase)
         example: my-company
-      accessGate:
+      accessGateCode:
         type: string
-        description: Unique code for the access point (will be uppercased)
+        description: Unique code for the access gate (will be uppercased)
         example: ABC123
       clientName:
         type: string
@@ -2238,7 +2251,7 @@ definitions:
       slug:
         type: string
         description: Unique slug identifier (lowercase)
-      client:
+      contact:
         type: object
         properties:
           name:
@@ -2275,9 +2288,9 @@ definitions:
         type: string
         format: date-time
         description: Last update timestamp
-      accessPoint:
+      accessGate:
         description: Present only on create response
-        $ref: "#/definitions/AccessPointResponse"
+        $ref: "#/definitions/AccessGateResponse"
   AccessClientsListResponse:
     type: object
     required:
@@ -2301,14 +2314,14 @@ definitions:
             brandColor:
               type: string
               description: Brand color (hex)
-            accessPoints:
+            accessGates:
               type: array
               items:
                 type: object
                 properties:
                   code:
                     type: string
-                    description: Access point code
+                    description: Access gate code
                   rootBoard:
                     type: object
                     properties:
@@ -2338,7 +2351,7 @@ definitions:
               type: string
             slug:
               type: string
-            client:
+            contact:
               type: object
               properties:
                 name:
@@ -2373,7 +2386,7 @@ definitions:
               format: date-time
             boardCount:
               type: integer
-              description: Total boards across all access points for this client
+              description: Total boards across all access gates for this client
             isExpired:
               type: boolean
               description: Whether the subscription has expired
@@ -2440,29 +2453,30 @@ definitions:
         type: object
       accessGateCode:
         type: string
+        x-nullable: true
         description: The access gate code associated with this board
-  AccessPointResponse:
+  AccessGateResponse:
     type: object
     properties:
       id:
         type: string
       code:
         type: string
-        description: Access point code (uppercase)
+        description: Access gate code (uppercase)
       accessClient:
         type: string
         description: AccessClient ID
       rootBoardId:
         type: string
         description: Root board ID
-      linkedBoardsIds:
+      linkedBoardIds:
         type: array
         items:
           type: string
         description: All board IDs reachable from the root board
       viewsCount:
         type: integer
-        description: Number of times this access point has been accessed
+        description: Number of times this access gate has been accessed
       lastAccessAt:
         type: string
         format: date-time

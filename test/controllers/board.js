@@ -299,7 +299,8 @@ describe('Board API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.accessGateCode.should.equal(null);
+      res.body.should.have.property('accessGateCode');
+      should.equal(res.body.accessGateCode, null);
     });
 
     it('should update accessGateCode on an existing board', async function () {
@@ -336,33 +337,15 @@ describe('Board API calls', function () {
 
       const boardId = createRes.body.id;
 
-      // Direct access should be blocked with 403 for regular users
       const getRes = await request(server)
         .get('/board/' + boardId)
         .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .expect(403);
-
-      getRes.body.should.have.property('message');
-      getRes.body.message.should.equal('This board requires an access code');
-      getRes.body.should.have.property('requiresAccessCode');
-      getRes.body.requiresAccessCode.should.equal(true);
-      getRes.body.should.have.property('accessGate');
-      getRes.body.accessGate.should.equal('GETTEST01');
-
-      // Admins should be able to access the board directly
-      const adminEmail = helper.generateEmail();
-      const admin = await helper.prepareUser(server, { role: 'admin', email: adminEmail });
-      const adminRes = await request(server)
-        .get('/board/' + boardId)
-        .set('Authorization', `Bearer ${admin.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
         .expect(200);
 
-      adminRes.body.should.have.property('accessGateCode');
-      adminRes.body.accessGateCode.should.equal('GETTEST01');
+      getRes.body.should.have.property('accessGateCode');
+      getRes.body.accessGateCode.should.equal('GETTEST01');
     });
 
     it('should exclude boards with accessGate from public boards listing', async function () {

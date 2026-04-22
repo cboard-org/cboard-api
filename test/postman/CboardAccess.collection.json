@@ -24,26 +24,26 @@
 									"pm.test(\"Response contains client data\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('slug');",
-									"    pm.expect(jsonData).to.have.property('client');",
-									"    pm.expect(jsonData.client).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('contact');",
+									"    pm.expect(jsonData.contact).to.have.property('name');",
 									"});",
 									"",
-									"pm.test(\"Response contains access point with auto-discovered boards\", function () {",
+									"pm.test(\"Response contains access gate with auto-discovered boards\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('accessPoint');",
-									"    pm.expect(jsonData.accessPoint).to.have.property('code');",
-									"    pm.expect(jsonData.accessPoint).to.have.property('linkedBoardsIds');",
-									"    pm.expect(jsonData.accessPoint.linkedBoardsIds.length).to.be.at.least(1);",
-									"    console.log(\"Auto-discovered \" + jsonData.accessPoint.linkedBoardsIds.length + \" boards\");",
+									"    pm.expect(jsonData).to.have.property('accessGate');",
+									"    pm.expect(jsonData.accessGate).to.have.property('code');",
+									"    pm.expect(jsonData.accessGate).to.have.property('linkedBoardIds');",
+									"    pm.expect(jsonData.accessGate.linkedBoardIds.length).to.be.at.least(1);",
+									"    console.log(\"Auto-discovered \" + jsonData.accessGate.linkedBoardIds.length + \" boards\");",
 									"});",
 									"",
-									"// Save the slug and access point code for later requests",
+									"// Save the slug and access gate code for later requests",
 									"if (pm.response.code === 201) {",
 									"    var jsonData = pm.response.json();",
 									"    pm.collectionVariables.set(\"client_slug\", jsonData.slug);",
-									"    pm.collectionVariables.set(\"access_code\", jsonData.accessPoint.code);",
+									"    pm.collectionVariables.set(\"access_code\", jsonData.accessGate.code);",
 									"    console.log(\"Client slug saved: \" + jsonData.slug);",
-									"    console.log(\"Access code saved: \" + jsonData.accessPoint.code);",
+									"    console.log(\"Access code saved: \" + jsonData.accessGate.code);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -65,16 +65,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGate\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
+							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGateCode\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-clients",
+							"raw": "{{url}}/admin/access/clients",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients"
+								"access",
+								"clients"
 							]
 						},
 						"description": "Creates a new Cboard Access client with the specified configuration. Requires admin authentication."
@@ -104,8 +105,8 @@
 									"    if (jsonData.data.length > 0) {",
 									"        var client = jsonData.data[0];",
 									"        pm.expect(client).to.have.property('slug');",
-									"        pm.expect(client).to.have.property('client');",
-									"        pm.expect(client.client).to.have.property('name');",
+									"        pm.expect(client).to.have.property('contact');",
+									"        pm.expect(client.contact).to.have.property('name');",
 									"        pm.expect(client).to.have.property('boardCount');",
 									"        pm.expect(client).to.have.property('isExpired');",
 									"    }",
@@ -125,13 +126,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/admin/access-clients",
+							"raw": "{{url}}/admin/access/clients",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients"
+								"access",
+								"clients"
 							]
 						},
 						"description": "Lists all Cboard Access clients with their statistics. Requires admin authentication."
@@ -176,13 +178,14 @@
 							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"clientEmail\": \"newemail@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true\n}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-clients/{{client_slug}}",
+							"raw": "{{url}}/admin/access/clients/{{client_slug}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients",
+								"access",
+								"clients",
 								"{{client_slug}}"
 							]
 						},
@@ -228,13 +231,14 @@
 							"raw": "{\n    \"isActive\": false\n}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-clients/{{client_slug}}",
+							"raw": "{{url}}/admin/access/clients/{{client_slug}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients",
+								"access",
+								"clients",
 								"{{client_slug}}"
 							]
 						},
@@ -282,13 +286,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/admin/access-clients/{{client_slug}}/stats",
+							"raw": "{{url}}/admin/access/clients/{{client_slug}}/stats",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients",
+								"access",
+								"clients",
 								"{{client_slug}}",
 								"stats"
 							]
@@ -298,7 +303,7 @@
 					"response": []
 				},
 				{
-					"name": "Update Access Point",
+					"name": "Update Access Gate",
 					"event": [
 						{
 							"listen": "test",
@@ -308,10 +313,10 @@
 									"    pm.response.to.have.status(200);",
 									"});",
 									"",
-									"pm.test(\"Response contains access point data\", function () {",
+									"pm.test(\"Response contains access gate data\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('code');",
-									"    pm.expect(jsonData).to.have.property('linkedBoardsIds');",
+									"    pm.expect(jsonData).to.have.property('linkedBoardIds');",
 									"    pm.expect(jsonData).to.have.property('rootBoardId');",
 									"});"
 								],
@@ -337,17 +342,18 @@
 							"raw": "{}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-points/{{access_code}}",
+							"raw": "{{url}}/admin/access/gates/{{access_code}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-points",
+								"access",
+								"gates",
 								"{{access_code}}"
 							]
 						},
-						"description": "Re-runs board discovery for an access point. Optionally pass a new rootBoardId to change the root and re-discover from there. Useful when the board structure has changed."
+						"description": "Re-runs board discovery for an access gate. Optionally pass a new rootBoardId to change the root and re-discover from there. Useful when the board structure has changed."
 					},
 					"response": []
 				}
@@ -381,15 +387,15 @@
 									"        pm.expect(client).to.have.property('slug');",
 									"        pm.expect(client).to.have.property('clientName');",
 									"        pm.expect(client).to.have.property('brandColor');",
-									"        pm.expect(client).to.have.property('accessPoints');",
-									"        pm.expect(client.accessPoints).to.be.an('array');",
+									"        pm.expect(client).to.have.property('accessGates');",
+									"        pm.expect(client.accessGates).to.be.an('array');",
 									"    });",
 									"});",
 									"",
-									"// Save first access point code for testing board access",
+									"// Save first access gate code for testing board access",
 									"var data = pm.response.json().data;",
-									"if (data.length > 0 && data[0].accessPoints.length > 0) {",
-									"    var code = data[0].accessPoints[0].code;",
+									"if (data.length > 0 && data[0].accessGates.length > 0) {",
+									"    var code = data[0].accessGates[0].code;",
 									"    pm.collectionVariables.set(\"access_code\", code);",
 									"    console.log(\"Access code saved: \" + code);",
 									"}"
@@ -455,16 +461,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/access/{{access_code}}",
+							"raw": "{{url}}/access/{{client_slug}}/{{access_code}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"access",
+								"{{client_slug}}",
 								"{{access_code}}"
 							]
 						},
-						"description": "Public endpoint that retrieves all boards for a specific access code. Used when scanning QR codes or entering access codes. No authentication required."
+						"description": "Public endpoint that retrieves all boards for a slug + access code pair. Used when scanning QR codes or entering access codes. No authentication required."
 					},
 					"response": []
 				}

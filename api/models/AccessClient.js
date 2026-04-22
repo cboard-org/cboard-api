@@ -11,7 +11,7 @@ const ACCESS_CLIENT_SCHEMA_DEFINITION = {
     trim: true,
     lowercase: true
   },
-  client: {
+  contact: {
     name: {
       type: String,
       required: true,

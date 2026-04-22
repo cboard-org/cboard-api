@@ -87,8 +87,11 @@ const BOARD_SCHEMA_OPTIONS = {
 
 const boardSchema = new Schema(BOARD_SCHEMA_DEFINITION, BOARD_SCHEMA_OPTIONS);
 
-// Sparse unique index skips documents where accessGateCode is null/missing, enforcing uniqueness only for set values
-boardSchema.index({ accessGateCode: 1 }, { sparse: true, unique: true });
+// Partial index so boards without a gate code (null/undefined) are not indexed, keeping the index lean.
+boardSchema.index(
+  { accessGateCode: 1 },
+  { partialFilterExpression: { accessGateCode: { $type: 'string' } } }
+);
 
 const validatePresenceOf = value => value && value.length;
 
