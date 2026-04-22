@@ -65,7 +65,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGate\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
+							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGateCode\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/admin/access-clients",

@@ -67,7 +67,7 @@ describe('Access API calls', function () {
         clientContact: 'test@example.com',
         brandColor: '#FF5733',
         rootBoardId: testBoardId,
-        accessGate: 'TEST01',
+        accessGateCode: 'TEST01',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -100,7 +100,7 @@ describe('Access API calls', function () {
         slug: 'duplicate',
         clientName: 'Test Client mocha test',
         rootBoardId: testBoardId,
-        accessGate: 'DUPL01',
+        accessGateCode: 'DUPL01',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -115,7 +115,7 @@ describe('Access API calls', function () {
       // Try to create with same slug
       const res = await request(server)
         .post('/admin/access-clients')
-        .send({ ...clientData, accessGate: 'DUPL02' })
+        .send({ ...clientData, accessGateCode: 'DUPL02' })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -129,7 +129,7 @@ describe('Access API calls', function () {
         slug: 'duplicate-code-a',
         clientName: 'Test Client mocha test',
         rootBoardId: testBoardId,
-        accessGate: 'DUPCODE',
+        accessGateCode: 'DUPCODE',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -158,7 +158,7 @@ describe('Access API calls', function () {
         slug: 'test-04',
         clientName: 'Test Client mocha test',
         rootBoardId: '507f1f77bcf86cd799439011', // Non-existent ID
-        accessGate: 'TEST04',
+        accessGateCode: 'TEST04',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -179,7 +179,7 @@ describe('Access API calls', function () {
         slug: 'test-05',
         clientName: 'Test Client mocha test',
         rootBoardId: testBoardId,
-        accessGate: 'TEST05',
+        accessGateCode: 'TEST05',
         subscriptionStart: new Date(),
         subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       };
@@ -202,7 +202,7 @@ describe('Access API calls', function () {
           slug: 'list-01',
           clientName: 'List Test 1 mocha test',
           rootBoardId: testBoardId,
-          accessGate: 'LIST01',
+          accessGateCode: 'LIST01',
           subscriptionStart: new Date(),
           subscriptionEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         })
@@ -214,7 +214,7 @@ describe('Access API calls', function () {
           slug: 'list-02',
           clientName: 'List Test 2 mocha test',
           rootBoardId: testBoardId,
-          accessGate: 'LIST02',
+          accessGateCode: 'LIST02',
           subscriptionStart: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
           subscriptionEnd: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // Expired
         })
@@ -264,7 +264,7 @@ describe('Access API calls', function () {
           slug: 'update-01',
           clientName: 'Update Test mocha test',
           rootBoardId: testBoardId,
-          accessGate: 'UPDATE01',
+          accessGateCode: 'UPDATE01',
           subscriptionStart: new Date(),
           subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
           brandColor: '#000000',
@@ -340,7 +340,7 @@ describe('Access API calls', function () {
           slug: 'ap-update-01',
           clientName: 'Access Gate Update Test mocha test',
           rootBoardId: testBoardId,
-          accessGate: 'APUPDATE01',
+          accessGateCode: 'APUPDATE01',
           subscriptionStart: new Date(),
           subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         })
@@ -408,7 +408,7 @@ describe('Access API calls', function () {
           slug: 'stats-01',
           clientName: 'Stats Test mocha test',
           rootBoardId: testBoardId,
-          accessGate: 'STATS01',
+          accessGateCode: 'STATS01',
           subscriptionStart: new Date(),
           subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         })
@@ -454,7 +454,7 @@ describe('Access API calls', function () {
           slug: 'expired-01',
           clientName: 'Expired Test mocha test',
           rootBoardId: testBoardId,
-          accessGate: 'EXPIRED01',
+          accessGateCode: 'EXPIRED01',
           subscriptionStart: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
           subscriptionEnd: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
         })

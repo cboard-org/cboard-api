@@ -82,7 +82,7 @@ The collection includes these variables (can be edited in collection variables o
     "clientPhone": "+1234567890",
      "brandColor": "#8B4513",
      "rootBoardId": "{{root_board_id}}",
-     "accessGate": "CAFE01",
+     "accessGateCode": "CAFE01",
      "subscriptionStart": "2026-04-01T00:00:00.000Z",
      "subscriptionEnd": "2027-04-01T00:00:00.000Z"
    }
@@ -115,7 +115,7 @@ Use **Update Access Gate** to re-run board discovery after the board structure c
 - `slug`: Unique client identifier (lowercase, URL-safe)
 - `clientName`: Display name
 - `rootBoardId`: ID of the main board
-- `accessGate`: Unique code for the access gate (uppercase alphanumeric)
+- `accessGateCode`: Unique code for the access gate (uppercase alphanumeric)
 - `subscriptionStart`: Start date (ISO 8601)
 - `subscriptionEnd`: End date (ISO 8601)
 

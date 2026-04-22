@@ -2181,13 +2181,13 @@ definitions:
       - rootBoardId
       - subscriptionStart
       - subscriptionEnd
-      - accessGate
+      - accessGateCode
     properties:
       slug:
         type: string
         description: Unique slug identifier for the access client (lowercase)
         example: my-company
-      accessGate:
+      accessGateCode:
         type: string
         description: Unique code for the access gate (will be uppercased)
         example: ABC123

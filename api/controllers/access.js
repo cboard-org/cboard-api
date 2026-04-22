@@ -207,7 +207,7 @@ async function createAccessClient(req, res) {
     rootBoardId,
     subscriptionStart,
     subscriptionEnd,
-    accessGate
+    accessGateCode
   } = req.body;
 
   try {
@@ -220,7 +220,7 @@ async function createAccessClient(req, res) {
     // Check for duplicates before persisting anything to avoid orphaned documents
     const [existingSlug, existingCode] = await Promise.all([
       AccessClient.findOne({ slug }),
-      AccessGate.findOne({ code: accessGate.toUpperCase() })
+      AccessGate.findOne({ code: accessGateCode.toUpperCase() })
     ]);
     if (existingSlug) {
       return res.status(409).json({ message: 'Slug already exists' });
@@ -246,7 +246,7 @@ async function createAccessClient(req, res) {
 
     // Create the access gate
     const newAccessGate = new AccessGate({
-      code: accessGate.toUpperCase(),
+      code: accessGateCode.toUpperCase(),
       accessClient: client._id,
       rootBoardId,
       linkedBoardIds: linkedBoardIds
