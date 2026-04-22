@@ -141,8 +141,8 @@ Board discovery is automatic — all boards reachable from `rootBoardId` via til
 
 These endpoints don't require authentication and simulate real user access:
 
-- **GET /access/clients**: Returns only active clients with valid subscriptions
-- **GET /access/:code**: Returns all boards for the access code and increments access counter
+- **GET /access/clients/all**: Returns only active clients with valid subscriptions
+- **GET /access/:clientSlug/:gateCode**: Returns all boards for the access code and increments access counter
 
 ## Test Scripts
 

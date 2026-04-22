@@ -103,7 +103,7 @@ async function getClients(req, res) {
 }
 
 /**
- * GET /access/:slug/:code
+ * GET /access/:clientSlug/:gateCode
  * Gets ALL boards for a slug + access code pair in a single request.
  * This enables instant frontend navigation without additional requests.
  * Validates slug and code exist, belong together, and client subscription is active.
@@ -111,8 +111,8 @@ async function getClients(req, res) {
  * Increments viewsCount and updates lastAccessAt on the AccessGate.
  */
 async function getAccessBoard(req, res) {
-  const code = req.swagger.params.code.value.toUpperCase();
-  const slug = req.swagger.params.slug.value;
+  const code = req.swagger.params.gateCode.value.toUpperCase();
+  const slug = req.swagger.params.clientSlug.value;
 
   try {
     const now = new Date();
@@ -191,7 +191,7 @@ async function getAccessBoard(req, res) {
 // ============================================
 
 /**
- * POST /admin/access-clients
+ * POST /admin/access/clients
  * Creates a new Access client and its first Access gate.
  * Requires admin authentication (enforced by Swagger middleware).
  * Creates AccessClient, creates AccessGate, and updates boards with accessGate.
@@ -276,7 +276,7 @@ async function createAccessClient(req, res) {
 }
 
 /**
- * GET /admin/access-clients
+ * GET /admin/access/clients
  * Lists all Access clients with stats.
  * Returns all clients with board counts, expiry status.
  * Populates createdBy. Board count derived from AccessGate.linkedBoardIds.
@@ -326,12 +326,12 @@ async function listAccessClients(req, res) {
 }
 
 /**
- * PUT /admin/access-clients/:slug
+ * PUT /admin/access/clients/:clientSlug
  * Updates an Access client.
  * Allowed fields: isActive, subscription dates, branding, client name/email/phone.
  */
 async function updateAccessClient(req, res) {
-  const slug = req.swagger.params.slug.value;
+  const slug = req.swagger.params.clientSlug.value;
   const updates = req.body;
 
   try {
@@ -363,12 +363,12 @@ async function updateAccessClient(req, res) {
 }
 
 /**
- * GET /admin/access-clients/:slug/stats
+ * GET /admin/access/clients/:clientSlug/stats
  * Gets detailed statistics for an Access client.
  * Returns client info, access counts (from AccessGates), board list with tile counts.
  */
 async function getAccessClientStats(req, res) {
-  const slug = req.swagger.params.slug.value;
+  const slug = req.swagger.params.clientSlug.value;
 
   try {
     const client = await AccessClient.findOne({ slug })
@@ -422,13 +422,13 @@ async function getAccessClientStats(req, res) {
 }
 
 /**
- * PUT /admin/access-gates/:code
+ * PUT /admin/access/gates/:gateCode
  * Re-runs board discovery for an access gate, updating its linkedBoardIds.
  * Optionally accepts a new rootBoardId to change the root and re-discover from there.
  * Useful when the board structure has changed since the access gate was created.
  */
 async function updateAccessGate(req, res) {
-  const code = req.swagger.params.code.value.toUpperCase();
+  const code = req.swagger.params.gateCode.value.toUpperCase();
   const { rootBoardId } = req.body;
 
   try {

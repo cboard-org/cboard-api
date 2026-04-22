@@ -68,13 +68,14 @@
 							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGateCode\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-clients",
+							"raw": "{{url}}/admin/access/clients",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients"
+								"access",
+								"clients"
 							]
 						},
 						"description": "Creates a new Cboard Access client with the specified configuration. Requires admin authentication."
@@ -125,13 +126,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/admin/access-clients",
+							"raw": "{{url}}/admin/access/clients",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients"
+								"access",
+								"clients"
 							]
 						},
 						"description": "Lists all Cboard Access clients with their statistics. Requires admin authentication."
@@ -176,13 +178,14 @@
 							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"clientEmail\": \"newemail@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true\n}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-clients/{{client_slug}}",
+							"raw": "{{url}}/admin/access/clients/{{client_slug}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients",
+								"access",
+								"clients",
 								"{{client_slug}}"
 							]
 						},
@@ -228,13 +231,14 @@
 							"raw": "{\n    \"isActive\": false\n}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-clients/{{client_slug}}",
+							"raw": "{{url}}/admin/access/clients/{{client_slug}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients",
+								"access",
+								"clients",
 								"{{client_slug}}"
 							]
 						},
@@ -282,13 +286,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/admin/access-clients/{{client_slug}}/stats",
+							"raw": "{{url}}/admin/access/clients/{{client_slug}}/stats",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-clients",
+								"access",
+								"clients",
 								"{{client_slug}}",
 								"stats"
 							]
@@ -337,13 +342,14 @@
 							"raw": "{}"
 						},
 						"url": {
-							"raw": "{{url}}/admin/access-gates/{{access_code}}",
+							"raw": "{{url}}/admin/access/gates/{{access_code}}",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"admin",
-								"access-gates",
+								"access",
+								"gates",
 								"{{access_code}}"
 							]
 						},

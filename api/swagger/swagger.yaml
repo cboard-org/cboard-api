@@ -1278,22 +1278,22 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /access/{slug}/{code}:
+  /access/{clientSlug}/{gateCode}:
     x-swagger-router-controller: access
     get:
       operationId: getAccessBoard
       description: Gets ALL boards for an access code in a single request. Validates slug and code exist and subscription is active. Returns client info, all boards array, and rootBoardId.
       parameters:
-        - name: slug
+        - name: clientSlug
           type: string
           in: path
           required: true
           description: Client slug (institution identifier)
-        - name: code
+        - name: gateCode
           type: string
           in: path
           required: true
-          description: Access code for the client
+          description: Access gate code for the client
       responses:
         "200":
           description: Success
@@ -1307,7 +1307,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients:
+  /admin/access/clients:
     x-swagger-router-controller: access
     post:
       operationId: createAccessClient
@@ -1356,7 +1356,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients/{slug}:
+  /admin/access/clients/{clientSlug}:
     x-swagger-router-controller: access
     put:
       operationId: updateAccessClient
@@ -1366,7 +1366,7 @@ paths:
       x-security-scopes:
         - admin
       parameters:
-        - name: slug
+        - name: clientSlug
           type: string
           in: path
           required: true
@@ -1390,7 +1390,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-clients/{slug}/stats:
+  /admin/access/clients/{clientSlug}/stats:
     x-swagger-router-controller: access
     get:
       operationId: getAccessClientStats
@@ -1400,7 +1400,7 @@ paths:
       x-security-scopes:
         - admin
       parameters:
-        - name: slug
+        - name: clientSlug
           type: string
           in: path
           required: true
@@ -1446,7 +1446,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-  /admin/access-gates/{code}:
+  /admin/access/gates/{gateCode}:
     x-swagger-router-controller: access
     put:
       operationId: updateAccessGate
@@ -1456,7 +1456,7 @@ paths:
       x-security-scopes:
         - admin
       parameters:
-        - name: code
+        - name: gateCode
           type: string
           in: path
           required: true

@@ -59,7 +59,7 @@ describe('Access API calls', function () {
     await AccessClient.deleteMany({ 'contact.name': /mocha test/i });
   });
 
-  describe('POST /admin/access-clients', function () {
+  describe('POST /admin/access/clients', function () {
     it('it should CREATE an access client and auto-discover linked boards', async function () {
       const clientData = {
         slug: 'test-01',
@@ -73,7 +73,7 @@ describe('Access API calls', function () {
       };
 
       const res = await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send(clientData)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -107,14 +107,14 @@ describe('Access API calls', function () {
 
       // Create first client
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send(clientData)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .expect(201);
 
       // Try to create with same slug
       const res = await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({ ...clientData, accessGateCode: 'DUPL02' })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -136,14 +136,14 @@ describe('Access API calls', function () {
 
       // Create first client
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send(clientData)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .expect(201);
 
       // Try to create with same accessGate but different slug
       const res = await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({ ...clientData, slug: 'duplicate-code-b' })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -164,7 +164,7 @@ describe('Access API calls', function () {
       };
 
       const res = await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send(clientData)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -185,7 +185,7 @@ describe('Access API calls', function () {
       };
 
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send(clientData)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -193,11 +193,11 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('GET /admin/access-clients', function () {
+  describe('GET /admin/access/clients', function () {
     beforeEach(async function () {
       // Create test clients
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({
           slug: 'list-01',
           clientName: 'List Test 1 mocha test',
@@ -209,7 +209,7 @@ describe('Access API calls', function () {
         .set('Authorization', `Bearer ${adminUser.token}`);
 
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({
           slug: 'list-02',
           clientName: 'List Test 2 mocha test',
@@ -223,7 +223,7 @@ describe('Access API calls', function () {
 
     it('it should LIST all access clients with stats', async function () {
       const res = await request(server)
-        .get('/admin/access-clients')
+        .get('/admin/access/clients')
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -249,17 +249,17 @@ describe('Access API calls', function () {
 
     it('it should NOT LIST without authorization', async function () {
       await request(server)
-        .get('/admin/access-clients')
+        .get('/admin/access/clients')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(403);
     });
   });
 
-  describe('PUT /admin/access-clients/:slug', function () {
+  describe('PUT /admin/access/clients/:slug', function () {
     beforeEach(async function () {
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({
           slug: 'update-01',
           clientName: 'Update Test mocha test',
@@ -280,7 +280,7 @@ describe('Access API calls', function () {
       };
 
       const res = await request(server)
-        .put('/admin/access-clients/update-01')
+        .put('/admin/access/clients/update-01')
         .send(updates)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -299,7 +299,7 @@ describe('Access API calls', function () {
       };
 
       const res = await request(server)
-        .put('/admin/access-clients/update-01')
+        .put('/admin/access/clients/update-01')
         .send(updates)
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -312,7 +312,7 @@ describe('Access API calls', function () {
 
     it('it should return 404 for non-existent slug', async function () {
       const res = await request(server)
-        .put('/admin/access-clients/nonexistent')
+        .put('/admin/access/clients/nonexistent')
         .send({ clientName: 'Test' })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -324,7 +324,7 @@ describe('Access API calls', function () {
 
     it('it should NOT UPDATE without authorization', async function () {
       await request(server)
-        .put('/admin/access-clients/update-01')
+        .put('/admin/access/clients/update-01')
         .send({ clientName: 'Test' })
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -332,10 +332,10 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('PUT /admin/access-gates/:code', function () {
+  describe('PUT /admin/access/gates/:code', function () {
     beforeEach(async function () {
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({
           slug: 'ap-update-01',
           clientName: 'Access Gate Update Test mocha test',
@@ -349,7 +349,7 @@ describe('Access API calls', function () {
 
     it('it should re-discover boards when updating access gate root', async function () {
       const res = await request(server)
-        .put('/admin/access-gates/APUPDATE01')
+        .put('/admin/access/gates/APUPDATE01')
         .send({ rootBoardId: testBoardId2 })
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -367,7 +367,7 @@ describe('Access API calls', function () {
 
     it('it should re-discover without changing root when no rootBoardId provided', async function () {
       const res = await request(server)
-        .put('/admin/access-gates/APUPDATE01')
+        .put('/admin/access/gates/APUPDATE01')
         .send({})
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -380,7 +380,7 @@ describe('Access API calls', function () {
 
     it('it should return 404 for non-existent access gate code', async function () {
       const res = await request(server)
-        .put('/admin/access-gates/NONEXISTENT')
+        .put('/admin/access/gates/NONEXISTENT')
         .send({})
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
@@ -392,7 +392,7 @@ describe('Access API calls', function () {
 
     it('it should NOT UPDATE without authorization', async function () {
       await request(server)
-        .put('/admin/access-gates/APUPDATE01')
+        .put('/admin/access/gates/APUPDATE01')
         .send({})
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -400,10 +400,10 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('GET /admin/access-clients/:slug/stats', function () {
+  describe('GET /admin/access/clients/:slug/stats', function () {
     beforeEach(async function () {
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({
           slug: 'stats-01',
           clientName: 'Stats Test mocha test',
@@ -417,7 +417,7 @@ describe('Access API calls', function () {
 
     it('it should GET client statistics', async function () {
       const res = await request(server)
-        .get('/admin/access-clients/stats-01/stats')
+        .get('/admin/access/clients/stats-01/stats')
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -449,7 +449,7 @@ describe('Access API calls', function () {
     it('it should return 0 daysUntilExpiry for expired client', async function () {
       // Create expired client
       await request(server)
-        .post('/admin/access-clients')
+        .post('/admin/access/clients')
         .send({
           slug: 'expired-01',
           clientName: 'Expired Test mocha test',
@@ -461,7 +461,7 @@ describe('Access API calls', function () {
         .set('Authorization', `Bearer ${adminUser.token}`);
 
       const res = await request(server)
-        .get('/admin/access-clients/expired-01/stats')
+        .get('/admin/access/clients/expired-01/stats')
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -473,7 +473,7 @@ describe('Access API calls', function () {
 
     it('it should return 404 for non-existent slug', async function () {
       const res = await request(server)
-        .get('/admin/access-clients/nonexistent/stats')
+        .get('/admin/access/clients/nonexistent/stats')
         .set('Authorization', `Bearer ${adminUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -484,7 +484,7 @@ describe('Access API calls', function () {
 
     it('it should NOT GET stats without authorization', async function () {
       await request(server)
-        .get('/admin/access-clients/stats-01/stats')
+        .get('/admin/access/clients/stats-01/stats')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(403);
