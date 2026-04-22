@@ -2251,7 +2251,7 @@ definitions:
       slug:
         type: string
         description: Unique slug identifier (lowercase)
-      client:
+      contact:
         type: object
         properties:
           name:
@@ -2351,7 +2351,7 @@ definitions:
               type: string
             slug:
               type: string
-            client:
+            contact:
               type: object
               properties:
                 name:

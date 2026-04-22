@@ -61,7 +61,7 @@ async function getClients(req, res) {
       isActive: true,
       subscriptionStart: { $lte: now },
       subscriptionEnd: { $gte: now }
-    }).select('slug client brandColor');
+    }).select('slug contact brandColor');
 
     const accessGates = await AccessGate.find({
       accessClient: { $in: clients.map(c => c._id) }
@@ -72,7 +72,7 @@ async function getClients(req, res) {
     const result = clients
       .map(client => ({
         slug: client.slug,
-        clientName: client.client.name,
+        clientName: client.contact.name,
         brandColor: client.brandColor,
         accessGates: accessGates
           .filter(ag => ag.accessClient.toString() === client._id.toString())
@@ -172,7 +172,7 @@ async function getAccessBoard(req, res) {
     return res.status(200).json({
       client: {
         code: client.slug,
-        name: client.client.name,
+        name: client.contact.name,
         color: client.brandColor
       },
       boards: boards.map(b => b.toJSON()),
@@ -232,7 +232,7 @@ async function createAccessClient(req, res) {
     // Create the client
     const client = new AccessClient({
       slug,
-      client: { name: clientName, email: clientEmail, phone: clientPhone },
+      contact: { name: clientName, email: clientEmail, phone: clientPhone },
       brandColor,
       subscriptionStart: new Date(subscriptionStart),
       subscriptionEnd: new Date(subscriptionEnd),
@@ -346,9 +346,9 @@ async function updateAccessClient(req, res) {
       client.subscriptionStart = new Date(updates.subscriptionStart);
     if (updates.subscriptionEnd)
       client.subscriptionEnd = new Date(updates.subscriptionEnd);
-    if (updates.clientName) client.client.name = updates.clientName;
-    if (updates.clientEmail) client.client.email = updates.clientEmail;
-    if (updates.clientPhone) client.client.phone = updates.clientPhone;
+    if (updates.clientName) client.contact.name = updates.clientName;
+    if (updates.clientEmail) client.contact.email = updates.clientEmail;
+    if (updates.clientPhone) client.contact.phone = updates.clientPhone;
     if (updates.brandColor) client.brandColor = updates.brandColor;
 
     await client.save();

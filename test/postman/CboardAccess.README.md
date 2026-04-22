@@ -88,7 +88,7 @@ The collection includes these variables (can be edited in collection variables o
    }
    ```
 
-2. The response includes the created client (`slug`, `client.name`, etc.) and the `accessGate` with `code` and `linkedBoardIds`
+2. The response includes the created client (`slug`, `contact.name`, etc.) and the `accessGate` with `code` and `linkedBoardIds`
 3. `client_slug` and `access_code` variables are automatically saved for subsequent requests
 
 ### Testing the Client

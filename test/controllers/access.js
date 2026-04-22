@@ -43,20 +43,20 @@ describe('Access API calls', function () {
     testBoardId = await helper.createMochaBoard(server, adminUser.token, adminUser.email);
     testBoardId2 = await helper.createMochaBoard(server, adminUser.token, adminUser.email);
   
-    const clients = await AccessClient.find({ 'client.name': /mocha test/i });
+    const clients = await AccessClient.find({ 'contact.name': /mocha test/i });
     const clientIds = clients.map(c => c._id);
     await AccessGate.deleteMany({ accessClient: { $in: clientIds } });
-    await AccessClient.deleteMany({ 'client.name': /mocha test/i });
+    await AccessClient.deleteMany({ 'contact.name': /mocha test/i });
   });
 
   after(async function () {
     helper.prepareNodemailerMock(true); //disable mockery
     await helper.deleteMochaUsers();
     await Board.deleteMany({ author: 'cboard mocha test' });
-    const clients = await AccessClient.find({ 'client.name': /mocha test/i });
+    const clients = await AccessClient.find({ 'contact.name': /mocha test/i });
     const clientIds = clients.map(c => c._id);
     await AccessGate.deleteMany({ accessClient: { $in: clientIds } });
-    await AccessClient.deleteMany({ 'client.name': /mocha test/i });
+    await AccessClient.deleteMany({ 'contact.name': /mocha test/i });
   });
 
   describe('POST /admin/access-clients', function () {
@@ -82,7 +82,7 @@ describe('Access API calls', function () {
 
       res.body.should.be.a('object');
       res.body.should.have.property('slug').eql('test-01');
-      res.body.client.should.have.property('name').eql('Test Client mocha test');
+      res.body.contact.should.have.property('name').eql('Test Client mocha test');
       res.body.should.have.property('brandColor').eql('#FF5733');
       res.body.should.have.property('createdBy');
       res.body.should.have.property('accessGate');
@@ -287,7 +287,7 @@ describe('Access API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.client.should.have.property('name').eql('Updated Name mocha test');
+      res.body.contact.should.have.property('name').eql('Updated Name mocha test');
       res.body.should.have.property('brandColor').eql('#FFFFFF');
       res.body.should.have.property('isActive').eql(false);
     });
@@ -429,7 +429,7 @@ describe('Access API calls', function () {
 
       // Verify client data
       res.body.client.should.have.property('slug').eql('stats-01');
-      res.body.client.client.should.have.property('name').eql('Stats Test mocha test');
+      res.body.client.contact.should.have.property('name').eql('Stats Test mocha test');
 
       // Verify stats — test board has no tile links, so auto-discovery returns 1 board
       res.body.stats.should.have.property('totalAccesses').eql(0);
