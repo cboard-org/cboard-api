@@ -217,6 +217,18 @@ async function createAccessClient(req, res) {
       return res.status(404).json({ message: 'Root board not found' });
     }
 
+    // Check for duplicates before persisting anything to avoid orphaned documents
+    const [existingSlug, existingCode] = await Promise.all([
+      AccessClient.findOne({ slug }),
+      AccessGate.findOne({ code: accessGate.toUpperCase() })
+    ]);
+    if (existingSlug) {
+      return res.status(409).json({ message: 'Slug already exists' });
+    }
+    if (existingCode) {
+      return res.status(409).json({ message: 'Code already exists' });
+    }
+
     // Create the client
     const client = new AccessClient({
       slug,
