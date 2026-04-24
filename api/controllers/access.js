@@ -171,7 +171,7 @@ async function getAccessBoard(req, res) {
 
     return res.status(200).json({
       client: {
-        code: client.slug,
+        slug: client.slug,
         name: client.contact.name,
         color: client.brandColor
       },
@@ -242,24 +242,24 @@ async function createAccessClient(req, res) {
     await client.save();
 
     try{
-    // Auto-discover all boards reachable from root via tile.loadBoard links
-    const linkedBoardIds = await getAllLinkedBoardIds(rootBoardId);
+      // Auto-discover all boards reachable from root via tile.loadBoard links
+      const linkedBoardIds = await getAllLinkedBoardIds(rootBoardId);
 
-    // Create the access gate
+      // Create the access gate
     const newAccessGate = new AccessGate({
-      code: accessGateCode.toUpperCase(),
-      accessClient: client._id,
-      rootBoardId,
-      linkedBoardIds: linkedBoardIds
-    });
+        code: accessGateCode.toUpperCase(),
+        accessClient: client._id,
+        rootBoardId,
+        linkedBoardIds: linkedBoardIds
+      });
 
-    await newAccessGate.save();
+      await newAccessGate.save();
 
-    // Mark all discovered boards with the access gate code
-    await Board.updateMany(
-      { _id: { $in: linkedBoardIds } },
-      { $set: { accessGateCode: newAccessGate.code } }
-    );
+      // Mark all discovered boards with the access gate code
+      await Board.updateMany(
+        { _id: { $in: linkedBoardIds } },
+        { $set: { accessGateCode: newAccessGate.code } }
+      );
     } catch (err) {
       await AccessClient.deleteOne({ _id: client._id });
       throw err;

@@ -2403,9 +2403,9 @@ definitions:
       client:
         type: object
         properties:
-          code:
+          slug:
             type: string
-            description: Access code
+            description: Client slug identifier
           name:
             type: string
             description: Client name
