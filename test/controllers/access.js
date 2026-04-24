@@ -365,6 +365,25 @@ describe('Access API calls', function () {
       board.accessGateCode.should.eql('APUPDATE01');
     });
 
+    it('it should clear accessGateCode from boards no longer linked after root change', async function () {
+      // testBoardId was the original root, so it has accessGateCode set
+      const before = await Board.findById(testBoardId);
+      before.accessGateCode.should.eql('APUPDATE01');
+
+      // Switch root to testBoardId2 — testBoardId should lose its accessGateCode
+      await request(server)
+        .put('/admin/access/gates/APUPDATE01')
+        .send({ rootBoardId: testBoardId2 })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      const delinked = await Board.findById(testBoardId);
+      expect(delinked.accessGateCode).to.be.null;
+
+      const linked = await Board.findById(testBoardId2);
+      linked.accessGateCode.should.eql('APUPDATE01');
+    });
+
     it('it should re-discover without changing root when no rootBoardId provided', async function () {
       const res = await request(server)
         .put('/admin/access/gates/APUPDATE01')

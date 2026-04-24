@@ -445,14 +445,23 @@ async function updateAccessGate(req, res) {
       return res.status(404).json({ message: 'Root board not found' });
     }
 
+    const oldLinkedBoardIds = accessGate.linkedBoardIds.map(id => id.toString());
+
     // Re-discover all boards reachable from root
     const linkedBoardIds = await getAllLinkedBoardIds(newRootBoardId);
+    const newLinkedBoardIds = linkedBoardIds.map(id => id.toString());
+    const removedIds = oldLinkedBoardIds.filter(id => !newLinkedBoardIds.includes(id));
 
     accessGate.rootBoardId = newRootBoardId;
     accessGate.linkedBoardIds = linkedBoardIds;
     await accessGate.save();
 
-    // Mark all discovered boards with this access gate code
+    if (removedIds.length) {
+      await Board.updateMany(
+        { _id: { $in: removedIds } },
+        { $set: { accessGateCode: null } }
+      );
+    }
     await Board.updateMany(
       { _id: { $in: linkedBoardIds } },
       { $set: { accessGateCode: code } }
