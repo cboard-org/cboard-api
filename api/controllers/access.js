@@ -241,6 +241,7 @@ async function createAccessClient(req, res) {
 
     await client.save();
 
+    try{
     // Auto-discover all boards reachable from root via tile.loadBoard links
     const linkedBoardIds = await getAllLinkedBoardIds(rootBoardId);
 
@@ -259,6 +260,10 @@ async function createAccessClient(req, res) {
       { _id: { $in: linkedBoardIds } },
       { $set: { accessGateCode: newAccessGate.code } }
     );
+    } catch (err) {
+      await AccessClient.deleteOne({ _id: client._id });
+      throw err;
+    }
 
     return res.status(201).json({ ...client.toJSON(), accessGate: newAccessGate.toJSON() });
   } catch (err) {
