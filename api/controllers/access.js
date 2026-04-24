@@ -241,12 +241,14 @@ async function createAccessClient(req, res) {
 
     await client.save();
 
-    try{
+    let newAccessGate;
+
+    try {
       // Auto-discover all boards reachable from root via tile.loadBoard links
       const linkedBoardIds = await getAllLinkedBoardIds(rootBoardId);
 
       // Create the access gate
-    const newAccessGate = new AccessGate({
+      newAccessGate = new AccessGate({
         code: accessGateCode.toUpperCase(),
         accessClient: client._id,
         rootBoardId,
