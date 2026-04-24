@@ -6,7 +6,7 @@ const Board = require('../models/Board');
 
 module.exports = {
   getClients: getClients,
-  getAccessBoard: getAccessBoard,
+  getAccessBoards: getAccessBoards,
   createAccessClient: createAccessClient,
   listAccessClients: listAccessClients,
   updateAccessClient: updateAccessClient,
@@ -110,7 +110,7 @@ async function getClients(req, res) {
  * Returns client info (slug, name, color), all boards array, and rootBoardId.
  * Increments viewsCount and updates lastAccessAt on the AccessGate.
  */
-async function getAccessBoard(req, res) {
+async function getAccessBoards(req, res) {
   const code = req.swagger.params.gateCode.value.toUpperCase();
   const slug = req.swagger.params.clientSlug.value;
 

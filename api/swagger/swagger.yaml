@@ -1281,7 +1281,7 @@ paths:
   /access/{clientSlug}/{gateCode}:
     x-swagger-router-controller: access
     get:
-      operationId: getAccessBoard
+      operationId: getAccessBoards
       description: Gets ALL boards for an access code in a single request. Validates slug and code exist and subscription is active. Returns client info, all boards array, and rootBoardId.
       parameters:
         - name: clientSlug
