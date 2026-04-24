@@ -2463,17 +2463,28 @@ definitions:
       code:
         type: string
         description: Access gate code (uppercase)
-      accessClient:
+      accessClientId:
         type: string
-        description: AccessClient ID
+        description: AccessClient ID (foreign key)
+      accessClient:
+        type: object
+        description: Populated AccessClient document (present when populated via virtual)
       rootBoardId:
         type: string
-        description: Root board ID
+        description: Root board ID (foreign key)
+      rootBoard:
+        type: object
+        description: Populated root Board document (present when populated via virtual)
       linkedBoardIds:
         type: array
         items:
           type: string
         description: All board IDs reachable from the root board
+      linkedBoards:
+        type: array
+        items:
+          type: object
+        description: Populated linked Board documents (present when populated via virtual)
       viewsCount:
         type: integer
         description: Number of times this access gate has been accessed

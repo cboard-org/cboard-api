@@ -64,10 +64,10 @@ async function getClients(req, res) {
     }).select('slug contact brandColor');
 
     const accessGates = await AccessGate.find({
-      accessClient: { $in: clients.map(c => c._id) }
+      accessClientId: { $in: clients.map(c => c._id) }
     })
-      .populate('rootBoardId', 'name caption tiles')
-      .select('code rootBoardId accessClient');
+      .populate('rootBoard', 'name caption tiles')
+      .select('code rootBoardId accessClientId');
 
     const result = clients
       .map(client => ({
@@ -75,15 +75,15 @@ async function getClients(req, res) {
         clientName: client.contact.name,
         brandColor: client.brandColor,
         accessGates: accessGates
-          .filter(ag => ag.accessClient.toString() === client._id.toString())
+          .filter(ag => ag.accessClientId.toString() === client._id.toString())
           .map(ag => ({
             code: ag.code,
-            rootBoard: ag.rootBoardId
+            rootBoard: ag.rootBoard
               ? {
-                  id: ag.rootBoardId._id,
-                  name: ag.rootBoardId.name,
-                  caption: ag.rootBoardId.caption,
-                  tilesCount: ag.rootBoardId.tiles?.length || 0
+                  id: ag.rootBoard._id,
+                  name: ag.rootBoard.name,
+                  caption: ag.rootBoard.caption,
+                  tilesCount: ag.rootBoard.tiles?.length || 0
                 }
               : null
           }))
@@ -250,7 +250,7 @@ async function createAccessClient(req, res) {
       // Create the access gate
       newAccessGate = new AccessGate({
         code: accessGateCode.toUpperCase(),
-        accessClient: client._id,
+        accessClientId: client._id,
         rootBoardId,
         linkedBoardIds: linkedBoardIds
       });
@@ -296,10 +296,10 @@ async function listAccessClients(req, res) {
 
     // Fetch access gates and sum linkedBoardIds per client to avoid N+1
     const clientIds = clients.map(c => c._id);
-    const accessGates = await AccessGate.find({ accessClient: { $in: clientIds } });
+    const accessGates = await AccessGate.find({ accessClientId: { $in: clientIds } });
 
     const agMap = accessGates.reduce((map, ag) => {
-      const key = ag.accessClient.toString();
+      const key = ag.accessClientId.toString();
       if (!map[key]) map[key] = 0;
       map[key] += ag.linkedBoardIds?.length || 0;
       return map;
@@ -385,7 +385,7 @@ async function getAccessClientStats(req, res) {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    const accessGates = await AccessGate.find({ accessClient: client._id });
+    const accessGates = await AccessGate.find({ accessClientId: client._id });
 
     // Collect unique board IDs across all access gates
     const allBoardIds = [

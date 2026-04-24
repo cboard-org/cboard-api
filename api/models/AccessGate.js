@@ -12,7 +12,7 @@ const ACCESS_GATE_SCHEMA_DEFINITION = {
     unique: true,
     index: true
   },
-  accessClient: {
+  accessClientId: {
     type: Schema.Types.ObjectId,
     ref: 'AccessClient',
     required: true
@@ -56,6 +56,26 @@ const accessGateSchema = new Schema(
   ACCESS_GATE_SCHEMA_DEFINITION,
   ACCESS_GATE_SCHEMA_OPTIONS
 );
+
+accessGateSchema.virtual('accessClient', {
+  ref: 'AccessClient',
+  localField: 'accessClientId',
+  foreignField: '_id',
+  justOne: true
+});
+
+accessGateSchema.virtual('rootBoard', {
+  ref: 'Board',
+  localField: 'rootBoardId',
+  foreignField: '_id',
+  justOne: true
+});
+
+accessGateSchema.virtual('linkedBoards', {
+  ref: 'Board',
+  localField: 'linkedBoardIds',
+  foreignField: '_id'
+});
 
 const AccessGate = mongoose.model('AccessGate', accessGateSchema);
 

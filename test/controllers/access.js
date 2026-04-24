@@ -45,7 +45,7 @@ describe('Access API calls', function () {
   
     const clients = await AccessClient.find({ 'contact.name': /mocha test/i });
     const clientIds = clients.map(c => c._id);
-    await AccessGate.deleteMany({ accessClient: { $in: clientIds } });
+    await AccessGate.deleteMany({ accessClientId: { $in: clientIds } });
     await AccessClient.deleteMany({ 'contact.name': /mocha test/i });
   });
 
@@ -55,7 +55,7 @@ describe('Access API calls', function () {
     await Board.deleteMany({ author: 'cboard mocha test' });
     const clients = await AccessClient.find({ 'contact.name': /mocha test/i });
     const clientIds = clients.map(c => c._id);
-    await AccessGate.deleteMany({ accessClient: { $in: clientIds } });
+    await AccessGate.deleteMany({ accessClientId: { $in: clientIds } });
     await AccessClient.deleteMany({ 'contact.name': /mocha test/i });
   });
 
