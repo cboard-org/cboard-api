@@ -509,4 +509,130 @@ describe('Access API calls', function () {
         .expect(403);
     });
   });
+
+  describe('GET /access/:clientSlug/:gateCode', function () {
+    // The controller updates viewsCount/lastAccessAt fire-and-forget, so tests
+    // that assert on those fields need a tiny delay for the async write to land.
+    const waitForAnalytics = () => new Promise(resolve => setTimeout(resolve, 100));
+
+    beforeEach(async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          slug: 'public-01',
+          clientName: 'Public Access mocha test',
+          rootBoardId: testBoardId,
+          accessGateCode: 'PUBLIC01',
+          brandColor: '#123456',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`);
+    });
+
+    it('it should GET boards for a valid slug + code pair', async function () {
+      const res = await request(server)
+        .get('/access/public-01/PUBLIC01')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('client');
+      res.body.client.should.have.property('slug').eql('public-01');
+      res.body.client.should.have.property('name').eql('Public Access mocha test');
+      res.body.client.should.have.property('color').eql('#123456');
+      res.body.should.have.property('boards').that.is.an('array');
+      res.body.boards.length.should.be.at.least(1);
+      res.body.should.have.property('rootBoardId').eql(testBoardId.toString());
+    });
+
+    it('it should accept a lowercase gate code (case-insensitive)', async function () {
+      await request(server)
+        .get('/access/public-01/public01')
+        .set('Accept', 'application/json')
+        .expect(200);
+    });
+
+    it('it should increment viewsCount and update lastAccessAt', async function () {
+      const before = await AccessGate.findOne({ code: 'PUBLIC01' });
+      const startCount = before.viewsCount || 0;
+
+      await request(server)
+        .get('/access/public-01/PUBLIC01')
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      await waitForAnalytics();
+
+      const after = await AccessGate.findOne({ code: 'PUBLIC01' });
+      after.viewsCount.should.eql(startCount + 1);
+      should.exist(after.lastAccessAt);
+      if (before.lastAccessAt) {
+        after.lastAccessAt.getTime().should.be.at.least(before.lastAccessAt.getTime());
+      }
+    });
+
+    it('it should return 404 for a non-existent gate code', async function () {
+      const res = await request(server)
+        .get('/access/public-01/NOPE')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Invalid access code');
+    });
+
+    it('it should return 404 when slug does not match the gate\'s client', async function () {
+      // Create a second client so its slug exists but does not own PUBLIC01
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          slug: 'other-01',
+          clientName: 'Other Client mocha test',
+          rootBoardId: testBoardId2,
+          accessGateCode: 'OTHER01',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`);
+
+      const res = await request(server)
+        .get('/access/other-01/PUBLIC01')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Invalid or expired access code');
+    });
+
+    it('it should return 404 when the client subscription has expired', async function () {
+      await AccessClient.updateOne(
+        { slug: 'public-01' },
+        { $set: { subscriptionEnd: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
+      );
+
+      const res = await request(server)
+        .get('/access/public-01/PUBLIC01')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Invalid or expired access code');
+    });
+
+    it('it should return 404 when the client is inactive', async function () {
+      await AccessClient.updateOne(
+        { slug: 'public-01' },
+        { $set: { isActive: false } }
+      );
+
+      const res = await request(server)
+        .get('/access/public-01/PUBLIC01')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Invalid or expired access code');
+    });
+  });
 });
