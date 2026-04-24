@@ -71,12 +71,13 @@ function encodeGrayscalePng(pixels, width, height) {
   ]);
 }
 
-function generateQRCode(code, baseUrl = DEFAULT_BASE_URL) {
+function generateQRCode(code, slug, baseUrl = DEFAULT_BASE_URL) {
   if (!code) throw new Error('Access code is required');
+  if (!slug) throw new Error('Client slug is required');
 
   const normalizedCode = code.toUpperCase();
-  const url = `${baseUrl}/access/${normalizedCode}`;
-  const filename = `${normalizedCode}-qr.png`;
+  const url = `${baseUrl}/access/${slug}/${normalizedCode}`;
+  const filename = `${slug}-${normalizedCode}-qr.png`;
   const outputPath = path.join(process.cwd(), filename);
 
   const qr = qrcodegen.QrCode.encodeText(url, qrcodegen.QrCode.Ecc.MEDIUM);
@@ -101,17 +102,18 @@ function generateQRCode(code, baseUrl = DEFAULT_BASE_URL) {
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const code = args[0];
-  const baseUrl = args[1] || DEFAULT_BASE_URL;
+  const slug = args[0];
+  const code = args[1];
+  const baseUrl = args[2] || DEFAULT_BASE_URL;
 
-  if (!code) {
-    console.error('Error: Access code is required');
-    console.error('\nUsage: node scripts/qr-generator/generate-qr.js <CODE> [BASE_URL]');
-    console.error('Example: node scripts/qr-generator/generate-qr.js CAFE01 https://app.cboard.io');
+  if (!slug || !code) {
+    console.error('Error: Client slug and access code are required');
+    console.error('\nUsage: node scripts/qr-generator/generate-qr.js <SLUG> <CODE> [BASE_URL]');
+    console.error('Example: node scripts/qr-generator/generate-qr.js my-company ABC123 https://app.cboard.io');
     process.exit(1);
   }
 
-  generateQRCode(code, baseUrl)
+  generateQRCode(code, slug, baseUrl)
     .then(({ url, outputPath }) => {
       console.log('QR code generated successfully!');
       console.log('  URL encoded:', url);
