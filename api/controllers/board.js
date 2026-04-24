@@ -80,7 +80,7 @@ async function getPublicBoards(req, res) {
     search && search.length ? getORQuery(searchFields, search, true) : {};
   const response = await paginatedResponse(
     Board,
-    { query: { ...query, isPublic: true, accessGateCode: null } },
+    { query: { ...query, isPublic: true, accessGateCode: { $in: [null, undefined] } } },
     req.query
   );
 
