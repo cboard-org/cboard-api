@@ -87,7 +87,7 @@ async function getPublicBoards(req, res) {
   return res.status(200).json(response);
 }
 
-function deleteBoard(req, res) {
+async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
   Board.findByIdAndRemove(id, function (err, boards) {
     if (err) {
