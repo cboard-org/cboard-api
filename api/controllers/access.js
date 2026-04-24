@@ -160,13 +160,19 @@ async function getAccessBoards(req, res) {
       });
     }
 
-    // Track access analytics atomically to avoid lost updates under concurrency
-    await AccessGate.updateOne(
+    // Fire-and-forget analytics: never block the response or surface tracking errors to the caller.
+    // $inc is atomic (safe under concurrency); $currentDate uses MongoDB server time for consistency across app nodes.
+    AccessGate.updateOne(
       { _id: accessGate._id },
       {
         $inc: { viewsCount: 1 },
-        $set: { lastAccessAt: new Date() }
+        $currentDate: { lastAccessAt: true }
       }
+    ).catch(err =>
+      console.error('[access] viewsCount update failed', {
+        gateId: accessGate._id,
+        error: err.message
+      })
     );
 
     return res.status(200).json({
