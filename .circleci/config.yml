@@ -157,6 +157,56 @@ jobs:
             -e APPLE_KEY_ID \
             cboard/cboard-bootstrap \
             up -d --no-deps cboard-api" && exit'
+  qa-image:
+    docker:
+      - image: cimg/node:18.18.1
+        auth:
+          username: cboardci
+          password: $DOCKERHUB_PASSWORD
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - yarn-packages-v1-{{ .Branch }}-{{ checksum “yarn.lock” }}
+            - yarn-packages-v1-{{ .Branch }}-
+            - yarn-packages-v1-
+      - run: yarn install --cache-folder ~/.cache/yarn
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: yarn-packages-v1-{{ .Branch }}-{{ checksum “yarn.lock” }}
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - run: |
+          openssl aes-256-cbc -d -md sha256 \
+            -in google-auth.json.cipher \
+            -out google-auth.json \
+            -k $KEY
+      - run: |
+          openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in google-play-auth.json.cipher \
+            -out google-play-auth.json \
+            -k $KEY
+      - run: |
+          openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in Apple-Sign-In-AuthKey.p8.cipher \
+            -out Apple-Sign-In-AuthKey.p8 \
+            -k $KEY
+      - run: |
+          openssl aes-256-cbc -d -md sha256 \
+            -pbkdf2 \
+            -in App-Store-Connect-API-Key.p8.cipher \
+            -out App-Store-Connect-API-Key.p8 \
+            -k $KEY
+      - run: |
+          TAG=qa-$CIRCLE_BUILD_NUM
+          docker build -t cboard/cboard-api:qa -t cboard/cboard-api:$TAG .
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
+          docker push cboard/cboard-api:qa
+          docker push cboard/cboard-api:$TAG
 workflows:
   version: 2
   build_test_image:
@@ -170,3 +220,10 @@ workflows:
           filters:
             branches:
               only: master
+      - qa-image:
+          context: google-auth
+          requires:
+            - build
+          filters:
+            branches:
+              only: feature/cboard-access
