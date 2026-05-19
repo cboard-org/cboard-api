@@ -397,6 +397,7 @@ async function deleteMochaUsers() {
  *
  * @property {string} token
  * @property {string} userId
+ * @property {string} email
  */
 
 /**
@@ -474,7 +475,8 @@ async function createCommunicator(server, userToken) {
  * @param {Express} server
  *
  * @param {string} token
- *   user data.
+ *
+ * @param {string} [email] - Optional email to set as the board owner, should match the authenticated user's email.
  *
  * @returns {Promise<createMochaBoard>}
  */
