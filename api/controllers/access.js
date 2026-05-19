@@ -474,7 +474,7 @@ async function updateAccessGate(req, res) {
 
     if (removedIds.length) {
       await Board.updateMany(
-        { _id: { $in: removedIds } },
+        { _id: { $in: removedIds }, accessGateCode: code },
         { $set: { accessGateCode: null } }
       );
     }
