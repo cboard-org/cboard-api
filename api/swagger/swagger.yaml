@@ -2278,8 +2278,7 @@ definitions:
         format: date-time
         description: Subscription end date
       createdBy:
-        type: string
-        description: ID of user who created the client
+        description: User who created the client (string ID or populated user object with name, email, role)
       createdAt:
         type: string
         format: date-time
