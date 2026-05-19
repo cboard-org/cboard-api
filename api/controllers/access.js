@@ -270,6 +270,9 @@ async function createAccessClient(req, res) {
       );
     } catch (err) {
       await AccessClient.deleteOne({ _id: client._id });
+      if (newAccessGate?._id) {
+        await AccessGate.deleteOne({ _id: newAccessGate._id });
+      }
       throw err;
     }
 
