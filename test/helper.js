@@ -397,6 +397,7 @@ async function deleteMochaUsers() {
  *
  * @property {string} token
  * @property {string} userId
+ * @property {string} email
  */
 
 /**
@@ -434,7 +435,7 @@ async function prepareUser(server, overrides = {}) {
 
   const token = login.body.authToken;
 
-  return { token, userId };
+  return { token, userId, email: data.email };
 }
 
 /**
@@ -474,15 +475,17 @@ async function createCommunicator(server, userToken) {
  * @param {Express} server
  *
  * @param {string} token
- *   user data.
+ *
+ * @param {string} [email] - Optional email to set as the board owner, should match the authenticated user's email.
  *
  * @returns {Promise<createMochaBoard>}
  */
 
-async function createMochaBoard(server, token) {
+async function createMochaBoard(server, token, email) {
+  const payload = email ? { ...boardData, email } : boardData;
   const res = await request(server)
     .post('/board')
-    .send(boardData)
+    .send(payload)
     .set('Authorization', `Bearer ${token}`);
   return res.body.id;
 }

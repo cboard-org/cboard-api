@@ -252,6 +252,143 @@ describe('Board API calls', function () {
     });
   });
 
+  describe('accessGateCode field behavior', function () {
+    it('should normalize accessGateCode to uppercase when creating a board', async function () {
+      const boardWithAccessCode = {
+        ...helper.boardData,
+        accessGateCode: 'cafe01'
+      };
+      const res = await request(server)
+        .post('/board')
+        .send(boardWithAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('accessGateCode');
+      res.body.accessGateCode.should.equal('CAFE01');
+    });
+
+    it('should trim whitespace from accessGateCode', async function () {
+      const boardWithAccessCode = {
+        ...helper.boardData,
+        accessGateCode: '  test01  '
+      };
+      const res = await request(server)
+        .post('/board')
+        .send(boardWithAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('accessGateCode');
+      res.body.accessGateCode.should.equal('TEST01');
+    });
+
+    it('should default accessGateCode to null when not provided', async function () {
+      const boardWithoutAccessCode = { ...helper.boardData };
+      delete boardWithoutAccessCode.accessGateCode;
+
+      const res = await request(server)
+        .post('/board')
+        .send(boardWithoutAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('accessGateCode');
+      should.equal(res.body.accessGateCode, null);
+    });
+
+    it('should update accessGateCode on an existing board', async function () {
+      const boardId = await helper.createMochaBoard(server, user.token);
+
+      const updateData = {
+        ...helper.boardData,
+        accessGateCode: 'updated01'
+      };
+      const res = await request(server)
+        .put('/board/' + boardId)
+        .send(updateData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('accessGateCode');
+      res.body.accessGateCode.should.equal('UPDATED01');
+    });
+
+    it('should return accessGateCode in GET response when set', async function () {
+      const boardWithAccessCode = {
+        ...helper.boardData,
+        accessGateCode: 'gettest01'
+      };
+      const createRes = await request(server)
+        .post('/board')
+        .send(boardWithAccessCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const boardId = createRes.body.id;
+
+      const getRes = await request(server)
+        .get('/board/' + boardId)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      getRes.body.should.have.property('accessGateCode');
+      getRes.body.accessGateCode.should.equal('GETTEST01');
+    });
+
+    it('should exclude boards with accessGate from public boards listing', async function () {
+      // Create a public board without accessGate
+      const publicBoard = {
+        ...helper.boardData,
+        name: 'Public Board Without Code',
+        isPublic: true
+      };
+      await request(server)
+        .post('/board')
+        .send(publicBoard)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      // Create a public board with accessGateCode
+      const publicBoardWithCode = {
+        ...helper.boardData,
+        name: 'Public Board With Code',
+        isPublic: true,
+        accessGateCode: 'public01'
+      };
+      await request(server)
+        .post('/board')
+        .send(publicBoardWithCode)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      // Get public boards
+      const res = await request(server)
+        .get('/board/public')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      // Verify that boards with accessGateCode are not in the results
+      const boardsWithCode = res.body.data.filter(b => b.name === 'Public Board With Code');
+      boardsWithCode.length.should.equal(0);
+    });
+  });
+
   describe('GET /board/byemail/:email', function() {
     it("only allows an admin to get another user's boards", async function() {
       const adminEmail = helper.generateEmail();
