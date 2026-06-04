@@ -10,6 +10,9 @@ const { processBase64Images, hasBase64Images } = require('../helpers/imageProces
 const {nev} = require('../mail');
 
 const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
+// Upper bound on ids per /board/byids request. Guards against runaway clients
+// (e.g. a copy-loop bug) without limiting any healthy user.
+const MAX_BOARDS_BY_IDS = 3000;
 
 module.exports = {
   createBoard: createBoard,
@@ -18,6 +21,8 @@ module.exports = {
   getBoard: getBoard,
   updateBoard: updateBoard,
   getBoardsEmail: getBoardsEmail,
+  getBoardsSync: getBoardsSync,
+  getBoardsByIds: getBoardsByIds,
   getPublicBoards: getPublicBoards,
   reportPublicBoard: reportPublicBoard,
   getCbuilderBoard: getCbuilderBoard
@@ -71,6 +76,75 @@ async function getBoardsEmail(req, res) {
   );
 
   return res.status(200).json(response);
+}
+
+
+async function getBoardsSync(req, res) {
+  const email = req.swagger.params.email.value;
+
+  if (!req.user.isAdmin && req.user.email !== email) {
+    return res.status(403).json({
+      message: "You are not authorized to get this user's boards."
+    });
+  }
+
+  try {
+    const boards = await Board.find({ email })
+      .select('lastEdited')
+      .lean()
+      .exec();
+
+    const data = boards.map(b => ({
+      id: b._id,
+      lastEdited: b.lastEdited
+    }));
+
+    return res.status(200).json({ total: data.length, data });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting boards for sync.',
+      error: err.message
+    });
+  }
+}
+
+async function getBoardsByIds(req, res) {
+  // Shape and non-empty are validated by swagger. The size cap is enforced
+  // here because swagger does not validate array maxItems for request bodies.
+  const { ids } = req.swagger.params.body.value;
+
+  if (ids.length > MAX_BOARDS_BY_IDS) {
+    return res.status(400).json({
+      message: `ids cannot contain more than ${MAX_BOARDS_BY_IDS} items.`
+    });
+  }
+
+  const validIds = ids.filter(id => ObjectId.isValid(id));
+  if (!validIds.length) {
+    return res.status(400).json({
+      message: 'ids must contain at least one valid board id.'
+    });
+  }
+
+  try {
+    const query = { _id: { $in: validIds } };
+
+    if (!req.user.isAdmin) {
+      query.email = req.user.email;
+    }
+
+    const boards = await Board.find(query).lean().exec();
+
+    // Normalize _id -> id to match the rest of the API surface.
+    const data = boards.map(({ _id, ...rest }) => ({ ...rest, id: _id }));
+
+    return res.status(200).json({ total: data.length, data });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting boards by ids.',
+      error: err.message
+    });
+  }
 }
 
 async function getPublicBoards(req, res) {
