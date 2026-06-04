@@ -1471,6 +1471,9 @@ definitions:
         type: string
       email:
         type: string
+      userId:
+        type: string
+        description: The ID of the user who owns this board
       tiles:
         type: array
         items:

@@ -23,6 +23,12 @@ const BOARD_SCHEMA_DEFINITION = {
     required: true,
     trim: true
   },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,
+    index: true
+  },
   isPublic: {
     type: Boolean,
     default: false

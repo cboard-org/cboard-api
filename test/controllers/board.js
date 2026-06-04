@@ -199,7 +199,7 @@ describe('Board API calls', function () {
         .expect(404);
     });
 
-    it.skip("returns a 404 if the caller is not an admin and doesn't own the board", async function () {
+    it("returns a 403 if the caller is not an admin and doesn't own the board", async function () {
       const email = helper.generateEmail();
       const user1 = await helper.prepareUser(server, { email });
       const user2 = await helper.prepareUser(server, {
@@ -222,10 +222,10 @@ describe('Board API calls', function () {
         .set('Authorization', `Bearer ${user2.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .expect(404);
+        .expect(403);
     });
 
-    it.skip("deletes the board if the caller is an admin but doesn't own the board", async function () {
+    it("deletes the board if the caller is an admin but doesn't own the board", async function () {
       const email = helper.generateEmail();
       const user1 = await helper.prepareUser(server, { email });
       const user2 = await helper.prepareUser(server, {

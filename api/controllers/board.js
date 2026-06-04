@@ -23,10 +23,10 @@ module.exports = {
   getCbuilderBoard: getCbuilderBoard
 };
 
-// TODO: Use the caller's email instead of getting it from the body.
 function createBoard(req, res) {
   const board = new Board(req.body);
   board.lastEdited = moment().format();
+  board.userId = req.auth.id;
   board.save(function (err, board) {
     if (err) {
       return res.status(409).json({
@@ -89,17 +89,27 @@ async function getPublicBoards(req, res) {
 
 async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
+
+  const board = await Board.findById(id);
+
+  if (!board) {
+    return res.status(404).json({
+      message: 'Board not found. Board Id: ' + id,
+      error: 'Board not found.'
+    });
+  }
+
+  if (!req.user.isAdmin && board.userId && board.userId.toString() !== req.auth.id) {
+    return res.status(403).json({
+      message: 'You are not authorized to delete this board.'
+    });
+  }
+
   Board.findByIdAndRemove(id, function (err, boards) {
     if (err) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
         error: err.message
-      });
-    }
-    if (!boards) {
-      return res.status(404).json({
-        message: 'Board not found. Board Id: ' + id,
-        error: 'Board not found.'
       });
     }
     return res.status(200).json(boards);
@@ -140,6 +150,12 @@ async function updateBoard(req, res) {
     if (!board) {
       return res.status(404).json({
         message: 'Unable to find board. board Id: ' + id
+      });
+    }
+
+    if (!req.user.isAdmin && board.userId && board.userId.toString() !== req.auth.id) {
+      return res.status(403).json({
+        message: 'You are not authorized to update this board.'
       });
     }
     

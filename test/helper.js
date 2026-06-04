@@ -61,6 +61,7 @@ const verifyBoardProperties = (body) => {
   body.should.have.property('name');
   body.should.have.property('author');
   body.should.have.property('email');
+  body.should.have.property('userId');
   body.should.have.property('isPublic');
   body.should.have.property('tiles');
 };
