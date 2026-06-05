@@ -292,4 +292,164 @@ describe('Board API calls', function () {
         .expect(200);
     });
   });
+
+  describe('GET /board/sync/:email', function () {
+    // beforeEach (not before) so the board is created for the user set up by
+    // the parent beforeEach, which runs first and regenerates the test email.
+    beforeEach(async function () {
+      this.boardId = await helper.createMochaBoard(server, user.token);
+    });
+
+    it('it should return a lightweight { id, lastEdited } list', async function () {
+      const res = await request(server)
+        .get(`/board/sync/${encodeURI(helper.boardData.email)}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('total').that.is.a('number');
+      res.body.should.have.property('data').that.is.an('array');
+      res.body.data.length.should.be.above(0);
+      res.body.data.forEach((entry) => {
+        entry.should.have.all.keys('id', 'lastEdited');
+      });
+      const ids = res.body.data.map((entry) => entry.id);
+      expect(ids).to.include(this.boardId);
+    });
+
+    it('it should NOT return the sync list without authorization', async function () {
+      await request(server)
+        .get(`/board/sync/${encodeURI(helper.boardData.email)}`)
+        .set('Accept', 'application/json')
+        .expect(403);
+    });
+
+    it("only allows an admin to get another user's sync list", async function () {
+      const adminEmail = helper.generateEmail();
+      const admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: adminEmail,
+      });
+
+      const otherEmail = helper.generateEmail();
+      const otherUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: otherEmail,
+      });
+
+      // A non-admin requesting someone else's sync list is rejected.
+      await request(server)
+        .get(`/board/sync/${encodeURI(helper.boardData.email)}`)
+        .set('Authorization', `Bearer ${otherUser.token}`)
+        .expect({
+          message: "You are not authorized to get this user's boards.",
+        })
+        .expect(403);
+
+      // An admin can request any user's sync list.
+      await request(server)
+        .get(`/board/sync/${encodeURI(helper.boardData.email)}`)
+        .set('Authorization', `Bearer ${admin.token}`)
+        .expect(200);
+    });
+  });
+
+  describe('POST /board/byids', function () {
+    let boardId1;
+    let boardId2;
+
+    // beforeEach (not before) so the boards belong to the user set up by the
+    // parent beforeEach, which runs first and regenerates the test email.
+    beforeEach(async function () {
+      boardId1 = await helper.createMochaBoard(server, user.token);
+      boardId2 = await helper.createMochaBoard(server, user.token);
+    });
+
+    it('it should return the requested boards', async function () {
+      const res = await request(server)
+        .post('/board/byids')
+        .send({ ids: [boardId1, boardId2] })
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('total', 2);
+      res.body.should.have.property('data').that.is.an('array');
+      res.body.data.should.have.lengthOf(2);
+      res.body.data.forEach((board) => helper.verifyBoardProperties(board));
+      const returnedIds = res.body.data.map((b) => b.id);
+      expect(returnedIds).to.have.members([boardId1, boardId2]);
+    });
+
+    it('it should ignore invalid ObjectIds and return only valid matches', async function () {
+      const res = await request(server)
+        .post('/board/byids')
+        .send({ ids: [boardId1, 'not-a-valid-object-id'] })
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('total', 1);
+      res.body.data.should.have.lengthOf(1);
+      res.body.data[0].should.have.property('id', boardId1);
+    });
+
+    it('it should return 400 when ids contains only invalid ObjectIds', async function () {
+      await request(server)
+        .post('/board/byids')
+        .send({ ids: ['not-a-valid-object-id'] })
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('it should return 400 for an empty ids array', async function () {
+      await request(server)
+        .post('/board/byids')
+        .send({ ids: [] })
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(400);
+    });
+
+    it('it should return 400 when ids exceeds the maximum allowed', async function () {
+      const ids = Array.from({ length: 3001 }, () => boardId1);
+      await request(server)
+        .post('/board/byids')
+        .send({ ids })
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect(400);
+    });
+
+    it('it should NOT return boards without authorization', async function () {
+      await request(server)
+        .post('/board/byids')
+        .send({ ids: [boardId1] })
+        .set('Accept', 'application/json')
+        .expect(403);
+    });
+
+    it("it should not return another user's boards to a non-admin", async function () {
+      const otherUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      const res = await request(server)
+        .post('/board/byids')
+        .send({ ids: [boardId1, boardId2] })
+        .set('Authorization', `Bearer ${otherUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('total', 0);
+      res.body.data.should.have.lengthOf(0);
+    });
+  });
 });

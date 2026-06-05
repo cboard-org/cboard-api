@@ -218,6 +218,37 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /board/byids:
+    x-swagger-router-controller: board
+    post:
+      operationId: getBoardsByIds
+      description: >-
+        Returns the full boards matching the provided ids. Non-admin users only
+        receive boards they own. Invalid ids are ignored.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/BoardsByIdsRequest"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardsByIdsResponse"
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /board/{id}:
     x-swagger-router-controller: board
     get:
@@ -318,6 +349,38 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/GetBoardListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /board/sync/{email}:
+    x-swagger-router-controller: board
+    get:
+      operationId: getBoardsSync
+      description: >-
+        Returns a lightweight list ({ id, lastEdited }) of every board for a
+        user email. Meant for sync: the client compares against its local copy
+        and fetches only changed boards via GET /board/{id}.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: email
+          type: string
+          in: path
+          required: true
+          minimum: 1
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetBoardsSyncResponse"
+        "403":
+          description: Not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         default:
           description: Error
           schema:
@@ -1843,6 +1906,48 @@ definitions:
         type: string
       search:
         type: string
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Board"
+  GetBoardsSyncResponse:
+    required:
+      - total
+      - data
+    properties:
+      total:
+        type: integer
+      data:
+        type: array
+        items:
+          type: object
+          required:
+            - id
+            - lastEdited
+          properties:
+            id:
+              type: string
+            lastEdited:
+              type: string
+              format: date-time
+  BoardsByIdsRequest:
+    type: object
+    required:
+      - ids
+    properties:
+      ids:
+        type: array
+        minItems: 1
+        maxItems: 3000
+        items:
+          type: string
+  GetBoardsByIdsResponse:
+    required:
+      - total
+      - data
+    properties:
+      total:
+        type: integer
       data:
         type: array
         items:
