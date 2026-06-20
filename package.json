@@ -57,7 +57,7 @@
     "swagger-tools": "^0.10.4",
     "translate-api": "^0.3.18",
     "uuid": "^3.4.0",
-    "validator": "^13.11.0",
+    "validator": "^13.15.22",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
