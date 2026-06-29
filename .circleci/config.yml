@@ -1,5 +1,6 @@
 version: 2
-
+orbs:
+  discord: antonioned/discord@0.1.0
 jobs:
   build:
     docker:
