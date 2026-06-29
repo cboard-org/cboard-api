@@ -1,2378 +1,2924 @@
 {
-	"info": {
-		"_postman_id": "f8bd131f-6f49-404d-afc7-2a1c15d2400b",
-		"name": "cboard-api",
-		"description": "contains tests for all cboard-api calls",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "/user/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Body match+es string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"An email has been sent to you. Please check it to verify your account\");",
-							"});",
-							"pm.globals.set(\"activation_url\",pm.response.json().url);",
-							"console.log(pm.globals.get(\"activation_url\"));"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"email_key = Math.random().toString(36).substring(7);",
-							"",
-							"pm.globals.set(\"email\", email_key + \"@cboard.io\");",
-							"",
-							"pm.globals.set(\"username\", email_key );",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Origin",
-						"value": "http://localhost:3000",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/activate/{activation_url}",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"CONFIRMED!\");",
-							"});",
-							"",
-							"pm.globals.set(\"userid\",pm.response.json().userid);",
-							"console.log(pm.globals.get(\"userid\"));"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/user/activate/{{activation_url}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"activate",
-						"{{activation_url}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/login/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"",
-							"pm.globals.set(\"token\",pm.response.json().authToken);",
-							"console.log(pm.globals.get(\"token\"));",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user/login/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"login",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/{id} not Authorized",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 403\", function () {",
-							"    pm.response.to.have.status(403);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/user/{{userid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"{{userid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/user/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/{id}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/user/{{userid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"{{userid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/{id}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user/{{userid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"{{userid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/languages/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"Check languages\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(Object.keys(jsonData.data).length).to.eql(10);",
-							"});",
-							"pm.test(\"Check total\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.total).to.eql(40);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/languages/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"languages",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/languages/?locale=en-US",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"Check language\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.locale).to.eql(\"en-US\");",
-							"    pm.expect(jsonData.displayName).to.eql(\"English\");",
-							"    pm.expect(jsonData.skin).to.eql(\"white\");",
-							"    pm.expect(jsonData.hair).to.eql(\"brown\");",
-							"    pm.expect(jsonData.arabic).to.eql(false);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/languages/en-US",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"languages",
-						"en-US"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/languages/?locale=es-Es",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"Check language\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.locale).to.eql(\"es-ES\");",
-							"    pm.expect(jsonData.displayName).to.eql(\"Spanish (Spain)\");",
-							"    pm.expect(jsonData.skin).to.eql(\"white\");",
-							"    pm.expect(jsonData.hair).to.eql(\"brown\");",
-							"    pm.expect(jsonData.arabic).to.eql(false);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/languages/es-Es",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"languages",
-						"es-Es"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/languages/?locale=cs-CZ",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"Check language\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.locale).to.eql(\"cs-CZ\");",
-							"    pm.expect(jsonData.displayName).to.eql(\"Czech (Czechia)\");",
-							"    pm.expect(jsonData.skin).to.eql(\"white\");",
-							"    pm.expect(jsonData.hair).to.eql(\"blonde\");",
-							"    pm.expect(jsonData.arabic).to.eql(false);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/languages/cs-CZ",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"languages",
-						"cs-CZ"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.globals.set(\"boardid\",pm.response.json().id);",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"board_key = Math.random().toString(36).substring(7);",
-							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
-							"",
-							"pm.environment.unset(\"variable_key\");"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"tiles\": [\n    \t{}\n    \t],\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/board/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/ Empty",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.globals.set(\"boardid\",pm.response.json().id);",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"board_key = Math.random().toString(36).substring(7);",
-							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
-							"",
-							"pm.environment.unset(\"variable_key\");"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/board/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/board/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/{id}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/board/{{boardid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"{{boardid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/{id}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/board/{{boardid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"{{boardid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/byemail/{email}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/board/byemail/{{email}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"byemail",
-						"{{email}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/public",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/board/public",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"public"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/report/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"board_key = Math.random().toString(36).substring(7);",
-							"pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
-							"",
-							"pm.environment.unset(\"variable_key\");"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\", \n  \"description\": \"this is a description\",\n  \"id\": \"123456\",\n  \"url\": \"https://cboard.io/888888\",\n  \"reason\": \"soffensive content\",\n  \"whistleblower\": {\n    \"name\": \"string\",\n    \"email\": \"string\",\n    \"language\": \"string\"\n  }\n}"
-				},
-				"url": {
-					"raw": "{{url}}/board/report",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"report"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/{id}",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/board/{{boardid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"{{boardid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/board/{id} 404",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 404\", function () {",
-							"    pm.response.to.have.status(404);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/board/{{boardid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"board",
-						"{{boardid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/settings/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"language\":{\"lang\":\"es-ES\"},\n\t\"display\":{\"uiSize\":\"Standard\",\"fontSize\":\"Standard\",\"hideOutputActive\":false,\"labelPosition\":\"Below\",\"darkThemeActive\":false},\n\t\"speech\":{\"voiceURI\":\"Microsoft Sabina Desktop - Spanish (Mexico)\",\"pitch\":1,\"rate\":1},\n\t\"scanning\":{\"active\":false,\"delay\":2000,\"strategy\":\"automatic\"},\n\t\"navigation\":{\"active\":false,\"caBackButtonActive\":false,\"quickUnlockActive\":false,\"removeOutputActive\":true}\n}"
-				},
-				"url": {
-					"raw": "{{url}}/settings/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"settings",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/settings/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"Check response\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    var edisplay = {",
-							"        \"uiSize\": \"Standard\",",
-							"        \"fontSize\": \"Standard\",",
-							"        \"hideOutputActive\": false,",
-							"        \"labelPosition\": \"Below\",",
-							"        \"darkThemeActive\": false",
-							"    };",
-							"    pm.expect(jsonData.display).to.eql(edisplay);",
-							"    var elanguage = {",
-							"        \"lang\": \"es-ES\"",
-							"    };",
-							"    pm.expect(jsonData.language).to.eql(elanguage);",
-							"    var enavigation = {",
-							"        \"active\": false,",
-							"        \"caBackButtonActive\": false,",
-							"        \"quickUnlockActive\": false,",
-							"        \"removeOutputActive\": true",
-							"    };",
-							"    pm.expect(jsonData.navigation).to.eql(enavigation);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/settings/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"settings",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/forgot/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.globals.set(\"reset_url\",pm.response.json().url);",
-							"console.log(pm.globals.get(\"reset_url\"));"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user/forgot/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"forgot",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/store-password",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"userid\": \"{{userid}}\",\n    \"password\": \"1234578\",\n    \"token\": \"{{reset_url}}\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user/store-password/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"store-password",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/login/ 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"",
-							"pm.globals.set(\"token\",pm.response.json().authToken);",
-							"console.log(pm.globals.get(\"token\"));",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"1234578\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user/login/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"login",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/login/ 3",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"",
-							"pm.test(\"Status code is 401\", function () {",
-							"    pm.response.to.have.status(401);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user/login/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"login",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/analytics/batchGet",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"Check report response\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.reports).to.be.a('array');",
-							"    pm.expect(jsonData.reports).to.have.lengthOf(2);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"dimension\": \"date\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    },\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"dimension\": \"date\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    }\n]",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{url}}/analytics/batchGet",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"analytics",
-						"batchGet"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/analytics/batchGet unauthorized",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 403\", function () {",
-							"    pm.response.to.have.status(403);",
-							"});",
-							"pm.test(\"Check error response\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.message).to.eql('Not valid token');",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"dimension\": \"date\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    },\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"totalEvents\",\n        \"dimension\": \"date\",\n        \"filter\": {\n            \"name\": \"eventAction\",\n            \"value\": \"Click Symbol\"\n        }\n    }\n]",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{url}}/analytics/batchGet",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"analytics",
-						"batchGet"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/analytics/batchGet no dimension",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 409\", function () {",
-							"    pm.response.to.have.status(409);",
-							"});",
-							"pm.test(\"Body matches string\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"Unknown dimension\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"7daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"avgSessionDuration\"\n    }\n]",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{url}}/analytics/batchGet",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"analytics",
-						"batchGet"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/analytics/batchGet dimension days",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"Check report response\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.reports).to.be.a('array');",
-							"    pm.expect(jsonData.reports).to.have.lengthOf(1);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "Bearer {{token}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "[\n    {\n        \"clientId\": \"1635071876.1577121026\",\n        \"startDate\": \"17daysago\",\n        \"endDate\": \"today\",\n        \"metric\": \"avgSessionDuration\",\n        \"dimension\": \"day\"\n    }\n]",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{url}}/analytics/batchGet",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"analytics",
-						"batchGet"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/user/logout/",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"",
-							"pm.globals.set(\"token\",pm.response.json().authToken);",
-							"console.log(pm.globals.get(\"token\"));",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/user/logout/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"user",
-						"logout",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/location",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"pm.sendRequest({\r",
-							"    url: 'https://api64.ipify.org?format=json',\r",
-							"    method: 'GET'\r",
-							"}, function (err, res) {\r",
-							"    if (err === null) {\r",
-							"        pm.environment.set(\"publicIp\", res.json().ip);\r",
-							"    }\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "X-Forwarded-For",
-						"value": "{{publicIp}}",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/location",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"location"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber unlogged",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Only registered users can access \", function () {",
-							"    pm.response.to.have.status(403);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"United States\",\n    \"status\": \"processing\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber success",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"const schema = {  ",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"_id\": {\"type\":\"string\"},",
-							"        \"userId\": {\"type\":\"string\"},",
-							"        \"country\": {\"type\":\"string\"},",
-							"        \"status\": {\"type\":\"string\"},",
-							"        \"transaction\": {\"type\":\"object\"},",
-							"        \"product\": {\"type\":\"object\"},",
-							"        \"createdAt\": {\"type\": \"string\"},",
-							"        \"updatedAt\": {\"type\":\"string\"}",
-							"    },",
-							"    \"required\":[\"_id\",\"userId\",\"country\",\"status\",\"product\",\"createdAt\",\"updatedAt\"]",
-							"}        ",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"to have required props\", function () {",
-							"    pm.response.to.have.jsonSchema(schema);",
-							"    pm.globals.set(\"subscriberId\",pm.response.json()._id);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"'United States'\",\n    \"status\": \"free-trial\",\n    \"product\": {\n        \"planId\": \"one_year_subscription\",\n        \"subscriptionId\": \"123456\",\n        \"status\": \"requested\"\n    }\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber unahutorized",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
-							"pm.test(\"only admin user can delete\", function () {",
-							"    pm.response.to.have.status(403);",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "",
-						"value": "",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
-							"pm.test(\"only admin user can delete\", function () {",
-							"    pm.response.to.have.status(403);",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "",
-						"value": "",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber/{id}/transaction unlogged",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"",
-							"pm.test(\"Only registered users can access \", function () {",
-							"    pm.response.to.have.status(403);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}",
-						"transaction"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber/invalidId/transaction",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"const schema = {  ",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"ok\": {\"type\":\"boolean\"},",
-							"        \"data\":{\"code\": {\"type\":\"number\"}},",
-							"    },",
-							"    \"required\":[\"ok\",\"data\"]",
-							"}        ",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"pm.test(\"to ok prop be false\", function () {",
-							"   pm.expect(pm.response.json().ok).to.be.false;",
-							"});",
-							"",
-							"pm.test(\"to have required props\", function () {",
-							"    pm.response.to.have.jsonSchema(schema);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/invalid/transaction",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"invalid",
-						"transaction"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber/{id}/transaction",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"const schema = {  ",
-							"    \"type\": \"object\",",
-							"    \"properties\": {",
-							"        \"ok\": {\"type\":\"boolean\"},",
-							"        \"data\":{ ",
-							"            \"type\": \"object\",",
-							"            \"properties\": {",
-							"                \"transaction\": {\"type\":\"object\"}",
-							"            },",
-							"            \"required\":[\"transaction\"]",
-							"        }    ",
-							"    },",
-							"    \"required\":[\"ok\",\"data\"]",
-							"}        ",
-							"",
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"to have required props\", function () {",
-							"    pm.response.to.have.jsonSchema(schema);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}",
-						"transaction"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscriber/{{userid}}",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{url}}/subscriber/{{userid}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{userid}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "{{url}}/subscriber/{{userid}} product requested to other plan Id",
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    }\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "{{url}}/subscriber/{{userid}} to owned with diferent plan Id",
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "{{url}}/subscriber/{{userid}} to owned",
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"product\": {\n      \"planId\": \"premium_full\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "{{url}}/subscriber/{{userid}} transaction to null",
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    },\n    \"transaction\": null\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscriber/{{subscriberId}}",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscriber",
-						"{{subscriberId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscription/{id} createSubscription",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"name\": \"mock subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature\",\n    \"feature2\",\n    \"feature3\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Argentina\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscription/mock-subscription-id",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscription",
-						"mock-subscription-id"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscription/{id} get Subscription",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/subscription/mock-subscription-id",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscription",
-						"mock-subscription-id"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscription/{id} update Subscription",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"name\": \"mock updated subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature3\",\n    \"feature4\",\n    \"feature5\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Perú\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
-				},
-				"url": {
-					"raw": "{{url}}/subscription/mock-subscription-id",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscription",
-						"mock-subscription-id"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/subscription/{id} delete Subscription",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/subscription/mock-subscription-id",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"subscription",
-						"mock-subscription-id"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "20b13236-6c1f-445f-957f-426e11ec7246",
+    "name": "cboard-api",
+    "description": "contains tests for all cboard-api calls",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "3894659"
+  },
+  "item": [
+    {
+      "name": "/user/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Body match+es string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"An email has been sent to you. Please check it to verify your account\");",
+              "});",
+              "pm.globals.set(\"activation_url\",pm.response.json().url);",
+              "console.log(pm.globals.get(\"activation_url\"));"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "email_key = Math.random().toString(36).substring(7);",
+              "",
+              "pm.globals.set(\"email\", email_key + \"@cboard.io\");",
+              "",
+              "pm.globals.set(\"username\", email_key );",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Origin",
+            "value": "http://localhost:3000",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"martin\",\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/activate/{activation_url}",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Body matches string\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"CONFIRMED!\");",
+              "});",
+              "",
+              "pm.globals.set(\"userid\",pm.response.json().userid);",
+              "console.log(pm.globals.get(\"userid\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/user/activate/{{activation_url}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "activate",
+            "{{activation_url}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/login/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "",
+              "pm.globals.set(\"token\",pm.response.json().authToken);",
+              "console.log(pm.globals.get(\"token\"));",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('google');",
+              "    pm.expect(jsonData).to.have.property('facebook');",
+              "    pm.expect(jsonData).to.have.property('apple');",
+              "    pm.expect(jsonData).to.have.property('location');",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "    pm.expect(jsonData).to.have.property('role');",
+              "    pm.expect(jsonData).to.have.property('provider');",
+              "    pm.expect(jsonData).to.have.property('locale');",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "    pm.expect(jsonData).to.have.property('isFirstLogin');",
+              "    pm.expect(jsonData).to.have.property('birthdate');",
+              "    pm.expect(jsonData).to.have.property('lastlogin');",
+              "    pm.expect(jsonData).to.have.property('createdAt');",
+              "    pm.expect(jsonData).to.have.property('updatedAt');",
+              "    pm.expect(jsonData).to.have.property('communicators');",
+              "    pm.expect(jsonData).to.have.property('boards');",
+              "    pm.expect(jsonData).to.have.property('isAdmin');",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('settings');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/login/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "login",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/login/ Existing user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('google');",
+              "    pm.expect(jsonData).to.have.property('facebook');",
+              "    pm.expect(jsonData).to.have.property('apple');",
+              "    pm.expect(jsonData).to.have.property('location');",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "    pm.expect(jsonData).to.have.property('role');",
+              "    pm.expect(jsonData).to.have.property('provider');",
+              "    pm.expect(jsonData).to.have.property('locale');",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "    pm.expect(jsonData).to.have.property('isFirstLogin');",
+              "    pm.expect(jsonData).to.have.property('birthdate');",
+              "    pm.expect(jsonData).to.have.property('lastlogin');",
+              "    pm.expect(jsonData).to.have.property('createdAt');",
+              "    pm.expect(jsonData).to.have.property('updatedAt');",
+              "    pm.expect(jsonData).to.have.property('communicators');",
+              "    pm.expect(jsonData).to.have.property('boards');",
+              "    pm.expect(jsonData).to.have.property('isAdmin');",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('settings');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"anything@cboard.io\",\n    \"password\": \"lote10mza126\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/login/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "login",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/{id} not Authorized",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 403\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/user/{{userid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "{{userid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/user/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/user/{{userid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "{{userid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/{{userid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "{{userid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/me",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "    pm.expect(jsonData).to.have.property('locale');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/me",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/languages/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Check languages\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(Object.keys(jsonData.data).length).to.eql(10);",
+              "});",
+              "pm.test(\"Check total\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.total).to.eql(40);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/languages/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "languages",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/languages/?locale=en-US",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check language\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.locale).to.eql(\"en-US\");",
+              "    pm.expect(jsonData.displayName).to.eql(\"English\");",
+              "    pm.expect(jsonData.skin).to.eql(\"white\");",
+              "    pm.expect(jsonData.hair).to.eql(\"brown\");",
+              "    pm.expect(jsonData.arabic).to.eql(false);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/languages/en-US",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "languages",
+            "en-US"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/languages/?locale=es-Es",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check language\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.locale).to.eql(\"es-ES\");",
+              "    pm.expect(jsonData.displayName).to.eql(\"Spanish (Spain)\");",
+              "    pm.expect(jsonData.skin).to.eql(\"white\");",
+              "    pm.expect(jsonData.hair).to.eql(\"brown\");",
+              "    pm.expect(jsonData.arabic).to.eql(false);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/languages/es-Es",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "languages",
+            "es-Es"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/languages/?locale=cs-CZ",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check language\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.locale).to.eql(\"cs-CZ\");",
+              "    pm.expect(jsonData.displayName).to.eql(\"Czech (Czechia)\");",
+              "    pm.expect(jsonData.skin).to.eql(\"white\");",
+              "    pm.expect(jsonData.hair).to.eql(\"blonde\");",
+              "    pm.expect(jsonData.arabic).to.eql(false);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/languages/cs-CZ",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "languages",
+            "cs-CZ"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.globals.set(\"boardid\",pm.response.json().id);",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "board_key = Math.random().toString(36).substring(7);",
+              "pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
+              "",
+              "pm.environment.unset(\"variable_key\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"obf\",\n    \"tiles\": [\n    \t{}\n    \t],\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/ Empty",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.globals.set(\"boardid\",pm.response.json().id);",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "board_key = Math.random().toString(36).substring(7);",
+              "pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
+              "",
+              "pm.environment.unset(\"variable_key\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Empty board\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"format\":  \"cboard\",\n  \"caption\": \"string\",\n  \"isPublic\": true,\n  \"locale\": \"ar-SA\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"titin\",\n    \"locale\": \"es-ES\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/{{boardid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "{{boardid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/{{boardid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "{{boardid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/byemail/{email}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/byemail/{{email}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "byemail",
+            "{{email}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/byids",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total');",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"ids\": [\"{{boardid}}\"]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/byids",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "byids"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/sync/{email}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total');",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/sync/{{email}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "sync",
+            "{{email}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/public",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/public",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "public"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/report/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "board_key = Math.random().toString(36).substring(7);",
+              "pm.globals.set(\"board_name\", \"test_board_\" + board_key);",
+              "",
+              "pm.environment.unset(\"variable_key\");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"{{board_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\", \n  \"description\": \"this is a description\",\n  \"id\": \"123456\",\n  \"url\": \"https://cboard.io/888888\",\n  \"reason\": \"soffensive content\",\n  \"whistleblower\": {\n    \"name\": \"string\",\n    \"email\": \"string\",\n    \"language\": \"string\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{url}}/board/report",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "report"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/{id}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/{{boardid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "{{boardid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/board/{id} 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/{{boardid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "{{boardid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/settings/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"language\":{\"lang\":\"es-ES\"},\n\t\"display\":{\"uiSize\":\"Standard\",\"fontSize\":\"Standard\",\"hideOutputActive\":false,\"labelPosition\":\"Below\",\"darkThemeActive\":false},\n\t\"speech\":{\"voiceURI\":\"Microsoft Sabina Desktop - Spanish (Mexico)\",\"pitch\":1,\"rate\":1},\n\t\"scanning\":{\"active\":false,\"delay\":2000,\"strategy\":\"automatic\"},\n\t\"navigation\":{\"active\":false,\"caBackButtonActive\":false,\"quickUnlockActive\":false,\"removeOutputActive\":true}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/settings/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "settings",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/settings/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var edisplay = {",
+              "        \"uiSize\": \"Standard\",",
+              "        \"fontSize\": \"Standard\",",
+              "        \"hideOutputActive\": false,",
+              "        \"labelPosition\": \"Below\",",
+              "        \"darkThemeActive\": false",
+              "    };",
+              "    pm.expect(jsonData.display).to.eql(edisplay);",
+              "    var elanguage = {",
+              "        \"lang\": \"es-ES\"",
+              "    };",
+              "    pm.expect(jsonData.language).to.eql(elanguage);",
+              "    var enavigation = {",
+              "        \"active\": false,",
+              "        \"caBackButtonActive\": false,",
+              "        \"quickUnlockActive\": false,",
+              "        \"removeOutputActive\": true",
+              "    };",
+              "    pm.expect(jsonData.navigation).to.eql(enavigation);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/settings/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "settings",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/translate",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check translation response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('cat');",
+              "    pm.expect(jsonData).to.have.property('dog');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"labels\": [\"cat\", \"dog\"],\n    \"from\": \"en\",\n    \"to\": \"es\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/translate",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "translate"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator POST",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "var comm_key = Math.random().toString(36).substring(7);",
+              "pm.globals.set(\"comm_name\", \"test_comm_\" + comm_key);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('success');",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('communicator');",
+              "    pm.globals.set(\"communicatorId\", jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"{{comm_name}}\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"rootBoard\": \"test-board-id\",\n    \"boards\": [\"test-board-id\"]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/communicator",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "communicator"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator GET list",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total');",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/communicator",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "communicator"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/{id} GET",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('name');",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "    pm.expect(jsonData).to.have.property('rootBoard');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/communicator/{{communicatorId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "communicator",
+            "{{communicatorId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/{id} PUT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"updated_comm\",\n    \"author\": \"Postman Test\",\n    \"email\": \"{{email}}\",\n    \"rootBoard\": \"test-board-id\",\n    \"boards\": [\"test-board-id\"]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/communicator/{{communicatorId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "communicator",
+            "{{communicatorId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/byemail/{email}",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total');",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/communicator/byemail/{{email}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "communicator",
+            "byemail",
+            "{{email}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/communicator/{id} DELETE not authorized",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Only admin can delete communicators\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/communicator/{{communicatorId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "communicator",
+            "{{communicatorId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/forgot/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.globals.set(\"reset_url\",pm.response.json().url);",
+              "console.log(pm.globals.get(\"reset_url\"));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"{{email}}\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/forgot/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "forgot",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/store-password",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"userid\": \"{{userid}}\",\n    \"password\": \"1234578\",\n    \"token\": \"{{reset_url}}\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/store-password/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "store-password",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/login/ 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "",
+              "pm.globals.set(\"token\",pm.response.json().authToken);",
+              "console.log(pm.globals.get(\"token\"));",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"1234578\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/login/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "login",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/login/ 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "",
+              "pm.test(\"Status code is 401\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/login/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "login",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/location",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.sendRequest({\r",
+              "    url: 'https://api64.ipify.org?format=json',\r",
+              "    method: 'GET'\r",
+              "}, function (err, res) {\r",
+              "    if (err === null) {\r",
+              "        pm.environment.set(\"publicIp\", res.json().ip);\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Forwarded-For",
+            "value": "{{publicIp}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/location",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "location"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber unlogged",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Only registered users can access \", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"United States\",\n    \"status\": \"processing\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const schema = {  ",
+              "    \"type\": \"object\",",
+              "    \"properties\": {",
+              "        \"_id\": {\"type\":\"string\"},",
+              "        \"userId\": {\"type\":\"string\"},",
+              "        \"country\": {\"type\":\"string\"},",
+              "        \"status\": {\"type\":\"string\"},",
+              "        \"transaction\": {\"type\":\"object\"},",
+              "        \"product\": {\"type\":\"object\"},",
+              "        \"createdAt\": {\"type\": \"string\"},",
+              "        \"updatedAt\": {\"type\":\"string\"}",
+              "    },",
+              "    \"required\":[\"_id\",\"userId\",\"country\",\"status\",\"product\",\"createdAt\",\"updatedAt\"]",
+              "}        ",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"to have required props\", function () {",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "    pm.globals.set(\"subscriberId\",pm.response.json()._id);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"userId\": \"{{userid}}\",\n    \"country\": \"'United States'\",\n    \"status\": \"free-trial\",\n    \"product\": {\n        \"planId\": \"one_year_subscription\",\n        \"subscriptionId\": \"123456\",\n        \"status\": \"requested\",\n        \"price\": \"8.00\",\n        \"billingPeriod\": \"P1Y\",\n        \"title\": \"postman test\"\n    }\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber unahutorized",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
+              "pm.test(\"only admin user can delete\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "",
+            "value": "",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//if this is tested with a valid token for a user role. the app crash. fix app.js:103",
+              "pm.test(\"only admin user can delete\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "",
+            "value": "",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber/{id}/transaction unlogged",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "",
+              "pm.test(\"Only registered users can access \", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}",
+            "transaction"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber/invalidId/transaction",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const schema = {  ",
+              "    \"type\": \"object\",",
+              "    \"properties\": {",
+              "        \"ok\": {\"type\":\"boolean\"},",
+              "        \"data\":{\"code\": {\"type\":\"number\"}},",
+              "    },",
+              "    \"required\":[\"ok\",\"data\"]",
+              "}        ",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"to ok prop be false\", function () {",
+              "   pm.expect(pm.response.json().ok).to.be.false;",
+              "});",
+              "",
+              "pm.test(\"to have required props\", function () {",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/invalid/transaction",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "invalid",
+            "transaction"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber/{id}/transaction",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const schema = {  ",
+              "    \"type\": \"object\",",
+              "    \"properties\": {",
+              "        \"ok\": {\"type\":\"boolean\"},",
+              "        \"data\":{ ",
+              "            \"type\": \"object\"",
+              "        }    ",
+              "    },",
+              "    \"required\":[\"ok\",\"data\"]",
+              "}        ",
+              "",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"to have required props\", function () {",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "    if (pm.response.json().ok) {",
+              "        pm.expect(pm.response.json().data).to.have.property('transaction');",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"className\": \"Transaction\",\n  \"transactionId\": \"GPA.3332-8799-5619-52658\",\n  \"state\": \"approved\",\n  \"products\": [\n    {\n      \"productId\": \"premium_full\"\n    }\n  ],\n  \"platform\": \"android-playstore\",\n  \"nativePurchase\": {\n    \"orderId\": \"GPA.3332-8799-5619-52658\",\n    \"packageName\": \"com.unicef.cboard\",\n    \"productId\": \"premium_full\",\n    \"purchaseTime\": 1668093831727,\n    \"purchaseState\": 0,\n    \"purchaseToken\": \"{{validPurchaseToken}}\",\n    \"quantity\": 1,\n    \"autoRenewing\": true,\n    \"acknowledged\": false,\n    \"productIds\": [\n      \"premium_full\"\n    ],\n    \"getPurchaseState\": 1,\n    \"developerPayload\": \"\",\n    \"accountId\": \"\",\n    \"profileId\": \"\",\n    \"signature\": \"XJcrs+pE1dCKERFuioZ2PtatZL1EWFd8Wb4CqGQctspuIJ7n9f/ohrGnABiP8HANyudNDcsoEd2+5l5vh5rNnsUIkePUzsoiFvm1M55Ag57hmdnElYyEBYUn+SSnOQcTzCM2rm2tlpedj1xRklwjH0oxFXj1QOQOsW0n/Vj2Gty5I0+Fp5XxbeMdruYB0TaToaLoRBCn4vATHVJca7M3QxZg9hT7p+aCOZoaCQ4/xBv+vD/VrdygaeGckWrMnTifX00H2fAvAoaC4OZ682dOQeVLHhYHO4RWDPlwinI/b+t8x1vQ/mKDQ4GxfFckrg/RRJco/9wGIxGd7257aF739w==\",\n    \"receipt\": \"{\\\"orderId\\\":\\\"GPA.3332-8799-5619-52658\\\",\\\"packageName\\\":\\\"com.unicef.cboard\\\",\\\"productId\\\":\\\"premium_full\\\",\\\"purchaseTime\\\":1668093831727,\\\"purchaseState\\\":0,\\\"purchaseToken\\\":\\\"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\\\",\\\"quantity\\\":1,\\\"autoRenewing\\\":true,\\\"acknowledged\\\":false}\"\n  },\n  \"purchaseId\": \"afalfjihkckgdngikhkhnpfa.AO-J1OyLtExOfZpoOORV9WKUcsyfdJMfo08iEtBuHE0ovZwNK5yl3lP5bS2Wi7CN2QvBj0AvSt-1jlkwmmY8q2KxGzakuFtzIg\",\n  \"purchaseDate\": \"2022-11-10T15:23:51.727Z\",\n  \"isPending\": false,\n  \"isAcknowledged\": false,\n  \"renewalIntent\": \"Renew\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}/transaction",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}",
+            "transaction"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber/{{userid}}",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/subscriber/{{userid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{userid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "{{url}}/subscriber/{{userid}} product requested to other plan Id",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    }\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "{{url}}/subscriber/{{userid}} to owned with diferent plan Id",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "{{url}}/subscriber/{{userid}} to owned",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"product\": {\n      \"planId\": \"premium_full\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"owned\"\n    }\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "{{url}}/subscriber/{{userid}} transaction to null",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"product\": {\n      \"planId\": \"other_plan\",\n      \"subscriptionId\": \"123456\",\n      \"status\": \"requested\"\n    },\n    \"transaction\": null\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscriber/{{subscriberId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "{{subscriberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscription/{id} createSubscription",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"mock subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature\",\n    \"feature2\",\n    \"feature3\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Argentina\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscription/mock-subscription-id",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscription",
+            "mock-subscription-id"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscription/{id} get Subscription",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/subscription/mock-subscription-id",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscription",
+            "mock-subscription-id"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscription/{id} update Subscription",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"mock updated subscription\",\n  \"status\": \"active\",\n  \"platform\": \"android-playstore\",\n  \"benefits\": [\n    \"feature3\",\n    \"feature4\",\n    \"feature5\"\n  ],\n  \"plans\": [\n    {\n      \"name\": \"mocked plan\",\n      \"planId\": \"mocked-plan-id\",\n      \"status\": \"active\",\n      \"countries\": [\n        \"Perú\"\n      ],\n      \"period\": \"unlimited\",\n      \"renovation\": \"anual\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{url}}/subscription/mock-subscription-id",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscription",
+            "mock-subscription-id"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscription/list",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/subscription/list",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscription",
+            "list"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscription/synchronize",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/subscription/synchronize",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscription",
+            "synchronize"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscriber/cancel/{id} unlogged",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Only registered users can access\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/subscriber/cancel/{{subscriberId}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscriber",
+            "cancel",
+            "{{subscriberId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/gpt/edit unlogged",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Only registered users can access\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"phrase\": \"I goes to school\",\n    \"language\": \"en\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/gpt/edit",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "gpt",
+            "edit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/gpt/edit",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 or 500\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 500]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"phrase\": \"I goes to school\",\n    \"language\": \"en\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/gpt/edit",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "gpt",
+            "edit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/account/{id} DELETE",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Check response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('user');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/account/{{userid}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "account",
+            "{{userid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/logout/",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 or 403\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/user/logout/",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "user",
+            "logout",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/subscription/{id} delete Subscription",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 or 403\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{url}}/subscription/mock-subscription-id",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "subscription",
+            "mock-subscription-id"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
 }
