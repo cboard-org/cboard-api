@@ -123,40 +123,50 @@ jobs:
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push cboard/cboard-api:latest
           docker push cboard/cboard-api:$TAG
-  deploy:
-    machine: true
+  deploy-qa:
+    machine:
+      image: ubuntu-2204:2024.11.1
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "70:3a:28:02:d9:74:fd:be:c8:79:f6:2e:9b:f7:21:04"
-      - run: |
-          ssh -t $SSH_USERNAME@$SSH_SERVER 'bash -ic "docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            cboard/cboard-bootstrap \
-            pull && \
-            docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -e URL \
-            -e SUBDOMAINS \
-            -e VALIDATION \
-            -e EMAIL \
-            -e ONLY_SUBDOMAINS=true \
-            -e PUID=”$(id -u $USER)” \
-            -e PGID=”$(id -g $USER)” \
-            -e AZURE_STORAGE_CONNECTION_STRING \
-            -e SENDGRID_API_KEY \
-            -e JWT_SECRET \
-            -e FACEBOOK_APP_ID \
-            -e FACEBOOK_APP_SECRET \
-            -e FACEBOOK_CALLBACK_URL \
-            -e GOOGLE_APP_ID \
-            -e GOOGLE_APP_SECRET \
-            -e GOOGLE_CALLBACK_URL \
-            -e APPLE_APP_CLIENT_ID \
-            -e APPLE_TEAM_ID \
-            -e APPLE_KEY_ID \
-            cboard/cboard-bootstrap \
-            up -d --no-deps cboard-api" && exit'
+      - run:
+          name: Deploy Over SSH
+          command: |
+            echo 'cboard-qa06.westus.cloudapp.azure.com \
+            AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBK9FTOTcgK0KgvdqdUhPLfvnDhzbViGnvtaXWg1XKgq2LEzgUTaHwyDsV5lZ3NnXimwptzF6GvO3u1ySlR2C19s=' >> ~/.ssh/known_hosts
+            ssh $SSH_USERNAME@$SSH_SERVER 'bash -ic \
+            "docker image prune -f && \
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock cboard/cboard-bootstrap pull && \
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock cboard/cboard-bootstrap stop cboard-api && \
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock cboard/cboard-bootstrap kill cboard-api && \
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock --env-file /home/sharedFolder/env.qa cboard/cboard-bootstrap up -d --no-deps cboard-api \
+            " && exit'
+      - discord/status:
+          fail_only: false
+          failure_message: "**${CIRCLE_USERNAME}**'s Cboard API deploy to QA: **${CIRCLE_JOB}** failed."
+          webhook: '${DISCORD_STATUS_WEBHOOK}'
+          success_message: '**${CIRCLE_USERNAME}** deployed Cboard API to QA!!.'
+  postman-test:
+    docker:
+      - image: postman/newman
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Run Postman collection against QA environment
+          command: |
+            newman run test/postman/cboard-api.postman_collection.json \
+              --environment test/postman/cboard-qa.postman_environment.json \
+              --reporters cli,junit \
+              --reporter-junit-export ~/junit/newman-results.xml
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+      - discord/status:
+          fail_only: false
+          failure_message: "**${CIRCLE_USERNAME}**'s Cboard API Postman tests against QA: **${CIRCLE_JOB}** failed."
+          webhook: '${DISCORD_STATUS_WEBHOOK}'
+          success_message: '**${CIRCLE_USERNAME}** Cboard API Postman tests passed on QA!!.'
+
 workflows:
   version: 2
   build_test_image:
@@ -167,6 +177,18 @@ workflows:
           context: google-auth
           requires:
             - build
+          filters:
+            branches:
+              only: master
+      - deploy-qa:
+          requires:
+            - image
+          filters:
+            branches:
+              only: master
+      - postman-test:
+          requires:
+            - deploy-qa
           filters:
             branches:
               only: master
