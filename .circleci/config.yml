@@ -152,8 +152,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install curl
-          command: apk add --no-cache curl
+          name: Install curl and bash
+          command: apk add --no-cache curl bash
       - run:
           name: Run Postman collection against QA environment
           command: |
