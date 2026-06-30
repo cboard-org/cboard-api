@@ -152,6 +152,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install curl
+          command: apk add --no-cache curl
+      - run:
           name: Run Postman collection against QA environment
           command: |
             newman run test/postman/cboard-api.postman_collection.json \
