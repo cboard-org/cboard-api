@@ -113,6 +113,32 @@ describe('Board API calls', function () {
       helper.verifyBoardProperties(res.body);
     });
 
+    it('it should PUT a board even when the body carries a stale __v (no VersionError)', async function () {
+      // Simulates an older client that cached the board with the Mongoose
+      // version key and echoes __v/_id/id back on update. The server must
+      // ignore them instead of overwriting the real version and throwing a
+      // VersionError on save.
+      const boardData = {
+        ...helper.boardData,
+        __v: 999,
+        _id: this.boardId,
+        name: 'edited with stale version',
+        tiles: [{ label: 'changed' }],
+      };
+
+      const res = await request(server)
+        .put('/board/' + this.boardId)
+        .send(boardData)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      helper.verifyBoardProperties(res.body);
+      res.body.should.have.property('name', 'edited with stale version');
+      res.body.should.not.have.property('__v');
+    });
+
     it('it should NOT PUT a board without ID', async function () {
       const boardData = { ...helper.boardData };
       await request(server)
@@ -381,6 +407,23 @@ describe('Board API calls', function () {
       res.body.data.forEach((board) => helper.verifyBoardProperties(board));
       const returnedIds = res.body.data.map((b) => b.id);
       expect(returnedIds).to.have.members([boardId1, boardId2]);
+    });
+
+    it('it should not expose the Mongoose _id/__v keys', async function () {
+      // Leaking __v here is what caused clients to echo a stale version back on
+      // update, triggering a VersionError. Boards must be normalized to `id`.
+      const res = await request(server)
+        .post('/board/byids')
+        .send({ ids: [boardId1] })
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.data.should.have.lengthOf(1);
+      res.body.data[0].should.have.property('id', boardId1);
+      res.body.data[0].should.not.have.property('__v');
+      res.body.data[0].should.not.have.property('_id');
     });
 
     it('it should ignore invalid ObjectIds and return only valid matches', async function () {

@@ -219,8 +219,6 @@ async function updateBoard(req, res) {
     
     const updateData = { ...req.body };
     delete updateData.__v;
-    delete updateData._id;
-    delete updateData.id;
 
     if (
       updateData.tiles &&
