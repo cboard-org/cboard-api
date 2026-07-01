@@ -135,8 +135,8 @@ async function getBoardsByIds(req, res) {
 
     const boards = await Board.find(query).lean().exec();
 
-    // Normalize _id -> id to match the rest of the API surface.
-    const data = boards.map(({ _id, ...rest }) => ({ ...rest, id: _id }));
+    // Normalize _id -> id and drop the Mongoose version key to match the toJSON() output 
+    const data = boards.map(({ _id, __v, ...rest }) => ({ ...rest, id: _id }));
 
     return res.status(200).json({ total: data.length, data });
   } catch (err) {
@@ -218,7 +218,8 @@ async function updateBoard(req, res) {
     }
     
     const updateData = { ...req.body };
-    
+    delete updateData.__v;
+
     if (
       updateData.tiles &&
       Array.isArray(updateData.tiles) &&
