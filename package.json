@@ -23,7 +23,7 @@
   "main": "app.js",
   "dependencies": {
     "applicationinsights": "^2.7.3",
-    "axios": "^1.6.4",
+    "axios": "^1.16.0",
     "azure-storage": "^2.10.6",
     "bcryptjs": "^2.4.3",
     "body-parser": "1.20.3",
@@ -31,9 +31,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "dotenv-defaults": "2.0.2",
-    "express": "^4.20.0",
+    "express": "^4.22.0",
     "express-session": "^1.17.3",
-    "googleapis": "^110.0.0",
+    "googleapis": "^124.0.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "mockery": "^2.1.0",
@@ -57,7 +57,7 @@
     "swagger-tools": "^0.10.4",
     "translate-api": "^0.3.18",
     "uuid": "^3.4.0",
-    "validator": "^13.11.0",
+    "validator": "^13.15.22",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
