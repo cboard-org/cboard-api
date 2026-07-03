@@ -199,19 +199,6 @@ userSchema.pre('save', function(next) {
 });
 
 /**
- * Post-save hook
- */
-userSchema.post('save', function(doc, next) {
-  doc
-    .populate('communicators')
-    .populate('boards')
-    .execPopulate()
-    .then(function() {
-      next();
-    });
-});
-
-/**
  * Methods
  */
 
@@ -231,23 +218,6 @@ userSchema.methods = {
 
 userSchema.statics = {
   /**
-   * Load
-   *
-   * @param {Object} options
-   * @param {Function} cb
-   * @api private
-   */
-
-  load: function(options, cb) {
-    options.select = options.select || 'name email';
-    return this.findOne(options.criteria)
-      .select(options.select)
-      .populate('communicators')
-      .populate('boards')
-      .exec(cb);
-  },
-
-  /**
    * Authenticate input against database
    *
    * @param {String} email
@@ -258,7 +228,7 @@ userSchema.statics = {
   authenticate: function(email, password, callback) {
     this.findOne({ email: email })
       .populate('communicators')
-      .populate('boards')
+      .populate({ path: 'boards', options: { lean: true } })
       .exec(function(err, user) {
         if (err) {
           return callback(err);
@@ -292,10 +262,7 @@ userSchema.statics = {
     let user = null;
 
     try {
-      user = await this.findById(id)
-        .populate('communicators')
-        .populate('boards')
-        .exec();
+      user = await this.findById(id).exec();
     } catch (e) {}
 
     return user ? user.toJSON() : null;

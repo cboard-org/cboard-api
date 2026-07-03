@@ -42,6 +42,15 @@ const USER_MODEL_ID_TYPE = {
   apple: 'apple.id'
 };
 
+function mapLeanBoardIds(boards) {
+  if (!Array.isArray(boards)) return boards;
+  return boards.map(board => {
+    if (!board || typeof board !== 'object' || !board._id) return board;
+    const { _id, __v, ...rest } = board;
+    return { ...rest, id: _id };
+  });
+}
+
 async function getSettings(user) {
   let settings = null;
 
@@ -151,12 +160,16 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
     const propertyId = USER_MODEL_ID_TYPE[type];
     let user = await User.findOne({ [propertyId]: profile.id })
       .populate('communicators')
-      .populate('boards')
+     .populate({ path: 'boards', options: { lean: true } })
       .exec();
 
 
     if (!user) {
       user = await createOrUpdateUser(accessToken, profile, type);
+      await user
+        .populate('communicators')
+        .populate({ path: 'boards', options: { lean: true } })
+        .execPopulate();
     }
 
     if (!user.location || !user.location.country)
@@ -175,8 +188,10 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
     const settings = await getSettings(user);
     const subscriber = await getSubscriber(user);
 
+    const userJSON = user.toJSON();
+    userJSON.boards = mapLeanBoardIds(userJSON.boards);
     const response = {
-      ...user.toJSON(),
+      ...userJSON,
       settings,
       subscriber,
       authToken: tokenString
@@ -316,8 +331,7 @@ async function listUser(req, res) {
   const response = await paginatedResponse(
     User,
     {
-      query,
-      populate: ['communicators', 'boards']
+      query
     },
     req.query
   );
@@ -341,10 +355,7 @@ async function getUser(req, res) {
   const id = req.swagger.params.id.value;
 
   try {
-    const user = await User.findById(id)
-      .populate('communicators')
-      .populate('boards')
-      .exec();
+    const user = await User.findById(id).exec();
 
     if (!user) {
       return res.status(404).json({
@@ -386,8 +397,6 @@ function updateUser(req, res) {
   }
 
   User.findById(id)
-    .populate('communicators')
-    .populate('boards')
     .exec(async function (err, user) {
       if (err) {
         return res.status(500).json({
@@ -461,8 +470,10 @@ function loginUser(req, res) {
       const settings = await getSettings(user);
       const subscriber = await getSubscriber(user);
 
+      const userJSON = user.toJSON();
+      userJSON.boards = mapLeanBoardIds(userJSON.boards);
       const response = {
-        ...user.toJSON(),
+        ...userJSON,
         settings,
         subscriber,
         birthdate: moment(user.birthdate).format('YYYY-MM-DD'),

@@ -105,6 +105,29 @@ describe('User API calls', function () {
         })
       });
     });
+
+    it('it should return the user communicators and boards', async function () {
+      const userEmail = helper.generateEmail();
+      await helper.prepareUser(server, {
+        role: 'user',
+        email: userEmail,
+      });
+      const userData = {
+        ...helper.userData,
+        email: userEmail,
+      };
+
+      const res = await request(server)
+        .post('/user/login')
+        .send(userData)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.to.have.property('communicators');
+      res.body.communicators.should.be.an('array');
+      res.body.should.to.have.property('boards');
+      res.body.boards.should.be.an('array');
+    });
   });
 
   describe('GET /user', function () {
