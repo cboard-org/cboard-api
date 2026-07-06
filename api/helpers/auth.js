@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { google } = require('googleapis');
 const config = require('../../config');
 
-const { secret: jwtSecret, issuer } = config.jwt;
+const { secret: jwtSecret, issuer, expiresIn: jwtExpiresIn } = config.jwt;
 
 const getTokenData = (token) => {
   let data = null;
@@ -50,7 +50,7 @@ const verifyToken = (req, token) => {
 };
 
 const issueToken = ({ email, id }) => {
-  return jwt.sign({ email, id, issuer }, jwtSecret);
+  return jwt.sign({ email, id, issuer }, jwtSecret, { expiresIn: jwtExpiresIn });
 };
 
 const getAuthDataFromReq = (req) => {

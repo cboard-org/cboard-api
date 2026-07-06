@@ -11,7 +11,8 @@ module.exports = {
   },
   jwt: {
     secret: process.env.JWT_SECRET,
-    issuer: process.env.JWT_ISSUER || constants.JWT_DEFAULT_ISSUER
+    issuer: process.env.JWT_ISSUER || constants.JWT_DEFAULT_ISSUER,
+    expiresIn: process.env.JWT_EXPIRES_IN || constants.JWT_DEFAULT_EXPIRES_IN
   },
   facebook: {
     APP_ID: process.env.FACEBOOK_APP_ID,
