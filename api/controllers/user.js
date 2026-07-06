@@ -12,6 +12,7 @@ const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
 const { findIpLocation, isLocalIp } = require('../helpers/localize');
+const { verifyAppleIdToken } = require('../helpers/appleAuth');
 const Subscribers = require('../models/Subscribers');
 
 const config = require('../../config');
@@ -215,7 +216,21 @@ async function googleLogin(req, accessToken, refreshToken, profile, done) {
 }
 
 async function appleLogin(req, accessToken, refreshToken, idToken, profile, done) {
-  const decodedUser = jwt.decode(idToken);
+  let decodedUser;
+  try {
+    // Accept both the native app bundle id and the web Services id as valid
+    // audiences, since Apple sets `aud` to whichever client initiated sign-in.
+    const audiences = [
+      process.env.APPLE_APP_CLIENT_ID,
+      `${process.env.APPLE_TEAM_ID}.${process.env.APPLE_APP_CLIENT_ID}`
+    ].filter(Boolean);
+
+    decodedUser = await verifyAppleIdToken(idToken, audiences);
+  } catch (err) {
+    console.error('Apple identity token verification failed:', err.message);
+    return done(new Error('Invalid Apple identity token'));
+  }
+
   const appleProfile = {
     id: decodedUser.sub,
     accessToken: accessToken,
