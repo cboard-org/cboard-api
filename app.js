@@ -54,7 +54,8 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
         process.env.CBOARD_APP_URL,
         process.env.CBOARD_IOS_APP_URL,
         process.env.CBUILDER_APP_URL
-      ]
+      ],
+      exposedHeaders: ['Request-Context']
     })
   );
 
