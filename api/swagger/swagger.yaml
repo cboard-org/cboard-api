@@ -1509,6 +1509,43 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /admin/access/clients/{clientSlug}/gates:
+    x-swagger-router-controller: access
+    post:
+      operationId: createAccessGate
+      description: Adds a new AccessGate to an existing Access client. Auto-discovers linked boards from rootBoardId and marks them with accessGateCode. Requires admin authentication.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: clientSlug
+          type: string
+          in: path
+          required: true
+          description: Client slug identifier
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/AccessGateCreate"
+      responses:
+        "201":
+          description: Success - gate created
+          schema:
+            $ref: "#/definitions/AccessGateResponse"
+        "404":
+          description: Client or root board not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "409":
+          description: Code already exists
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /admin/access/gates/{gateCode}:
     x-swagger-router-controller: access
     put:
@@ -2559,6 +2596,19 @@ definitions:
         type: string
         x-nullable: true
         description: The access gate code associated with this board
+  AccessGateCreate:
+    type: object
+    required:
+      - accessGateCode
+      - rootBoardId
+    properties:
+      accessGateCode:
+        type: string
+        description: Unique code for the access gate (will be uppercased)
+        example: EVENTS-B
+      rootBoardId:
+        type: string
+        description: ID of the root board (boards reachable from it are auto-discovered)
   AccessGateResponse:
     type: object
     properties:

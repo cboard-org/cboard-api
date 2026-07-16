@@ -8,6 +8,7 @@ module.exports = {
   getClients: getClients,
   getAccessBoards: getAccessBoards,
   createAccessClient: createAccessClient,
+  createAccessGate: createAccessGate,
   listAccessClients: listAccessClients,
   updateAccessClient: updateAccessClient,
   updateAccessGate: updateAccessGate,
@@ -336,6 +337,62 @@ async function listAccessClients(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error listing clients',
+      error: err.message
+    });
+  }
+}
+
+/**
+ * POST /admin/access/clients/:clientSlug/gates
+ * Adds a new AccessGate to an existing Access client.
+ * Requires admin authentication (enforced by Swagger middleware).
+ * Auto-discovers linked boards from rootBoardId and marks them with accessGateCode.
+ */
+async function createAccessGate(req, res) {
+  const slug = req.swagger.params.clientSlug.value;
+  const { accessGateCode, rootBoardId } = req.body;
+
+  try {
+    const client = await AccessClient.findOne({ slug });
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+
+    const rootBoard = await Board.findById(rootBoardId);
+    if (!rootBoard) {
+      return res.status(404).json({ message: 'Root board not found' });
+    }
+
+    const existingCode = await AccessGate.findOne({
+      code: accessGateCode.toUpperCase()
+    });
+    if (existingCode) {
+      return res.status(409).json({ message: 'Code already exists' });
+    }
+
+    const linkedBoardIds = await getAllLinkedBoardIds(rootBoardId);
+
+    const newAccessGate = new AccessGate({
+      code: accessGateCode.toUpperCase(),
+      accessClientId: client._id,
+      rootBoardId,
+      linkedBoardIds
+    });
+
+    await newAccessGate.save();
+
+    await Board.updateMany(
+      { _id: { $in: linkedBoardIds } },
+      { $set: { accessGateCode: newAccessGate.code } }
+    );
+
+    return res.status(201).json(newAccessGate.toJSON());
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ message: 'Code already exists' });
+    }
+    return res.status(500).json({
+      message: 'Error creating access gate',
       error: err.message
     });
   }

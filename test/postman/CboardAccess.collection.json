@@ -83,6 +83,70 @@
 					"response": []
 				},
 				{
+					"name": "Add Access Gate to Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response contains access gate data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('code');",
+									"    pm.expect(jsonData).to.have.property('rootBoardId');",
+									"    pm.expect(jsonData).to.have.property('linkedBoardIds');",
+									"    pm.expect(jsonData.linkedBoardIds.length).to.be.at.least(1);",
+									"    console.log(\"Gate created: \" + jsonData.code + \" with \" + jsonData.linkedBoardIds.length + \" boards\");",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_code\", jsonData.code);",
+									"    console.log(\"Access code saved: \" + jsonData.code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accessGateCode\": \"EVENTS-B\",\n    \"rootBoardId\": \"{{root_board_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/admin/access/clients/{{client_slug}}/gates",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access",
+								"clients",
+								"{{client_slug}}",
+								"gates"
+							]
+						},
+						"description": "Adds a new independent AccessGate to an existing client. Each gate has its own accessGateCode and rootBoardId. Boards are auto-discovered from the root via tile.loadBoard links. Multiple gates per client allow independent board trees under the same subscription."
+					},
+					"response": []
+				},
+				{
 					"name": "List All Clients",
 					"event": [
 						{
