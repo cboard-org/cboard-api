@@ -13,6 +13,7 @@ Cboard Access allows businesses to offer AAC boards in their locations via QR co
 
 ### 2. Admin Endpoints (Require Authentication)
 - **Create Access Client**: Create a new Cboard Access client and its first access gate
+- **Add Access Gate to Client**: Add an independent access gate (with its own code and root board) to an existing client
 - **List All Clients**: View all registered clients with statistics
 - **Update Client**: Modify client information
 - **Deactivate Client**: Disable a client by setting `isActive` to false
@@ -91,6 +92,32 @@ The collection includes these variables (can be edited in collection variables o
 2. The response includes the created client (`slug`, `contact.name`, etc.) and the `accessGate` with `code` and `linkedBoardIds`
 3. `client_slug` and `access_code` variables are automatically saved for subsequent requests
 
+### Adding Independent Access Gates
+
+A single client can have multiple access gates, each with its own code and independent board tree. This is useful when a client needs to offer different board sets (e.g. for different events, rooms, or user groups) under the same subscription.
+
+1. After creating the client, run **Add Access Gate to Client** for each additional gate:
+   ```json
+   {
+     "accessGateCode": "EVENTS-B",
+     "rootBoardId": "{{root_board_id}}"
+   }
+   ```
+
+2. Each gate auto-discovers its own board tree from its `rootBoardId` via tile navigation — independently from other gates
+3. The new `access_code` variable is automatically saved for testing board access
+4. Users access each independent tree by entering or scanning that gate's specific code
+
+**Example — 4 independent board sets for one client:**
+```
+POST /admin/access/clients/events/gates  →  { "accessGateCode": "EVENTS-A", "rootBoardId": "..." }
+POST /admin/access/clients/events/gates  →  { "accessGateCode": "EVENTS-B", "rootBoardId": "..." }
+POST /admin/access/clients/events/gates  →  { "accessGateCode": "EVENTS-C", "rootBoardId": "..." }
+POST /admin/access/clients/events/gates  →  { "accessGateCode": "EVENTS-D", "rootBoardId": "..." }
+```
+
+Each board tree can internally link to other boards via `tile.loadBoard`, but the four trees are completely isolated from each other.
+
 ### Testing the Client
 
 1. **Admin View**: Run "List All Clients" to see all clients with statistics
@@ -125,6 +152,18 @@ Use **Update Access Gate** to re-run board discovery after the board structure c
 - `brandColor`: Hex color code
 
 Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to the access gate.
+
+### Add Access Gate to Client
+
+**Endpoint:** `POST /admin/access/clients/:clientSlug/gates`
+
+**Required Fields:**
+- `accessGateCode`: Unique code for this gate (uppercase alphanumeric, e.g. `EVENTS-B`)
+- `rootBoardId`: ID of the root board for this gate's independent board tree
+
+Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to this gate. Boards belonging to other gates of the same client are not affected.
+
+Returns the created `AccessGate` object with `code`, `rootBoardId`, and `linkedBoardIds`.
 
 ### Update Client
 
@@ -175,7 +214,14 @@ Each request includes automated tests:
 3. Update to reactivate
 4. Verify it reappears in public listing
 
-### Scenario 4: Board Structure Changed
+### Scenario 4: Client with Multiple Independent Board Sets
+
+1. Create the client with the first gate (via Create Access Client)
+2. Run "Add Access Gate to Client" for each additional independent board set
+3. Verify each gate has its own `linkedBoardIds` via "View Statistics"
+4. Test each gate independently via "Test Public Board Access" with different `access_code` values
+
+### Scenario 5: Board Structure Changed
 
 1. Update boards (add/remove tile navigation)
 2. Run "Update Access Gate" to re-discover linked boards
