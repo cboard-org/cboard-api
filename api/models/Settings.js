@@ -7,6 +7,17 @@ const SETTINGS_SCHEMA_DEFINITION = {
   display: {},
   scanning: {},
   navigation: {},
+  
+  // --- START CHANGES FOR ELEVENLABS API KEY ---
+  elevenlabsApiKey: {
+    type: String,
+    required: false,
+    trim: true,
+    // CRITICAL: Mongoose will hide this field in queries by default for security
+    select: false 
+  },
+  // --- END CHANGES FOR ELEVENLABS API KEY ---
+  
   user: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -24,6 +35,9 @@ const SETTINGS_SCHEMA_OPTIONS = {
     transform: function(doc, ret) {
       ret.id = ret._id;
       delete ret._id;
+      
+      // We do not need to explicitly delete elevenlabsApiKey here if it's set 
+      // with `select: false` in the schema definition, but this is fine.
     }
   }
 };
@@ -34,11 +48,23 @@ const settingsSchema = new Schema(
 );
 
 settingsSchema.statics = {
-  getOrCreate: async function(user) {
+  // --- MODIFIED getOrCreate STATIC METHOD ---
+  // Added optional 'includeSecrets' flag to force selection of secret fields (like API keys)
+  getOrCreate: async function(user, includeSecrets = false) {
+    let settingsQuery = this.findOne({ user: user.id });
+    
+    // Check if we need to include secret fields (used by the settings.js controller)
+    if (includeSecrets) {
+      // Force selection of the secret key before executing the query
+      settingsQuery = settingsQuery.select('+elevenlabsApiKey');
+    }
+    
     let settings = null;
     try {
-      settings = await Settings.findOne({ user: user.id }).exec();
-    } catch (e) {}
+      settings = await settingsQuery.exec();
+    } catch (e) {
+        // Handle error finding settings
+    }
 
     // No settings yet? We need to create them
     if (!settings) {
@@ -47,11 +73,24 @@ settingsSchema.statics = {
 
       try {
         settings = await settings.save().exec();
-      } catch (e) {}
+      } catch (e) {
+          // Handle error saving new settings
+      }
+      
+      // If the settings were just created, and we need the secrets, 
+      // we must run a new find query to ensure the secrets are attached.
+      if (settings && includeSecrets) {
+         settings = await this.findOne({ user: user.id }).select('+elevenlabsApiKey').exec();
+      }
     }
 
     if (settings) {
-      settings = settings.toJSON();
+      // The settings.js controller will handle sanitization via getSafeSettingsResponse,
+      // so we should only call toJSON() if the controller doesn't need the secret 
+      // fields (which is unlikely if includeSecrets is true).
+      // Given the previous code calls toJSON, we keep it here for now, but 
+      // the controller will be responsible for the final safety check.
+      settings = settings.toJSON(); 
     }
 
     return settings;
