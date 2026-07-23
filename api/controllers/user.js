@@ -15,7 +15,23 @@ const { findIpLocation, isLocalIp } = require('../helpers/localize');
 const Subscribers = require('../models/Subscribers');
 
 const config = require('../../config');
-const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL } = config;
+const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL, INTERNAL_API_KEY } = config;
+
+function hasValidInternalApiKey(req) {
+  if (!INTERNAL_API_KEY) return false;
+
+  const authHeader = req.get('Authorization') || '';
+  if (authHeader.indexOf('Bearer ') !== 0) return false;
+
+  const providedKey = authHeader.slice('Bearer '.length);
+
+  const providedBuffer = Buffer.from(providedKey);
+  const expectedBuffer = Buffer.from(INTERNAL_API_KEY);
+
+  if (providedBuffer.length !== expectedBuffer.length) return false;
+
+  return crypto.timingSafeEqual(providedBuffer, expectedBuffer);
+}
 
 module.exports = {
   createUser: createUser,
@@ -148,6 +164,12 @@ async function createUser(req, res) {
 }
 
 async function proxyOauth(req, res) {
+  if (!hasValidInternalApiKey(req)) {
+    return res.status(401).json({
+      message: 'Not authorized to use the OAuth proxy endpoint.'
+    });
+  }
+
   const {accessToken, refreshToken, profile} = req.body;
   const provider = req.swagger.params.provider.value;
   return passportLogin('', provider, accessToken, refreshToken, profile, (req, authRes) => {
