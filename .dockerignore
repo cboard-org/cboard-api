@@ -1,2 +1,14 @@
-!node_modules
-!package-lock.json
+node_modules
+npm-debug.log
+.git
+.gitignore
+.dockerignore
+Dockerfile
+.env
+.nvmrc
+test
+coverage
+.nyc_output
+*.md
+.vscode
+.idea

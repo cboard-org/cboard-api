@@ -1,12 +1,19 @@
 # The Node version should always match what's in .nvmrc.
-FROM node:18.18.1
+
+# --- deps stage: install production dependencies only ---
+FROM node:18.18.1-slim AS deps
 WORKDIR /opt/cboard-api/
-COPY . /opt/cboard-api/
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --production && yarn cache clean
 
-RUN npm install -g node-gyp 
-RUN npm install -g swagger
-#RUN npm install -g yarn
-RUN yarn install
+# --- runtime stage: slim image with only what's needed to run ---
+FROM node:18.18.1-slim AS runtime
+ENV NODE_ENV=production
+WORKDIR /opt/cboard-api/
 
+COPY --from=deps /opt/cboard-api/node_modules ./node_modules
+COPY . .
+
+USER node
 EXPOSE 80 10010
-CMD [ "yarn", "start"]
+CMD [ "node", "app.js" ]
