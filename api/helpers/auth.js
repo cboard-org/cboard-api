@@ -28,14 +28,8 @@ const authorizeRequest = (req, { role }) => {
   return isAuthorized;
 };
 
-// Here we setup the security checks for the endpoints
-// that need it (in our case, only /protected). This
-// function will be called every time a request to a protected
-// endpoint is received
 const verifyToken = (req, token) => {
   let isValid = false;
-  // Validate the 'Authorization' header. it should have the following format:
-  // 'Bearer <tokenString>'
   if (token && token.indexOf('Bearer ') == 0) {
     const tokenString = token.split(' ')[1];
     const decodedToken = getTokenData(tokenString);
