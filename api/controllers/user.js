@@ -12,10 +12,27 @@ const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
 const { findIpLocation, isLocalIp } = require('../helpers/localize');
+const { verifyAppleIdToken } = require('../helpers/appleAuth');
 const Subscribers = require('../models/Subscribers');
 
 const config = require('../../config');
-const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL } = config;
+const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL, INTERNAL_API_KEY } = config;
+
+function hasValidInternalApiKey(req) {
+  if (!INTERNAL_API_KEY) return false;
+
+  const authHeader = req.get('Authorization') || '';
+  if (authHeader.indexOf('Bearer ') !== 0) return false;
+
+  const providedKey = authHeader.slice('Bearer '.length);
+
+  const providedBuffer = Buffer.from(providedKey);
+  const expectedBuffer = Buffer.from(INTERNAL_API_KEY);
+
+  if (providedBuffer.length !== expectedBuffer.length) return false;
+
+  return crypto.timingSafeEqual(providedBuffer, expectedBuffer);
+}
 
 module.exports = {
   createUser: createUser,
@@ -148,6 +165,12 @@ async function createUser(req, res) {
 }
 
 async function proxyOauth(req, res) {
+  if (!hasValidInternalApiKey(req)) {
+    return res.status(401).json({
+      message: 'Not authorized to use the OAuth proxy endpoint.'
+    });
+  }
+
   const {accessToken, refreshToken, profile} = req.body;
   const provider = req.swagger.params.provider.value;
   return passportLogin('', provider, accessToken, refreshToken, profile, (req, authRes) => {
@@ -215,7 +238,21 @@ async function googleLogin(req, accessToken, refreshToken, profile, done) {
 }
 
 async function appleLogin(req, accessToken, refreshToken, idToken, profile, done) {
-  const decodedUser = jwt.decode(idToken);
+  let decodedUser;
+  try {
+    // Accept both the native app bundle id and the web Services id as valid
+    // audiences, since Apple sets `aud` to whichever client initiated sign-in.
+    const audiences = [
+      process.env.APPLE_APP_CLIENT_ID,
+      `${process.env.APPLE_TEAM_ID}.${process.env.APPLE_APP_CLIENT_ID}`
+    ].filter(Boolean);
+
+    decodedUser = await verifyAppleIdToken(idToken, audiences);
+  } catch (err) {
+    console.error('Apple identity token verification failed:', err.message);
+    return done(new Error('Invalid Apple identity token'));
+  }
+
   const appleProfile = {
     id: decodedUser.sub,
     accessToken: accessToken,
