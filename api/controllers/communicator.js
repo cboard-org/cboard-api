@@ -11,32 +11,32 @@ module.exports = {
   getCommunicatorsEmail: getCommunicatorsEmail
 };
 
-function createCommunicator(req, res) {
+async function createCommunicator(req, res) {
   const communicator = new Communicator(req.body);
-  communicator.save(function(err, communicator) {
-    if (err) {
-      return res.status(409).json({
-        message: 'Error saving communicator',
-        error: err.message
-      });
-    }
+  try {
+    const savedCommunicator = await communicator.save();
     return res.status(200).json({
       success: 1,
-      id: communicator._id,
+      id: savedCommunicator._id,
       communicator: {
-        id: communicator._id,
-        name: communicator.name,
-        author: communicator.author,
-        email: communicator.email,
-        description: communicator.description,
-        rootBoard: communicator.rootBoard,
-        boards: communicator.boards,
-        defaultBoardsIncluded: communicator.defaultBoardsIncluded,
-        lastEdited: communicator.lastEdited,
+        id: savedCommunicator._id,
+        name: savedCommunicator.name,
+        author: savedCommunicator.author,
+        email: savedCommunicator.email,
+        description: savedCommunicator.description,
+        rootBoard: savedCommunicator.rootBoard,
+        boards: savedCommunicator.boards,
+        defaultBoardsIncluded: savedCommunicator.defaultBoardsIncluded,
+        lastEdited: savedCommunicator.lastEdited,
       },
       message: 'Communicator saved successfully'
     });
-  });
+  } catch (err) {
+    return res.status(409).json({
+      message: 'Error saving communicator',
+      error: err.message
+    });
+  }
 }
 
 async function listCommunicators(req, res) {
@@ -75,24 +75,22 @@ async function getCommunicatorsEmail(req, res) {
   return res.status(200).json(response);
 }
 
-function getCommunicator(req, res) {
+async function getCommunicator(req, res) {
   const id = req.swagger.params.id.value;
-  Communicator.findById(id, function(err, communicator) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting board. ',
-        error: err.message
-      });
-    }
-
+  try {
+    const communicator = await Communicator.findById(id);
     if (!communicator) {
       return res.status(404).json({
         message: `Communicator does not exist. Communicator ID: ${id}`
       });
     }
-
     return res.status(200).json(communicator);
-  });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting board. ',
+      error: err.message
+    });
+  }
 }
 
 async function updateCommunicator(req, res) {
@@ -145,15 +143,10 @@ async function updateCommunicator(req, res) {
   }
 }
 
-function removeCommunicator(req, res) {
+async function removeCommunicator(req, res) {
   const id = req.swagger.params.id.value;
-  Communicator.findByIdAndRemove(id, function(err, communicator) {
-    if (err) {
-      return res.status(404).json({
-        message: `Communicator not found. Communicator Id: ${id}`,
-        error: err.message
-      });
-    }
+  try {
+    const communicator = await Communicator.findByIdAndDelete(id);
     if (!communicator) {
       return res.status(404).json({
         message: 'Communicator not found. Communicator Id: ' + id,
@@ -161,5 +154,10 @@ function removeCommunicator(req, res) {
       });
     }
     return res.status(200).json(communicator);
-  });
+  } catch (err) {
+    return res.status(404).json({
+      message: `Communicator not found. Communicator Id: ${id}`,
+      error: err.message
+    });
+  }
 }

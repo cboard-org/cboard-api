@@ -182,7 +182,7 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only: update-mongoose
       - deploy-qa:
           requires:
             - image

@@ -383,14 +383,14 @@ describe('User API calls', function () {
         email: helper.generateEmail(),
       });
 
-      expect(await User.exists({ _id: user.userId })).to.equal(true);
+      expect(await User.exists({ _id: user.userId })).to.not.be.null;
 
       const res = await request(server)
         .del(`/user/${user.userId}`)
         .set('Authorization', `Bearer ${user.token}`)
         .expect(403);
 
-      expect(await User.exists({ _id: user.userId })).to.equal(true);
+      expect(await User.exists({ _id: user.userId })).to.not.be.null;
     });
 
     it('it should delete a user', async function () {
@@ -403,14 +403,14 @@ describe('User API calls', function () {
         email: helper.generateEmail(),
       });
 
-      expect(await User.exists({ _id: user.userId })).to.equal(true);
+      expect(await User.exists({ _id: user.userId })).to.not.be.null;
 
       const res = await request(server)
         .del(`/user/${user.userId}`)
         .set('Authorization', `Bearer ${admin.token}`)
         .expect(200);
 
-      expect(await User.exists({ _id: user.userId })).to.equal(false);
+      expect(await User.exists({ _id: user.userId })).to.be.null;
     });
   });
 });

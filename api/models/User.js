@@ -222,36 +222,27 @@ userSchema.statics = {
    *
    * @param {String} email
    * @param {String} password
-   * @param {Function} callback
    * @api private
    */
-  authenticate: function(email, password, callback) {
-    this.findOne({ email: email })
+  authenticate: async function(email, password) {
+    const user = await this.findOne({ email: email })
       .populate('communicators')
       .populate({ path: 'boards', options: { lean: true } })
-      .exec(function(err, user) {
-        if (err) {
-          return callback(err);
-        } else if (!user) {
-          const err = new Error('User not found.');
-          err.status = 401;
-          return callback(err);
-        }
-        bcrypt.compare(password, user.password, function(err, result) {
-          if (result === true) {
-            return callback(null, user);
-          } else {
-            return callback();
-          }
-        });
-      });
+      .exec();
+    if (!user) {
+      const err = new Error('User not found.');
+      err.status = 401;
+      throw err;
+    }
+    const result = await bcrypt.compare(password, user.password);
+    return result === true ? user : null;
   },
 
   updateUser: async function(user) {
     let success = false;
 
     try {
-      await user.save().exec();
+      await user.save();
       success = true;
     } catch (e) {}
 

@@ -46,7 +46,7 @@ settingsSchema.statics = {
       settings.user = user.id;
 
       try {
-        settings = await settings.save().exec();
+        settings = await settings.save();
       } catch (e) {}
     }
 

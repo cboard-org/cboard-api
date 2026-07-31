@@ -36,7 +36,7 @@ const paginatedResponse = async (
 
   try {
     data = await queryModel.exec();
-    total = await model.count(query).exec();
+    total = await model.countDocuments(query).exec();
   } catch (e) {}
 
   return {

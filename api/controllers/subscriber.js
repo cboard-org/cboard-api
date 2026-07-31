@@ -73,19 +73,19 @@ async function cancelPlan(req, res) {
 
 }
 
-function createSubscriber(req, res) {
+async function createSubscriber(req, res) {
   const newSubscriber = req.body;
   const subscriber = new Subscriber(newSubscriber);
-  subscriber.save(function (err, subscriber) {
-    if (err) {
-      console.error('error', err);
-      return res.status(409).json({
-        message: 'Error saving subscriber',
-        error: err.message,
-      });
-    }
-    return res.status(200).json(subscriber.toJSON());
-  });
+  try {
+    const savedSubscriber = await subscriber.save();
+    return res.status(200).json(savedSubscriber.toJSON());
+  } catch (err) {
+    console.error('error', err);
+    return res.status(409).json({
+      message: 'Error saving subscriber',
+      error: err.message,
+    });
+  }
 }
 
 async function getSubscriber(req, res) {
@@ -105,14 +105,16 @@ async function getSubscriber(req, res) {
     });
   }
 
-  Subscriber.findOne({ userId: userId }, async function (err, subscriber) {
-    if (err) {
-      return res.status(409).json({
-        success: false,
-        message: 'Error getting subscriber',
-        error: err.message,
-      });
-    }
+  let subscriber;
+  try {
+    subscriber = await Subscriber.findOne({ userId: userId });
+  } catch (err) {
+    return res.status(409).json({
+      success: false,
+      message: 'Error getting subscriber',
+      error: err.message,
+    });
+  }
 
     if (!subscriber) {
       if (req.headers.purchaseversion === '1.0.0') {
@@ -256,81 +258,80 @@ async function getSubscriber(req, res) {
         error: err.message,
       });
     }
-
-  });
 }
 
-function updateSubscriber(req, res) {
+async function updateSubscriber(req, res) {
   const subscriberId = req.swagger.params.id.value;
 
   const { requestedBy, isAdmin: isRequestedByAdmin } = getAuthDataFromReq(req);
 
-  Subscriber.findOne({ _id: subscriberId }, async function (err, subscriber) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error updating subscriber. ',
-        error: err.message,
-      });
-    }
-    if (!subscriber) {
-      return res.status(404).json({
-        message: 'Subscriber does not exist. Subscriber Id: ' + subscriberId,
-      });
-    }
-    if (!isRequestedByAdmin &&
-      (!requestedBy || subscriber.userId != requestedBy)) {
-      return res.status(401).json({
-        message: 'Error updating subscriber',
-        error:
-          'unhautorized request, subscriber object is only accesible with subscribered user authToken',
-      });
-    }
-    for (let key in req.body) {
-      const keyCreatedAt = subscriber[key]?.createdAt;
-      subscriber[key] = keyCreatedAt
-        ? { ...req.body[key], createdAt: keyCreatedAt }
-        : req.body[key];
-    }
-    if (subscriber.transaction?.nativePurchase?.productId &&
-      subscriber.transaction.nativePurchase.productId !== subscriber.product.subscriptionId) {
-      // this means that user chooses to buy a different subscription than he bought in the past 
-      subscriber.transaction.nativePurchase.productId = subscriber.product.subscriptionId;
-    }
-    await subscriber.save(function (err, subscriber) {
-      if (err) {
-        const errorValidatingTransaction = err.errors?.transaction;
-        const errorValidatingProduct = err.product;
-        if (errorValidatingTransaction) {
-          console.log(err);
-          return res.status(409).json({
-            message: 'Error saving subscriber.',
-            error:
-              errorValidatingTransaction.message ??
-              errorValidatingTransaction.properties?.message,
-          });
-        }
-        if (errorValidatingProduct) {
-          return res.status(401).json({
-            message: 'Error saving subscriber.',
-            error: errorValidatingProduct.message,
-          });
-        }
-        return res.status(500).json({
-          message: 'Error saving subscriber.',
-          error: err.message,
-        });
-      }
-      if (!subscriber) {
-        return res.status(404).json({
-          message: 'Unable to find subscriber. subscriber id: ' + subscriberId,
-        });
-      }
-      return res.status(200).json(subscriber);
+  let subscriber;
+  try {
+    subscriber = await Subscriber.findOne({ _id: subscriberId });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error updating subscriber. ',
+      error: err.message,
     });
-  });
+  }
+  if (!subscriber) {
+    return res.status(404).json({
+      message: 'Subscriber does not exist. Subscriber Id: ' + subscriberId,
+    });
+  }
+  if (!isRequestedByAdmin &&
+    (!requestedBy || subscriber.userId != requestedBy)) {
+    return res.status(401).json({
+      message: 'Error updating subscriber',
+      error:
+        'unhautorized request, subscriber object is only accesible with subscribered user authToken',
+    });
+  }
+  for (let key in req.body) {
+    const keyCreatedAt = subscriber[key]?.createdAt;
+    subscriber[key] = keyCreatedAt
+      ? { ...req.body[key], createdAt: keyCreatedAt, updatedAt: new Date() }
+      : req.body[key];
+  }
+  if (subscriber.transaction?.nativePurchase?.productId &&
+    subscriber.transaction.nativePurchase.productId !== subscriber.product.subscriptionId) {
+    // this means that user chooses to buy a different subscription than he bought in the past 
+    subscriber.transaction.nativePurchase.productId = subscriber.product.subscriptionId;
+  }
+  try {
+    const savedSubscriber = await subscriber.save();
+    if (!savedSubscriber) {
+      return res.status(404).json({
+        message: 'Unable to find subscriber. subscriber id: ' + subscriberId,
+      });
+    }
+    return res.status(200).json(savedSubscriber);
+  } catch (err) {
+    const errorValidatingTransaction = err.errors?.transaction;
+    const errorValidatingProduct = err.product;
+    if (errorValidatingTransaction) {
+      console.log(err);
+      return res.status(409).json({
+        message: 'Error saving subscriber.',
+        error:
+          errorValidatingTransaction.message ??
+          errorValidatingTransaction.properties?.message,
+      });
+    }
+    if (errorValidatingProduct) {
+      return res.status(401).json({
+        message: 'Error saving subscriber.',
+        error: errorValidatingProduct.message,
+      });
+    }
+    return res.status(500).json({
+      message: 'Error saving subscriber.',
+      error: err.message,
+    });
+  }
 }
 
-function deleteSubscriber(req, res) {
+async function deleteSubscriber(req, res) {
   const subscriberId = req.swagger.params.id.value;
 
   if (!ObjectId.isValid(subscriberId)) {
@@ -341,17 +342,17 @@ function deleteSubscriber(req, res) {
     });
   }
 
-  Subscriber.findByIdAndRemove(subscriberId, function (err, subscriber) {
-    if (err) {
-      console.log(err);
-      return res.status(200).json({
-        error: {
-          message: err,
-        },
-      });
-    }
+  try {
+    const subscriber = await Subscriber.findByIdAndDelete(subscriberId);
     return res.status(200).json(subscriber);
-  });
+  } catch (err) {
+    console.log(err);
+    return res.status(200).json({
+      error: {
+        message: err,
+      },
+    });
+  }
 }
 
 async function createTransaction(req, res) {
@@ -507,26 +508,28 @@ async function createTransaction(req, res) {
       transaction
     };
 
-  Subscriber.findOneAndUpdate(
-    { _id: subscriberId },
-    updatedObject,
-    {
-      new: true,
-      runValidators: true,
-      useFindAndModify: false
-    },
-    function(err, subscriber) {
-      if (err) {
-        return res.status(200).json({
-          ok: false,
-          data: {
-            code: 6778001 //INVALID_PAYLOAD
-          },
-          error: {
-            message: err.message
-          }
-        });
+  let subscriber;
+  try {
+    subscriber = await Subscriber.findOneAndUpdate(
+      { _id: subscriberId },
+      updatedObject,
+      {
+        new: true,
+        runValidators: true
       }
+    );
+  } catch (err) {
+    return res.status(200).json({
+      ok: false,
+      data: {
+        code: 6778001 //INVALID_PAYLOAD
+      },
+      error: {
+        message: err.message
+      }
+    });
+  }
+  {
       const transaction = subscriber.transaction;
       if (transaction.platform === 'ios-appstore') {
         return res.status(200).json({
@@ -567,6 +570,5 @@ async function createTransaction(req, res) {
           ],
         },
       });
-    }
-  );
+  }
 }
