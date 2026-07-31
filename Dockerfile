@@ -2,6 +2,8 @@
 FROM node:26.5.1
 WORKDIR /opt/cboard-api/
 COPY . /opt/cboard-api/
+# Enable corepack and set the desired yarn version
+RUN corepack enable && corepack prepare yarn@stable --activate
 
 RUN npm install -g node-gyp 
 RUN npm install -g swagger
