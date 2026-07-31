@@ -9,7 +9,11 @@ jobs:
         auth:
           username: cboardci
           password: $DOCKERHUB_PASSWORD
-      - image: circleci/mongo:4.0
+      # Mongoose 8 / MongoDB Node driver 6 require MongoDB >= 4.2 (wire version 8).
+      - image: mongo:6.0
+        auth:
+          username: cboardci
+          password: $DOCKERHUB_PASSWORD
     working_directory: ~/repo
     steps:
       - checkout
