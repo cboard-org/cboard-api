@@ -154,7 +154,20 @@ async function getSubscriber(req, res) {
         // get subscription from paypal API
         remoteData = await paypal.getSubscriptionDetails(subscriber.transaction.subscriptionId);
         status = remoteData.status;
+        // Normalize PayPal statuses to internal vocabulary
         if (status.toLowerCase() === 'cancelled') status = 'canceled';
+        // PayPal suspends after exhausting payment retries; keep as 'suspended'
+        // so the frontend can show a targeted "fix payment on PayPal" CTA
+        if (status.toLowerCase() === 'suspended') status = 'suspended';
+        // PayPal keeps ACTIVE during the billing retry window but accrues
+        // outstanding_balance. Surface that as in_grace_period so the user
+        // is warned without losing access.
+        const outstandingBalance = parseFloat(
+          remoteData.billing_info?.outstanding_balance?.value || 0
+        );
+        if (status.toLowerCase() === 'active' && outstandingBalance > 0) {
+          status = 'in_grace_period';
+        }
         expiryDate = remoteData.billing_info?.next_billing_time;
         nativePurchase = remoteData;
       } catch (err) {
