@@ -71,7 +71,7 @@ jobs:
   image:
     docker:
       # The Node version should always match what's in .nvmrc.
-      - image: cimg/node:18.18.1
+      - image: cimg/node:26.5.1
         auth:
           username: cboardci
           password: $DOCKERHUB_PASSWORD 
@@ -172,7 +172,6 @@ jobs:
           success_message: '**${CIRCLE_USERNAME}** Cboard API Postman tests passed on QA!!.'
 
 workflows:
-  version: 2
   build_test_image:
     jobs:
       - build:
