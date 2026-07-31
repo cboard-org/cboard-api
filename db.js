@@ -4,7 +4,10 @@ var mongoose = require('mongoose');
 var config = require('./config');
 const seeds = require('./seeds');
 
-mongoose.connect(config.databaseUrl, { useNewUrlParser: true });
+mongoose.connect(config.databaseUrl, { 
+  useNewUrlParser: true,
+  useFindAndModify: false
+});
 mongoose.connection.on('connected', () => {
   console.log('Connected to ' + config.env + ' database ');
   seeds();

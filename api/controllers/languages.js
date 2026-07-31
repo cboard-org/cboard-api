@@ -9,8 +9,7 @@ const listLanguage = async (req, res) => {
   const laguages = await paginatedResponse(
     LanguagesModel,
     {
-      query,
-      populate: ['communicators', 'boards']
+      query
     },
     req.query
   );

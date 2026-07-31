@@ -12,10 +12,27 @@ const Settings = require('../models/Settings');
 const { nev } = require('../mail');
 const auth = require('../helpers/auth');
 const { findIpLocation, isLocalIp } = require('../helpers/localize');
+const { verifyAppleIdToken } = require('../helpers/appleAuth');
 const Subscribers = require('../models/Subscribers');
 
 const config = require('../../config');
-const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL } = config;
+const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL, INTERNAL_API_KEY } = config;
+
+function hasValidInternalApiKey(req) {
+  if (!INTERNAL_API_KEY) return false;
+
+  const authHeader = req.get('Authorization') || '';
+  if (authHeader.indexOf('Bearer ') !== 0) return false;
+
+  const providedKey = authHeader.slice('Bearer '.length);
+
+  const providedBuffer = Buffer.from(providedKey);
+  const expectedBuffer = Buffer.from(INTERNAL_API_KEY);
+
+  if (providedBuffer.length !== expectedBuffer.length) return false;
+
+  return crypto.timingSafeEqual(providedBuffer, expectedBuffer);
+}
 
 module.exports = {
   createUser: createUser,
@@ -41,6 +58,15 @@ const USER_MODEL_ID_TYPE = {
   google: 'google.id',
   apple: 'apple.id'
 };
+
+function mapLeanBoardIds(boards) {
+  if (!Array.isArray(boards)) return boards;
+  return boards.map(board => {
+    if (!board || typeof board !== 'object' || !board._id) return board;
+    const { _id, __v, ...rest } = board;
+    return { ...rest, id: _id };
+  });
+}
 
 async function getSettings(user) {
   let settings = null;
@@ -139,6 +165,12 @@ async function createUser(req, res) {
 }
 
 async function proxyOauth(req, res) {
+  if (!hasValidInternalApiKey(req)) {
+    return res.status(401).json({
+      message: 'Not authorized to use the OAuth proxy endpoint.'
+    });
+  }
+
   const {accessToken, refreshToken, profile} = req.body;
   const provider = req.swagger.params.provider.value;
   return passportLogin('', provider, accessToken, refreshToken, profile, (req, authRes) => {
@@ -150,12 +182,17 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
   try {
     const propertyId = USER_MODEL_ID_TYPE[type];
     let user = await User.findOne({ [propertyId]: profile.id })
-      .populate('communicators')  
+      .populate('communicators')
+     .populate({ path: 'boards', options: { lean: true } })
       .exec();
 
 
     if (!user) {
       user = await createOrUpdateUser(accessToken, profile, type);
+      await user
+        .populate('communicators')
+        .populate({ path: 'boards', options: { lean: true } })
+        .execPopulate();
     }
 
     if (!user.location || !user.location.country)
@@ -174,8 +211,10 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
     const settings = await getSettings(user);
     const subscriber = await getSubscriber(user);
 
+    const userJSON = user.toJSON();
+    userJSON.boards = mapLeanBoardIds(userJSON.boards);
     const response = {
-      ...user.toJSON(),
+      ...userJSON,
       settings,
       subscriber,
       authToken: tokenString
@@ -199,7 +238,21 @@ async function googleLogin(req, accessToken, refreshToken, profile, done) {
 }
 
 async function appleLogin(req, accessToken, refreshToken, idToken, profile, done) {
-  const decodedUser = jwt.decode(idToken);
+  let decodedUser;
+  try {
+    // Accept both the native app bundle id and the web Services id as valid
+    // audiences, since Apple sets `aud` to whichever client initiated sign-in.
+    const audiences = [
+      process.env.APPLE_APP_CLIENT_ID,
+      `${process.env.APPLE_TEAM_ID}.${process.env.APPLE_APP_CLIENT_ID}`
+    ].filter(Boolean);
+
+    decodedUser = await verifyAppleIdToken(idToken, audiences);
+  } catch (err) {
+    console.error('Apple identity token verification failed:', err.message);
+    return done(new Error('Invalid Apple identity token'));
+  }
+
   const appleProfile = {
     id: decodedUser.sub,
     accessToken: accessToken,
@@ -315,8 +368,7 @@ async function listUser(req, res) {
   const response = await paginatedResponse(
     User,
     {
-      query,
-      populate: ['communicators']
+      query
     },
     req.query
   );
@@ -340,9 +392,7 @@ async function getUser(req, res) {
   const id = req.swagger.params.id.value;
 
   try {
-    const user = await User.findById(id)
-      .populate('communicators')
-      .exec();
+    const user = await User.findById(id).exec();
 
     if (!user) {
       return res.status(404).json({
@@ -384,7 +434,6 @@ function updateUser(req, res) {
   }
 
   User.findById(id)
-    .populate('communicators')
     .exec(async function (err, user) {
       if (err) {
         return res.status(500).json({
@@ -425,7 +474,7 @@ function updateUser(req, res) {
       catch (e) {
         return res.status(500).json({
           message: 'Error saving user. ',
-          error: err.message
+          error: e.message
         });
       }
     });
@@ -458,8 +507,10 @@ function loginUser(req, res) {
       const settings = await getSettings(user);
       const subscriber = await getSubscriber(user);
 
+      const userJSON = user.toJSON();
+      userJSON.boards = mapLeanBoardIds(userJSON.boards);
       const response = {
-        ...user.toJSON(),
+        ...userJSON,
         settings,
         subscriber,
         birthdate: moment(user.birthdate).format('YYYY-MM-DD'),

@@ -48,7 +48,16 @@ if (config.appInsightConnectionString && config.env === 'production') {
 
 swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
   //Serves the Swagger UI on /docs
-  app.use(cors());
+  app.use(
+    cors({
+      origin: [
+        process.env.CBOARD_APP_URL,
+        process.env.CBOARD_IOS_APP_URL,
+        process.env.CBUILDER_APP_URL
+      ],
+      exposedHeaders: ['Request-Context']
+    })
+  );
 
   // Log HTTP requests. The `dev` format looks like this:
   // :method :url :status :response-time ms - :res[content-length]

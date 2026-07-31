@@ -127,6 +127,12 @@ userSchema.virtual('communicators', {
   foreignField: 'email'
 });
 
+userSchema.virtual('boards', {
+  ref: 'Board',
+  localField: 'email',
+  foreignField: 'email'
+});
+
 userSchema.virtual('isAdmin').get(function() {
   return this.role === 'admin';
 });
@@ -193,18 +199,6 @@ userSchema.pre('save', function(next) {
 });
 
 /**
- * Post-save hook
- */
-userSchema.post('save', function(doc, next) {
-  doc
-    .populate('communicators')
-    .execPopulate()
-    .then(function() {
-      next();
-    });
-});
-
-/**
  * Methods
  */
 
@@ -224,22 +218,6 @@ userSchema.methods = {
 
 userSchema.statics = {
   /**
-   * Load
-   *
-   * @param {Object} options
-   * @param {Function} cb
-   * @api private
-   */
-
-  load: function(options, cb) {
-    options.select = options.select || 'name email';
-    return this.findOne(options.criteria)
-      .select(options.select)
-      .populate('communicators')
-      .exec(cb);
-  },
-
-  /**
    * Authenticate input against database
    *
    * @param {String} email
@@ -250,6 +228,7 @@ userSchema.statics = {
   authenticate: function(email, password, callback) {
     this.findOne({ email: email })
       .populate('communicators')
+      .populate({ path: 'boards', options: { lean: true } })
       .exec(function(err, user) {
         if (err) {
           return callback(err);
@@ -283,9 +262,7 @@ userSchema.statics = {
     let user = null;
 
     try {
-      user = await this.findById(id)
-        .populate('communicators')
-        .exec();
+      user = await this.findById(id).exec();
     } catch (e) {}
 
     return user ? user.toJSON() : null;

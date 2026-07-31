@@ -103,13 +103,30 @@ describe('User API calls', function () {
         it('it should contain a field indicating the user created date', function() {
           res.body.should.to.have.property('createdAt');
         })
-        it('it should not contain a field with the boards of the user', function() {
-          res.body.should.not.have.property('boards');
-        })
-        it('it should contain a field with the communicators of the user', function() {
-          res.body.should.have.property('communicators');
-        })
       });
+    });
+
+    it('it should return the user communicators and boards', async function () {
+      const userEmail = helper.generateEmail();
+      await helper.prepareUser(server, {
+        role: 'user',
+        email: userEmail,
+      });
+      const userData = {
+        ...helper.userData,
+        email: userEmail,
+      };
+
+      const res = await request(server)
+        .post('/user/login')
+        .send(userData)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.to.have.property('communicators');
+      res.body.communicators.should.be.an('array');
+      res.body.should.to.have.property('boards');
+      res.body.boards.should.be.an('array');
     });
   });
 
@@ -154,8 +171,6 @@ describe('User API calls', function () {
 
       const getUser = res.body;
       getUser.should.to.have.any.keys('name', 'role', 'provider', 'email');
-      res.body.should.not.have.property('boards');
-      res.body.should.have.property('communicators');
     });
   });
 
