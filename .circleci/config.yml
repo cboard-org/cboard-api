@@ -186,16 +186,16 @@ workflows:
             - build
           filters:
             branches:
-              only: update-mongoose
+              only: master
       - deploy-qa:
           requires:
             - image
           filters:
             branches:
-              only: update-mongoose
+              only: master
       - postman-test:
           requires:
             - deploy-qa
           filters:
             branches:
-              only: update-mongoose
+              only: master
