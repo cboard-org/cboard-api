@@ -1,4 +1,5 @@
-const uuidv1 = require('uuid/v1');
+const { v1: uuidv1 } = require('uuid');
+
 const azure = require('azure-storage');
 const blobService = azure.createBlobService(
   process.env.AZURE_STORAGE_CONNECTION_STRING
