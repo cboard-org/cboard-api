@@ -5,13 +5,16 @@ const constants = require('../constants');
 
 module.exports = {
   env: 'production',
-  databaseUrl: 'mongodb://10.0.0.4:27017,10.0.0.5:27017,10.0.0.6:27017/cboard-api?replicaSet=repset',
+  databaseUrl:
+    process.env.MONGO_URL ||
+    'mongodb://10.0.0.4:27017,10.0.0.5:27017,10.0.0.6:27017/cboard-api?replicaSet=repset',
   session: {
     secret: process.env.API_SESSION_SECRET || 's3Cur3'
   },
   jwt: {
     secret: process.env.JWT_SECRET,
-    issuer: process.env.JWT_ISSUER || constants.JWT_DEFAULT_ISSUER
+    issuer: process.env.JWT_ISSUER || constants.JWT_DEFAULT_ISSUER,
+    expiresIn: process.env.JWT_EXPIRES_IN || constants.JWT_DEFAULT_EXPIRES_IN
   },
   facebook: {
     APP_ID: process.env.FACEBOOK_APP_ID,

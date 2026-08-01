@@ -1,7 +1,9 @@
 # The Node version should always match what's in .nvmrc.
-FROM node:18.18.1
+FROM node:26.5.1
 WORKDIR /opt/cboard-api/
 COPY . /opt/cboard-api/
+# Corepack is no longer bundled with Node 25+, install it first
+RUN npm install -g corepack && corepack enable && corepack prepare yarn@stable --activate
 
 RUN npm install -g node-gyp 
 RUN npm install -g swagger

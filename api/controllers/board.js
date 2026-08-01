@@ -29,18 +29,18 @@ module.exports = {
 };
 
 // TODO: Use the caller's email instead of getting it from the body.
-function createBoard(req, res) {
+async function createBoard(req, res) {
   const board = new Board(req.body);
   board.lastEdited = moment().format();
-  board.save(function (err, board) {
-    if (err) {
-      return res.status(409).json({
-        message: 'Error saving board',
-        error: err.message
-      });
-    }
-    return res.status(200).json(board.toJSON());
-  });
+  try {
+    const savedBoard = await board.save();
+    return res.status(200).json(savedBoard.toJSON());
+  } catch (err) {
+    return res.status(409).json({
+      message: 'Error saving board',
+      error: err.message
+    });
+  }
 }
 
 async function listBoard(req, res) {
@@ -163,24 +163,24 @@ async function getPublicBoards(req, res) {
 
 async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
-  Board.findByIdAndRemove(id, function (err, boards) {
-    if (err) {
-      return res.status(404).json({
-        message: 'Board not found. Board Id: ' + id,
-        error: err.message
-      });
-    }
-    if (!boards) {
+  try {
+    const board = await Board.findByIdAndDelete(id);
+    if (!board) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
         error: 'Board not found.'
       });
     }
-    return res.status(200).json(boards);
-  });
+    return res.status(200).json(board);
+  } catch (err) {
+    return res.status(404).json({
+      message: 'Board not found. Board Id: ' + id,
+      error: err.message
+    });
+  }
 }
 
-function getBoard(req, res) {
+async function getBoard(req, res) {
   const id = req.swagger.params.id.value;
   //  Validate id
   if (!ObjectId.isValid(id)) {
@@ -188,20 +188,20 @@ function getBoard(req, res) {
       message: 'Invalid ID for a Board. Board Id: ' + id
     });
   }
-  Board.findOne({ _id: id }, function (err, boards) {
-    if (err) {
-      return res.status(500).json({
-        message: 'Error getting board. ',
-        error: err.message
-      });
-    }
-    if (!boards) {
+  try {
+    const board = await Board.findOne({ _id: id });
+    if (!board) {
       return res.status(404).json({
         message: 'Board does not exist. Board Id: ' + id
       });
     }
-    return res.status(200).json(boards.toJSON());
-  });
+    return res.status(200).json(board.toJSON());
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting board. ',
+      error: err.message
+    });
+  }
 }
 
 async function updateBoard(req, res) {

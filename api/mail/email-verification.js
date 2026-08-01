@@ -309,11 +309,10 @@ module.exports = function(mongoose) {
     tempUserData[options.passwordFieldName] = password;
     var newTempUser = new options.tempUserModel(tempUserData);
 
-    newTempUser.save(function(err, tempUser) {
-      if (err) {
-        return callback(err, null, null);
-      }
+    newTempUser.save().then(function(tempUser) {
       return callback(null, null, tempUser);
+    }).catch(function(err) {
+      return callback(err, null, null);
     });
   };
 
@@ -361,24 +360,15 @@ module.exports = function(mongoose) {
       query[options.emailFieldName] = user[options.emailFieldName];
     }
 
-    options.persistentUserModel.findOne(query, function(
-      err,
+    options.persistentUserModel.findOne(query).then(function(
       existingPersistentUser
     ) {
-      if (err) {
-        return callback(err, null, null);
-      }
-
       // user has already signed up and confirmed their account
       if (existingPersistentUser) {
         return callback(null, existingPersistentUser, null);
       }
 
-      options.tempUserModel.findOne(query, function(err, existingTempUser) {
-        if (err) {
-          return callback(err, null, null);
-        }
-
+      options.tempUserModel.findOne(query).then(function(existingTempUser) {
         // user has already signed up but not yet confirmed their account
         if (existingTempUser) {
           return callback(null, null, null);
@@ -409,7 +399,11 @@ module.exports = function(mongoose) {
             );
           }
         }
+      }).catch(function(err) {
+        return callback(err, null, null);
       });
+    }).catch(function(err) {
+      return callback(err, null, null);
     });
   };
 
@@ -467,11 +461,7 @@ module.exports = function(mongoose) {
       query = {};
     query[options.URLFieldName] = url;
 
-    TempUser.findOne(query, function(err, tempUserData) {
-      if (err) {
-        return callback(err, null);
-      }
-
+    TempUser.findOne(query).then(function(tempUserData) {
       // temp user is found (i.e. user accessed URL before their data expired)
       if (tempUserData) {
         var userData = JSON.parse(JSON.stringify(tempUserData)), // copy data
@@ -482,23 +472,22 @@ module.exports = function(mongoose) {
         user = new User(userData);
 
         // save the temporary user to the persistent user collection
-        user.save(function(err, savedUser) {
-          if (err) {
-            return callback(err, null);
-          }
-
-          TempUser.remove(query, function(err) {
-            if (err) {
-              return callback(err, null);
-            }
+        user.save().then(function(savedUser) {
+          TempUser.deleteMany(query).then(function() {
             return callback(null, savedUser);
+          }).catch(function(err) {
+            return callback(err, null);
           });
+        }).catch(function(err) {
+          return callback(err, null);
         });
 
         // temp user is not found (i.e. user accessed URL after data expired, or something else...)
       } else {
         return callback(null, null);
       }
+    }).catch(function(err) {
+      return callback(err, null);
     });
   };
 
@@ -512,20 +501,12 @@ module.exports = function(mongoose) {
   var resendVerificationEmail = function(email, domain, callback) {
     var query = {};
     query[options.emailFieldName] = email;
-    options.tempUserModel.findOne(query, function(err, tempUser) {
-      if (err) {
-        return callback(err, null);
-      }
-
+    options.tempUserModel.findOne(query).then(function(tempUser) {
       // user found (i.e. user re-requested verification email before expiration)
       if (tempUser) {
         // generate new user token
         tempUser[options.URLFieldName] = randtoken.generate(options.URLLength);
-        tempUser.save(function(err) {
-          if (err) {
-            return callback(err, null);
-          }
-
+        tempUser.save().then(function() {
           sendVerificationEmail(
             getNestedValue(tempUser, options.emailFieldName),
             domain,
@@ -537,10 +518,14 @@ module.exports = function(mongoose) {
               return callback(null, true);
             }
           );
+        }).catch(function(err) {
+          return callback(err, null);
         });
       } else {
         return callback(null, false);
       }
+    }).catch(function(err) {
+      return callback(err, null);
     });
   };
 
