@@ -376,16 +376,16 @@ async function listUser(req, res) {
   return res.status(200).json(response);
 }
 
-function removeUser(req, res) {
+async function removeUser(req, res) {
   const id = req.swagger.params.id.value;
-  User.findByIdAndRemove(id, function (err, users) {
-    if (err) {
-      return res.status(404).json({
-        message: 'User not found. User Id: ' + id
-      });
-    }
+  try {
+    const users = await User.findByIdAndDelete(id);
     return res.status(200).json(users);
-  });
+  } catch (err) {
+    return res.status(404).json({
+      message: 'User not found. User Id: ' + id
+    });
+  }
 }
 
 async function getUser(req, res) {
@@ -424,7 +424,7 @@ const UPDATEABLE_FIELDS = [
   'isFirstLogin'
 ]
 
-function updateUser(req, res) {
+async function updateUser(req, res) {
   const id = req.swagger.params.id.value;
 
   if (!req.user.isAdmin && req.auth.id !== id) {
@@ -433,92 +433,99 @@ function updateUser(req, res) {
     })
   }
 
-  User.findById(id)
-    .exec(async function (err, user) {
-      if (err) {
-        return res.status(500).json({
-          message: 'Error updating user. ',
-          error: err.message
-        });
-      }
-      if (!user) {
-        return res.status(404).json({
-          message: 'Unable to find user. User Id: ' + id
-        });
-      }
-      for (let key in req.body) {
-        if (UPDATEABLE_FIELDS.includes(key)) {
-
-          if (key === 'location') {
-            if ((user.location && user.location.country) || isLocalIp(req.ip)) continue;
-            try {
-              req.body.location = await findIpLocation(req.ip);
-            } catch (error) {
-              console.error(error.message);
-              continue;
-            }
-          }
-
-          user[key] = req.body[key];
-        }
-      }
-      try {
-        const dbUser = await user.save();
-        if (!dbUser) {
-          return res.status(404).json({
-            message: 'Unable to find user. User id: ' + id
-          });
-        }
-        return res.status(200).json(user);
-      }
-      catch (e) {
-        return res.status(500).json({
-          message: 'Error saving user. ',
-          error: e.message
-        });
-      }
+  let user;
+  try {
+    user = await User.findById(id).exec();
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error updating user. ',
+      error: err.message
     });
-}
+  }
+  if (!user) {
+    return res.status(404).json({
+      message: 'Unable to find user. User Id: ' + id
+    });
+  }
+  for (let key in req.body) {
+    if (UPDATEABLE_FIELDS.includes(key)) {
 
-function loginUser(req, res) {
-  const { email, password } = req.body;
-
-  User.authenticate(email, password, async (error, user) => {
-    if (error || !user) {
-      return res.status(401).json({
-        message: 'Wrong email or password.'
-      });
-    } else {
-      const userId = user._id;
-      req.session.userId = userId;
-
-      const tokenString = auth.issueToken({
-        email,
-        id: userId
-      });
-
-      if (!user.location || !user.location.country)
+      if (key === 'location') {
+        if ((user.location && user.location.country) || isLocalIp(req.ip)) continue;
         try {
-          await updateUserLocation(req.ip, user);
+          req.body.location = await findIpLocation(req.ip);
         } catch (error) {
           console.error(error.message);
+          continue;
         }
+      }
 
-      const settings = await getSettings(user);
-      const subscriber = await getSubscriber(user);
-
-      const userJSON = user.toJSON();
-      userJSON.boards = mapLeanBoardIds(userJSON.boards);
-      const response = {
-        ...userJSON,
-        settings,
-        subscriber,
-        birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
-        authToken: tokenString
-      };
-      return res.status(200).json(response);
+      user[key] = req.body[key];
     }
+  }
+  try {
+    const dbUser = await user.save();
+    if (!dbUser) {
+      return res.status(404).json({
+        message: 'Unable to find user. User id: ' + id
+      });
+    }
+    return res.status(200).json(user);
+  }
+  catch (e) {
+    return res.status(500).json({
+      message: 'Error saving user. ',
+      error: e.message
+    });
+  }
+}
+
+async function loginUser(req, res) {
+  const { email, password } = req.body;
+
+  let user;
+  try {
+    user = await User.authenticate(email, password);
+  } catch (error) {
+    return res.status(401).json({
+      message: 'Wrong email or password.'
+    });
+  }
+
+  if (!user) {
+    return res.status(401).json({
+      message: 'Wrong email or password.'
+    });
+  }
+
+  const userId = user._id;
+  req.session.userId = userId;
+
+  const tokenString = auth.issueToken({
+    email,
+    id: userId
   });
+
+  if (!user.location || !user.location.country)
+    try {
+      await updateUserLocation(req.ip, user);
+    } catch (error) {
+      console.error(error.message);
+    }
+
+  const settings = await getSettings(user);
+  const subscriber = await getSubscriber(user);
+
+  const userJSON = user.toJSON();
+  userJSON.boards = mapLeanBoardIds(userJSON.boards);
+  const response = {
+    ...userJSON,
+    settings,
+    subscriber,
+    birthdate: moment(user.birthdate).format('YYYY-MM-DD'),
+    authToken: tokenString
+  };
+  return res.status(200).json(response);
 }
 
 async function updateUserLocation(ip, user) {
@@ -595,34 +602,27 @@ async function forgotPassword(req, res) {
     }).exec();
     if (resetPassword) {
       //remove entry if exist
-      await ResetPassword.deleteOne({ _id: resetPassword.id }, function (err) {
-        if (err) {
-          return res.status(500).json({
-            message: 'ERROR: delete reset password FAILED ',
-            error: err.message
-          });
-        }
-      }).exec();
+      await ResetPassword.deleteOne({ _id: resetPassword.id });
     }
     //creating the token to be sent to the forgot password form
     token = crypto.randomBytes(32).toString('hex');
     //hashing the password to store in the db node.js
     bcrypt.genSalt(8, function (err, salt) {
-      bcrypt.hash(token, salt, function (err, hash) {
+      bcrypt.hash(token, salt, async function (err, hash) {
         const item = new ResetPassword({
           userId: user.id,
           resetPasswordToken: hash,
           resetPasswordExpires: moment.utc().add(86400, 'seconds'),
           status: false
         });
-        item.save(function (err, rstPassword) {
-          if (err) {
-            return res.status(500).json({
-              message: 'ERROR: create reset password FAILED ',
-              error: err.message
-            });
-          }
-        });
+        try {
+          await item.save();
+        } catch (err) {
+          return res.status(500).json({
+            message: 'ERROR: create reset password FAILED ',
+            error: err.message
+          });
+        }
         //sending mail to the user where he can reset password.
         //User id, the token generated and user domain are sent as params in a link
 
@@ -690,25 +690,23 @@ async function storePassword(req, res) {
               message: 'No user found with that ID.'
             });
           }
-          ResetPassword.findOneAndUpdate(
-            { id: resetPassword.id },
-            { status: true },
-            function (err) {
-              if (err) {
-                return res.status(500).json({
-                  message: 'ERROR: reset your password email FAILED ',
-                  error: err.message
-                });
-              } else {
-                const response = {
-                  success: 1,
-                  url: token,
-                  message: 'Success! We have reset your password.'
-                };
-                return res.status(200).json(response);
-              }
-            }
-          );
+          try {
+            await ResetPassword.findOneAndUpdate(
+              { id: resetPassword.id },
+              { status: true }
+            );
+            const response = {
+              success: 1,
+              url: token,
+              message: 'Success! We have reset your password.'
+            };
+            return res.status(200).json(response);
+          } catch (err) {
+            return res.status(500).json({
+              message: 'ERROR: reset your password email FAILED ',
+              error: err.message
+            });
+          }
         });
       });
     });

@@ -355,7 +355,7 @@ const subscription = {
     await mockedSubscription.save();
   },
   deleteSubscription: async () => {
-    await Subscription.findOneAndRemove({
+    await Subscription.findOneAndDelete({
       subscriptionId: subscription.subscriptionId,
     });
   },
@@ -365,20 +365,11 @@ const gpt = {
   toEditData: { phrase: 'what you to think' } 
 }
 
-function prepareDb() {
-  mongoose.connect('mongodb://127.0.0.1:27017/cboard-api', {
-    useNewUrlParser: true,
-  });
-  const connection = mongoose.connection;
-
-  return new Promise((resolve, reject) => {
-    connection.once('open', function () {
-      mongoose.connection.db.dropDatabase(function (err, result) {
-        console.log('Database droped');
-        resolve(true);
-      });
-    });
-  });
+async function prepareDb() {
+  await mongoose.connect('mongodb://127.0.0.1:27017/cboard-api');
+  await mongoose.connection.db.dropDatabase();
+  console.log('Database droped');
+  return true;
 }
 
 /*generate email to create new users*/

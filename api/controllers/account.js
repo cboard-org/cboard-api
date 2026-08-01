@@ -26,7 +26,7 @@ async function removeAccount(req, res) {
 
   const response = {};
   try {
-    const user = await User.findByIdAndRemove(id);
+    const user = await User.findByIdAndDelete(id);
     response.user = user;
   } catch (error) {
     console.error(error);
@@ -70,7 +70,7 @@ async function removeAccount(req, res) {
   }
 
   try {
-    const subscriber = await Subscribers.findOneAndRemove({ userId: id });
+    const subscriber = await Subscribers.findOneAndDelete({ userId: id });
     response.subscriber = subscriber;
   } catch (error) {
     console.error(error);
