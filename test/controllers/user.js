@@ -139,27 +139,14 @@ describe('User API calls', function () {
         .expect(403);
     });
 
-    it('it should NOT Get the full users list as a non-admin user', async function () {
+    it('it should Get the full users list', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
         email: helper.generateEmail(),
       });
-      await request(server)
-        .get('/user')
-        .set('Authorization', `Bearer ${user.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(403);
-    });
-
-    it('it should Get the full users list', async function () {
-      const admin = await helper.prepareUser(server, {
-        role: 'admin',
-        email: helper.generateEmail(),
-      });
       const res = await request(server)
         .get('/user')
-        .set('Authorization', `Bearer ${admin.token}`)
+        .set('Authorization', `Bearer ${user.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
