@@ -189,10 +189,10 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
 
     if (!user) {
       user = await createOrUpdateUser(accessToken, profile, type);
-      await user
-        .populate('communicators')
-        .populate({ path: 'boards', options: { lean: true } })
-        .execPopulate();
+      await user.populate([
+        'communicators',
+        { path: 'boards', options: { lean: true } }
+      ]);
     }
 
     if (!user.location || !user.location.country)
