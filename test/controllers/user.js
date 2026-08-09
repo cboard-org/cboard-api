@@ -139,14 +139,27 @@ describe('User API calls', function () {
         .expect(403);
     });
 
-    it('it should Get the full users list', async function () {
+    it('it should NOT Get the full users list as a non-admin user', async function () {
       const user = await helper.prepareUser(server, {
         role: 'user',
         email: helper.generateEmail(),
       });
-      const res = await request(server)
+      await request(server)
         .get('/user')
         .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+
+    it('it should Get the full users list', async function () {
+      const admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: helper.generateEmail(),
+      });
+      const res = await request(server)
+        .get('/user')
+        .set('Authorization', `Bearer ${admin.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
@@ -165,6 +178,45 @@ describe('User API calls', function () {
       const res = await request(server)
         .get(`/user/${user.userId}`)
         .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const getUser = res.body;
+      getUser.should.to.have.any.keys('name', 'role', 'provider', 'email');
+    });
+
+    it('it should NOT Get another user as a non-admin user', async function () {
+      const user = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      const otherUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      await request(server)
+        .get(`/user/${otherUser.userId}`)
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+
+    it('it should allow an admin to Get another user', async function () {
+      const admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: helper.generateEmail(),
+      });
+      const otherUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      const res = await request(server)
+        .get(`/user/${otherUser.userId}`)
+        .set('Authorization', `Bearer ${admin.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);

@@ -391,6 +391,12 @@ async function removeUser(req, res) {
 async function getUser(req, res) {
   const id = req.swagger.params.id.value;
 
+  if (!req.user.isAdmin && req.auth.id !== id) {
+    return res.status(403).json({
+      message: 'You are not authorized to get this user.'
+    });
+  }
+
   try {
     const user = await User.findById(id).exec();
 
