@@ -495,4 +495,27 @@ describe('Board API calls', function () {
       res.body.data.should.have.lengthOf(0);
     });
   });
+
+  describe('GET /board/public search (regex escaping)', function () {
+    it('it should treat regex special characters literally without erroring', async function () {
+      // `(` is an invalid regex on its own and crashed the unescaped query.
+      const res = await request(server)
+        .get(`/board/public?search=${encodeURIComponent('(')}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      helper.verifyListProperties(res.body);
+    });
+
+    it('it should handle ReDoS-style patterns without erroring', async function () {
+      const res = await request(server)
+        .get(`/board/public?search=${encodeURIComponent('(a+)+$')}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      helper.verifyListProperties(res.body);
+    });
+  });
 });

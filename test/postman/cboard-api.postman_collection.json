@@ -1128,6 +1128,57 @@
       "response": []
     },
     {
+      "name": "/board/public?search regex escaping",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Malicious regex input is handled, not a server error\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/board/public?search=(",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "board",
+            "public"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "("
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "/board/report/",
       "event": [
         {
