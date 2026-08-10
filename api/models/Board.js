@@ -62,7 +62,13 @@ const BOARD_SCHEMA_DEFINITION = {
     type: Boolean,
     default: false
   },
-  grid: {}
+  grid: {},
+  accessGateCode: {
+    type: String,
+    trim: true,
+    uppercase: true,
+    default: null
+  }
 };
 
 const BOARD_SCHEMA_OPTIONS = {
@@ -84,6 +90,12 @@ const boardSchema = new Schema(BOARD_SCHEMA_DEFINITION, BOARD_SCHEMA_OPTIONS);
 
 boardSchema.index({ email: 1 });
 boardSchema.index({ email: 1, lastEdited: 1, _id: 1 });
+
+// Partial index so boards without a gate code (null/undefined) are not indexed, keeping the index lean.
+boardSchema.index(
+  { accessGateCode: 1 },
+  { partialFilterExpression: { accessGateCode: { $type: 'string' } } }
+);
 
 const validatePresenceOf = value => value && value.length;
 
