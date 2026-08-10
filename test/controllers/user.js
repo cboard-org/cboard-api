@@ -9,6 +9,7 @@ const uuid = require('uuid');
 const helper = require('../helper');
 
 const User = require('../../api/models/User');
+const config = require('../../config');
 
 //Parent block
 describe('User API calls', function () {
@@ -323,6 +324,31 @@ describe('User API calls', function () {
       userAndUrl.should.be
         .a('object')
         .with.all.keys('success', 'userid', 'url', 'message');
+    });
+
+    it('it should NOT return the reset token in production', async function () {
+      const userEmail = helper.generateEmail();
+      await helper.prepareUser(server, {
+        role: 'user',
+        email: userEmail,
+      });
+
+      const originalEnv = config.env;
+      config.env = 'production';
+      try {
+        const res = await request(server)
+          .post('/user/forgot')
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .send({ email: userEmail })
+          .expect(200);
+
+        res.body.should.be.a('object').with.all.keys('success', 'message');
+        res.body.should.not.have.property('url');
+        res.body.should.not.have.property('userid');
+      } finally {
+        config.env = originalEnv;
+      }
     });
   });
 

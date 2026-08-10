@@ -650,10 +650,12 @@ async function forgotPassword(req, res) {
           } else {
             const response = {
               success: 1,
-              userid: user.id,
-              url: token,
               message: 'Success! Check your mail to reset your password.'
             };
+            if (config.env !== 'production') {
+              response.userid = user.id;
+              response.url = token;
+            }
             return res.status(200).json(response);
           }
         });

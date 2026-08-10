@@ -1791,8 +1791,12 @@
               "pm.test(\"Status code is 200\", function () {",
               "    pm.response.to.have.status(200);",
               "});",
-              "pm.globals.set(\"reset_url\",pm.response.json().url);",
-              "console.log(pm.globals.get(\"reset_url\"));"
+              "pm.test(\"Reset token is not exposed in the response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.not.have.property('url');",
+              "    pm.expect(jsonData).to.not.have.property('userid');",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "});"
             ],
             "type": "text/javascript"
           }
