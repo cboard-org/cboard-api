@@ -20,18 +20,18 @@ jobs:
       - restore_cache:
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
-            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - yarn-packages-v1-{{ .Branch }}-
-            - yarn-packages-v1-
+            - npm-packages-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - npm-packages-v1-{{ .Branch }}-
+            - npm-packages-v1-
       # Install and save node_modules to cache
       - run:
           name: Install dependencias 
           command: |
-            yarn install --cache-folder ~/.cache/yarn
+            npm ci
       - save_cache:
           paths:
-            - ~/.cache/yarn
-          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - ~/.npm
+          key: npm-packages-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
       - run:
           name: Decrypt the Google auth file 
           command: |
@@ -85,15 +85,15 @@ jobs:
       - restore_cache:
           keys:
             # when lock file changes, use increasingly general patterns to restore cache
-            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - yarn-packages-v1-{{ .Branch }}-
-            - yarn-packages-v1-
+            - npm-packages-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - npm-packages-v1-{{ .Branch }}-
+            - npm-packages-v1-
       # Install and save node_modules to cache
-      - run: yarn install --cache-folder ~/.cache/yarn
+      - run: npm ci
       - save_cache:
           paths:
-            - ~/.cache/yarn
-          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - ~/.npm
+          key: npm-packages-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
       # Build Docker Image
       # https://circleci.com/docs/2.0/building-docker-images/#overview
       - setup_remote_docker:   # (2)
