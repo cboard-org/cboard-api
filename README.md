@@ -29,8 +29,7 @@ Clone the repository and install dependencies:
 $ git clone https://github.com/cboard-org/cboard-api.git
 $ cd cboard-api
 $ nvm install
-$ npm install -g yarn
-$ yarn install
+$ npm ci
 ```
 
 ## Start the database
