@@ -420,6 +420,118 @@
 						"description": "Re-runs board discovery for an access gate. Optionally pass a new rootBoardId to change the root and re-discover from there. Useful when the board structure has changed."
 					},
 					"response": []
+				},
+				{
+					"name": "Generate Access Gate QR Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains a persisted QR code URL\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('code');",
+									"    pm.expect(jsonData).to.have.property('clientSlug');",
+									"    pm.expect(jsonData).to.have.property('url');",
+									"    pm.expect(jsonData).to.have.property('qrCodeUrl');",
+									"    pm.expect(jsonData.qrCodeUrl).to.include('qr-codes/');",
+									"});",
+									"",
+									"// Open the qrCodeUrl in a browser to view/download/print the QR - it's a stable",
+									"// link (Azure Blob Storage, or CDN if configured) that stays the same on regeneration."
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/admin/access/gates/{{access_code}}/qr",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access",
+								"gates",
+								"{{access_code}}",
+								"qr"
+							]
+						},
+						"description": "Generates a QR code for an access gate, encoding the public Access URL (CBOARD_APP_URL/access/:clientSlug/:gateCode). Uploads it to Azure Blob Storage under qr-codes/ at a stable path (overwritten on regeneration) and returns the permanent link in `qrCodeUrl` - open it in a browser to view, download, or print. Requires admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Preview Access Gate QR Code (staging baseUrl)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains an ephemeral base64 QR preview, not a persisted URL\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('url');",
+									"    pm.expect(jsonData.url).to.include('staging.cboard.io');",
+									"    pm.expect(jsonData).to.have.property('qrCode');",
+									"    pm.expect(jsonData.qrCode).to.match(/^data:image\\/png;base64,/);",
+									"    pm.expect(jsonData).to.not.have.property('qrCodeUrl');",
+									"});",
+									"",
+									"// Paste the qrCode value into a browser address bar to preview the image.",
+									"// baseUrl overrides skip Blob Storage entirely - nothing gets uploaded/overwritten."
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/admin/access/gates/{{access_code}}/qr?baseUrl=https://staging.cboard.io",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"admin",
+								"access",
+								"gates",
+								"{{access_code}}",
+								"qr"
+							],
+							"query": [
+								{
+									"key": "baseUrl",
+									"value": "https://staging.cboard.io"
+								}
+							]
+						},
+						"description": "Previews the QR code against a non-production frontend URL via ?baseUrl=. Returns an ephemeral base64 `qrCode` instead of persisting to Blob Storage, since the encoded URL differs from the production one. Requires admin authentication."
+					},
+					"response": []
 				}
 			]
 		},

@@ -3,6 +3,12 @@
 const AccessClient = require('../models/AccessClient');
 const AccessGate = require('../models/AccessGate');
 const Board = require('../models/Board');
+const {
+  generateQrCodePngBuffer,
+  generateQrCodeDataUrl,
+  buildAccessUrl,
+  uploadQrCodeBlob
+} = require('../helpers/qrCode');
 
 module.exports = {
   getClients: getClients,
@@ -12,7 +18,8 @@ module.exports = {
   listAccessClients: listAccessClients,
   updateAccessClient: updateAccessClient,
   updateAccessGate: updateAccessGate,
-  getAccessClientStats: getAccessClientStats
+  getAccessClientStats: getAccessClientStats,
+  getAccessGateQrCode: getAccessGateQrCode
 };
 
 /**
@@ -544,6 +551,63 @@ async function updateAccessGate(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error updating access gate',
+      error: err.message
+    });
+  }
+}
+
+/**
+ * GET /admin/access/gates/:gateCode/qr
+ * Generates a QR code for an access gate, encoding the public Access URL
+ * (CBOARD_APP_URL/access/:clientSlug/:gateCode). Replaces the local
+ * scripts/qr-generator CLI script for day-to-day use.
+ *
+ * By default the QR is uploaded to Azure Blob Storage at a stable path
+ * (qr-codes/:clientSlug-:gateCode.png, overwritten on regeneration) and the
+ * response returns qrCodeUrl — a permanent link safe to print or embed.
+ *
+ * Optional ?baseUrl= query param overrides the default frontend URL (e.g. for staging
+ * previews). Since that encodes a different URL than the persisted QR, it is NOT
+ * uploaded — the response returns an ephemeral qrCode base64 data URL instead.
+ */
+async function getAccessGateQrCode(req, res) {
+  const code = req.swagger.params.gateCode.value.toUpperCase();
+  const baseUrlOverride = req.swagger.params.baseUrl.value;
+
+  try {
+    const accessGate = await AccessGate.findOne({ code }).populate('accessClient');
+    if (!accessGate) {
+      return res.status(404).json({ message: 'Access gate not found' });
+    }
+
+    const client = accessGate.accessClient;
+    if (!client) {
+      return res.status(404).json({ message: 'Access client not found' });
+    }
+
+    const url = buildAccessUrl(client.slug, code, baseUrlOverride);
+
+    if (baseUrlOverride) {
+      return res.status(200).json({
+        code,
+        clientSlug: client.slug,
+        url,
+        qrCode: generateQrCodeDataUrl(url)
+      });
+    }
+
+    const pngBuffer = generateQrCodePngBuffer(url);
+    const qrCodeUrl = await uploadQrCodeBlob(client.slug, code, pngBuffer);
+
+    return res.status(200).json({
+      code,
+      clientSlug: client.slug,
+      url,
+      qrCodeUrl
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error generating QR code',
       error: err.message
     });
   }

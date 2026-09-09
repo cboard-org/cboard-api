@@ -6,7 +6,8 @@ const blobService = azure.createBlobService(
 );
 
 module.exports = {
-  createBlockBlobFromText
+  createBlockBlobFromText,
+  createOrReplaceBlockBlob
 };
 
 function createContainerIfNotExists(shareName) {
@@ -53,6 +54,41 @@ async function createBlockBlobFromText(
     blobService.createBlockBlobFromText(
       containerName,
       finalName,
+      buffer,
+      options,
+      function(error, file) {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve([file, blobService.getUrl(file.container, file.name)]);
+      }
+    );
+  });
+}
+
+// Returns [file:BlobResult, fileUrl:string]. Uploads to the exact blobName given,
+// overwriting any existing blob at that path — for content that should live at a
+// stable, reusable URL (e.g. QR codes) instead of getting a unique name per upload
+// like createBlockBlobFromText does.
+async function createOrReplaceBlockBlob(
+  containerName,
+  blobName,
+  buffer,
+  mimetype
+) {
+  await createContainerIfNotExists(containerName);
+
+  const options = {};
+  if (mimetype && mimetype.length) {
+    options.contentSettings = { contentType: mimetype };
+  }
+
+  return new Promise((resolve, reject) => {
+    blobService.createBlockBlobFromText(
+      containerName,
+      blobName,
       buffer,
       options,
       function(error, file) {

@@ -1583,6 +1583,39 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /admin/access/gates/{gateCode}/qr:
+    x-swagger-router-controller: access
+    get:
+      operationId: getAccessGateQrCode
+      description: Generates a QR code encoding the public Access URL for a gate (CBOARD_APP_URL/access/:clientSlug/:gateCode). Uploads it to Azure Blob Storage at a stable path (overwritten on regeneration) and returns qrCodeUrl, unless baseUrl is overridden, in which case it returns an ephemeral base64 qrCode instead of persisting. Requires admin authentication.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: gateCode
+          type: string
+          in: path
+          required: true
+          description: Access gate code (uppercase)
+        - name: baseUrl
+          type: string
+          in: query
+          required: false
+          description: Overrides the default frontend base URL (CBOARD_APP_URL) the QR code points to, e.g. for staging previews. When set, the QR is NOT persisted to Blob Storage — the response returns an ephemeral base64 qrCode instead of qrCodeUrl.
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessGateQrCodeResponse"
+        "404":
+          description: Access gate or client not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -2652,3 +2685,21 @@ definitions:
       updatedAt:
         type: string
         format: date-time
+  AccessGateQrCodeResponse:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Access gate code (uppercase)
+      clientSlug:
+        type: string
+        description: Slug of the AccessClient this gate belongs to
+      url:
+        type: string
+        description: The Cboard Access URL encoded in the QR code
+      qrCodeUrl:
+        type: string
+        description: Permanent Blob Storage (or CDN) URL of the QR code PNG, at qr-codes/:clientSlug-:gateCode.png. Present unless baseUrl was overridden; overwritten on regeneration so the link stays stable.
+      qrCode:
+        type: string
+        description: QR code image as a base64 PNG data URL (data:image/png;base64,...). Present only when baseUrl was overridden — an ephemeral preview that is not persisted to Blob Storage.

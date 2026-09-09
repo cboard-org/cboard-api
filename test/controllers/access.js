@@ -510,6 +510,103 @@ describe('Access API calls', function () {
     });
   });
 
+  describe('GET /admin/access/gates/:code/qr', function () {
+    // Stub the Azure Blob Storage call so these tests don't hit the real network —
+    // consistent with the rest of the suite, which never exercises live blob uploads.
+    const blobHelper = require('../../api/helpers/blob');
+    let originalCreateOrReplaceBlockBlob;
+    let uploadCalls;
+
+    before(function () {
+      originalCreateOrReplaceBlockBlob = blobHelper.createOrReplaceBlockBlob;
+      blobHelper.createOrReplaceBlockBlob = async (containerName, blobName) => {
+        uploadCalls.push({ containerName, blobName });
+        return [
+          { container: containerName, name: blobName },
+          `https://fakeblob.test/${containerName}/${blobName}`,
+        ];
+      };
+    });
+
+    after(function () {
+      blobHelper.createOrReplaceBlockBlob = originalCreateOrReplaceBlockBlob;
+    });
+
+    beforeEach(async function () {
+      uploadCalls = [];
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          slug: 'qr-01',
+          clientName: 'QR Test mocha test',
+          rootBoardId: testBoardId,
+          accessGateCode: 'QRTEST01',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`);
+    });
+
+    it('it should GENERATE and persist a QR code for an access gate', async function () {
+      const res = await request(server)
+        .get('/admin/access/gates/QRTEST01/qr')
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('code').eql('QRTEST01');
+      res.body.should.have.property('clientSlug').eql('qr-01');
+      res.body.should.have.property('url').that.match(/\/access\/qr-01\/QRTEST01$/);
+      res.body.should.have.property('qrCodeUrl').that.match(/^https:\/\/fakeblob\.test\/.*qr-codes\/qr-01-QRTEST01\.png$/);
+      res.body.should.not.have.property('qrCode');
+
+      uploadCalls.should.have.lengthOf(1);
+      uploadCalls[0].blobName.should.eql('qr-codes/qr-01-QRTEST01.png');
+    });
+
+    it('it should accept a lowercase gate code (case-insensitive)', async function () {
+      const res = await request(server)
+        .get('/admin/access/gates/qrtest01/qr')
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      res.body.should.have.property('code').eql('QRTEST01');
+    });
+
+    it('it should return an ephemeral base64 preview when baseUrl is overridden, without persisting', async function () {
+      const res = await request(server)
+        .get('/admin/access/gates/QRTEST01/qr')
+        .query({ baseUrl: 'https://staging.cboard.io' })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      res.body.should.have.property('url').eql('https://staging.cboard.io/access/qr-01/QRTEST01');
+      res.body.should.have.property('qrCode').that.match(/^data:image\/png;base64,/);
+      res.body.should.not.have.property('qrCodeUrl');
+      uploadCalls.should.have.lengthOf(0);
+    });
+
+    it('it should return 404 for a non-existent gate code', async function () {
+      const res = await request(server)
+        .get('/admin/access/gates/NOPE/qr')
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Access gate not found');
+    });
+
+    it('it should NOT GENERATE without authorization', async function () {
+      await request(server)
+        .get('/admin/access/gates/QRTEST01/qr')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+  });
+
   describe('GET /access/:clientSlug/:gateCode', function () {
     // The controller updates viewsCount/lastAccessAt fire-and-forget, so tests
     // that assert on those fields need a tiny delay for the async write to land.
