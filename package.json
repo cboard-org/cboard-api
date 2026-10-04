@@ -38,7 +38,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.3",
     "mockery": "^2.1.0",
-    "moment": "2.29.4",
+    "moment": "2.31.0",
     "mongoose": "^8.24.3",
     "morgan": "^1.11.0",
     "ms": "^2.1.3",
