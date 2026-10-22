@@ -129,6 +129,62 @@ describe('User API calls', function () {
       res.body.should.to.have.property('boards');
       res.body.boards.should.be.an('array');
     });
+
+    describe('lastlogin', function () {
+      const loginAs = (server, email) =>
+        request(server)
+          .post('/user/login')
+          .send({ ...helper.userData, email })
+          .expect('Content-Type', /json/)
+          .expect(200);
+
+      async function newUser(server) {
+        const email = helper.generateEmail();
+        await helper.prepareUser(server, { role: 'user', email });
+        return email;
+      }
+
+      it('it should record the login time and bump updatedAt when the stored value is stale', async function () {
+        const email = await newUser(server);
+        const old = new Date('2020-01-01T00:00:00Z');
+        await User.updateOne({ email }, { $set: { lastlogin: old } });
+        const before = await User.findOne({ email }).lean();
+
+        await loginAs(server, email);
+
+        const after = await User.findOne({ email }).lean();
+        expect(after.lastlogin.getTime()).to.be.greaterThan(old.getTime());
+        expect(Date.now() - after.lastlogin.getTime()).to.be.lessThan(60 * 1000);
+        expect(after.updatedAt.getTime()).to.be.greaterThan(before.updatedAt.getTime());
+      });
+
+      it('it should not rewrite lastlogin for a login right after another one', async function () {
+        const email = await newUser(server);
+        await User.updateOne({ email }, { $set: { lastlogin: new Date('2020-01-01T00:00:00Z') } });
+
+        await loginAs(server, email);
+        const first = await User.findOne({ email }).lean();
+        await loginAs(server, email);
+        const second = await User.findOne({ email }).lean();
+
+        expect(second.lastlogin.getTime()).to.equal(first.lastlogin.getTime());
+        expect(second.updatedAt.getTime()).to.equal(first.updatedAt.getTime());
+      });
+
+      it('it should set lastlogin when the user has none', async function () {
+        const email = await newUser(server);
+        await User.updateOne({ email }, { $unset: { lastlogin: 1 } });
+
+        await loginAs(server, email);
+
+        const after = await User.findOne({ email }).lean();
+        expect(after.lastlogin).to.be.an.instanceof(Date);
+      });
+
+      it('it should never fail the login if lastlogin cannot be recorded', async function () {
+        await User.touchLastLogin('not-an-object-id'); // resolves: the error is logged, not thrown
+      });
+    });
   });
 
   describe('GET /user', function () {
