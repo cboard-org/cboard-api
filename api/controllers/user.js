@@ -203,6 +203,7 @@ async function passportLogin(ip, type, accessToken, refreshToken, profile, done)
       }
 
     const { _id: userId, email } = user;
+    await User.touchLastLogin(userId);
     const tokenString = auth.issueToken({
       id: userId,
       email
@@ -506,6 +507,8 @@ async function loginUser(req, res) {
 
   const userId = user._id;
   req.session.userId = userId;
+
+  await User.touchLastLogin(userId);
 
   const tokenString = auth.issueToken({
     email,

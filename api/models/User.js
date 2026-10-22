@@ -8,6 +8,9 @@ const Communicator = require('./Communicator');
 
 const oAuthTypes = ['github', 'twitter', 'facebook', 'google', 'linkedin'];
 
+// A login only rewrites `lastlogin` when the stored value is older than this, so a burst of logins is one write.
+const LAST_LOGIN_MIN_INTERVAL_MS = 60 * 60 * 1000;
+
 const USER_SCHEMA_DEFINITION = {
   name: {
     type: String,
@@ -217,6 +220,31 @@ userSchema.methods = {
  */
 
 userSchema.statics = {
+  /**
+   * Records a login in `lastlogin`.
+   *
+   * The write is conditional (atomic, no read) on the stored value being stale, and it also bumps `updatedAt`
+   * (schema timestamps), which is what lets downstream incremental syncs notice the change. It is best effort:
+   * a failure is logged and never blocks the login.
+   *
+   * @param {ObjectId|String} userId
+   * @param {Date} now
+   */
+  touchLastLogin: async function(userId, now = new Date()) {
+    const staleBefore = new Date(now.getTime() - LAST_LOGIN_MIN_INTERVAL_MS);
+    try {
+      await this.updateOne(
+        {
+          _id: userId,
+          $or: [{ lastlogin: { $lt: staleBefore } }, { lastlogin: { $exists: false } }]
+        },
+        { $set: { lastlogin: now } }
+      );
+    } catch (err) {
+      console.error('Unable to record last login', err.message);
+    }
+  },
+
   /**
    * Authenticate input against database
    *
