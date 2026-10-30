@@ -26,6 +26,7 @@ const morgan = require('morgan');
 const config = require('./config');
 
 const app = express();
+app.use('/api/institutions', require('./api/controllers/institutions').router());
 
 if (config.appInsightConnectionString && config.env === 'production') {
   appInsights
