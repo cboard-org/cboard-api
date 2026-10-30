@@ -11,6 +11,7 @@ const helper = require('../helper');
 const AccessClient = require('../../api/models/AccessClient');
 const AccessGate = require('../../api/models/AccessGate');
 const Board = require('../../api/models/Board');
+const User = require('../../api/models/User');
 
 //Parent block
 describe('Access API calls', function () {
@@ -43,20 +44,20 @@ describe('Access API calls', function () {
     testBoardId = await helper.createMochaBoard(server, adminUser.token, adminUser.email);
     testBoardId2 = await helper.createMochaBoard(server, adminUser.token, adminUser.email);
   
-    const clients = await AccessClient.find({ 'contact.name': /mocha test/i });
+    const clients = await AccessClient.find({ name: /mocha test/i });
     const clientIds = clients.map(c => c._id);
     await AccessGate.deleteMany({ accessClientId: { $in: clientIds } });
-    await AccessClient.deleteMany({ 'contact.name': /mocha test/i });
+    await AccessClient.deleteMany({ name: /mocha test/i });
   });
 
   after(async function () {
     helper.prepareNodemailerMock(true); //disable mockery
     await helper.deleteMochaUsers();
     await Board.deleteMany({ author: 'cboard mocha test' });
-    const clients = await AccessClient.find({ 'contact.name': /mocha test/i });
+    const clients = await AccessClient.find({ name: /mocha test/i });
     const clientIds = clients.map(c => c._id);
     await AccessGate.deleteMany({ accessClientId: { $in: clientIds } });
-    await AccessClient.deleteMany({ 'contact.name': /mocha test/i });
+    await AccessClient.deleteMany({ name: /mocha test/i });
   });
 
   describe('POST /admin/access/clients', function () {
@@ -64,7 +65,8 @@ describe('Access API calls', function () {
       const clientData = {
         slug: 'test-01',
         clientName: 'Test Client mocha test',
-        clientContact: 'test@example.com',
+        contactName: 'Jane Doe',
+        clientEmail: 'test@example.com',
         brandColor: '#FF5733',
         rootBoardId: testBoardId,
         accessGateCode: 'TEST01',
@@ -82,7 +84,10 @@ describe('Access API calls', function () {
 
       res.body.should.be.a('object');
       res.body.should.have.property('slug').eql('test-01');
-      res.body.contact.should.have.property('name').eql('Test Client mocha test');
+      res.body.should.have.property('name').eql('Test Client mocha test');
+      res.body.contact.should.have.property('name').eql('Jane Doe');
+      res.body.contact.should.have.property('email').eql('test@example.com');
+      res.body.should.have.property('members').eql([]);
       res.body.should.have.property('brandColor').eql('#FF5733');
       res.body.should.have.property('createdBy');
       res.body.should.have.property('accessGate');
@@ -275,6 +280,7 @@ describe('Access API calls', function () {
     it('it should UPDATE an access client', async function () {
       const updates = {
         clientName: 'Updated Name mocha test',
+        contactName: 'John Doe',
         brandColor: '#FFFFFF',
         isActive: false,
       };
@@ -287,7 +293,8 @@ describe('Access API calls', function () {
         .expect('Content-Type', /json/)
         .expect(200);
 
-      res.body.contact.should.have.property('name').eql('Updated Name mocha test');
+      res.body.should.have.property('name').eql('Updated Name mocha test');
+      res.body.contact.should.have.property('name').eql('John Doe');
       res.body.should.have.property('brandColor').eql('#FFFFFF');
       res.body.should.have.property('isActive').eql(false);
     });
@@ -448,7 +455,7 @@ describe('Access API calls', function () {
 
       // Verify client data
       res.body.client.should.have.property('slug').eql('stats-01');
-      res.body.client.contact.should.have.property('name').eql('Stats Test mocha test');
+      res.body.client.should.have.property('name').eql('Stats Test mocha test');
 
       // Verify stats — test board has no tile links, so auto-discovery returns 1 board
       res.body.stats.should.have.property('totalAccesses').eql(0);
@@ -633,6 +640,357 @@ describe('Access API calls', function () {
         .expect(404);
 
       res.body.should.have.property('message').eql('Invalid or expired access code');
+    });
+  });
+
+  describe('Access client members', function () {
+    let secondUser;
+
+    beforeEach(async function () {
+      secondUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+    });
+
+    const memberClientData = members => ({
+      slug: 'members-01',
+      clientName: 'Members Client mocha test',
+      rootBoardId: testBoardId,
+      accessGateCode: 'MEMBERS01',
+      subscriptionStart: new Date(),
+      subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      members,
+    });
+
+    const memberIds = res => res.body.members.map(member => member.userId);
+
+    it('it should set the members and flag them as access clients on create', async function () {
+      const res = await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }, { email: secondUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(201);
+
+      memberIds(res).should.have.members([
+        regularUser.userId.toString(),
+        secondUser.userId.toString(),
+      ]);
+
+      const firstMember = await User.findById(regularUser.userId);
+      firstMember.isAccessClient.should.eql(true);
+      const secondMember = await User.findById(secondUser.userId);
+      secondMember.isAccessClient.should.eql(true);
+    });
+
+    it('it should ignore duplicated member emails', async function () {
+      const res = await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }, { email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      memberIds(res).should.eql([regularUser.userId.toString()]);
+    });
+
+    it('it should NOT CREATE with a non-existent member email', async function () {
+      const unknownEmail = helper.generateEmail();
+
+      const res = await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }, { email: unknownEmail }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Member user not found');
+      res.body.should.have.property('emails').eql([unknownEmail]);
+
+      const client = await AccessClient.findOne({ slug: 'members-01' });
+      expect(client).to.be.null;
+      const user = await User.findById(regularUser.userId);
+      user.isAccessClient.should.eql(false);
+    });
+
+    it('it should create a client without members when members is not provided', async function () {
+      const { members, ...data } = memberClientData();
+
+      const res = await request(server)
+        .post('/admin/access/clients')
+        .send(data)
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      res.body.should.have.property('members').eql([]);
+    });
+
+    it('it should replace the members on update and sync the flags', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      const res = await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({ members: [{ email: secondUser.email }] })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      memberIds(res).should.eql([secondUser.userId.toString()]);
+
+      const removedMember = await User.findById(regularUser.userId);
+      removedMember.isAccessClient.should.eql(false);
+      const addedMember = await User.findById(secondUser.userId);
+      addedMember.isAccessClient.should.eql(true);
+    });
+
+    it('it should keep the flag of a member that still belongs to another client', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          ...memberClientData([{ email: regularUser.email }]),
+          slug: 'members-02',
+          accessGateCode: 'MEMBERS02',
+          rootBoardId: testBoardId2,
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({ members: [] })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      const user = await User.findById(regularUser.userId);
+      user.isAccessClient.should.eql(true);
+    });
+
+    it('it should remove all members on update with an empty list', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      const res = await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({ members: [] })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      res.body.should.have.property('members').eql([]);
+
+      const removedMember = await User.findById(regularUser.userId);
+      removedMember.isAccessClient.should.eql(false);
+    });
+
+    it('it should keep the members when members is not sent on update', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      const res = await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({ brandColor: '#FFFFFF' })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      memberIds(res).should.eql([regularUser.userId.toString()]);
+    });
+
+    it('it should NOT UPDATE with a non-existent member email', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      const unknownEmail = helper.generateEmail();
+
+      const res = await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({ members: [{ email: unknownEmail }] })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Member user not found');
+      res.body.should.have.property('emails').eql([unknownEmail]);
+
+      const client = await AccessClient.findOne({ slug: 'members-01' });
+      client.members.map(member => member.userId.toString()).should.eql([
+        regularUser.userId.toString(),
+      ]);
+    });
+  });
+
+  describe('GET /access/me/clients', function () {
+    beforeEach(async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          slug: 'mine-01',
+          clientName: 'Mine Client mocha test',
+          rootBoardId: testBoardId,
+          accessGateCode: 'MINE01',
+          brandColor: '#654321',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          members: [{ email: regularUser.email }],
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`);
+
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          slug: 'not-mine-01',
+          clientName: 'Not Mine Client mocha test',
+          rootBoardId: testBoardId2,
+          accessGateCode: 'NOTMINE01',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`);
+    });
+
+    it('it should LIST only the clients the user is a member of', async function () {
+      const res = await request(server)
+        .get('/access/me/clients')
+        .set('Authorization', `Bearer ${regularUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('total').eql(1);
+      res.body.data.length.should.eql(1);
+
+      const client = res.body.data[0];
+      client.should.have.property('slug').eql('mine-01');
+      client.should.have.property('clientName').eql('Mine Client mocha test');
+      client.should.have.property('brandColor').eql('#654321');
+      client.should.have.property('isActive').eql(true);
+      client.should.have.property('isExpired').eql(false);
+      client.should.have.property('daysUntilExpiry');
+      client.should.have.property('subscriptionEnd');
+      client.accessGates.length.should.eql(1);
+      client.accessGates[0].should.have.property('code').eql('MINE01');
+      client.accessGates[0].should.have.property('viewsCount').eql(0);
+      client.accessGates[0].should.have.property('lastAccessAt');
+      client.accessGates[0].rootBoard.should.have.property('id').eql(testBoardId.toString());
+    });
+
+    it('it should reflect gate views in the counters', async function () {
+      await request(server).get('/access/mine-01/MINE01').expect(200);
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const res = await request(server)
+        .get('/access/me/clients')
+        .set('Authorization', `Bearer ${regularUser.token}`)
+        .expect(200);
+
+      const gate = res.body.data[0].accessGates[0];
+      gate.viewsCount.should.eql(1);
+      should.exist(gate.lastAccessAt);
+    });
+
+    it('it should return an empty list for a user without clients', async function () {
+      const res = await request(server)
+        .get('/access/me/clients')
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+
+      res.body.should.have.property('total').eql(0);
+      res.body.data.should.eql([]);
+    });
+
+    it('it should NOT LIST without authorization', async function () {
+      await request(server)
+        .get('/access/me/clients')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+  });
+
+  describe('GET /access/me/clients/:slug/stats', function () {
+    beforeEach(async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          slug: 'mystats-01',
+          clientName: 'My Stats mocha test',
+          rootBoardId: testBoardId,
+          accessGateCode: 'MYSTATS01',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          members: [{ email: regularUser.email }],
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`);
+    });
+
+    it('it should GET statistics for a client the user is a member of', async function () {
+      const res = await request(server)
+        .get('/access/me/clients/mystats-01/stats')
+        .set('Authorization', `Bearer ${regularUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.client.should.have.property('slug').eql('mystats-01');
+      res.body.client.should.have.property('name').eql('My Stats mocha test');
+      res.body.client.should.not.have.property('createdBy');
+      res.body.client.should.not.have.property('members');
+      res.body.stats.should.have.property('totalAccesses').eql(0);
+      res.body.stats.should.have.property('boardCount').eql(1);
+      res.body.stats.should.have.property('isExpired').eql(false);
+      res.body.stats.should.have.property('daysUntilExpiry');
+    });
+
+    it('it should NOT GET statistics for a client the user is not a member of', async function () {
+      const res = await request(server)
+        .get('/access/me/clients/mystats-01/stats')
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Client not found');
+    });
+
+    it('it should return 404 for non-existent slug', async function () {
+      const res = await request(server)
+        .get('/access/me/clients/nonexistent/stats')
+        .set('Authorization', `Bearer ${regularUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Client not found');
+    });
+
+    it('it should NOT GET stats without authorization', async function () {
+      await request(server)
+        .get('/access/me/clients/mystats-01/stats')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
     });
   });
 });
