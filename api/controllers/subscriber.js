@@ -116,6 +116,15 @@ async function getSubscriber(req, res) {
     });
   }
 
+    const institutional = await require('./institutions').entitlements(userId);
+    const activeInstitutional = institutional.sort((a,b) => Date.parse(b.endsAt)-Date.parse(a.endsAt))[0];
+    const personalAccess = require('../helpers/institutional-access').hasPersonalAccess(subscriber);
+    if (activeInstitutional && !personalAccess) {
+      return res.status(200).json({success:true,userId,status:'active',institutionalEntitlement:activeInstitutional,
+        product:{subscriptionId:'institutional-cboard',title:'Cboard institutional access',billingPeriod:'annual',price:0},
+        transaction:{platform:'institutional',expiryDate:activeInstitutional.endsAt,purchaseDate:activeInstitutional.startsAt}});
+    }
+
     if (!subscriber) {
       if (req.headers.purchaseversion === '1.0.0') {
         return res.status(200).json({
