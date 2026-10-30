@@ -97,6 +97,10 @@ const USER_SCHEMA_DEFINITION = {
   isFirstLogin: {
     type: Boolean,
     required: false
+  },
+  isAccessClient: {
+    type: Boolean,
+    default: false
   }
 };
 
@@ -134,6 +138,12 @@ userSchema.virtual('boards', {
   ref: 'Board',
   localField: 'email',
   foreignField: 'email'
+});
+
+userSchema.virtual('accessClients', {
+  ref: 'AccessClient',
+  localField: '_id',
+  foreignField: 'members.userId'
 });
 
 userSchema.virtual('isAdmin').get(function() {
