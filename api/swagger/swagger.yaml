@@ -1341,6 +1341,54 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /access/me/clients:
+    x-swagger-router-controller: access
+    get:
+      operationId: getMyAccessClients
+      description: Lists the Access clients the authenticated user is a member of, with their access gates, usage counters and subscription status. Read-only, boards are managed by the Cboard team.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/MyAccessClientsListResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /access/me/clients/{clientSlug}/stats:
+    x-swagger-router-controller: access
+    get:
+      operationId: getMyAccessClientStats
+      description: Gets detailed statistics for an Access client the authenticated user is a member of.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+        - user
+      parameters:
+        - name: clientSlug
+          type: string
+          in: path
+          required: true
+          description: Slug identifier for the client
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessClientStatsResponse"
+        "404":
+          description: Client not found or the authenticated user is not a member
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /access/{clientSlug}/{gateCode}:
     x-swagger-router-controller: access
     get:
@@ -1392,7 +1440,7 @@ paths:
           schema:
             $ref: "#/definitions/AccessClientResponse"
         "404":
-          description: Root board not found
+          description: Root board or member user not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "409":
@@ -1423,7 +1471,7 @@ paths:
     x-swagger-router-controller: access
     put:
       operationId: updateAccessClient
-      description: Updates an Access client. Requires admin authentication. Allowed fields include isActive, subscription dates, and branding.
+      description: Updates an Access client. Requires admin authentication. Allowed fields include isActive, subscription dates, branding, contact and members. When members is sent, it replaces the current member list.
       security:
         - Bearer: []
       x-security-scopes:
@@ -1446,7 +1494,7 @@ paths:
           schema:
             $ref: "#/definitions/AccessClientResponse"
         "404":
-          description: Client not found
+          description: Client or member user not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         default:
@@ -1472,35 +1520,7 @@ paths:
         "200":
           description: Success
           schema:
-            type: object
-            properties:
-              client:
-                $ref: "#/definitions/AccessClientResponse"
-              stats:
-                type: object
-                properties:
-                  totalAccesses:
-                    type: integer
-                  lastAccessAt:
-                    type: string
-                    format: date-time
-                  boardCount:
-                    type: integer
-                  boards:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        name:
-                          type: string
-                        tilesCount:
-                          type: integer
-                  daysUntilExpiry:
-                    type: integer
-                  isExpired:
-                    type: boolean
+            $ref: "#/definitions/AccessClientStatsResponse"
         "404":
           description: Client not found
           schema:
@@ -2337,12 +2357,15 @@ definitions:
         type: string
         description: Name of the client organization
         example: Company Name
+      contactName:
+        type: string
+        description: Name of the contact person of the client organization
       clientEmail:
         type: string
-        description: Email of the client organization
+        description: Email of the contact person of the client organization
       clientPhone:
         type: string
-        description: Phone number of the client organization
+        description: Phone number of the contact person of the client organization
       brandColor:
         type: string
         description: Brand color for the client (hex color)
@@ -2358,6 +2381,25 @@ definitions:
         type: string
         format: date-time
         description: Subscription end date
+      members:
+        type: array
+        description: Cboard users who can see the client in their dashboard
+        items:
+          $ref: "#/definitions/AccessClientMemberInput"
+  AccessClientMemberInput:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
+        description: Email of an existing Cboard user
+  AccessClientMember:
+    type: object
+    properties:
+      userId:
+        type: string
+        description: ID of the Cboard user
   AccessClientUpdate:
     type: object
     properties:
@@ -2375,15 +2417,23 @@ definitions:
       clientName:
         type: string
         description: Name of the client organization
+      contactName:
+        type: string
+        description: Name of the contact person
       clientEmail:
         type: string
-        description: Email of the client
+        description: Email of the contact person
       clientPhone:
         type: string
-        description: Phone number of the client
+        description: Phone number of the contact person
       brandColor:
         type: string
         description: Brand color for the client (hex color)
+      members:
+        type: array
+        description: Replaces the current member list. An empty array removes all members
+        items:
+          $ref: "#/definitions/AccessClientMemberInput"
   AccessClientResponse:
     type: object
     properties:
@@ -2393,18 +2443,21 @@ definitions:
       slug:
         type: string
         description: Unique slug identifier (lowercase)
+      name:
+        type: string
+        description: Client organization name
       contact:
         type: object
         properties:
           name:
             type: string
-            description: Client organization name
+            description: Name of the contact person
           email:
             type: string
-            description: Email of the client
+            description: Email of the contact person
           phone:
             type: string
-            description: Phone number of the client
+            description: Phone number of the contact person
       brandColor:
         type: string
         description: Brand color (hex)
@@ -2421,6 +2474,11 @@ definitions:
         description: Subscription end date
       createdBy:
         description: User who created the client (string ID or populated user object with name, email, role)
+      members:
+        type: array
+        description: Cboard users who can see the client in their dashboard
+        items:
+          $ref: "#/definitions/AccessClientMember"
       createdAt:
         type: string
         format: date-time
@@ -2474,6 +2532,94 @@ definitions:
                         type: string
                       tilesCount:
                         type: integer
+  MyAccessClientsListResponse:
+    type: object
+    required:
+      - total
+      - data
+    properties:
+      total:
+        type: integer
+        description: Total number of clients the user is a member of
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            slug:
+              type: string
+            clientName:
+              type: string
+            brandColor:
+              type: string
+            isActive:
+              type: boolean
+            subscriptionStart:
+              type: string
+              format: date-time
+            subscriptionEnd:
+              type: string
+              format: date-time
+            isExpired:
+              type: boolean
+            daysUntilExpiry:
+              type: integer
+              description: Days until subscription expires (0 if expired)
+            accessGates:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  viewsCount:
+                    type: integer
+                  lastAccessAt:
+                    type: string
+                    format: date-time
+                    x-nullable: true
+                  rootBoard:
+                    type: object
+                    x-nullable: true
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      caption:
+                        type: string
+                      tilesCount:
+                        type: integer
+  AccessClientStatsResponse:
+    type: object
+    properties:
+      client:
+        $ref: "#/definitions/AccessClientResponse"
+      stats:
+        type: object
+        properties:
+          totalAccesses:
+            type: integer
+          lastAccessAt:
+            type: string
+            format: date-time
+          boardCount:
+            type: integer
+          boards:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                tilesCount:
+                  type: integer
+          daysUntilExpiry:
+            type: integer
+          isExpired:
+            type: boolean
   AccessClientsAdminListResponse:
     type: object
     required:
@@ -2492,6 +2638,8 @@ definitions:
               type: string
             slug:
               type: string
+            name:
+              type: string
             contact:
               type: object
               properties:
@@ -2501,6 +2649,10 @@ definitions:
                   type: string
                 phone:
                   type: string
+            members:
+              type: array
+              items:
+                $ref: "#/definitions/AccessClientMember"
             brandColor:
               type: string
             isActive:
