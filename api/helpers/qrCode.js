@@ -1,25 +1,11 @@
 'use strict';
 
-const path = require('path');
-const fs = require('fs');
 const zlib = require('zlib');
-const vm = require('vm');
 
-const blob = require('./blob');
-const config = require('../../config');
+const qrcodegen = require('./vendor/qrcodegen-v1.8.0-es6');
 
 const QR_SCALE = 10;
 const QR_MARGIN = 4;
-const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
-const QR_CODE_BLOB_FOLDER = 'qr-codes';
-
-const src = fs.readFileSync(
-  path.join(__dirname, 'vendor', 'qrcodegen-v1.8.0-es6.js'),
-  'utf8'
-);
-const sandbox = {};
-vm.runInNewContext(src, sandbox);
-const { qrcodegen } = sandbox;
 
 // CRC32 table for PNG chunk checksums
 const CRC_TABLE = (() => {
@@ -104,17 +90,6 @@ function generateQrCodePngBuffer(text) {
 }
 
 /**
- * Encodes text into a QR code and returns it as a base64 data URL,
- * ready to embed directly in an <img> src or return over JSON.
- * @param {string} text - Content to encode
- * @returns {string} data:image/png;base64,... URL
- */
-function generateQrCodeDataUrl(text) {
-  const png = generateQrCodePngBuffer(text);
-  return `data:image/png;base64,${png.toString('base64')}`;
-}
-
-/**
  * Builds the public Cboard Access URL that a QR code should point to.
  * @param {string} slug - AccessClient slug
  * @param {string} code - AccessGate code
@@ -130,38 +105,7 @@ function buildAccessUrl(slug, code, baseUrl) {
   return `${resolvedBaseUrl.replace(/\/$/, '')}/access/${slug}/${code.toUpperCase()}`;
 }
 
-/**
- * Uploads a QR code PNG to Azure Blob Storage at a stable path (qr-codes/{slug}-{code}.png),
- * overwriting any previous QR for that gate so the returned URL never changes across
- * regenerations — safe to print or bookmark. Resolves to the CDN URL when configured.
- * @param {string} slug - AccessClient slug
- * @param {string} code - AccessGate code
- * @param {Buffer} pngBuffer - QR code PNG bytes
- * @returns {Promise<string>}
- */
-async function uploadQrCodeBlob(slug, code, pngBuffer) {
-  const blobName = `${QR_CODE_BLOB_FOLDER}/${slug}-${code.toUpperCase()}.png`;
-
-  const [, fileUrl] = await blob.createOrReplaceBlockBlob(
-    BLOB_CONTAINER_NAME,
-    blobName,
-    pngBuffer,
-    'image/png'
-  );
-
-  return config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME &&
-    config.AZURE_CDN_URL &&
-    fileUrl.startsWith(config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME)
-    ? fileUrl.replace(
-        config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME,
-        config.AZURE_CDN_URL
-      )
-    : fileUrl;
-}
-
 module.exports = {
   generateQrCodePngBuffer,
-  generateQrCodeDataUrl,
-  buildAccessUrl,
-  uploadQrCodeBlob
+  buildAccessUrl
 };
