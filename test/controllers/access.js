@@ -510,17 +510,19 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('GET /admin/access/gates/:code/qr', function () {
+  describe('/admin/access/gates/:code/qr', function () {
     // Stub the Azure Blob Storage call so these tests don't hit the real network —
     // consistent with the rest of the suite, which never exercises live blob uploads.
     const blobHelper = require('../../api/helpers/blob');
     let originalCreateOrReplaceBlockBlob;
     let uploadCalls;
+    let uploadError;
 
     before(function () {
       originalCreateOrReplaceBlockBlob = blobHelper.createOrReplaceBlockBlob;
-      blobHelper.createOrReplaceBlockBlob = async (containerName, blobName) => {
-        uploadCalls.push({ containerName, blobName });
+      blobHelper.createOrReplaceBlockBlob = async (containerName, blobName, buffer, mimetype) => {
+        if (uploadError) throw uploadError;
+        uploadCalls.push({ containerName, blobName, buffer, mimetype });
         return [
           { container: containerName, name: blobName },
           `https://fakeblob.test/${containerName}/${blobName}`,
@@ -534,6 +536,8 @@ describe('Access API calls', function () {
 
     beforeEach(async function () {
       uploadCalls = [];
+      uploadError = null;
+      await AccessGate.deleteMany({ code: 'QRTEST01' });
       await request(server)
         .post('/admin/access/clients')
         .send({
@@ -547,63 +551,164 @@ describe('Access API calls', function () {
         .set('Authorization', `Bearer ${adminUser.token}`);
     });
 
-    it('it should GENERATE and persist a QR code for an access gate', async function () {
-      const res = await request(server)
-        .get('/admin/access/gates/QRTEST01/qr')
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      res.body.should.have.property('code').eql('QRTEST01');
-      res.body.should.have.property('clientSlug').eql('qr-01');
-      res.body.should.have.property('url').that.match(/\/access\/qr-01\/QRTEST01$/);
-      res.body.should.have.property('qrCodeUrl').that.match(/^https:\/\/fakeblob\.test\/.*qr-codes\/qr-01-QRTEST01\.png$/);
-      res.body.should.not.have.property('qrCode');
-
-      uploadCalls.should.have.lengthOf(1);
-      uploadCalls[0].blobName.should.eql('qr-codes/qr-01-QRTEST01.png');
+    after(async function () {
+      await AccessGate.deleteMany({ code: 'QRTEST01' });
     });
 
-    it('it should accept a lowercase gate code (case-insensitive)', async function () {
-      const res = await request(server)
-        .get('/admin/access/gates/qrtest01/qr')
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .expect(200);
+    describe('POST', function () {
+      it('it should GENERATE a QR code and save its URL on the access gate', async function () {
+        const res = await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(200);
 
-      res.body.should.have.property('code').eql('QRTEST01');
+        res.body.should.have.property('code').eql('QRTEST01');
+        res.body.should.have.property('clientSlug').eql('qr-01');
+        res.body.should.have.property('url').that.match(/\/access\/qr-01\/QRTEST01$/);
+        res.body.should.have.property('qrCodeUrl').that.match(/^https:\/\/fakeblob\.test\/.*qr-codes\/qr-01-QRTEST01\.png$/);
+
+        uploadCalls.should.have.lengthOf(1);
+        uploadCalls[0].blobName.should.eql('qr-codes/qr-01-QRTEST01.png');
+        uploadCalls[0].mimetype.should.eql('image/png');
+
+        const accessGate = await AccessGate.findOne({ code: 'QRTEST01' });
+        accessGate.qrCodeUrl.should.eql(res.body.qrCodeUrl);
+      });
+
+      it('it should keep the same URL on regeneration', async function () {
+        const first = await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .expect(200);
+        const second = await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .expect(200);
+
+        second.body.qrCodeUrl.should.eql(first.body.qrCodeUrl);
+        uploadCalls.should.have.lengthOf(2);
+        const accessGate = await AccessGate.findOne({ code: 'QRTEST01' });
+        accessGate.qrCodeUrl.should.eql(second.body.qrCodeUrl);
+      });
+
+      it('it should accept a lowercase gate code (case-insensitive)', async function () {
+        const res = await request(server)
+          .post('/admin/access/gates/qrtest01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .expect(200);
+
+        res.body.should.have.property('code').eql('QRTEST01');
+      });
+
+      it('it should return 404 for a non-existent gate code', async function () {
+        const res = await request(server)
+          .post('/admin/access/gates/NOPE/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(404);
+
+        res.body.should.have.property('message').eql('Access gate not found');
+      });
+
+      it('it should return 404 when the access client no longer exists', async function () {
+        await AccessClient.deleteOne({ slug: 'qr-01' });
+
+        const res = await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(404);
+
+        res.body.should.have.property('message').eql('Access client not found');
+        uploadCalls.should.have.lengthOf(0);
+      });
+
+      it('it should return 500 and not save a URL when the upload fails', async function () {
+        uploadError = new Error('Blob upload failed');
+
+        const res = await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(500);
+
+        res.body.should.have.property('message').eql('Error generating QR code');
+        res.body.should.have.property('error').eql('Blob upload failed');
+
+        const accessGate = await AccessGate.findOne({ code: 'QRTEST01' });
+        expect(accessGate.qrCodeUrl).to.be.null;
+      });
+
+      it('it should NOT GENERATE without authorization', async function () {
+        await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(403);
+      });
+
+      it('it should NOT GENERATE for a non-admin user', async function () {
+        await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${regularUser.token}`)
+          .set('Accept', 'application/json')
+          .expect(403);
+      });
     });
 
-    it('it should return an ephemeral base64 preview when baseUrl is overridden, without persisting', async function () {
-      const res = await request(server)
-        .get('/admin/access/gates/QRTEST01/qr')
-        .query({ baseUrl: 'https://staging.cboard.io' })
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .expect(200);
+    describe('GET', function () {
+      it('it should GET the saved QR code without uploading again', async function () {
+        const generated = await request(server)
+          .post('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .expect(200);
 
-      res.body.should.have.property('url').eql('https://staging.cboard.io/access/qr-01/QRTEST01');
-      res.body.should.have.property('qrCode').that.match(/^data:image\/png;base64,/);
-      res.body.should.not.have.property('qrCodeUrl');
-      uploadCalls.should.have.lengthOf(0);
-    });
+        const res = await request(server)
+          .get('/admin/access/gates/qrtest01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(200);
 
-    it('it should return 404 for a non-existent gate code', async function () {
-      const res = await request(server)
-        .get('/admin/access/gates/NOPE/qr')
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(404);
+        res.body.should.eql(generated.body);
+        uploadCalls.should.have.lengthOf(1);
+      });
 
-      res.body.should.have.property('message').eql('Access gate not found');
-    });
+      it('it should return 404 when no QR code has been generated yet', async function () {
+        const res = await request(server)
+          .get('/admin/access/gates/QRTEST01/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(404);
 
-    it('it should NOT GENERATE without authorization', async function () {
-      await request(server)
-        .get('/admin/access/gates/QRTEST01/qr')
-        .set('Accept', 'application/json')
-        .expect('Content-Type', /json/)
-        .expect(403);
+        res.body.should.have.property('message').eql('QR code not generated yet');
+        uploadCalls.should.have.lengthOf(0);
+      });
+
+      it('it should return 404 for a non-existent gate code', async function () {
+        const res = await request(server)
+          .get('/admin/access/gates/NOPE/qr')
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(404);
+
+        res.body.should.have.property('message').eql('Access gate not found');
+      });
+
+      it('it should NOT GET without authorization', async function () {
+        await request(server)
+          .get('/admin/access/gates/QRTEST01/qr')
+          .set('Accept', 'application/json')
+          .expect('Content-Type', /json/)
+          .expect(403);
+      });
     });
   });
 
