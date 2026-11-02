@@ -10,7 +10,7 @@ const { generateQrCodePngBuffer, buildAccessUrl } = require('../../api/helpers/q
 /**
  * Generates a QR code PNG for a Cboard Access client/code pair and writes it to disk.
  * Kept for local/offline use; the same logic backs the
- * GET /admin/access/gates/{gateCode}/qr endpoint.
+ * POST /admin/access/gates/{gateCode}/qr endpoint.
  */
 function generateQRCode(code, slug, baseUrl) {
   const url = buildAccessUrl(slug, code, baseUrl);
