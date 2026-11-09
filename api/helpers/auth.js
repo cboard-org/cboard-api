@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { google } = require('googleapis');
 const config = require('../../config');
+const User = require('../models/User');
 
 const { secret: jwtSecret, issuer, expiresIn: jwtExpiresIn } = config.jwt;
 
@@ -63,6 +64,17 @@ const getAuthDataFromReq = (req) => {
   };
 };
 
+// Resolves the caller on endpoints without a swagger security block.
+// Returns null when the token is missing or invalid, or the user no longer exists.
+const getOptionalUser = async (req) => {
+  if (!verifyToken(req, req.get('Authorization'))) return null;
+  return (await User.getById(req.auth.id)) || null;
+};
+
+// Ownership is email-based until boards store a userId.
+const canAccessBoard = (board, user) =>
+  !!user && (user.isAdmin || (!!board.email && user.email === board.email));
+
 async function gapiAuth() {
   try {
     const scopes = ['https://www.googleapis.com/auth/androidpublisher'];
@@ -84,5 +96,7 @@ module.exports = {
   verifyToken,
   issueToken,
   getAuthDataFromReq,
+  getOptionalUser,
+  canAccessBoard,
   gapiAuth
 };

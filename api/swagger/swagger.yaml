@@ -202,7 +202,11 @@ paths:
             $ref: "#/definitions/ErrorResponse"
     get:
       operationId: listBoard
-      description: Returns the full boards list.
+      description: Returns the full boards list. Admin only.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
       parameters:
         - $ref: "#/parameters/PageParameter"
         - $ref: "#/parameters/LimitParameter"

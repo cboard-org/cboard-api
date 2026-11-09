@@ -83,9 +83,32 @@ describe('Board API calls', function () {
   });
 
   describe('GET /board', function () {
-    it('it should GET all the boards', async function () {
+    it('it should NOT GET all the boards without authorization', async function () {
+      await request(server)
+        .get('/board')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+
+    it('it should NOT GET all the boards as a non-admin user', async function () {
+      await request(server)
+        .get('/board')
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(403);
+    });
+
+    it('it should GET all the boards as an admin', async function () {
+      const admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: helper.generateEmail(),
+      });
+
       const res = await request(server)
         .get('/board')
+        .set('Authorization', `Bearer ${admin.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
@@ -95,22 +118,86 @@ describe('Board API calls', function () {
   });
 
   describe('PUT /board/:boardid', function () {
+    let owner;
+    let otherUser;
+    let admin;
+
+    // The owner and the board are created in the same scope so the token used
+    // in each test belongs to the board owner (the parent beforeEach creates a
+    // new, unrelated user for every test).
     before(async function () {
-      this.boardId = await helper.createMochaBoard(server, user.token);
+      owner = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      otherUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: helper.generateEmail(),
+      });
+      this.boardId = await helper.createMochaBoard(server, owner.token, owner.email);
     });
 
     it('it should PUT a board', async function () {
-      const boardData = { ...helper.boardData };
+      const boardData = { ...helper.boardData, email: owner.email };
       boardData.name = 'edited name';
       const res = await request(server)
         .put('/board/' + this.boardId)
         .send(boardData)
-        .set('Authorization', `Bearer ${user.token}`)
+        .set('Authorization', `Bearer ${owner.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
 
       helper.verifyBoardProperties(res.body);
+    });
+
+    it("it should NOT PUT another user's board", async function () {
+      const before = await Board.findById(this.boardId).lean();
+
+      await request(server)
+        .put('/board/' + this.boardId)
+        .send({ ...helper.boardData, name: 'edited by another user' })
+        .set('Authorization', `Bearer ${otherUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+
+      const after = await Board.findById(this.boardId).lean();
+      after.name.should.equal(before.name);
+      after.email.should.equal(owner.email);
+    });
+
+    it("it should PUT another user's board as an admin", async function () {
+      const res = await request(server)
+        .put('/board/' + this.boardId)
+        .send({ ...helper.boardData, email: owner.email, name: 'edited by admin' })
+        .set('Authorization', `Bearer ${admin.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      helper.verifyBoardProperties(res.body);
+      res.body.should.have.property('name', 'edited by admin');
+    });
+
+    it('it should NOT change the board email for a non-admin owner', async function () {
+      // `user` is an existing account created by the parent beforeEach, so the
+      // email passes the model validation and only the ownership rule applies.
+      const res = await request(server)
+        .put('/board/' + this.boardId)
+        .send({ ...helper.boardData, email: user.email, name: 'reassign attempt' })
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('email', owner.email);
+      const stored = await Board.findById(this.boardId).lean();
+      stored.email.should.equal(owner.email);
     });
 
     it('it should PUT a board even when the body carries a stale __v (no VersionError)', async function () {
@@ -120,6 +207,7 @@ describe('Board API calls', function () {
       // VersionError on save.
       const boardData = {
         ...helper.boardData,
+        email: owner.email,
         __v: 999,
         _id: this.boardId,
         name: 'edited with stale version',
@@ -129,7 +217,7 @@ describe('Board API calls', function () {
       const res = await request(server)
         .put('/board/' + this.boardId)
         .send(boardData)
-        .set('Authorization', `Bearer ${user.token}`)
+        .set('Authorization', `Bearer ${owner.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
@@ -159,14 +247,38 @@ describe('Board API calls', function () {
   });
 
   describe('GET /board/:boardid', function () {
+    let owner;
+    let otherUser;
+    let admin;
+
     before(async function () {
-      this.boardId = await helper.createMochaBoard(server, user.token);
+      owner = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      otherUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      admin = await helper.prepareUser(server, {
+        role: 'admin',
+        email: helper.generateEmail(),
+      });
+      this.publicBoardId = await helper.createMochaBoard(server, owner.token, owner.email);
+
+      const { body } = await request(server)
+        .post('/board')
+        .send({ ...helper.boardData, email: owner.email, isPublic: false })
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('Accept', 'application/json')
+        .expect(200);
+      this.privateBoardId = body.id;
     });
 
     it('it should GET a board', async function () {
       const res = await request(server)
-        .get('/board/' + this.boardId)
-        .set('Authorization', `Bearer ${user.token}`)
+        .get('/board/' + this.publicBoardId)
+        .set('Authorization', `Bearer ${owner.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
@@ -174,9 +286,49 @@ describe('Board API calls', function () {
       helper.verifyBoardProperties(res.body);
     });
 
-    it('it should GET a board without authorization', async function () {
+    it('it should GET a public board without authorization', async function () {
       const res = await request(server)
-        .get('/board/' + this.boardId)
+        .get('/board/' + this.publicBoardId)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      helper.verifyBoardProperties(res.body);
+    });
+
+    it('it should NOT GET a private board without authorization', async function () {
+      await request(server)
+        .get('/board/' + this.privateBoardId)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+    });
+
+    it("it should NOT GET another user's private board", async function () {
+      await request(server)
+        .get('/board/' + this.privateBoardId)
+        .set('Authorization', `Bearer ${otherUser.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(404);
+    });
+
+    it('it should GET a private board as its owner', async function () {
+      const res = await request(server)
+        .get('/board/' + this.privateBoardId)
+        .set('Authorization', `Bearer ${owner.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      helper.verifyBoardProperties(res.body);
+      res.body.should.have.property('isPublic', false);
+    });
+
+    it("it should GET another user's private board as an admin", async function () {
+      const res = await request(server)
+        .get('/board/' + this.privateBoardId)
+        .set('Authorization', `Bearer ${admin.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
@@ -186,8 +338,16 @@ describe('Board API calls', function () {
   });
 
   describe('DELETE /board/:boardid', function () {
+    let owner;
+
+    // The owner and the board are created in the same scope so the token used
+    // in each test belongs to the board owner.
     before(async function () {
-      this.boardId = await helper.createMochaBoard(server, user.token);
+      owner = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      this.boardId = await helper.createMochaBoard(server, owner.token, owner.email);
     });
 
     it('it should NOT DELETE a board without authorization', async function () {
@@ -208,7 +368,7 @@ describe('Board API calls', function () {
     it('it should delete a board', async function () {
       const res = await request(server)
         .del('/board/' + this.boardId)
-        .set('Authorization', `Bearer ${user.token}`)
+        .set('Authorization', `Bearer ${owner.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(200);
@@ -219,13 +379,13 @@ describe('Board API calls', function () {
     it('it should NOT DELETE a board that was already removed ', async function () {
       await request(server)
         .del('/board/' + this.boardId)
-        .set('Authorization', `Bearer ${user.token}`)
+        .set('Authorization', `Bearer ${owner.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(404);
     });
 
-    it.skip("returns a 404 if the caller is not an admin and doesn't own the board", async function () {
+    it("returns a 404 if the caller is not an admin and doesn't own the board", async function () {
       const email = helper.generateEmail();
       const user1 = await helper.prepareUser(server, { email });
       const user2 = await helper.prepareUser(server, {
@@ -249,9 +409,12 @@ describe('Board API calls', function () {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(404);
+
+      const stillThere = await Board.findById(boardId);
+      should.exist(stillThere);
     });
 
-    it.skip("deletes the board if the caller is an admin but doesn't own the board", async function () {
+    it("deletes the board if the caller is an admin but doesn't own the board", async function () {
       const email = helper.generateEmail();
       const user1 = await helper.prepareUser(server, { email });
       const user2 = await helper.prepareUser(server, {
