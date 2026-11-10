@@ -71,9 +71,12 @@ const getOptionalUser = async (req) => {
   return (await User.getById(req.auth.id)) || null;
 };
 
-// Ownership is email-based until boards store a userId.
-const canAccessBoard = (board, user) =>
-  !!user && (user.isAdmin || (!!board.email && user.email === board.email));
+// Ownership is email-based until boards and communicators store a userId.
+const isOwnerOrAdmin = (resource, user) =>
+  !!user && (user.isAdmin || (!!resource.email && user.email === resource.email));
+
+const canAccessBoard = isOwnerOrAdmin;
+const canAccessCommunicator = isOwnerOrAdmin;
 
 async function gapiAuth() {
   try {
@@ -98,5 +101,6 @@ module.exports = {
   getAuthDataFromReq,
   getOptionalUser,
   canAccessBoard,
+  canAccessCommunicator,
   gapiAuth
 };
