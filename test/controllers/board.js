@@ -72,6 +72,25 @@ describe('Board API calls', function () {
         .expect(409);
     });
 
+    it('it should NOT POST a board owned by another user', async function () {
+      const victim = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+
+      const res = await request(server)
+        .post('/board')
+        .send({ ...helper.boardData, email: victim.email })
+        .set('Authorization', `Bearer ${user.token}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      res.body.should.have.property('email', user.email);
+      const stored = await Board.findById(res.body.id).lean();
+      stored.email.should.equal(user.email);
+    });
+
     it('it should NOT POST a board without authorization', async function () {
       await request(server)
         .post('/board')
