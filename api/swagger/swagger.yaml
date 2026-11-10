@@ -480,12 +480,11 @@ paths:
             $ref: "#/definitions/ErrorResponse"
     get:
       operationId: listCommunicators
-      description: Returns the full communicators list.
+      description: Returns the full communicators list. Admin only.
       security:
         - Bearer: []
       x-security-scopes:
         - admin
-        - user
       parameters:
         - $ref: "#/parameters/PageParameter"
         - $ref: "#/parameters/LimitParameter"
