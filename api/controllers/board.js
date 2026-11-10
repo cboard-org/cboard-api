@@ -29,9 +29,12 @@ module.exports = {
   getCbuilderBoard: getCbuilderBoard
 };
 
-// TODO: Use the caller's email instead of getting it from the body.
 async function createBoard(req, res) {
   const board = new Board(req.body);
+  // Non-admins can only create boards they own.
+  if (!req.user.isAdmin) {
+    board.email = req.user.email;
+  }
   board.lastEdited = moment().format();
   try {
     const savedBoard = await board.save();
