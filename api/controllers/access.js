@@ -3,6 +3,7 @@
 const AccessClient = require('../models/AccessClient');
 const AccessGate = require('../models/AccessGate');
 const Board = require('../models/Board');
+const User = require('../models/User');
 
 module.exports = {
   getClients: getClients,
@@ -12,8 +13,89 @@ module.exports = {
   listAccessClients: listAccessClients,
   updateAccessClient: updateAccessClient,
   updateAccessGate: updateAccessGate,
-  getAccessClientStats: getAccessClientStats
+  getAccessClientStats: getAccessClientStats,
+  getMyAccessClients: getMyAccessClients,
+  getMyAccessClientStats: getMyAccessClientStats
 };
+
+const DAY_IN_MS = 1000 * 60 * 60 * 24;
+
+function getSubscriptionStatus(client, now) {
+  const daysUntilExpiry = Math.ceil((client.subscriptionEnd - now) / DAY_IN_MS);
+  return {
+    isExpired: client.subscriptionEnd < now,
+    daysUntilExpiry: Math.max(0, daysUntilExpiry)
+  };
+}
+
+/**
+ * Keeps User.isAccessClient in sync with whether each user is a member of any AccessClient.
+ * @param {Array<string|ObjectId>} userIds
+ */
+async function syncAccessClientFlags(userIds) {
+  const uniqueIds = [...new Set(userIds.map(id => id.toString()))];
+  for (const userId of uniqueIds) {
+    const isMember = await AccessClient.exists({ 'members.userId': userId });
+    await User.updateOne(
+      { _id: userId },
+      { $set: { isAccessClient: !!isMember } }
+    );
+  }
+}
+
+/**
+ * Resolves member emails to AccessClient member entries.
+ * @param {Array<{email: string}>} members
+ * @returns {Promise<{members: Array<{userId: ObjectId}>, missingEmails: string[]}>}
+ */
+async function resolveMembers(members) {
+  const emails = [...new Set(members.map(m => m.email.trim()))];
+  const users = await User.find({ email: { $in: emails } }, { email: 1 });
+  const missingEmails = emails.filter(
+    email => !users.some(user => user.email === email)
+  );
+  return {
+    members: users.map(user => ({ userId: user._id })),
+    missingEmails
+  };
+}
+
+function getMemberIds(client) {
+  return client.members.map(member => member.userId.toString());
+}
+
+/**
+ * Collects usage stats for a client from its AccessGates and linked boards.
+ * @param {Object} client - AccessClient document
+ */
+async function buildClientStats(client) {
+  const accessGates = await AccessGate.find({ accessClientId: client._id });
+
+  // Collect unique board IDs across all access gates
+  const allBoardIds = [
+    ...new Set(accessGates.flatMap(ag => ag.linkedBoardIds.map(id => id.toString())))
+  ];
+  const boards = await Board.find({ _id: { $in: allBoardIds } }, { name: 1, tiles: 1 });
+
+  const totalAccesses = accessGates.reduce((sum, ag) => sum + (ag.viewsCount || 0), 0);
+  const lastAccessAt = accessGates.reduce((latest, ag) => {
+    if (!ag.lastAccessAt) return latest;
+    if (!latest || ag.lastAccessAt > latest) return ag.lastAccessAt;
+    return latest;
+  }, null);
+
+  return {
+    totalAccesses,
+    lastAccessAt,
+    boardCount: boards.length,
+    boards: boards.map(b => ({
+      id: b._id,
+      name: b.name,
+      tilesCount: b.tiles?.length || 0
+    })),
+    ...getSubscriptionStatus(client, new Date())
+  };
+}
 
 /**
  * Recursively discovers all boards reachable from a root board via tile.loadBoard references.
@@ -62,7 +144,7 @@ async function getClients(req, res) {
       isActive: true,
       subscriptionStart: { $lte: now },
       subscriptionEnd: { $gte: now }
-    }).select('slug contact brandColor');
+    }).select('slug name brandColor');
 
     const accessGates = await AccessGate.find({
       accessClientId: { $in: clients.map(c => c._id) }
@@ -73,7 +155,7 @@ async function getClients(req, res) {
     const result = clients
       .map(client => ({
         slug: client.slug,
-        clientName: client.contact.name,
+        clientName: client.name,
         brandColor: client.brandColor,
         accessGates: accessGates
           .filter(ag => ag.accessClientId.toString() === client._id.toString())
@@ -179,7 +261,7 @@ async function getAccessBoards(req, res) {
     return res.status(200).json({
       client: {
         slug: client.slug,
-        name: client.contact.name,
+        name: client.name,
         color: client.brandColor
       },
       boards: boards.map(b => b.toJSON()),
@@ -208,13 +290,15 @@ async function createAccessClient(req, res) {
   const {
     slug,
     clientName,
+    contactName,
     clientEmail,
     clientPhone,
     brandColor,
     rootBoardId,
     subscriptionStart,
     subscriptionEnd,
-    accessGateCode
+    accessGateCode,
+    members = []
   } = req.body;
 
   try {
@@ -222,6 +306,14 @@ async function createAccessClient(req, res) {
     const rootBoard = await Board.findById(rootBoardId);
     if (!rootBoard) {
       return res.status(404).json({ message: 'Root board not found' });
+    }
+
+    const resolvedMembers = await resolveMembers(members);
+    if (resolvedMembers.missingEmails.length) {
+      return res.status(404).json({
+        message: 'Member user not found',
+        emails: resolvedMembers.missingEmails
+      });
     }
 
     // Check for duplicates before persisting anything to avoid orphaned documents
@@ -239,11 +331,13 @@ async function createAccessClient(req, res) {
     // Create the client
     const client = new AccessClient({
       slug,
-      contact: { name: clientName, email: clientEmail, phone: clientPhone },
+      name: clientName,
+      contact: { name: contactName, email: clientEmail, phone: clientPhone },
       brandColor,
       subscriptionStart: new Date(subscriptionStart),
       subscriptionEnd: new Date(subscriptionEnd),
-      createdBy: req.user.id
+      createdBy: req.user.id,
+      members: resolvedMembers.members
     });
 
     await client.save();
@@ -276,6 +370,8 @@ async function createAccessClient(req, res) {
       }
       throw err;
     }
+
+    await syncAccessClientFlags(getMemberIds(client));
 
     return res.status(201).json({ ...client.toJSON(), accessGate: newAccessGate.toJSON() });
   } catch (err) {
@@ -401,7 +497,8 @@ async function createAccessGate(req, res) {
 /**
  * PUT /admin/access/clients/:clientSlug
  * Updates an Access client.
- * Allowed fields: isActive, subscription dates, branding, client name/email/phone.
+ * Allowed fields: isActive, subscription dates, branding, client name, contact name/email/phone, members.
+ * When members is sent, it replaces the current member list.
  */
 async function updateAccessClient(req, res) {
   const slug = req.swagger.params.clientSlug.value;
@@ -419,12 +516,32 @@ async function updateAccessClient(req, res) {
       client.subscriptionStart = new Date(updates.subscriptionStart);
     if (updates.subscriptionEnd)
       client.subscriptionEnd = new Date(updates.subscriptionEnd);
-    if (updates.clientName) client.contact.name = updates.clientName;
+    if (updates.clientName) client.name = updates.clientName;
+    if (updates.contactName) client.contact.name = updates.contactName;
     if (updates.clientEmail) client.contact.email = updates.clientEmail;
     if (updates.clientPhone) client.contact.phone = updates.clientPhone;
     if (updates.brandColor) client.brandColor = updates.brandColor;
 
+    const previousMemberIds = getMemberIds(client);
+    if (updates.members !== undefined) {
+      const resolvedMembers = await resolveMembers(updates.members);
+      if (resolvedMembers.missingEmails.length) {
+        return res.status(404).json({
+          message: 'Member user not found',
+          emails: resolvedMembers.missingEmails
+        });
+      }
+      client.members = resolvedMembers.members;
+    }
+
     await client.save();
+
+    const currentMemberIds = getMemberIds(client);
+    const changedMemberIds = [
+      ...previousMemberIds.filter(id => !currentMemberIds.includes(id)),
+      ...currentMemberIds.filter(id => !previousMemberIds.includes(id))
+    ];
+    await syncAccessClientFlags(changedMemberIds);
 
     return res.status(200).json(client.toJSON());
   } catch (err) {
@@ -451,40 +568,9 @@ async function getAccessClientStats(req, res) {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    const accessGates = await AccessGate.find({ accessClientId: client._id });
-
-    // Collect unique board IDs across all access gates
-    const allBoardIds = [
-      ...new Set(accessGates.flatMap(ag => ag.linkedBoardIds.map(id => id.toString())))
-    ];
-    const boards = await Board.find({ _id: { $in: allBoardIds } }, { name: 1, tiles: 1 });
-
-    const totalAccesses = accessGates.reduce((sum, ag) => sum + (ag.viewsCount || 0), 0);
-    const lastAccessAt = accessGates.reduce((latest, ag) => {
-      if (!ag.lastAccessAt) return latest;
-      if (!latest || ag.lastAccessAt > latest) return ag.lastAccessAt;
-      return latest;
-    }, null);
-
-    const now = new Date();
-    const daysUntilExpiry = Math.ceil(
-      (client.subscriptionEnd - now) / (1000 * 60 * 60 * 24)
-    );
-
     return res.status(200).json({
       client: client.toJSON(),
-      stats: {
-        totalAccesses,
-        lastAccessAt,
-        boardCount: boards.length,
-        boards: boards.map(b => ({
-          id: b._id,
-          name: b.name,
-          tilesCount: b.tiles?.length || 0
-        })),
-        daysUntilExpiry: Math.max(0, daysUntilExpiry),
-        isExpired: client.subscriptionEnd < now
-      }
+      stats: await buildClientStats(client)
     });
   } catch (err) {
     return res.status(500).json({
@@ -544,6 +630,97 @@ async function updateAccessGate(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error updating access gate',
+      error: err.message
+    });
+  }
+}
+
+// ============================================
+// MEMBER ENDPOINTS
+// Members have read-only access: boards are managed by the Cboard team.
+// ============================================
+
+/**
+ * GET /access/me/clients
+ * Lists the Access clients the authenticated user is a member of, with their
+ * access gates, usage counters and subscription status.
+ */
+async function getMyAccessClients(req, res) {
+  try {
+    const clients = await AccessClient.find({
+      'members.userId': req.user.id
+    }).sort({ name: 1 });
+
+    const accessGates = await AccessGate.find({
+      accessClientId: { $in: clients.map(c => c._id) }
+    })
+      .populate('rootBoard', 'name caption tiles')
+      .select('code rootBoardId accessClientId viewsCount lastAccessAt');
+
+    const now = new Date();
+    const result = clients.map(client => ({
+      slug: client.slug,
+      clientName: client.name,
+      brandColor: client.brandColor,
+      isActive: client.isActive,
+      subscriptionStart: client.subscriptionStart,
+      subscriptionEnd: client.subscriptionEnd,
+      ...getSubscriptionStatus(client, now),
+      accessGates: accessGates
+        .filter(ag => ag.accessClientId.toString() === client._id.toString())
+        .map(ag => ({
+          code: ag.code,
+          viewsCount: ag.viewsCount || 0,
+          lastAccessAt: ag.lastAccessAt,
+          rootBoard: ag.rootBoard
+            ? {
+                id: ag.rootBoard._id,
+                name: ag.rootBoard.name,
+                caption: ag.rootBoard.caption,
+                tilesCount: ag.rootBoard.tiles?.length || 0
+              }
+            : null
+        }))
+    }));
+
+    return res.status(200).json({
+      total: result.length,
+      data: result
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error listing clients',
+      error: err.message
+    });
+  }
+}
+
+/**
+ * GET /access/me/clients/:clientSlug/stats
+ * Gets detailed statistics for an Access client the authenticated user is a member of.
+ */
+async function getMyAccessClientStats(req, res) {
+  const slug = req.swagger.params.clientSlug.value;
+
+  try {
+    const client = await AccessClient.findOne({
+      slug,
+      'members.userId': req.user.id
+    });
+
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+
+    const { createdBy, members, ...clientData } = client.toJSON();
+
+    return res.status(200).json({
+      client: clientData,
+      stats: await buildClientStats(client)
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting client statistics',
       error: err.message
     });
   }

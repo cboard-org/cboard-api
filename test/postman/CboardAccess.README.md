@@ -79,17 +79,19 @@ The collection includes these variables (can be edited in collection variables o
    {
      "slug": "coffee-shop-downtown",
      "clientName": "Coffee Shop Downtown",
+     "contactName": "Jane Doe",
      "clientEmail": "manager@coffee.com",
-    "clientPhone": "+1234567890",
+     "clientPhone": "+1234567890",
      "brandColor": "#8B4513",
      "rootBoardId": "{{root_board_id}}",
      "accessGateCode": "CAFE01",
      "subscriptionStart": "2026-04-01T00:00:00.000Z",
-     "subscriptionEnd": "2027-04-01T00:00:00.000Z"
+     "subscriptionEnd": "2027-04-01T00:00:00.000Z",
+     "members": [{ "email": "manager@coffee.com" }]
    }
    ```
 
-2. The response includes the created client (`slug`, `contact.name`, etc.) and the `accessGate` with `code` and `linkedBoardIds`
+2. The response includes the created client (`slug`, `name`, `contact`, `members`, etc.) and the `accessGate` with `code` and `linkedBoardIds`
 3. `client_slug` and `access_code` variables are automatically saved for subsequent requests
 
 ### Adding Independent Access Gates
@@ -140,18 +142,26 @@ Use **Update Access Gate** to re-run board discovery after the board structure c
 
 **Required Fields:**
 - `slug`: Unique client identifier (lowercase, URL-safe)
-- `clientName`: Display name
+- `clientName`: Name of the organization
 - `rootBoardId`: ID of the main board
 - `accessGateCode`: Unique code for the access gate (uppercase alphanumeric)
 - `subscriptionStart`: Start date (ISO 8601)
 - `subscriptionEnd`: End date (ISO 8601)
 
 **Optional Fields:**
-- `clientEmail`: Email of the client
-- `clientPhone`: Phone number of the client
+- `contactName`: Name of the contact person
+- `clientEmail`: Email of the contact person
+- `clientPhone`: Phone number of the contact person
 - `brandColor`: Hex color code
+- `members`: Cboard users who can see the client in their dashboard, as `[{ "email": "..." }]`. Each email must belong to an existing Cboard user, otherwise the request fails with 404 `Member user not found` and the missing `emails`
 
 Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to the access gate.
+
+### Members
+
+Members are Cboard users linked to a client. They see the client's QR codes, scans and plan in their Cboard Access dashboard (`GET /access/me/clients` and `GET /access/me/clients/:clientSlug/stats`). Access is read-only: the boards behind each gate are managed by the Cboard team.
+
+A member is unrelated to the global user `role` (`user` / `admin`): any Cboard user can be a member of one or more clients. Users that are members of at least one client have `isAccessClient: true`.
 
 ### Add Access Gate to Client
 
@@ -169,9 +179,11 @@ Returns the created `AccessGate` object with `code`, `rootBoardId`, and `linkedB
 
 **Updatable Fields:**
 - `clientName`
+- `contactName`
 - `clientEmail`
 - `clientPhone`
 - `brandColor`
+- `members`: replaces the current member list (`[]` removes all members)
 - `isActive` (boolean)
 - `subscriptionStart`
 - `subscriptionEnd`
