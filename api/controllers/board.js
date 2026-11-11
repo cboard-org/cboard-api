@@ -5,7 +5,11 @@ const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
-const { getOptionalUser, canAccessBoard } = require('../helpers/auth');
+const {
+  getOptionalUser,
+  canAccessBoard,
+  verifyToken
+} = require('../helpers/auth');
 const { processBase64Images, hasBase64Images } = require('../helpers/imageProcessor');
 
 const {nev} = require('../mail');
@@ -202,7 +206,14 @@ async function getBoard(req, res) {
       });
     }
     if (!board.isPublic) {
-      // 404 hides that a private board exists.
+      // 401, not 404, for callers without a valid token: clients older than
+      // 1.40.0 delete their local copy of a board when this returns 404 during sync.
+      if (!verifyToken(req, req.get('Authorization'))) {
+        return res.status(401).json({
+          message: 'Authentication required to access this board.'
+        });
+      }
+      // 404 for authenticated non-owners hides that a private board exists.
       const user = await getOptionalUser(req);
       if (!canAccessBoard(board, user)) {
         return res.status(404).json({
