@@ -8,7 +8,10 @@ var expect = require('chai').expect;
 const should = chai.should();
 const helper = require('../helper');
 
+const jwt = require('jsonwebtoken');
+const config = require('../../config');
 const Board = require('../../api/models/Board');
+const User = require('../../api/models/User');
 
 //Parent block
 describe('Board API calls', function () {
@@ -315,9 +318,52 @@ describe('Board API calls', function () {
       helper.verifyBoardProperties(res.body);
     });
 
-    it('it should NOT GET a private board without authorization', async function () {
+    // 401, not 404: clients older than 1.40.0 delete their local copy of a
+    // board when this endpoint returns 404 during sync.
+    it('it should return 401 for a private board without authorization', async function () {
       await request(server)
         .get('/board/' + this.privateBoardId)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(401);
+    });
+
+    it('it should return 401 for a private board with an invalid token', async function () {
+      await request(server)
+        .get('/board/' + this.privateBoardId)
+        .set('Authorization', 'Bearer not-a-valid-token')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(401);
+    });
+
+    it('it should return 401 for a private board with an expired token', async function () {
+      const expiredToken = jwt.sign(
+        {
+          email: owner.email,
+          id: owner.userId,
+          issuer: config.jwt.issuer,
+          exp: Math.floor(Date.now() / 1000) - 60
+        },
+        config.jwt.secret
+      );
+      await request(server)
+        .get('/board/' + this.privateBoardId)
+        .set('Authorization', `Bearer ${expiredToken}`)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(401);
+    });
+
+    it('it should return 404 for a private board with a valid token of a deleted user', async function () {
+      const deletedUser = await helper.prepareUser(server, {
+        role: 'user',
+        email: helper.generateEmail(),
+      });
+      await User.deleteOne({ _id: deletedUser.userId });
+      await request(server)
+        .get('/board/' + this.privateBoardId)
+        .set('Authorization', `Bearer ${deletedUser.token}`)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect(404);
