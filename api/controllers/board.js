@@ -5,6 +5,7 @@ const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Board = require('../models/Board');
 const { getCbuilderBoardbyId } = require('../helpers/cbuilder');
+const { getOptionalUser, canAccessBoard } = require('../helpers/auth');
 const { processBase64Images, hasBase64Images } = require('../helpers/imageProcessor');
 
 const {nev} = require('../mail');
@@ -28,9 +29,12 @@ module.exports = {
   getCbuilderBoard: getCbuilderBoard
 };
 
-// TODO: Use the caller's email instead of getting it from the body.
 async function createBoard(req, res) {
   const board = new Board(req.body);
+  // Non-admins can only create boards they own.
+  if (!req.user.isAdmin) {
+    board.email = req.user.email;
+  }
   board.lastEdited = moment().format();
   try {
     const savedBoard = await board.save();
@@ -164,13 +168,15 @@ async function getPublicBoards(req, res) {
 async function deleteBoard(req, res) {
   const id = req.swagger.params.id.value;
   try {
-    const board = await Board.findByIdAndDelete(id);
-    if (!board) {
+    const board = await Board.findById(id);
+    // 404 instead of 403 for non-owners: the client logs the user out on any 403.
+    if (!board || !canAccessBoard(board, req.user)) {
       return res.status(404).json({
         message: 'Board not found. Board Id: ' + id,
         error: 'Board not found.'
       });
     }
+    await board.deleteOne();
     return res.status(200).json(board);
   } catch (err) {
     return res.status(404).json({
@@ -195,6 +201,15 @@ async function getBoard(req, res) {
         message: 'Board does not exist. Board Id: ' + id
       });
     }
+    if (!board.isPublic) {
+      // 404 hides that a private board exists.
+      const user = await getOptionalUser(req);
+      if (!canAccessBoard(board, user)) {
+        return res.status(404).json({
+          message: 'Board does not exist. Board Id: ' + id
+        });
+      }
+    }
     return res.status(200).json(board.toJSON());
   } catch (err) {
     return res.status(500).json({
@@ -211,14 +226,19 @@ async function updateBoard(req, res) {
   try {
     const board = await Board.findOne({ _id: id });
     
-    if (!board) {
+    // 404 instead of 403 for non-owners: the client logs the user out on any 403.
+    if (!board || !canAccessBoard(board, req.user)) {
       return res.status(404).json({
         message: 'Unable to find board. board Id: ' + id
       });
     }
-    
+
     const updateData = { ...req.body };
     delete updateData.__v;
+    // Only admins may reassign a board to another owner.
+    if (!req.user.isAdmin) {
+      delete updateData.email;
+    }
 
     if (
       updateData.tiles &&
