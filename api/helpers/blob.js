@@ -1,12 +1,15 @@
 const { v1: uuidv1 } = require('uuid');
 
 const azure = require('azure-storage');
+const config = require('../../config');
 const blobService = azure.createBlobService(
   process.env.AZURE_STORAGE_CONNECTION_STRING
 );
 
 module.exports = {
-  createBlockBlobFromText
+  createBlockBlobFromText,
+  createOrReplaceBlockBlob,
+  toCdnUrl
 };
 
 function createContainerIfNotExists(shareName) {
@@ -65,4 +68,55 @@ async function createBlockBlobFromText(
       }
     );
   });
+}
+
+// Returns [file:BlobResult, fileUrl:string]. Uploads to the exact blobName given,
+// overwriting any existing blob at that path — for content that should live at a
+// stable, reusable URL (e.g. QR codes) instead of getting a unique name per upload
+// like createBlockBlobFromText does. Uses a short cache so overwrites reach the CDN.
+async function createOrReplaceBlockBlob(
+  containerName,
+  blobName,
+  buffer,
+  mimetype
+) {
+  await createContainerIfNotExists(containerName);
+
+  const options = {};
+  if (mimetype && mimetype.length) {
+    const cacheMaxAgeInSeconds = 3600;
+    options.contentSettings = {
+      contentType: mimetype,
+      cacheControl: `max-age=${cacheMaxAgeInSeconds}`
+    };
+  }
+
+  return new Promise((resolve, reject) => {
+    blobService.createBlockBlobFromText(
+      containerName,
+      blobName,
+      buffer,
+      options,
+      function(error, file) {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve([file, blobService.getUrl(file.container, file.name)]);
+      }
+    );
+  });
+}
+
+// Rewrites a production blob URL to its CDN equivalent when a CDN is configured
+function toCdnUrl(fileUrl) {
+  return config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME &&
+    config.AZURE_CDN_URL &&
+    fileUrl.startsWith(config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME)
+    ? fileUrl.replace(
+        config.CBOARD_PRODUCTION_BLOB_CONTAINER_HOSTNAME,
+        config.AZURE_CDN_URL
+      )
+    : fileUrl;
 }

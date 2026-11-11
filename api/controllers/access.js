@@ -3,6 +3,14 @@
 const AccessClient = require('../models/AccessClient');
 const AccessGate = require('../models/AccessGate');
 const Board = require('../models/Board');
+const blob = require('../helpers/blob');
+const {
+  generateQrCodePngBuffer,
+  buildAccessUrl
+} = require('../helpers/qrCode');
+
+const BLOB_CONTAINER_NAME = process.env.BLOB_CONTAINER_NAME || 'cblob';
+const QR_CODE_BLOB_FOLDER = 'qr-codes';
 
 module.exports = {
   getClients: getClients,
@@ -12,7 +20,9 @@ module.exports = {
   listAccessClients: listAccessClients,
   updateAccessClient: updateAccessClient,
   updateAccessGate: updateAccessGate,
-  getAccessClientStats: getAccessClientStats
+  getAccessClientStats: getAccessClientStats,
+  generateAccessGateQrCode: generateAccessGateQrCode,
+  getAccessGateQrCode: getAccessGateQrCode
 };
 
 /**
@@ -544,6 +554,88 @@ async function updateAccessGate(req, res) {
   } catch (err) {
     return res.status(500).json({
       message: 'Error updating access gate',
+      error: err.message
+    });
+  }
+}
+
+/**
+ * POST /admin/access/gates/:gateCode/qr
+ * Generates a QR code encoding the public Access URL
+ * (CBOARD_APP_URL/access/:clientSlug/:gateCode), uploads it to Blob Storage
+ * at a stable path (qr-codes/:clientSlug-:gateCode.png, overwritten on
+ * regeneration) and saves its URL on the access gate as qrCodeUrl.
+ */
+async function generateAccessGateQrCode(req, res) {
+  const code = req.swagger.params.gateCode.value.toUpperCase();
+
+  try {
+    const accessGate = await AccessGate.findOne({ code }).populate('accessClient');
+    if (!accessGate) {
+      return res.status(404).json({ message: 'Access gate not found' });
+    }
+
+    const client = accessGate.accessClient;
+    if (!client) {
+      return res.status(404).json({ message: 'Access client not found' });
+    }
+
+    const url = buildAccessUrl(client.slug, code);
+    const [, fileUrl] = await blob.createOrReplaceBlockBlob(
+      BLOB_CONTAINER_NAME,
+      `${QR_CODE_BLOB_FOLDER}/${client.slug}-${code}.png`,
+      generateQrCodePngBuffer(url),
+      'image/png'
+    );
+
+    accessGate.qrCodeUrl = blob.toCdnUrl(fileUrl);
+    await accessGate.save();
+
+    return res.status(200).json({
+      code,
+      clientSlug: client.slug,
+      url,
+      qrCodeUrl: accessGate.qrCodeUrl
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error generating QR code',
+      error: err.message
+    });
+  }
+}
+
+/**
+ * GET /admin/access/gates/:gateCode/qr
+ * Returns the QR code previously generated for an access gate.
+ */
+async function getAccessGateQrCode(req, res) {
+  const code = req.swagger.params.gateCode.value.toUpperCase();
+
+  try {
+    const accessGate = await AccessGate.findOne({ code }).populate('accessClient');
+    if (!accessGate) {
+      return res.status(404).json({ message: 'Access gate not found' });
+    }
+
+    const client = accessGate.accessClient;
+    if (!client) {
+      return res.status(404).json({ message: 'Access client not found' });
+    }
+
+    if (!accessGate.qrCodeUrl) {
+      return res.status(404).json({ message: 'QR code not generated yet' });
+    }
+
+    return res.status(200).json({
+      code,
+      clientSlug: client.slug,
+      url: buildAccessUrl(client.slug, code),
+      qrCodeUrl: accessGate.qrCodeUrl
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: 'Error getting QR code',
       error: err.message
     });
   }

@@ -19,6 +19,8 @@ Cboard Access allows businesses to offer AAC boards in their locations via QR co
 - **Deactivate Client**: Disable a client by setting `isActive` to false
 - **View Statistics**: Get detailed stats for a specific client
 - **Update Access Gate**: Re-run board discovery for an access gate
+- **Generate Access Gate QR Code**: Generate a QR code for an access gate and save its URL
+- **Get Access Gate QR Code**: Get the saved QR code URL for an access gate
 
 ### 3. Public Endpoints (No Authentication)
 - **Test Public Client Listing**: List active clients for app display
@@ -134,6 +136,14 @@ Each board tree can internally link to other boards via `tile.loadBoard`, but th
 
 Use **Update Access Gate** to re-run board discovery after the board structure changes. Optionally pass a new `rootBoardId` in the body to change the root.
 
+### Generating a QR Code
+
+Use **Generate Access Gate QR Code** to get a printable QR code for a gate — no terminal needed. It replaces the old `scripts/qr-generator/generate-qr.js` CLI workflow (that script now just wraps the same helper for local/offline use).
+
+1. Run **Generate Access Gate QR Code** for `{{access_code}}`
+2. The response's `qrCodeUrl` field is a permanent Azure Blob Storage (or CDN, if configured) link under `qr-codes/` — open it in a browser to view, download, or send to print. It's also saved on the gate, and regenerating overwrites the same path, so the link never changes.
+3. Later, run **Get Access Gate QR Code** to retrieve the saved `qrCodeUrl` without generating a new one
+
 ## Request Details
 
 ### Create Access Client
@@ -182,6 +192,20 @@ These endpoints don't require authentication and simulate real user access:
 
 - **GET /access/clients/all**: Returns only active clients with valid subscriptions
 - **GET /access/:clientSlug/:gateCode**: Returns all boards for the access code and increments access counter
+
+### Generate Access Gate QR Code
+
+**Endpoint:** `POST /admin/access/gates/:gateCode/qr`
+
+Encodes the same `CBOARD_APP_URL/access/:clientSlug/:gateCode` URL used by the public endpoints above, uploads the QR PNG to Azure Blob Storage at `qr-codes/:clientSlug-:gateCode.png` (overwriting any previous QR for that gate) and saves its URL on the gate. Returns `{ code, clientSlug, url, qrCodeUrl }`, where `qrCodeUrl` is the permanent (CDN-resolved, when configured) link.
+
+The PNG is served with a 1-hour cache, so after a regeneration the CDN picks up the new image within an hour.
+
+### Get Access Gate QR Code
+
+**Endpoint:** `GET /admin/access/gates/:gateCode/qr`
+
+Returns the saved `{ code, clientSlug, url, qrCodeUrl }` without generating anything. Returns 404 if no QR code has been generated for the gate yet.
 
 ## Test Scripts
 

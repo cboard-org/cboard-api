@@ -1586,6 +1586,60 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
+  /admin/access/gates/{gateCode}/qr:
+    x-swagger-router-controller: access
+    post:
+      operationId: generateAccessGateQrCode
+      description: Generates a QR code encoding the public Access URL for a gate (CBOARD_APP_URL/access/:clientSlug/:gateCode), uploads it to Azure Blob Storage at a stable path (overwritten on regeneration) and saves its URL on the gate as qrCodeUrl. Requires admin authentication.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: gateCode
+          type: string
+          in: path
+          required: true
+          description: Access gate code (case-insensitive)
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessGateQrCodeResponse"
+        "404":
+          description: Access gate or client not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    get:
+      operationId: getAccessGateQrCode
+      description: Returns the QR code previously generated for a gate. Requires admin authentication.
+      security:
+        - Bearer: []
+      x-security-scopes:
+        - admin
+      parameters:
+        - name: gateCode
+          type: string
+          in: path
+          required: true
+          description: Access gate code (case-insensitive)
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AccessGateQrCodeResponse"
+        "404":
+          description: Access gate or client not found, or QR code not generated yet
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 # complex objects have schema definitions
 definitions:
   AnalyticsReport:
@@ -2649,9 +2703,27 @@ definitions:
         type: string
         format: date-time
         description: Last access timestamp
+      qrCodeUrl:
+        type: string
+        description: URL of the last generated QR code PNG, null until generated
       createdAt:
         type: string
         format: date-time
       updatedAt:
         type: string
         format: date-time
+  AccessGateQrCodeResponse:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Access gate code (uppercase)
+      clientSlug:
+        type: string
+        description: Slug of the AccessClient this gate belongs to
+      url:
+        type: string
+        description: The Cboard Access URL encoded in the QR code
+      qrCodeUrl:
+        type: string
+        description: Blob Storage (or CDN, when configured) URL of the QR code PNG, at qr-codes/:clientSlug-:gateCode.png. Stays the same across regenerations.
