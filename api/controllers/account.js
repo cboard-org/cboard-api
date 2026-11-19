@@ -3,6 +3,7 @@ const Settings = require('../models/Settings');
 const Communicator = require('../models/Communicator');
 const Board = require('../models/Board');
 const Subscribers = require('../models/Subscribers');
+const AccessClient = require('../models/AccessClient');
 
 const { getAuthDataFromReq } = require('../helpers/auth');
 
@@ -76,6 +77,19 @@ async function removeAccount(req, res) {
     console.error(error);
     return res.status(500).json({
       message: 'Error deleting user subscriber'
+    });
+  }
+
+  try {
+    const accessClients = await AccessClient.updateMany(
+      { 'members.userId': id },
+      { $pull: { members: { userId: id } } }
+    );
+    response.removedFromAccessClients = accessClients.modifiedCount;
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Error removing user from access clients'
     });
   }
 

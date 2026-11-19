@@ -24,8 +24,9 @@
 									"pm.test(\"Response contains client data\", function () {",
 									"    var jsonData = pm.response.json();",
 									"    pm.expect(jsonData).to.have.property('slug');",
+									"    pm.expect(jsonData).to.have.property('name');",
 									"    pm.expect(jsonData).to.have.property('contact');",
-									"    pm.expect(jsonData.contact).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('members');",
 									"});",
 									"",
 									"pm.test(\"Response contains access gate with auto-discovered boards\", function () {",
@@ -65,7 +66,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGateCode\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
+							"raw": "{\n    \"slug\": \"test-coffee-shop\",\n    \"clientName\": \"Test Coffee Shop\",\n    \"contactName\": \"Jane Doe\",\n    \"clientEmail\": \"contact@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#8B4513\",\n    \"rootBoardId\": \"{{root_board_id}}\",\n    \"accessGateCode\": \"TEST01\",\n    \"subscriptionStart\": \"2026-04-01T00:00:00.000Z\",\n    \"subscriptionEnd\": \"2027-04-01T00:00:00.000Z\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/admin/access/clients",
@@ -169,8 +170,9 @@
 									"    if (jsonData.data.length > 0) {",
 									"        var client = jsonData.data[0];",
 									"        pm.expect(client).to.have.property('slug');",
+									"        pm.expect(client).to.have.property('name');",
 									"        pm.expect(client).to.have.property('contact');",
-									"        pm.expect(client.contact).to.have.property('name');",
+									"        pm.expect(client).to.have.property('members');",
 									"        pm.expect(client).to.have.property('boardCount');",
 									"        pm.expect(client).to.have.property('isExpired');",
 									"    }",
@@ -239,7 +241,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"clientEmail\": \"newemail@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true\n}"
+							"raw": "{\n    \"clientName\": \"Test Coffee Shop - Updated\",\n    \"contactName\": \"John Doe\",\n    \"clientEmail\": \"newemail@testcoffee.com\",\n    \"clientPhone\": \"+1234567890\",\n    \"brandColor\": \"#6F4E37\",\n    \"isActive\": true\n}"
 						},
 						"url": {
 							"raw": "{{url}}/admin/access/clients/{{client_slug}}",
