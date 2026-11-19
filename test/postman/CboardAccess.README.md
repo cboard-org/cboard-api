@@ -153,7 +153,7 @@ Use **Update Access Gate** to re-run board discovery after the board structure c
 - `clientEmail`: Email of the contact person
 - `clientPhone`: Phone number of the contact person
 - `brandColor`: Hex color code
-- `members`: Cboard users who can see the client in their dashboard, as `[{ "email": "..." }]`. Each email must belong to an existing Cboard user, otherwise the request fails with 404 `Member user not found` and the missing `emails`
+- `members`: Cboard users who can see the client in their dashboard, as `[{ "email": "..." }]` or `[{ "userId": "..." }]` (both forms can be mixed). Each entry must belong to an existing Cboard user, otherwise the request fails with 404 `Member user not found` and the missing `emails` / `userIds`. A malformed list (not an array, or entries without a valid `email`/`userId`) returns 400. Admin responses return members as `[{ "userId", "email" }]`, so the list can be sent back as-is when editing
 
 Board discovery is automatic — all boards reachable from `rootBoardId` via tile navigation are linked to the access gate.
 
@@ -183,7 +183,7 @@ Returns the created `AccessGate` object with `code`, `rootBoardId`, and `linkedB
 - `clientEmail`
 - `clientPhone`
 - `brandColor`
-- `members`: replaces the current member list (`[]` removes all members)
+- `members`: replaces the current member list (`[]` removes all members). To add one member, send the current list from the admin response plus the new entry
 - `isActive` (boolean)
 - `subscriptionStart`
 - `subscriptionEnd`
