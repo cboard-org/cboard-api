@@ -2723,4 +2723,4 @@ definitions:
         description: The Cboard Access URL encoded in the QR code
       qrCodeUrl:
         type: string
-        description: Blob Storage (or CDN, when configured) URL of the QR code PNG, at qr-codes/:clientSlug-:gateCode.png. Stays the same across regenerations.
+        description: Blob Storage (or CDN, when configured) URL of the QR code PNG, at qr-codes/:clientSlug/:gateCode.png. Stays the same across regenerations.
