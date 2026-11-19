@@ -563,8 +563,10 @@ async function updateAccessGate(req, res) {
  * POST /admin/access/gates/:gateCode/qr
  * Generates a QR code encoding the public Access URL
  * (CBOARD_APP_URL/access/:clientSlug/:gateCode), uploads it to Blob Storage
- * at a stable path (qr-codes/:clientSlug-:gateCode.png, overwritten on
+ * at a stable path (qr-codes/:clientSlug/:gateCode.png, overwritten on
  * regeneration) and saves its URL on the access gate as qrCodeUrl.
+ * The "/" separator matters: slugs and gate codes may contain hyphens, so
+ * joining them with "-" could map two different gates to the same blob.
  */
 async function generateAccessGateQrCode(req, res) {
   const code = req.swagger.params.gateCode.value.toUpperCase();
@@ -583,7 +585,7 @@ async function generateAccessGateQrCode(req, res) {
     const url = buildAccessUrl(client.slug, code);
     const [, fileUrl] = await blob.createOrReplaceBlockBlob(
       BLOB_CONTAINER_NAME,
-      `${QR_CODE_BLOB_FOLDER}/${client.slug}-${code}.png`,
+      `${QR_CODE_BLOB_FOLDER}/${client.slug}/${code}.png`,
       generateQrCodePngBuffer(url),
       'image/png'
     );
