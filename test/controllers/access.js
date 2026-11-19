@@ -838,6 +838,228 @@ describe('Access API calls', function () {
         regularUser.userId.toString(),
       ]);
     });
+
+    it('it should include member emails in admin responses', async function () {
+      const createRes = await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      createRes.body.members.should.eql([
+        { userId: regularUser.userId.toString(), email: regularUser.email },
+      ]);
+
+      const listRes = await request(server)
+        .get('/admin/access/clients')
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+      const listed = listRes.body.data.find(c => c.slug === 'members-01');
+      listed.members.should.eql([
+        { userId: regularUser.userId.toString(), email: regularUser.email },
+      ]);
+
+      const statsRes = await request(server)
+        .get('/admin/access/clients/members-01/stats')
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+      statsRes.body.client.members.should.eql([
+        { userId: regularUser.userId.toString(), email: regularUser.email },
+      ]);
+    });
+
+    it('it should accept members by userId so admin payloads round-trip', async function () {
+      const createRes = await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      // Send back the existing members as received, plus a new one by email
+      const res = await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({
+          members: [
+            ...createRes.body.members.map(({ userId }) => ({ userId })),
+            { email: secondUser.email },
+          ],
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      memberIds(res).should.have.members([
+        regularUser.userId.toString(),
+        secondUser.userId.toString(),
+      ]);
+    });
+
+    it('it should NOT UPDATE with a non-existent member userId', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      const unknownId = '507f1f77bcf86cd799439011';
+      const res = await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({ members: [{ userId: unknownId }] })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(404);
+
+      res.body.should.have.property('message').eql('Member user not found');
+      res.body.should.have.property('userIds').eql([unknownId]);
+    });
+
+    [
+      ['null', null],
+      ['a non-array', { email: 'a@b.com' }],
+      ['an array of strings', ['a@b.com']],
+      ['an array with an empty object', [{}]],
+      ['an invalid userId', [{ userId: 'not-an-id' }]],
+    ].forEach(([label, members]) => {
+      it(`it should return 400 when members is ${label}`, async function () {
+        await request(server)
+          .post('/admin/access/clients')
+          .send(memberClientData([]))
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .expect(201);
+
+        const updateRes = await request(server)
+          .put('/admin/access/clients/members-01')
+          .send({ members })
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json');
+        updateRes.status.should.eql(400);
+
+        const createRes = await request(server)
+          .post('/admin/access/clients')
+          .send({
+            ...memberClientData(members),
+            slug: 'members-bad',
+            accessGateCode: 'MEMBERSBAD',
+          })
+          .set('Authorization', `Bearer ${adminUser.token}`)
+          .set('Accept', 'application/json');
+        createRes.status.should.eql(400);
+      });
+    });
+
+    it('it should repair stale flags when the same update is retried', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      // Simulate a previous sync that failed midway: flag left out of date
+      await User.updateOne({ _id: regularUser.userId }, { $set: { isAccessClient: false } });
+
+      await request(server)
+        .put('/admin/access/clients/members-01')
+        .send({ members: [{ email: regularUser.email }] })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      const user = await User.findById(regularUser.userId);
+      user.isAccessClient.should.eql(true);
+    });
+
+    it('it should remove a deleted account from client members', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }, { email: secondUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      await request(server)
+        .delete(`/account/${secondUser.userId}`)
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      const client = await AccessClient.findOne({ slug: 'members-01' });
+      client.members.map(m => m.userId.toString()).should.eql([
+        regularUser.userId.toString(),
+      ]);
+    });
+
+    it('it should remove a deleted user from client members', async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send(memberClientData([{ email: regularUser.email }, { email: secondUser.email }]))
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      await request(server)
+        .delete(`/user/${secondUser.userId}`)
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      const client = await AccessClient.findOne({ slug: 'members-01' });
+      client.members.map(m => m.userId.toString()).should.eql([
+        regularUser.userId.toString(),
+      ]);
+    });
+  });
+
+  describe('Legacy clients without name', function () {
+    const legacySlug = 'legacy-01';
+
+    beforeEach(async function () {
+      await request(server)
+        .post('/admin/access/clients')
+        .send({
+          slug: legacySlug,
+          clientName: 'placeholder',
+          contactName: 'Legacy Org mocha test',
+          rootBoardId: testBoardId,
+          accessGateCode: 'LEGACY01',
+          subscriptionStart: new Date(),
+          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(201);
+
+      // Mimic a client created on master: org name only in contact.name
+      await AccessClient.collection.updateOne({ slug: legacySlug }, { $unset: { name: '' } });
+    });
+
+    afterEach(async function () {
+      const client = await AccessClient.collection.findOne({ slug: legacySlug });
+      if (client) {
+        await AccessGate.deleteMany({ accessClientId: client._id });
+        await AccessClient.collection.deleteOne({ _id: client._id });
+      }
+    });
+
+    it('GET /access/clients/all should not fail and fall back to contact.name', async function () {
+      const res = await request(server).get('/access/clients/all').expect(200);
+      const legacy = res.body.data.find(c => c.slug === legacySlug);
+      legacy.should.have.property('clientName').eql('Legacy Org mocha test');
+    });
+
+    it('GET /access/:slug/:code should return the fallback client name', async function () {
+      const res = await request(server).get(`/access/${legacySlug}/LEGACY01`).expect(200);
+      res.body.client.should.have.property('name').eql('Legacy Org mocha test');
+    });
+
+    it('PUT should update a legacy client without sending clientName', async function () {
+      const res = await request(server)
+        .put(`/admin/access/clients/${legacySlug}`)
+        .send({ isActive: false })
+        .set('Authorization', `Bearer ${adminUser.token}`)
+        .expect(200);
+
+      res.body.should.have.property('name').eql('Legacy Org mocha test');
+      res.body.should.have.property('isActive').eql(false);
+    });
+
+    it('backfill script should copy contact.name into name', async function () {
+      const { backfillAccessClientName } = require('../../scripts/backfillAccessClientName');
+      await backfillAccessClientName();
+      const client = await AccessClient.collection.findOne({ slug: legacySlug });
+      client.should.have.property('name').eql('Legacy Org mocha test');
+    });
   });
 
   describe('GET /access/me/clients', function () {
