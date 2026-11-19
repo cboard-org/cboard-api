@@ -835,3 +835,5 @@ var qrcodegen;
         QrSegment.Mode = Mode;
     })(QrSegment = qrcodegen.QrSegment || (qrcodegen.QrSegment = {}));
 })(qrcodegen || (qrcodegen = {}));
+// Expose the namespace as a CommonJS module
+module.exports = qrcodegen;

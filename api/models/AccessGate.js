@@ -34,6 +34,10 @@ const ACCESS_GATE_SCHEMA_DEFINITION = {
     type: [Schema.Types.ObjectId],
     ref: 'Board',
     default: []
+  },
+  qrCodeUrl: {
+    type: String,
+    default: null
   }
 };
 
