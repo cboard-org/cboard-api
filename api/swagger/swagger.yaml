@@ -2388,18 +2388,23 @@ definitions:
           $ref: "#/definitions/AccessClientMemberInput"
   AccessClientMemberInput:
     type: object
-    required:
-      - email
+    description: Identifies an existing Cboard user by email or userId (one of them is required; email wins if both are sent)
     properties:
       email:
         type: string
         description: Email of an existing Cboard user
+      userId:
+        type: string
+        description: ID of an existing Cboard user (as returned in admin responses)
   AccessClientMember:
     type: object
     properties:
       userId:
         type: string
         description: ID of the Cboard user
+      email:
+        type: string
+        description: Email of the Cboard user (admin responses only; null if the user no longer exists)
   AccessClientUpdate:
     type: object
     properties:
