@@ -567,10 +567,10 @@ describe('Access API calls', function () {
         res.body.should.have.property('code').eql('QRTEST01');
         res.body.should.have.property('clientSlug').eql('qr-01');
         res.body.should.have.property('url').that.match(/\/access\/qr-01\/QRTEST01$/);
-        res.body.should.have.property('qrCodeUrl').that.match(/^https:\/\/fakeblob\.test\/.*qr-codes\/qr-01-QRTEST01\.png$/);
+        res.body.should.have.property('qrCodeUrl').that.match(/^https:\/\/fakeblob\.test\/.*qr-codes\/qr-01\/QRTEST01\.png$/);
 
         uploadCalls.should.have.lengthOf(1);
-        uploadCalls[0].blobName.should.eql('qr-codes/qr-01-QRTEST01.png');
+        uploadCalls[0].blobName.should.eql('qr-codes/qr-01/QRTEST01.png');
         uploadCalls[0].mimetype.should.eql('image/png');
 
         const accessGate = await AccessGate.findOne({ code: 'QRTEST01' });
@@ -591,6 +591,50 @@ describe('Access API calls', function () {
         uploadCalls.should.have.lengthOf(2);
         const accessGate = await AccessGate.findOne({ code: 'QRTEST01' });
         accessGate.qrCodeUrl.should.eql(second.body.qrCodeUrl);
+      });
+
+      it('it should use distinct blob paths for gates whose slug-code would collide with a hyphen', async function () {
+        // acme-2024 + SUMMER and acme + 2024-SUMMER both flatten to "acme-2024-SUMMER"
+        const collidingPairs = [
+          { slug: 'qr-acme-2024', code: 'SUMMER' },
+          { slug: 'qr-acme', code: '2024-SUMMER' },
+        ];
+        await AccessGate.deleteMany({ code: { $in: collidingPairs.map(p => p.code) } });
+
+        try {
+          for (const { slug, code } of collidingPairs) {
+            await request(server)
+              .post('/admin/access/clients')
+              .send({
+                slug,
+                clientName: 'QR collision mocha test',
+                rootBoardId: testBoardId,
+                accessGateCode: code,
+                subscriptionStart: new Date(),
+                subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+              })
+              .set('Authorization', `Bearer ${adminUser.token}`)
+              .expect(201);
+          }
+
+          const responses = [];
+          for (const { code } of collidingPairs) {
+            responses.push(
+              await request(server)
+                .post(`/admin/access/gates/${code}/qr`)
+                .set('Authorization', `Bearer ${adminUser.token}`)
+                .expect(200)
+            );
+          }
+
+          uploadCalls.map(c => c.blobName).should.eql([
+            'qr-codes/qr-acme-2024/SUMMER.png',
+            'qr-codes/qr-acme/2024-SUMMER.png',
+          ]);
+          responses[0].body.qrCodeUrl.should.not.eql(responses[1].body.qrCodeUrl);
+        } finally {
+          await AccessGate.deleteMany({ code: { $in: collidingPairs.map(p => p.code) } });
+        }
       });
 
       it('it should accept a lowercase gate code (case-insensitive)', async function () {
