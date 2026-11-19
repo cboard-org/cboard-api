@@ -1117,6 +1117,23 @@ describe('Access API calls', function () {
       client.accessGates[0].rootBoard.should.have.property('id').eql(testBoardId.toString());
     });
 
+    it('it should return the QR code URL of each gate', async function () {
+      const before = await request(server)
+        .get('/access/me/clients')
+        .set('Authorization', `Bearer ${regularUser.token}`)
+        .expect(200);
+      expect(before.body.data[0].accessGates[0].qrCodeUrl).to.be.null;
+
+      const qrCodeUrl = 'https://cdn.test/qr-codes/mine-01-MINE01.png';
+      await AccessGate.collection.updateOne({ code: 'MINE01' }, { $set: { qrCodeUrl } });
+
+      const res = await request(server)
+        .get('/access/me/clients')
+        .set('Authorization', `Bearer ${regularUser.token}`)
+        .expect(200);
+      res.body.data[0].accessGates[0].should.have.property('qrCodeUrl').eql(qrCodeUrl);
+    });
+
     it('it should reflect gate views in the counters', async function () {
       await request(server).get('/access/mine-01/MINE01').expect(200);
       await new Promise(resolve => setTimeout(resolve, 100));
