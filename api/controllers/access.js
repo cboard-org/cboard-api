@@ -765,7 +765,7 @@ async function getMyAccessClients(req, res) {
       accessClientId: { $in: clients.map(c => c._id) }
     })
       .populate('rootBoard', 'name caption tiles')
-      .select('code rootBoardId accessClientId viewsCount lastAccessAt');
+      .select('code rootBoardId accessClientId viewsCount lastAccessAt qrCodeUrl');
 
     const now = new Date();
     const result = clients.map(client => ({
@@ -782,6 +782,7 @@ async function getMyAccessClients(req, res) {
           code: ag.code,
           viewsCount: ag.viewsCount || 0,
           lastAccessAt: ag.lastAccessAt,
+          qrCodeUrl: ag.get('qrCodeUrl') || null,
           rootBoard: ag.rootBoard
             ? {
                 id: ag.rootBoard._id,
