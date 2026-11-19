@@ -43,25 +43,122 @@ async function syncAccessClientFlags(userIds) {
   }
 }
 
+const OBJECT_ID_REGEX = /^[a-f0-9]{24}$/i;
+
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
 /**
- * Resolves member emails to AccessClient member entries.
- * @param {Array<{email: string}>} members
- * @returns {Promise<{members: Array<{userId: ObjectId}>, missingEmails: string[]}>}
+ * Validates the shape of a members payload.
+ * Each entry must be an object with a non-empty `email` or a valid `userId`.
+ * @returns {string|null} error message, or null when valid
+ */
+function validateMembersInput(members) {
+  if (!Array.isArray(members)) {
+    return 'members must be an array';
+  }
+  const invalid = members.some(
+    m =>
+      !m ||
+      typeof m !== 'object' ||
+      !(
+        isNonEmptyString(m.email) ||
+        (isNonEmptyString(m.userId) && OBJECT_ID_REGEX.test(m.userId.trim()))
+      )
+  );
+  return invalid
+    ? 'Each member must be an object with a non-empty email or a valid userId'
+    : null;
+}
+
+/**
+ * Resolves member entries ({ email } or { userId }) to AccessClient member entries.
+ * Accepting userId lets admin clients round-trip the members list they received.
+ * @param {Array<{email?: string, userId?: string}>} members
+ * @returns {Promise<{members: Array<{userId: ObjectId}>, missingEmails: string[], missingUserIds: string[]}>}
  */
 async function resolveMembers(members) {
-  const emails = [...new Set(members.map(m => m.email.trim()))];
-  const users = await User.find({ email: { $in: emails } }, { email: 1 });
+  const emails = [
+    ...new Set(members.filter(m => isNonEmptyString(m.email)).map(m => m.email.trim()))
+  ];
+  const userIds = [
+    ...new Set(
+      members
+        .filter(m => !isNonEmptyString(m.email))
+        .map(m => m.userId.trim().toLowerCase())
+    )
+  ];
+
+  const users = await User.find(
+    { $or: [{ email: { $in: emails } }, { _id: { $in: userIds } }] },
+    { email: 1 }
+  );
+
   const missingEmails = emails.filter(
     email => !users.some(user => user.email === email)
   );
+  const missingUserIds = userIds.filter(
+    id => !users.some(user => user._id.toString() === id)
+  );
+
   return {
     members: users.map(user => ({ userId: user._id })),
-    missingEmails
+    missingEmails,
+    missingUserIds
   };
+}
+
+function hasMissingMembers(resolved) {
+  return resolved.missingEmails.length > 0 || resolved.missingUserIds.length > 0;
+}
+
+function missingMembersResponse(res, resolved) {
+  return res.status(404).json({
+    message: 'Member user not found',
+    emails: resolved.missingEmails,
+    userIds: resolved.missingUserIds
+  });
 }
 
 function getMemberIds(client) {
   return client.members.map(member => member.userId.toString());
+}
+
+/**
+ * Serializes AccessClients for admin responses, adding each member's email so
+ * admin clients can edit the (replace-all) members list without extra lookups.
+ * @param {Array<Object>} clients - AccessClient documents
+ * @returns {Promise<Array<Object>>}
+ */
+async function toAdminJSON(clients) {
+  const memberIds = [...new Set(clients.flatMap(getMemberIds))];
+  const users = memberIds.length
+    ? await User.find({ _id: { $in: memberIds } }, { email: 1 })
+    : [];
+  const emailById = new Map(users.map(u => [u._id.toString(), u.email]));
+
+  return clients.map(client => {
+    const json = client.toJSON();
+    json.members = getMemberIds(client).map(userId => ({
+      userId,
+      email: emailById.get(userId) || null
+    }));
+    return json;
+  });
+}
+
+async function toAdminClientJSON(client) {
+  const [json] = await toAdminJSON([client]);
+  return json;
+}
+
+/**
+ * Display name for a client. Falls back to contact.name for clients created
+ * before `name` existed and not yet backfilled.
+ */
+function getClientName(client) {
+  return client.name || client.contact?.name || client.slug;
 }
 
 /**
@@ -144,7 +241,7 @@ async function getClients(req, res) {
       isActive: true,
       subscriptionStart: { $lte: now },
       subscriptionEnd: { $gte: now }
-    }).select('slug name brandColor');
+    }).select('slug name contact.name brandColor');
 
     const accessGates = await AccessGate.find({
       accessClientId: { $in: clients.map(c => c._id) }
@@ -155,7 +252,7 @@ async function getClients(req, res) {
     const result = clients
       .map(client => ({
         slug: client.slug,
-        clientName: client.name,
+        clientName: getClientName(client),
         brandColor: client.brandColor,
         accessGates: accessGates
           .filter(ag => ag.accessClientId.toString() === client._id.toString())
@@ -261,7 +358,7 @@ async function getAccessBoards(req, res) {
     return res.status(200).json({
       client: {
         slug: client.slug,
-        name: client.name,
+        name: getClientName(client),
         color: client.brandColor
       },
       boards: boards.map(b => b.toJSON()),
@@ -301,6 +398,11 @@ async function createAccessClient(req, res) {
     members = []
   } = req.body;
 
+  const membersError = validateMembersInput(members);
+  if (membersError) {
+    return res.status(400).json({ message: membersError });
+  }
+
   try {
     // Verify that the root board exists
     const rootBoard = await Board.findById(rootBoardId);
@@ -309,11 +411,8 @@ async function createAccessClient(req, res) {
     }
 
     const resolvedMembers = await resolveMembers(members);
-    if (resolvedMembers.missingEmails.length) {
-      return res.status(404).json({
-        message: 'Member user not found',
-        emails: resolvedMembers.missingEmails
-      });
+    if (hasMissingMembers(resolvedMembers)) {
+      return missingMembersResponse(res, resolvedMembers);
     }
 
     // Check for duplicates before persisting anything to avoid orphaned documents
@@ -373,7 +472,10 @@ async function createAccessClient(req, res) {
 
     await syncAccessClientFlags(getMemberIds(client));
 
-    return res.status(201).json({ ...client.toJSON(), accessGate: newAccessGate.toJSON() });
+    return res.status(201).json({
+      ...(await toAdminClientJSON(client)),
+      accessGate: newAccessGate.toJSON()
+    });
   } catch (err) {
     if (err.code === 11000) {
       const isSlugDuplicate = err.message.includes('slug');
@@ -412,14 +514,15 @@ async function listAccessClients(req, res) {
     }, {});
 
     const now = new Date();
-    const result = clients.map(client => {
+    const clientsJSON = await toAdminJSON(clients);
+    const result = clients.map((client, index) => {
       const boardCount = agMap[client._id.toString()] || 0;
       const daysUntilExpiry = Math.ceil(
         (client.subscriptionEnd - now) / (1000 * 60 * 60 * 24)
       );
 
       return {
-        ...client.toJSON(),
+        ...clientsJSON[index],
         boardCount,
         isExpired: client.subscriptionEnd < now,
         daysUntilExpiry: Math.max(0, daysUntilExpiry)
@@ -504,11 +607,24 @@ async function updateAccessClient(req, res) {
   const slug = req.swagger.params.clientSlug.value;
   const updates = req.body;
 
+  if (updates.members !== undefined) {
+    const membersError = validateMembersInput(updates.members);
+    if (membersError) {
+      return res.status(400).json({ message: membersError });
+    }
+  }
+
   try {
     const client = await AccessClient.findOne({ slug });
 
     if (!client) {
       return res.status(404).json({ message: 'Client not found' });
+    }
+
+    // Clients created before `name` was introduced stored the org name in
+    // contact.name; fill it so the required-path validation on save passes.
+    if (!client.name && client.contact?.name) {
+      client.name = client.contact.name;
     }
 
     if (updates.isActive !== undefined) client.isActive = updates.isActive;
@@ -525,25 +641,19 @@ async function updateAccessClient(req, res) {
     const previousMemberIds = getMemberIds(client);
     if (updates.members !== undefined) {
       const resolvedMembers = await resolveMembers(updates.members);
-      if (resolvedMembers.missingEmails.length) {
-        return res.status(404).json({
-          message: 'Member user not found',
-          emails: resolvedMembers.missingEmails
-        });
+      if (hasMissingMembers(resolvedMembers)) {
+        return missingMembersResponse(res, resolvedMembers);
       }
       client.members = resolvedMembers.members;
     }
 
     await client.save();
 
-    const currentMemberIds = getMemberIds(client);
-    const changedMemberIds = [
-      ...previousMemberIds.filter(id => !currentMemberIds.includes(id)),
-      ...currentMemberIds.filter(id => !previousMemberIds.includes(id))
-    ];
-    await syncAccessClientFlags(changedMemberIds);
+    // Sync the union (not just the diff) so that retrying the same request
+    // repairs flags left stale by a previously interrupted sync.
+    await syncAccessClientFlags([...previousMemberIds, ...getMemberIds(client)]);
 
-    return res.status(200).json(client.toJSON());
+    return res.status(200).json(await toAdminClientJSON(client));
   } catch (err) {
     return res.status(500).json({
       message: 'Error updating client',
@@ -569,7 +679,7 @@ async function getAccessClientStats(req, res) {
     }
 
     return res.status(200).json({
-      client: client.toJSON(),
+      client: await toAdminClientJSON(client),
       stats: await buildClientStats(client)
     });
   } catch (err) {
@@ -660,7 +770,7 @@ async function getMyAccessClients(req, res) {
     const now = new Date();
     const result = clients.map(client => ({
       slug: client.slug,
-      clientName: client.name,
+      clientName: getClientName(client),
       brandColor: client.brandColor,
       isActive: client.isActive,
       subscriptionStart: client.subscriptionStart,
@@ -715,7 +825,7 @@ async function getMyAccessClientStats(req, res) {
     const { createdBy, members, ...clientData } = client.toJSON();
 
     return res.status(200).json({
-      client: clientData,
+      client: { ...clientData, name: getClientName(client) },
       stats: await buildClientStats(client)
     });
   } catch (err) {
