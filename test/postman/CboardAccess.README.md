@@ -197,7 +197,7 @@ These endpoints don't require authentication and simulate real user access:
 
 **Endpoint:** `POST /admin/access/gates/:gateCode/qr`
 
-Encodes the same `CBOARD_APP_URL/access/:clientSlug/:gateCode` URL used by the public endpoints above, uploads the QR PNG to Azure Blob Storage at `qr-codes/:clientSlug-:gateCode.png` (overwriting any previous QR for that gate) and saves its URL on the gate. Returns `{ code, clientSlug, url, qrCodeUrl }`, where `qrCodeUrl` is the permanent (CDN-resolved, when configured) link.
+Encodes the same `CBOARD_APP_URL/access/:clientSlug/:gateCode` URL used by the public endpoints above, uploads the QR PNG to Azure Blob Storage at `qr-codes/:clientSlug/:gateCode.png` (overwriting any previous QR for that gate) and saves its URL on the gate. Returns `{ code, clientSlug, url, qrCodeUrl }`, where `qrCodeUrl` is the permanent (CDN-resolved, when configured) link.
 
 The PNG is served with a 1-hour cache, so after a regeneration the CDN picks up the new image within an hour.
 
