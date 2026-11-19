@@ -2583,6 +2583,10 @@ definitions:
                     type: string
                     format: date-time
                     x-nullable: true
+                  qrCodeUrl:
+                    type: string
+                    x-nullable: true
+                    description: URL of the generated QR code image (null until generated)
                   rootBoard:
                     type: object
                     x-nullable: true
