@@ -157,10 +157,15 @@ async function getSubscriber(req, res) {
         remoteData = await paypal.getSubscriptionDetails(subscriber.transaction.subscriptionId);
         status = remoteData.status;
         // Normalize PayPal statuses to internal vocabulary
-        if (status.toLowerCase() === 'cancelled') status = 'canceled';
-        // PayPal suspends after exhausting payment retries; keep as 'suspended'
-        // so the frontend can show a targeted "fix payment on PayPal" CTA
-        if (status.toLowerCase() === 'suspended') status = 'suspended';
+        const PAYPAL_STATUS_MAP = {
+          approval_pending: 'proccesing',
+          approved: 'proccesing',
+          active: 'active',
+          suspended: 'suspended',
+          cancelled: 'canceled',
+          expired: 'expired'
+        };
+        status = PAYPAL_STATUS_MAP[status.toLowerCase()] || status.toLowerCase();
         // PayPal keeps ACTIVE during the billing retry window but accrues
         // outstanding_balance. Surface that as in_grace_period so the user
         // is warned without losing access.
