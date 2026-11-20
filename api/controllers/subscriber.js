@@ -15,6 +15,10 @@ const {
   verifyAppStorePurchase,
   setSubscriptionState
 } = require('../helpers/appStore');
+const {
+  normalizeSubscriptionStatus,
+  PAYPAL_STATUS_MAP
+} = require('../helpers/subscriptionStatus');
 
 module.exports = {
   createSubscriber,
@@ -137,7 +141,14 @@ async function getSubscriber(req, res) {
     if (subscriber.transaction?.platform === 'android-playstore' &&
       subscriber.transaction?.nativePurchase?.purchaseToken) {
       try {
-        const newSubscriber = await subscriber.save();
+        let newSubscriber = await subscriber.save();
+        const normalizedStatus = normalizeSubscriptionStatus(
+          newSubscriber.transaction?.subscriptionState
+        );
+        if (newSubscriber.status !== normalizedStatus) {
+          newSubscriber.status = normalizedStatus;
+          newSubscriber = await newSubscriber.save();
+        }
         return res.status(200).json({success: true, ...newSubscriber.toJSON()});
       }
       catch (err) {
@@ -155,19 +166,16 @@ async function getSubscriber(req, res) {
       try {
         // get subscription from paypal API
         remoteData = await paypal.getSubscriptionDetails(subscriber.transaction.subscriptionId);
-        status = remoteData.status;
         // Normalize PayPal statuses to internal vocabulary
-        if (status.toLowerCase() === 'cancelled') status = 'canceled';
-        // PayPal suspends after exhausting payment retries; keep as 'suspended'
-        // so the frontend can show a targeted "fix payment on PayPal" CTA
-        if (status.toLowerCase() === 'suspended') status = 'suspended';
+        const rawStatus = remoteData.status?.toLowerCase();
+        status = PAYPAL_STATUS_MAP[rawStatus] || normalizeSubscriptionStatus(remoteData.status);
         // PayPal keeps ACTIVE during the billing retry window but accrues
         // outstanding_balance. Surface that as in_grace_period so the user
         // is warned without losing access.
         const outstandingBalance = parseFloat(
           remoteData.billing_info?.outstanding_balance?.value || 0
         );
-        if (status.toLowerCase() === 'active' && outstandingBalance > 0) {
+        if (status === 'active' && outstandingBalance > 0) {
           status = 'in_grace_period';
         }
         expiryDate = remoteData.billing_info?.next_billing_time;
@@ -202,7 +210,7 @@ async function getSubscriber(req, res) {
           ...subscriber.transaction,
           ...decodedTransaction
         };
-        subscriber.status = subscriber.transaction.subscriptionState;
+        subscriber.status = normalizeSubscriptionStatus(subscriber.transaction.subscriptionState);
       } catch (err) {
         return res.status(200).json({
           ok: false,
