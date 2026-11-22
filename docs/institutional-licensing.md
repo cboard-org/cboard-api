@@ -10,6 +10,7 @@ Set these values through the existing environment/secret mechanism, with a diffe
 INSTITUTIONAL_LICENSING_ENABLED=false
 CBOARD_INSTITUTIONS_URL=https://institutional-staging.example.test
 INSTITUTIONS_HMAC_KEY=
+INSTITUTIONS_TRUSTED_PROXIES=
 ```
 
 Set the institutional service's PRODUCT_ENDPOINTS.cboard to this API origin, PRODUCT_LOGIN_URLS.cboard to the real browser login URL, PRODUCT_ACTIVATION_URLS.cboard to the real browser URL ending in /institutional-access, and PRODUCT_KEYS.cboard to the same dedicated key. Those service settings are JSON objects. No token or secret belongs in a browser URL.
@@ -23,3 +24,11 @@ Open /institutional-access after signing in. Review the invitation and renewal t
 Test valid/wrong-account/expired/replayed invitations, existing ordinary paid/lifetime access, actual premium feature access, unavailable service, local expiry, stale/conflicting revisions, provider approval recovery and cancellation. Normal Stripe webhooks ignore purpose=institutional-subscription where Stripe is used, so billing events cannot create an unbounded ordinary subscription. Cbuilder also rejects that purpose in its ordinary checkout verification action.
 
 Do not delete institutional records or disable a deployed reader as a billing rollback: preserve funded access through its recorded end. Stop the institutional worker and new writes, restore a compatible image, reconcile provider state, then replay targeted jobs. Full provider and production-host validation remains required.
+
+## Request limits
+
+Both institutional routes share 300 requests per client network per UTC-aligned minute before parsing, JWT checks, bridge indexes or account queries. Authenticated activation actions share 30 requests per verified account per minute across actions and IP addresses, before account/subscriber reads or service calls. IPv6 clients share a /56. Rejections return HTTP 429 and Retry-After; clients must back off. Fixed windows can allow two windows' budget across a boundary.
+
+Counters use atomic updates in the existing product MongoDB `institutionalRateLimits` collection, shared by every API process/VM, with an expiry TTL index. Keys hash the client/account identifier. Grant the existing scoped product user index/read/write access to this collection. Database/index failure returns HTTP 503 and never falls back to process-local counters. No additional database or Redis is required.
+
+The limiter deliberately ignores the application's unrestricted `trust proxy` setting. Forwarded addresses are accepted only through the explicit IP/CIDR chain in `INSTITUTIONS_TRUSTED_PROXIES`. Empty configuration keys requests by the socket peer; behind a proxy this conservatively shares the network budget. Before staging activation, identify the actual NGINX/gateway addresses, restrict direct backend ingress and verify that the trusted edge overwrites or appends the real source to X-Forwarded-For. Never use `true`, arbitrary hop counts or broad unverified subnets. Account limits apply independently of this proxy setting. Signed entitlement bytes and HMAC/replay verification remain unchanged.

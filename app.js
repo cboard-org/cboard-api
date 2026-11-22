@@ -26,7 +26,6 @@ const morgan = require('morgan');
 const config = require('./config');
 
 const app = express();
-app.use('/api/institutions', require('./api/controllers/institutions').router());
 
 if (config.appInsightConnectionString && config.env === 'production') {
   appInsights
@@ -59,6 +58,8 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
       exposedHeaders: ['Request-Context']
     })
   );
+
+  app.use('/api/institutions', require('./api/controllers/institutions').router());
 
   // Log HTTP requests. The `dev` format looks like this:
   // :method :url :status :response-time ms - :res[content-length]
