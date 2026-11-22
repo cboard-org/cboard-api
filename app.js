@@ -59,6 +59,8 @@ swaggerTools.initializeMiddleware(swaggerConfig, async function (middleware) {
     })
   );
 
+  app.use('/api/institutions', require('./api/controllers/institutions').router());
+
   // Log HTTP requests. The `dev` format looks like this:
   // :method :url :status :response-time ms - :res[content-length]
   app.use(morgan('dev'));
