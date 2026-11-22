@@ -1,6 +1,7 @@
 const { paginatedResponse } = require('../helpers/response');
 const { getORQuery } = require('../helpers/query');
 const Communicator = require('../models/Communicator');
+const { canAccessCommunicator } = require('../helpers/auth');
 
 module.exports = {
   createCommunicator: createCommunicator,
@@ -13,6 +14,10 @@ module.exports = {
 
 async function createCommunicator(req, res) {
   const communicator = new Communicator(req.body);
+  // Non-admins can only create communicators they own.
+  if (!req.user.isAdmin) {
+    communicator.email = req.user.email;
+  }
   try {
     const savedCommunicator = await communicator.save();
     return res.status(200).json({
@@ -79,7 +84,8 @@ async function getCommunicator(req, res) {
   const id = req.swagger.params.id.value;
   try {
     const communicator = await Communicator.findById(id);
-    if (!communicator) {
+    // 404 instead of 403 for non-owners: the client logs the user out on any 403.
+    if (!communicator || !canAccessCommunicator(communicator, req.user)) {
       return res.status(404).json({
         message: `Communicator does not exist. Communicator ID: ${id}`
       });
@@ -98,7 +104,8 @@ async function updateCommunicator(req, res) {
   let communicator = null;
   try {
     communicator = await Communicator.findById(id).exec();
-    if (!communicator) {
+    // 404 instead of 403 for non-owners: the client logs the user out on any 403.
+    if (!communicator || !canAccessCommunicator(communicator, req.user)) {
       return res.status(404).json({
         message: `Unable to find communicator. Communicator ID: ${id}`
       });
@@ -122,8 +129,14 @@ async function updateCommunicator(req, res) {
     });
   }
 
-  for (let key in req.body) {
-    communicator[key] = req.body[key];
+  const updateData = { ...req.body };
+  // Only admins may reassign a communicator to another owner.
+  if (!req.user.isAdmin) {
+    delete updateData.email;
+  }
+
+  for (let key in updateData) {
+    communicator[key] = updateData[key];
   }
 
   try {
