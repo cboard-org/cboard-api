@@ -136,6 +136,24 @@ describe('shared institutional request protection', function() {
       .set('X-Forwarded-For', '2001:db8:abce::1')
       .expect(401);
   });
+  it('shares one network budget across IPv4 and mapped IPv6 representations', async () => {
+    const server = app({ INSTITUTIONS_TRUSTED_PROXIES: '127.0.0.1/8,::1/128' });
+    const addresses = [
+      '192.0.2.1',
+      '::ffff:192.0.2.1',
+      '::ffff:c000:201',
+      '0:0:0:0:0:ffff:c000:201'
+    ];
+    for (let i = 0; i < 300; i++)
+      await request(server)
+        .post('/activation/check')
+        .set('X-Forwarded-For', addresses[i % addresses.length])
+        .expect(401);
+    await request(server)
+      .post('/activation/check')
+      .set('X-Forwarded-For', '192.0.2.1')
+      .expect(429);
+  });
   it('limits the actual activation controller before account reads and service calls', async () => {
     const config = require('../../config');
     const savedSecret = config.jwt.secret;
