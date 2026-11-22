@@ -136,6 +136,73 @@ describe('shared institutional request protection', function() {
       .set('X-Forwarded-For', '2001:db8:abce::1')
       .expect(401);
   });
+  it('limits the actual activation controller before account reads and service calls', async () => {
+    const config = require('../../config');
+    const savedSecret = config.jwt.secret;
+    config.jwt.secret = 'synthetic-local-test-secret-never-deploy';
+    const auth = require('../../api/helpers/auth');
+    const User = require('../../api/models/User');
+    const Subscriber = require('../../api/models/Subscribers');
+    const bridgeModule = require('../../api/helpers/institutional-bridge');
+    const original = {
+      user: User.getById,
+      subscriber: Subscriber.findOne,
+      bridge: bridgeModule.createBridge,
+      db: mongoose.connection.db
+    };
+    const modulePath = require.resolve('../../api/controllers/institutions');
+    const cached = require.cache[modulePath];
+    let reads = 0,
+      calls = 0;
+    try {
+      mongoose.connection.db = db;
+      User.getById = async () => {
+        reads++;
+        return { email: 'synthetic@example.test' };
+      };
+      Subscriber.findOne = async () => null;
+      bridgeModule.createBridge = () => ({
+        entitlements: async () => [],
+        request: async () => {
+          calls++;
+          return { state: 'pending' };
+        }
+      });
+      delete require.cache[modulePath];
+      const server = express();
+      server.use('/api/institutions', require(modulePath).router());
+      const token = auth.issueToken({
+        id: 'synthetic-account',
+        email: 'synthetic@example.test'
+      });
+      await request(server)
+        .post('/api/institutions/activation/check')
+        .send({})
+        .expect(401);
+      assert.equal(reads, 0);
+      for (let i = 0; i < 30; i++)
+        await request(server)
+          .post('/api/institutions/activation/check')
+          .set('Authorization', `Bearer ${token}`)
+          .send({})
+          .expect(200);
+      await request(server)
+        .post('/api/institutions/activation/check')
+        .set('Authorization', `Bearer ${token}`)
+        .send({})
+        .expect(429);
+      assert.equal(reads, 30);
+      assert.equal(calls, 30);
+    } finally {
+      User.getById = original.user;
+      Subscriber.findOne = original.subscriber;
+      bridgeModule.createBridge = original.bridge;
+      mongoose.connection.db = original.db;
+      config.jwt.secret = savedSecret;
+      if (cached) require.cache[modulePath] = cached;
+      else delete require.cache[modulePath];
+    }
+  });
   it('preserves raw signed bytes and rejects unavailable protection without passing downstream', async () => {
     await request(app())
       .post('/entitlements')
