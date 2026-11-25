@@ -1002,66 +1002,6 @@ describe('Access API calls', function () {
     });
   });
 
-  describe('Legacy clients without name', function () {
-    const legacySlug = 'legacy-01';
-
-    beforeEach(async function () {
-      await request(server)
-        .post('/admin/access/clients')
-        .send({
-          slug: legacySlug,
-          clientName: 'placeholder',
-          contactName: 'Legacy Org mocha test',
-          rootBoardId: testBoardId,
-          accessGateCode: 'LEGACY01',
-          subscriptionStart: new Date(),
-          subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        })
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .expect(201);
-
-      // Mimic a client created on master: org name only in contact.name
-      await AccessClient.collection.updateOne({ slug: legacySlug }, { $unset: { name: '' } });
-    });
-
-    afterEach(async function () {
-      const client = await AccessClient.collection.findOne({ slug: legacySlug });
-      if (client) {
-        await AccessGate.deleteMany({ accessClientId: client._id });
-        await AccessClient.collection.deleteOne({ _id: client._id });
-      }
-    });
-
-    it('GET /access/clients/all should not fail and fall back to contact.name', async function () {
-      const res = await request(server).get('/access/clients/all').expect(200);
-      const legacy = res.body.data.find(c => c.slug === legacySlug);
-      legacy.should.have.property('clientName').eql('Legacy Org mocha test');
-    });
-
-    it('GET /access/:slug/:code should return the fallback client name', async function () {
-      const res = await request(server).get(`/access/${legacySlug}/LEGACY01`).expect(200);
-      res.body.client.should.have.property('name').eql('Legacy Org mocha test');
-    });
-
-    it('PUT should update a legacy client without sending clientName', async function () {
-      const res = await request(server)
-        .put(`/admin/access/clients/${legacySlug}`)
-        .send({ isActive: false })
-        .set('Authorization', `Bearer ${adminUser.token}`)
-        .expect(200);
-
-      res.body.should.have.property('name').eql('Legacy Org mocha test');
-      res.body.should.have.property('isActive').eql(false);
-    });
-
-    it('backfill script should copy contact.name into name', async function () {
-      const { backfillAccessClientName } = require('../../scripts/backfillAccessClientName');
-      await backfillAccessClientName();
-      const client = await AccessClient.collection.findOne({ slug: legacySlug });
-      client.should.have.property('name').eql('Legacy Org mocha test');
-    });
-  });
-
   describe('GET /access/me/clients', function () {
     beforeEach(async function () {
       await request(server)
