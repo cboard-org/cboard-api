@@ -14,6 +14,7 @@ const auth = require('../helpers/auth');
 const { findIpLocation, isLocalIp } = require('../helpers/localize');
 const { verifyAppleIdToken } = require('../helpers/appleAuth');
 const Subscribers = require('../models/Subscribers');
+const AccessClient = require('../models/AccessClient');
 
 const config = require('../../config');
 const { CBOARD_PROD_URL, CBOARD_QA_URL, LOCALHOST_PORT_3000_URL, INTERNAL_API_KEY } = config;
@@ -381,6 +382,10 @@ async function removeUser(req, res) {
   const id = req.swagger.params.id.value;
   try {
     const users = await User.findByIdAndDelete(id);
+    await AccessClient.updateMany(
+      { 'members.userId': id },
+      { $pull: { members: { userId: id } } }
+    );
     return res.status(200).json(users);
   } catch (err) {
     return res.status(404).json({

@@ -3,6 +3,17 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const ACCESS_CLIENT_MEMBER_SCHEMA = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    }
+  },
+  { _id: false }
+);
+
 const ACCESS_CLIENT_SCHEMA_DEFINITION = {
   slug: {
     type: String,
@@ -11,10 +22,14 @@ const ACCESS_CLIENT_SCHEMA_DEFINITION = {
     trim: true,
     lowercase: true
   },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
   contact: {
     name: {
       type: String,
-      required: true,
       trim: true
     },
     email: {
@@ -46,6 +61,10 @@ const ACCESS_CLIENT_SCHEMA_DEFINITION = {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  members: {
+    type: [ACCESS_CLIENT_MEMBER_SCHEMA],
+    default: []
   }
 };
 
@@ -68,6 +87,8 @@ const accessClientSchema = new Schema(
   ACCESS_CLIENT_SCHEMA_DEFINITION,
   ACCESS_CLIENT_SCHEMA_OPTIONS
 );
+
+accessClientSchema.index({ 'members.userId': 1 });
 
 const AccessClient = mongoose.model('AccessClient', accessClientSchema);
 
