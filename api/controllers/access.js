@@ -154,14 +154,6 @@ async function toAdminClientJSON(client) {
 }
 
 /**
- * Display name for a client. Falls back to contact.name for clients created
- * before `name` existed and not yet backfilled.
- */
-function getClientName(client) {
-  return client.name || client.contact?.name || client.slug;
-}
-
-/**
  * Collects usage stats for a client from its AccessGates and linked boards.
  * @param {Object} client - AccessClient document
  */
@@ -241,7 +233,7 @@ async function getClients(req, res) {
       isActive: true,
       subscriptionStart: { $lte: now },
       subscriptionEnd: { $gte: now }
-    }).select('slug name contact.name brandColor');
+    }).select('slug name brandColor');
 
     const accessGates = await AccessGate.find({
       accessClientId: { $in: clients.map(c => c._id) }
@@ -252,7 +244,7 @@ async function getClients(req, res) {
     const result = clients
       .map(client => ({
         slug: client.slug,
-        clientName: getClientName(client),
+        clientName: client.name,
         brandColor: client.brandColor,
         accessGates: accessGates
           .filter(ag => ag.accessClientId.toString() === client._id.toString())
@@ -358,7 +350,7 @@ async function getAccessBoards(req, res) {
     return res.status(200).json({
       client: {
         slug: client.slug,
-        name: getClientName(client),
+        name: client.name,
         color: client.brandColor
       },
       boards: boards.map(b => b.toJSON()),
@@ -621,12 +613,6 @@ async function updateAccessClient(req, res) {
       return res.status(404).json({ message: 'Client not found' });
     }
 
-    // Clients created before `name` was introduced stored the org name in
-    // contact.name; fill it so the required-path validation on save passes.
-    if (!client.name && client.contact?.name) {
-      client.name = client.contact.name;
-    }
-
     if (updates.isActive !== undefined) client.isActive = updates.isActive;
     if (updates.subscriptionStart)
       client.subscriptionStart = new Date(updates.subscriptionStart);
@@ -770,7 +756,7 @@ async function getMyAccessClients(req, res) {
     const now = new Date();
     const result = clients.map(client => ({
       slug: client.slug,
-      clientName: getClientName(client),
+      clientName: client.name,
       brandColor: client.brandColor,
       isActive: client.isActive,
       subscriptionStart: client.subscriptionStart,
@@ -826,7 +812,7 @@ async function getMyAccessClientStats(req, res) {
     const { createdBy, members, ...clientData } = client.toJSON();
 
     return res.status(200).json({
-      client: { ...clientData, name: getClientName(client) },
+      client: clientData,
       stats: await buildClientStats(client)
     });
   } catch (err) {
